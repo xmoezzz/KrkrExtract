@@ -9,6 +9,13 @@ Version 0.0.0.3d:
 打包完成后，如果提示你关闭游戏，删除KrkrzTempWorker.xp3以打包下一个文件夹的话，  
 一定要按这个提示去做，要不然是封装不了的。  
 
+If you can't read Chinese:  
+Support Packing! 
+Support packing krkr2 and krkrz's normal package.  
+Support packing krkrz's special package.(eg:サノバウィッチ)  
+Fixed some errors.  
+If System suggests you to exit the game and delete KrkrzTempWorker.xp3 to pack next folder,  
+you must follow this advice in order to avoid some packing issues.  
   
 配合坑娘的建议，改了一下图标，希望大家喜欢（死   
 ![image](https://github.com/xmoeproject/KrkrExtract/blob/master/0.gif)  
