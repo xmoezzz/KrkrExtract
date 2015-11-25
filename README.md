@@ -3,17 +3,12 @@ A tool can extract and pack krkr2 and krkrz's xp3 files
 
 Version 0.0.0.3e:
 [Fixed]
-Ignored some Invalid segments.
-Removed all resource extraction functions from KrkrExtract.exe
+png extraction issue.
 
 [Pending]  
 Separated module for resources extraction.  
-Translation tool.  
-  
-[???]  
-I'll be appreciated if someone can tell me how to implement CompareStringW.  
-  
-=======
+Translation tool.(PSB Decompiler)  
+
 Version 0.0.0.3d:  
 支持封包！支持普通的krkr2和krkrz的xp3格式封包（含加密），  
 支持特殊格式的krkrz封包（含加密，如柚子社的サノバウィッチ）  
