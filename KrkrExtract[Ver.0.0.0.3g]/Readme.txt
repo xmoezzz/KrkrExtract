@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 0.0.0.3f]
+﻿KrkrExtract[Ver 0.0.0.3g]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -30,6 +30,9 @@ Support:
 xmoe.project@gmail.com
 
 [Dev log]
+
+Version 0.0.0.3g
+Fixed some bugs(Maybe no important)
 
 Version 0.0.0.3f
 Fixed png extraction.(eg : 恋がさくころ桜どき)
