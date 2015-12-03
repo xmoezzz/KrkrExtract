@@ -1,9 +1,9 @@
 ﻿# KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files  
 
-Version 0.0.0.3e:
-[Fixed]
-png extraction issue.
+Version 0.0.0.3g:
+[Fixed]  
+some bugs(maybe not important).
 
 [Pending]  
 Separated module for resources extraction.  
