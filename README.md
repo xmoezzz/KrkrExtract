@@ -1,15 +1,10 @@
-﻿# KrkrExtract
+# KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files  
 
-Version 0.0.0.3e:
-[Fixed]
-png extraction issue.
-
-[Pending]  
-Separated module for resources extraction.  
-Translation tool.(PSB Decompiler)  
-
-Version 0.0.0.3d:  
+Version 0.0.0.4a: 
+New GUI!
+Support more operations.(See ReadMe)
+ 
 支持封包！支持普通的krkr2和krkrz的xp3格式封包（含加密），  
 支持特殊格式的krkrz封包（含加密，如柚子社的サノバウィッチ）  
 修复封包识别错误的问题  
@@ -24,7 +19,5 @@ Support packing krkrz's special package.(eg:サノバウィッチ)
 Fixed some errors.  
 If System suggests you to exit the game and delete KrkrzTempWorker.xp3 to pack next folder,  
 you must follow this advice in order to avoid some packing issues.  
-  
 
-配合坑娘的建议，改了一下图标，希望大家喜欢（死   
-![image](https://github.com/xmoeproject/KrkrExtract/blob/master/0.gif)  
+
