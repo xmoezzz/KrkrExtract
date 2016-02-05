@@ -1,10 +1,22 @@
 # KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files  
 
+<<<<<<< HEAD
 Version 0.0.0.4a: 
 New GUI!
 Support more operations.(See ReadMe)
  
+=======
+Version 0.0.0.3g:
+[Fixed]  
+some bugs(maybe not important).
+
+[Pending]  
+Separated module for resources extraction.  
+Translation tool.(PSB Decompiler)  
+
+Version 0.0.0.3d:  
+>>>>>>> origin/master
 支持封包！支持普通的krkr2和krkrz的xp3格式封包（含加密），  
 支持特殊格式的krkrz封包（含加密，如柚子社的サノバウィッチ）  
 修复封包识别错误的问题  
