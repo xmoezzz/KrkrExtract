@@ -31,6 +31,9 @@ xmoe.project@gmail.com
 
 [Dev log]
 
+Version 0.0.0.4b
+Fixed some bugs when extract psb files
+
 Version 0.0.0.4a
 See ReadMe
 
