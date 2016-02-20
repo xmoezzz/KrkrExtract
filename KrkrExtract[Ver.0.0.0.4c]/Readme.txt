@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 0.0.0.4a]
+﻿KrkrExtract[Ver 0.0.0.4c]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -30,6 +30,10 @@ Support:
 xmoe.project@gmail.com
 
 [Dev log]
+
+Version 0.0.0.4c:
+Support more one GAME!
+neko~neko~moe~nya~
 
 Version 0.0.0.4b
 Fixed some bugs when extract psb files
