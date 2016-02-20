@@ -32,7 +32,7 @@ xmoe.project@gmail.com
 [Dev log]
 
 Version 0.0.0.4c:
-Support more one GAME!
+Support one more GAME!
 neko~neko~moe~nya~
 
 Version 0.0.0.4b

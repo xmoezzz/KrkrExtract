@@ -1,9 +1,9 @@
 ﻿# KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files  
 
-Version 0.0.0.4c:
-Support more one GAME!
-neko~neko~moe~nya~
+Version 0.0.0.4c:  
+Support one more GAME!  
+neko~neko~moe~nya~  
 
 Version 0.0.0.4a: 
 New GUI!
