@@ -1,6 +1,12 @@
 ﻿# KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files  
 
+AlphaMovie Decoder:  
+https://github.com/xmoeproject/AlphaMovieDecoder  
+
+Version 0.0.0.4d:  
+Fixed some errors.  
+
 Version 0.0.0.4c:  
 Support one more GAME!  
 neko~neko~moe~nya~  
