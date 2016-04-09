@@ -30,7 +30,10 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
-Version 0.0.0.5a
+Version 0.0.0.5b  
+Supported Multi_Language(CHS CHT JP EN)  
+
+Version 0.0.0.5a  
 ADD KrkrLoader Project's core   
 
 Version 0.0.0.4g    
