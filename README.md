@@ -15,8 +15,8 @@ Only support tvpwin32(64bit)
 不要问我为啥开发64Bit版本的。  
    
 [What's new?]  
-Version 0.0.0.5b:  
-Supported Multi-Language.(CHS, CHT, JP, EN)  
+Version 0.0.0.5a:  
+Add KrkrLoader's core.  
 
 
 [Note]  
