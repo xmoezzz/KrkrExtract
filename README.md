@@ -15,8 +15,10 @@ Only support tvpwin32(64bit)
 不要问我为啥开发64Bit版本的。  
    
 [What's new?]  
-Version 0.0.0.5b:  
-Supported Multi_Language(CHS CHT JP EN)  
+Version 0.0.0.6a  
+Support emote, pimg...  
+(Warning: Beta Version! Something is still under construction)  
+(TODO: Rewrite The Text Extraction Module..)  
 
 
 [Note]  
