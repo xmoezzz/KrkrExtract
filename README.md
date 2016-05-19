@@ -9,23 +9,28 @@ https://github.com/xmoeproject/AlphaMovieDecoder
 tjs2Compiler:  
 https://github.com/xmoeproject/X-moe/tree/master/ByteCodeAnalysis/tjs2Compiler
 
-[64Bit Version]  
+##[64Bit Version]  
 专治各种不服和脑残:)  
 Only support tvpwin32(64bit)  
+↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑  
+让我用中文把这个句子解释一遍：  
+64位版本是用于64位的krkr引擎，和你操作系统没啥关系，  
+换句话说，现阶段你可以无视64位这个版本。  
+
 不要问我为啥开发64Bit版本的。  
    
-[What's new?]  
+##[What's new?]  
 Version 0.0.0.6a  
 Support emote, pimg...  
 (Warning: Beta Version! Something is still under construction)  
 (TODO: Rewrite The Text Extraction Module..)  
 
 
-[Note]  
+##[Note]  
 For long-term support, this project won't be an open source project at present.
 
 
-[Tips]  
+##[Tips]  
 If you can't read Chinese:  
 Support Packing! 
 Support packing krkr2 and krkrz's normal package.  
