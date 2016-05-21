@@ -1,7 +1,7 @@
 # KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files (IA32 & AMD64)  
 
-[Other krkr Project]  
+##[Other krkr Project]  
  
 AlphaMovie Decoder:  
 https://github.com/xmoeproject/AlphaMovieDecoder
@@ -20,10 +20,8 @@ Only support tvpwin32(64bit)
 不要问我为啥开发64Bit版本的。  
    
 ##[What's new?]  
-Version 0.0.0.6a  
-Support emote, pimg...  
-(Warning: Beta Version! Something is still under construction)  
-(TODO: Rewrite The Text Extraction Module..)  
+Version 0.0.0.6b  
+Support PSBFile V3  
 
 
 ##[Note]  

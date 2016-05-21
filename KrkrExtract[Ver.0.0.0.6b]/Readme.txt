@@ -1,4 +1,4 @@
-KrkrExtract[Ver 0.0.0.6a]
+﻿KrkrExtract[Ver 0.0.0.6b]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -30,6 +30,10 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 0.0.0.6b
+Support PSBFile V3!
+
+
 Version 0.0.0.6a
 Support emote, pimg...
 (Warning: Beta Version! Something is still under construction)
