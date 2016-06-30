@@ -20,9 +20,14 @@ Only support tvpwin32(64bit)
 不要问我为啥开发64Bit版本的。  
    
 ##[What's new?]  
-Version 0.0.0.6c  
-Rewrite Text Dumper!  
+Version 0.0.0.6d  
+Fixed some bugs on Windows7  
+Fixed "floating point support not loaded"  
 
+Build-in PSB Text Dumper still has some bugs, you can use the separated tool(EmoteDumper.exe) to do this job.  
+In order to extract emote files, you should make sure "emotedriver.dll" is in the game root path, which cannot copy from another krkr-based game.  
+KrkrExtract will search the private key for emote packages and extract them.  
+At Present, emote files in "Clover Day's plus" cannot be extracted.  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
