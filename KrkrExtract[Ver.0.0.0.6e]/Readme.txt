@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 0.0.0.6d]
+﻿KrkrExtract[Ver 0.0.0.6e]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -23,6 +23,13 @@ Author:X'moe
 打包完成后，如果提示你关闭游戏，删除KrkrzTempWorker.xp3以打包下一个文件夹的话，
 一定要按这个提示去做，要不然是封装不了的。
 
+三、PSBFile  
+PSB文件是一个二进制打包格式，虽然不是Krkr引擎原始插件，但由于应用广泛，所以还是添加了支持。  
+PSB文本分为加密和非加密的，如果要提取加密状态的PSB文件（多为emote封包），需要保证"emotedriver.dll"在游戏目录中，  
+并且这个"emotedriver.dll"是不能从其他的游戏里复制过来。  
+现阶段提取不一定很稳定，但是能使用Tools文件夹下的EmoteDumper.exe来暂时解决这个问题，如果需要提取加密的psb文件，  
+同样需要将对应的"emotedriver.dll"文件和EmoteDumper.exe放在一起。  
+
 Support:
 xmoe.project@gmail.com
 
@@ -30,6 +37,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 0.0.0.6e
+works with psb v3.0 now
+
 Version 0.0.0.6d
 Fixed some bugs on Windows7
 Fixed "floating point support not loaded"
