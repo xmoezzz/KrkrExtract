@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 0.0.0.6e]
+﻿KrkrExtract[Ver 0.0.0.6f]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
