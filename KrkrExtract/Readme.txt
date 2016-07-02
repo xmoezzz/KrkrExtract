@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 0.0.0.6g]
+﻿KrkrExtract[Ver 1.0.1.0]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -37,6 +37,11 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 1.0.1.0
+improved text extractor...
+works with psb v3 now
+
+
 Version 0.0.0.6g
 supported Clover Day's Plus
 (A new way to find private key...)
