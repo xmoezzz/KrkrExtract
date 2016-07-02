@@ -37,6 +37,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 0.0.0.6f
+supported 千恋＊万花！！
+
 Version 0.0.0.6e
 works with psb v3.0 now
 

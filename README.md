@@ -20,8 +20,8 @@ Only support tvpwin32(64bit)
 不要问我为啥开发64Bit版本的。  
    
 ##[What's new?]  
-Version 0.0.0.6e  
-works with psb v3.0 now  
+Version 0.0.0.6f  
+supported 千恋＊万花！！  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
