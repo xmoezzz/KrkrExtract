@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 0.0.0.6f]
+﻿KrkrExtract[Ver 0.0.0.6g]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -37,6 +37,10 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 0.0.0.6g
+supported Clover Day's Plus
+(A new way to find private key...)
+
 Version 0.0.0.6f
 supported 千恋＊万花！！
 

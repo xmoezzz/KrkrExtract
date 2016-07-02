@@ -20,8 +20,9 @@ Only support tvpwin32(64bit)
 不要问我为啥开发64Bit版本的。  
    
 ##[What's new?]  
-Version 0.0.0.6f  
-supported 千恋＊万花！！  
+Version 0.0.0.6g  
+supported Clover Day's Plus  
+(A new way to find private key...)  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
