@@ -19,10 +19,12 @@ Only support tvpwin32(64bit)
 
 不要问我为啥开发64Bit版本的。  
    
+##[Pending]  
+TJS2 Decompiler  
+
 ##[What's new?]  
-Version 1.0.1.0  
-improved text extractor...  
-works with psb v3 now  
+Version 1.0.1.2  
+fixed some bugs when using Text Decryption Mode  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
