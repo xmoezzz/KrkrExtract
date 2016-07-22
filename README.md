@@ -21,6 +21,8 @@ Only support tvpwin32(64bit)
    
 ##[Pending]  
 TJS2 Decompiler  
+protection segment -> End of file(changed)  
+sample: CoroBlo_vol_1_demo  
 
 ##[What's new?]  
 Version 1.0.1.2  
