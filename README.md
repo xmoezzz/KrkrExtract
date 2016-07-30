@@ -25,8 +25,8 @@ protection segment -> End of file(changed)
 sample: CoroBlo_vol_1_demo  
 
 ##[What's new?]  
-Version 1.0.1.2  
-fixed some bugs when using Text Decryption Mode  
+Version 1.0.2.0  
+Supported 千恋＊万花！  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.

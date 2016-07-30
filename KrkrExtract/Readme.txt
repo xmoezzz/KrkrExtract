@@ -37,6 +37,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 1.0.2.0
+Supported 千恋＊万花！ 
+
 Version 1.0.1.2
 fixed some bugs when using Text Decryption Mode
 
