@@ -26,7 +26,7 @@ sample: CoroBlo_vol_1_demo
 
 ##[What's new?]  
 Version 1.0.2.0  
-Supported 千恋＊万花！  
+Supported 千恋＊万花! and fixed some bugs  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
