@@ -25,7 +25,7 @@ protection segment -> End of file(changed)
 sample: CoroBlo_vol_1_demo  
 
 ##[What's new?]  
-Version 1.0.2.0  
+Version 1.0.2.1  
 Supported 千恋＊万花! and fixed some bugs  
 
 ##[Note]  
