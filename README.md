@@ -21,12 +21,12 @@ Only support tvpwin32(64bit)
    
 ##[Pending]  
 TJS2 Decompiler  
-protection segment -> End of file(changed)  
-sample: CoroBlo_vol_1_demo  
+
 
 ##[What's new?]  
-Version 1.0.2.1  
-Supported 千恋＊万花! and fixed some bugs  
+Version 1.0.2.2  
+Improved compatibility  
+
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
