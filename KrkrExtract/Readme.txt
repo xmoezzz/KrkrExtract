@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 1.0.2.2]
+﻿KrkrExtract[Ver 1.0.3.0]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -37,7 +37,11 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
-Version 1.0.2.1
+Version 1.0.3.0
+Supported 死に逝く君、館に芽吹く憎悪!
+For png files, plz use system mode to extract them.
+
+Version 1.0.2.2
 Improved compatibility
 
 Version 1.0.2.1
