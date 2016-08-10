@@ -10,15 +10,10 @@ tjs2Compiler:
 https://github.com/xmoeproject/X-moe/tree/master/ByteCodeAnalysis/tjs2Compiler
 
 ##[64Bit Version]  
-专治各种不服和脑残:)  
-Only support tvpwin32(64bit)  
-↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑  
-让我用中文把这个句子解释一遍：  
-64位版本是用于64位的krkr引擎，和你操作系统没啥关系，  
-换句话说，现阶段你可以无视64位这个版本。  
+Under construction now.  
+64bit Version can only run with 64bit krkr engine.  
 
-不要问我为啥开发64Bit版本的。  
-   
+
 ##[Pending]  
 TJS2 Decompiler  
 
@@ -28,22 +23,27 @@ Version 1.0.3.0
 Supported 死に逝く君、館に芽吹く憎悪!  
 For png files, plz use system mode to extract them.  
 
-
-
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
 
+为了长远的支持，该工程现阶段将不会开源。  
 
 ##[Tips]  
 If you can't read Chinese:  
-Support Packing! 
-Support packing krkr2 and krkrz's normal package.  
-Support packing krkrz's special package.(eg:サノバウィッチ)  
-Fixed some errors.  
+Support packing and unpacked.  
 If System suggests you to exit the game and delete KrkrzTempWorker.xp3 to pack next folder,  
 you must follow this advice to avoid some packing issues.  
 
-[Bugs report]  
-Recently for some reasons, my email address temporary change to: xmoe.project@hotmail.com
 
+
+[Bugs report]  
+1.Plz attach a capture and descript the issue.  
+2.Your system information.  
+3.The name(in Japanese) of the crashed game.  
+4.DO NOT ATTACH ANY DOWNLOAD LINK HERE, you can contact me by email.  
+
+1.请截图，并且描述问题。  
+2.系统信息。  
+3.出错游戏的名字（日文名）。  
+4.请不要在这里放任何链接，但你可以用过邮件联系我。  
 
