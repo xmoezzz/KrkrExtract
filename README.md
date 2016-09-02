@@ -19,9 +19,9 @@ TJS2 Decompiler
 
 
 ##[What's new?]  
-Version 1.0.3.0  
-Supported 死に逝く君、館に芽吹く憎悪!  
-For png files, plz use system mode to extract them.  
+Version 1.0.3.1  
+Improved compatibility (Fixed issue10)  
+开始考虑制作单独的封包软件....  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
