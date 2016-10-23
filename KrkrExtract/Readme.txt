@@ -29,6 +29,7 @@ PSB文本分为加密和非加密的，如果要提取加密状态的PSB文件�
 并且这个"emotedriver.dll"是不能从其他的游戏里复制过来。  
 现阶段提取不一定很稳定，但是能使用Tools文件夹下的EmoteDumper.exe来暂时解决这个问题，如果需要提取加密的psb文件，  
 同样需要将对应的"emotedriver.dll"文件和EmoteDumper.exe放在一起。  
+EmoteDumperXmoe.exe的用法和EmoteDumper.exe一样，可以提取双行文本。  
 
 Support:
 xmoe.project@gmail.com
@@ -37,6 +38,11 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 2.0.0.0  
+Support pack SenrenBanka  
+Rewrite all source code and fix some bug  
+Beta version! Maybe not stable now  
+
 Version 1.0.3.1
 Improved compatibility (Fixed issue10)
 

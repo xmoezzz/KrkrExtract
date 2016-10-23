@@ -19,6 +19,17 @@ TJS2 Decompiler
 
 
 ##[What's new?]  
+
+Version 2.0.0.0  
+Support pack SenrenBanka  
+Rewrite all source code and fix some bug  
+Beta version! Maybe not stable now  
+1.支持对千恋*万花（及相同类型）进行封包。  
+2.重写全部架构，优化分析流程。  
+3.修复多出bug，优化内存使用。  
+目前还是beta版本，不保证100%的稳定性。  
+下一功能改善版本将会推出：1.tjs编译器（两种方式） 2.tjs反编译器  
+
 Version 1.0.3.1  
 Improved compatibility (Fixed issue10)  
 开始考虑制作单独的封包软件....  
