@@ -22,7 +22,6 @@ TJS2 Decompiler
 
 Version 2.0.0.0  
 Support pack SenrenBanka  
-Rewrite all source code and fix some bug  
 Beta version! Maybe not stable now  
 1.支持对千恋*万花（及相同类型）进行封包。  
 2.重写全部架构，优化分析流程。  
