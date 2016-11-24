@@ -20,24 +20,10 @@ TJS2 Decompiler
 
 ##[What's new?]  
 
-<<<<<<< HEAD
-Version 2.0.0.1  
-Fixed some bugs and supported some old games now.  
-At present, this version is more stable than previous version.  
-=======
-Version 2.0.0.0  
-Support pack SenrenBanka  
-Beta version! Maybe not stable now  
-1.支持对千恋*万花（及相同类型）进行封包。  
-2.重写全部架构，优化分析流程。  
-3.修复多出bug，优化内存使用。  
-目前还是beta版本，不保证100%的稳定性。  
-下一功能改善版本将会推出：1.tjs编译器（两种方式） 2.tjs反编译器  
->>>>>>> origin/master
+Version 2.0.0.2  
+Fixed a bug caused by system decoder.  
+Removed "ImageWorker.dll".  
 
-Version 1.0.3.1  
-Improved compatibility (Fixed issue10)  
-开始考虑制作单独的封包软件....  
 
 ##[Note]  
 For long-term support, this project won't be an open source project at present.
