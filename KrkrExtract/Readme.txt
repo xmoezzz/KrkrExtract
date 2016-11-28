@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 2.0.0.2]
+﻿KrkrExtract[Ver 2.0.0.3]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -38,6 +38,11 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 2.0.0.3
+Improved package parser.
+Supported steam based game(beta).
+
+
 Version 2.0.0.2
 Fixed a bug caused by system decoder.
 Removed "ImageWorker.dll".

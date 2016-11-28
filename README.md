@@ -20,9 +20,10 @@ TJS2 Decompiler
 
 ##[What's new?]  
 
-Version 2.0.0.2  
-Fixed a bug caused by system decoder.  
-Removed "ImageWorker.dll".  
+Version 2.0.0.3  
+Improved package parser.  
+Supported steam based game(beta).  
+
 
 
 ##[Note]  
