@@ -20,10 +20,8 @@ TJS2 Decompiler
 
 ##[What's new?]  
 
-Version 2.0.0.3  
-Improved package parser.  
-Supported steam based game(beta).  
-
+Version 2.0.0.4  
+Add support to some games.  
 
 
 ##[Note]  
