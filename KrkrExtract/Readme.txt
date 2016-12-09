@@ -1,4 +1,4 @@
-﻿KrkrExtract[Ver 2.0.0.4]
+﻿KrkrExtract[Ver 2.0.1.1]
 
 Author:X'moe
 目前提供krkr2和krkrz（包括M2公司）通用提取
@@ -38,6 +38,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 2.0.1.1
+Fixed some bugs.
+
 Version 2.0.1.0
 Unlock reading accessibility.(eg : "startup.tjs")
 
