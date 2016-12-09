@@ -19,9 +19,8 @@ TJS2 Decompiler
 
 
 ##[What's new?]  
-
-Version 2.0.0.4  
-Add support to some games.  
+Version 2.0.1.0  
+Unlock reading accessibility.(eg : "startup.tjs")  
 
 
 ##[Note]  

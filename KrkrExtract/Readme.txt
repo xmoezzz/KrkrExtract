@@ -38,6 +38,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 2.0.1.0
+Unlock reading accessibility.(eg : "startup.tjs")
+
 Version 2.0.0.4
 Add support to some games.
 
