@@ -38,6 +38,12 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 2.0.1.3
+Fixed a packing issue.[works with "千恋＊万花"]
+
+Version 2.0.1.2
+Fixed a packing issue.[works with "キミのとなりで恋してる！"]
+
 Version 2.0.1.1
 Fixed some bugs.
 

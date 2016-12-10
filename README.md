@@ -19,8 +19,8 @@ TJS2 Decompiler
 
 
 ##[What's new?]  
-Version 2.0.1.1  
-Fixed some bugs.  
+Version 2.0.1.3  
+Fixed a packing issue.[works with "千恋＊万花"]  
 
 
 ##[Note]  
