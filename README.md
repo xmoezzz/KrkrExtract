@@ -16,11 +16,12 @@ Under construction now.
 
 ##[Pending]  
 TJS2 Decompiler  
+Optimize memory usage  
 
 
 ##[What's new?]  
-Version 2.0.1.3  
-Fixed a packing issue.[works with "千恋＊万花"]  
+Version 2.0.1.4  
+Now you can make packages without re-launching game.  
 
 
 ##[Note]  

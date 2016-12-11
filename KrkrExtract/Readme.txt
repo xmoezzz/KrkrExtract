@@ -21,7 +21,7 @@ Author:X'moe
 如果没有任何错误发生，程序将会提示打包成功。
 
 打包完成后，如果提示你关闭游戏，删除KrkrzTempWorker.xp3以打包下一个文件夹的话，
-一定要按这个提示去做，要不然是封装不了的。
+一定要按这个提示去做，要不然是封装不了的。（现在一般不需要这个步骤了）
 
 三、PSBFile  
 PSB文件是一个二进制打包格式，虽然不是Krkr引擎原始插件，但由于应用广泛，所以还是添加了支持。  
@@ -38,6 +38,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 2.0.1.4
+Now you can make packages without re-launching game.
+
 Version 2.0.1.3
 Fixed a packing issue.[works with "千恋＊万花"]
 
