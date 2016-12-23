@@ -20,8 +20,8 @@ Optimize memory usage
 
 
 ##[What's new?]  
-Version 2.0.1.4  
-Now you can make packages without re-launching game.  
+Version 2.0.2.0  
+Fixed some bugs.  
 
 
 ##[Note]  
