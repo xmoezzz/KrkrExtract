@@ -20,9 +20,9 @@ Optimize memory usage
 
 
 ##[What's new?]  
-Version 2.0.2.1
-Removing crt...
-(Maybe unstable now!!)
+Version 2.0.2.2  
+Added some filters for security check.  
+Supported some games.  
  
 
 
