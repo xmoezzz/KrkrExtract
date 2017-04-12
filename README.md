@@ -20,9 +20,9 @@ Optimize memory usage
 
 
 ##[What's new?]  
-Version 2.0.2.2  
-Added some filters for security check.  
-Supported some games.  
+Version 3.0.0.0  
+Universal Patch.  
+Fixed some bug.  
  
 
 
