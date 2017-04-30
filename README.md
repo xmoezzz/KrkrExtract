@@ -20,9 +20,8 @@ Optimize memory usage
 
 
 ##[What's new?]  
-Version 3.0.0.0  
-Universal Patch.  
-Fixed some bug.  
+Version 3.0.0.1   
+Fixed packing bugs.  
  
 
 
