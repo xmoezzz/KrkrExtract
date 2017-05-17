@@ -117,18 +117,104 @@
 		
 	</div>
     <div class="container" id="fh5co-info-unpack">
-    	<h2> About Unpack </h2>
+   	  <h2> About Unpack </h2>
+    	<article>
+        KrkrExtract can extract xp3 packages used by kirikiri engine.
+        <br>
+        (1)Make sure "KrkrExtract.exe" and "KrkrExtract.dll" are in your game directory.
+        <br>
+        (2)Drag the executable file of the current game into "KrkrExtract.exe".
+        <br>
+        (3)Drag a xp3 file into the window, KrkrExtract will extract it.
+        <br>
+        
+        Some Special options:
+        <br>
+        (1)PNG Setting:
+        <br>
+        Raw: Do nothing.
+        <br>
+        System Decoder: Try to use build-in plugins then extract. If raw data seems corrupted, please try this way. NOT 100% STABLE.(eg: 恋がさくころ桜どき)
+        <br>
+        (2)PSB File:
+        <br>
+        Raw: Do nothing.
+        <br>
+        Decompile Script: Decompile the binary data into a tjs script.
+        <br>
+        Unpack Image:  Try to unpack images in the PSB package.
+        <br>
+        Unpack Animation: Try to unpack images(eg:emote) in PSB package.
+        <br>
+        Dump Text: only extract essential texts for translation.
+        <br>
+        JSON: also decompile the binary data, but in JSON format.(this option will help you use the JIT Compiler)
+        <br>
+        Full Unpack: Do all processes.
+        <br>
+        (3)Text Decryption:
+        <br>
+        Raw: Do nothing.
+        <br>
+		Text: Try to use kirikiri's standard decryption.
+		<br>
+        (4)TLG Image:
+        <br>
+		Raw:Do nothing.
+        <br>
+		Build-in Decoder: Use build-in decoder, save images as 32bit bmp files.
+        <br>
+		System: Try to use build-in plugins then extract(save as png format). If the tlg files are using unknown format, please try this way. NOT 100% STABLE. 
+        <br>
+        PNG: Use build-in decoder, save images as png format.
+		<br>
+        JPG: Use build-in decoder, save images as jpg format.
+        <br>
+        (5)TJS2 Script:
+        <br>
+        Raw: Do nothing.
+        <br>
+        Decompile: Try to decompile current script file.
+        <br>
+        (6)Alpha Movie Animation:(amv file)
+        <br>
+        JPG(Sequence): Use build-in decoder, save as jpg sequence.
+        <br>
+        PNG(Sequence): Use build-in decoder, save as png sequence.
+        <br>
+        MNG: Use build-in decoder, convert into mng format.
+        <br>
+        </article>
         
     </div>
     
     <div class="container" id="fh5co-info-repack">
     	<h2> About Repack </h2>
+    	<article>
+        KrkrExtract can repack files into a xp3 package, just like the original xp3 files.
+        <br>
+        This technology will help you translate or modify the game.
+        <br>
+        (1)Folder: Select a folder to pack. All sub-folders in this folder will be ignored.(You can drag a folder into the window)
+		<br>
+		(2)Original Pack: Select an original xp3 package from target game. In usual, KrkrExtract will select a package automatically.
+        <br>
+		(3)Output Pack: Input file name for your new package.( Create it if not exists)
+		<br>
+        (4)Make Package: Try to make a xp3 package.
+        <br>
+        <br>
+        </article>
         
     </div>
     
     
     <div class="container" id="fh5co-info-patch">
-    	<h2> About Universal Patch </h2>
+   	  <h2> About Universal Patch </h2>
+    	<article>
+        Universal Patch is a new technology for your translation project.
+        <br>
+        </article>
         
     </div>
     
