@@ -20,8 +20,8 @@ Optimize memory usage
 
 
 ##[What's new?]  
-Version 3.0.0.1   
-Fixed packing bugs.  
+Version 3.0.1.0  
+Added JIT-Compiler for universal patch.  
  
 
 

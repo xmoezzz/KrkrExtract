@@ -38,6 +38,9 @@ xmoe.project@gmail.com
 For long-term support, this project won't be an open source project at present.
 
 [Dev log]
+Version 3.0.1.0
+Added JIT-Compiler for universal patch.
+
 Version 3.0.0.1
 Fixed packing bugs.
 
