@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="tjs2">
+      <UniqueIdentifier>{29ecd99f-a46c-41c7-8e48-98358136165d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tjs2\tjsError.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsException.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsGlobalStringMap.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsInterCodeExec.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsInterCodeGen.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsInterface.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsLex.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsMath.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsMessage.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsMT19937ar-cok.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsNamespace.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsNative.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsObject.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsObjectExtendable.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsOctPack.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjspp.tab.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsRandomGenerator.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsRegExp.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsScriptBlock.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsScriptCache.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsString.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsUtils.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsVariant.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsVariantString.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjs.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjs.tab.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsArray.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsBinarySerializer.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsByteCodeLoader.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsCompileControl.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsConfig.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsConstArrayData.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsDate.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsdate.tab.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsDateParser.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsDebug.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsDictionary.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2\tjsDisassemble.cpp">
+      <Filter>tjs2</Filter>
+    </ClCompile>
+    <ClCompile Include="tjs2Compiler.cpp" />
+    <ClCompile Include="TextStream.cpp" />
+    <ClCompile Include="TVPStream.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tjs2\tjsError.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsErrorDefs.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsErrorInc.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsException.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsGlobalStringMap.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsHashSearch.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsInterCodeExec.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsInterCodeGen.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsInterface.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsLex.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsMath.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsMessage.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsMT19937ar-cok.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsNamespace.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsNative.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsObject.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsObjectExtendable.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsOctPack.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjspp.tab.hpp">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsRandomGenerator.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsRegExp.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsScriptBlock.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsScriptCache.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsString.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsTypes.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsUtils.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsVariant.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsVariantString.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjs.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjs.tab.hpp">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsArray.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsBinarySerializer.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsByteCodeLoader.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsCommHead.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsCompileControl.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsConfig.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsConstArrayData.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsDate.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsdate.tab.hpp">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsDateParser.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsDebug.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="tjs2\tjsDictionary.h">
+      <Filter>tjs2</Filter>
+    </ClInclude>
+    <ClInclude Include="TextStream.h" />
+    <ClInclude Include="TVPStream.h" />
+    <ClInclude Include="WinFile.h" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,114 @@
+﻿生成启动时间为 2016-01-28 9:24:19 PM。
+     1>项目“C:\tjs2Compiler\tjs2Compiler\onig\onig_s.vcxproj”在节点 3 上(Build 个目标)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I.\ /Zi /nologo /W3 /WX- /MP /Ox /Ob2 /Oi /Ot /Oy- /GL /D ONIG_EXTERN=extern /D HAVE_CONFIG_H /D NOT_RUBY /D EXPORT /D WIN32 /D NDEBUG /D _LIB /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt enc\ascii.c enc\big5.c enc\cp1251.c enc\euc_jp.c enc\euc_kr.c enc\euc_tw.c enc\gb18030.c enc\iso8859_1.c enc\iso8859_10.c enc\iso8859_11.c enc\iso8859_13.c enc\iso8859_14.c enc\iso8859_15.c enc\iso8859_16.c enc\iso8859_2.c enc\iso8859_3.c enc\iso8859_4.c enc\iso8859_5.c enc\iso8859_6.c enc\iso8859_7.c enc\iso8859_8.c enc\iso8859_9.c enc\koi8.c enc\koi8_r.c enc\sjis.c enc\unicode.c enc\utf16_be.c enc\utf16_le.c enc\utf32_be.c enc\utf32_le.c enc\utf8.c regcomp.c regenc.c regerror.c regexec.c regext.c reggnu.c regparse.c regposerr.c regposix.c regsyntax.c regtrav.c regversion.c st.c
+         ascii.c
+         big5.c
+         cp1251.c
+         euc_jp.c
+         euc_kr.c
+         euc_tw.c
+         gb18030.c
+         iso8859_1.c
+         iso8859_10.c
+         iso8859_11.c
+         iso8859_13.c
+         iso8859_14.c
+         iso8859_15.c
+         iso8859_16.c
+         iso8859_2.c
+         iso8859_3.c
+         iso8859_4.c
+         iso8859_5.c
+         iso8859_6.c
+         iso8859_7.c
+         iso8859_8.c
+         iso8859_9.c
+         koi8.c
+         koi8_r.c
+         sjis.c
+         unicode.c
+         utf16_be.c
+         utf16_le.c
+         utf32_be.c
+         utf32_le.c
+         utf8.c
+         regcomp.c
+         regenc.c
+         regerror.c
+         regexec.c
+     1>regerror.c(187): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : 参见“sprintf”的声明
+     1>regerror.c(192): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : 参见“sprintf”的声明
+     1>regerror.c(336): warning C4996: '_vsnprintf': This function or variable may be unsafe. Consider using _vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(346) : 参见“_vsnprintf”的声明
+     1>regerror.c(342): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         regext.c
+         reggnu.c
+         regparse.c
+         regposerr.c
+         regposix.c
+         regsyntax.c
+     1>regposerr.c(87): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : 参见“sprintf”的声明
+     1>regposerr.c(94): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(195) : 参见“strncpy”的声明
+         regtrav.c
+         regversion.c
+         st.c
+     1>regversion.c(42): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : 参见“sprintf”的声明
+     1>regversion.c(54): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : 参见“sprintf”的声明
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"c:\tjs2Compiler\lib\onig_s.lib" /NOLOGO /LTCG Release\ascii.obj
+         Release\big5.obj
+         Release\cp1251.obj
+         Release\euc_jp.obj
+         Release\euc_kr.obj
+         Release\euc_tw.obj
+         Release\gb18030.obj
+         Release\iso8859_1.obj
+         Release\iso8859_10.obj
+         Release\iso8859_11.obj
+         Release\iso8859_13.obj
+         Release\iso8859_14.obj
+         Release\iso8859_15.obj
+         Release\iso8859_16.obj
+         Release\iso8859_2.obj
+         Release\iso8859_3.obj
+         Release\iso8859_4.obj
+         Release\iso8859_5.obj
+         Release\iso8859_6.obj
+         Release\iso8859_7.obj
+         Release\iso8859_8.obj
+         Release\iso8859_9.obj
+         Release\koi8.obj
+         Release\koi8_r.obj
+         Release\sjis.obj
+         Release\unicode.obj
+         Release\utf16_be.obj
+         Release\utf16_le.obj
+         Release\utf32_be.obj
+         Release\utf32_le.obj
+         Release\utf8.obj
+         Release\regcomp.obj
+         Release\regenc.obj
+         Release\regerror.obj
+         Release\regexec.obj
+         Release\regext.obj
+         Release\reggnu.obj
+         Release\regparse.obj
+         Release\regposerr.obj
+         Release\regposix.obj
+         Release\regsyntax.obj
+         Release\regtrav.obj
+         Release\regversion.obj
+         Release\st.obj
+         onig_s.vcxproj -> c:\tjs2Compiler\lib\onig_s.lib
+     1>已完成生成项目“C:\tjs2Compiler\tjs2Compiler\onig\onig_s.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:07.13
