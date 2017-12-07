@@ -1,0 +1,94 @@
+﻿生成启动时间为 2015/3/20 14:28:10。
+     1>项目“E:\krkrz-master\krkrz-master\src\core\external\zlib\zlib.vcxproj”在节点 2 上(Build 个目标)。
+     1>PrepareForBuild:
+         正在创建目录“E:\krkrz-master\krkrz-master\src\core\external\zlib\lib\”。
+         正在创建目录“Release\zlib.tlog\”。
+       InitializeBuildStatus:
+         正在创建“Release\zlib.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       CustomBuild:
+         inffas32.asm
+          Assembling: contrib\masmx86\inffas32.asm
+         Microsoft (R) Macro Assembler Version 12.00.31010.0
+         Copyright (C) Microsoft Corporation.  All rights reserved.
+         
+         match686.asm
+          Assembling: contrib\masmx86\match686.asm
+         Microsoft (R) Macro Assembler Version 12.00.31010.0
+         Copyright (C) Microsoft Corporation.  All rights reserved.
+         
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /MP /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _LIB /D ASMV /D ASMINF /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt adler32.c compress.c crc32.c deflate.c gzclose.c gzlib.c gzread.c gzwrite.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c
+         adler32.c
+         compress.c
+         crc32.c
+         deflate.c
+         gzclose.c
+         gzlib.c
+         gzread.c
+         gzwrite.c
+     1>gzlib.c(193): warning C4996: 'wcstombs': This function or variable may be unsafe. Consider using wcstombs_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdlib.h(575) : 参见“wcstombs”的声明
+     1>gzlib.c(208): warning C4996: 'wcstombs': This function or variable may be unsafe. Consider using wcstombs_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdlib.h(575) : 参见“wcstombs”的声明
+     1>gzlib.c(214): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(346) : 参见“_snprintf”的声明
+     1>gzread.c(30): warning C4996: 'read': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _read. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(337) : 参见“read”的声明
+     1>gzlib.c(245): warning C4996: '_wopen': This function or variable may be unsafe. Consider using _wsopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(274) : 参见“_wopen”的声明
+     1>gzlib.c(245): warning C4996: 'open': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _open. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(336) : 参见“open”的声明
+     1>gzread.c(36): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(168) : 参见“strerror”的声明
+     1>gzlib.c(294): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(346) : 参见“_snprintf”的声明
+     1>gzlib.c(608): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(346) : 参见“_snprintf”的声明
+     1>gzread.c(591): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(326) : 参见“close”的声明
+         infback.c
+     1>gzwrite.c(84): warning C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _write. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(342) : 参见“write”的声明
+     1>gzwrite.c(86): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(168) : 参见“strerror”的声明
+     1>gzwrite.c(102): warning C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _write. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(342) : 参见“write”的声明
+     1>gzwrite.c(103): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(168) : 参见“strerror”的声明
+     1>gzwrite.c(357): warning C4996: 'vsnprintf': This function or variable may be unsafe. Consider using vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(337) : 参见“vsnprintf”的声明
+     1>gzwrite.c(573): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\io.h(326) : 参见“close”的声明
+         inffast.c
+         inflate.c
+         inftrees.c
+         trees.c
+         uncompr.c
+         zutil.c
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"E:\krkrz-master\krkrz-master\src\core\external\zlib\lib\zlib.lib" /NOLOGO /LTCG Release\inffas32.obj
+         Release\match686.obj
+         Release\adler32.obj
+         Release\compress.obj
+         Release\crc32.obj
+         Release\deflate.obj
+         Release\gzclose.obj
+         Release\gzlib.obj
+         Release\gzread.obj
+         Release\gzwrite.obj
+         Release\infback.obj
+         Release\inffast.obj
+         Release\inflate.obj
+         Release\inftrees.obj
+         Release\trees.obj
+         Release\uncompr.obj
+         Release\zutil.obj
+         zlib.vcxproj -> E:\krkrz-master\krkrz-master\src\core\external\zlib\lib\zlib.lib
+       FinalizeBuildStatus:
+         正在删除文件“Release\zlib.tlog\unsuccessfulbuild”。
+         正在对“Release\zlib.tlog\zlib.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“E:\krkrz-master\krkrz-master\src\core\external\zlib\zlib.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:03.77

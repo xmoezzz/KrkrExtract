@@ -152,17 +152,106 @@ NTSTATUS NTAPI FindEmoteKeyByParse(PULONG PrivateKey)
 	return Status;
 }
 
+/*
+CPU Disasm
+Address                      Hex dump                       Command                                      Comments
+05B37A29                     |.  C785 38FFFFFF 15CD5B07     mov dword ptr [ebp-0C8],75BCD15
+05B37A33                     |.  C785 3CFFFFFF E5559A15     mov dword ptr [ebp-0C4],159A55E5
+05B37A3D                     |.  C785 40FFFFFF B53B121F     mov dword ptr [ebp-0C0],1F123BB5
+
+*/
+NTSTATUS NTAPI FindEmoteKeyByEmotePlayer(PULONG PrivateKey)
+{
+	ULONG64    Magic[3];
+	PVOID      ModuleAddress;
+	ULONG_PTR  iPos, SizeOfImage;
+	ULONG      AddressOfPrivate;
+	MODULEINFO ModuleInfo;
+	NTSTATUS   Status;
+
+	if (PrivateKey)
+		*PrivateKey = 0;
+
+	Status = STATUS_UNSUCCESSFUL;
+
+
+	LOOP_ONCE
+	{
+		ModuleAddress = GetModuleHandleW(L"emoteplayer.dll");
+
+		if (!ModuleAddress)
+			ModuleAddress = LoadLibraryW(L"emoteplayer.dll");
+
+		if (!ModuleAddress)
+			ModuleAddress = LoadLibraryW(L"plugin\\emoteplayer.dll");
+
+		if (!ModuleAddress)
+			return STATUS_NO_SUCH_FILE;
+
+		RtlZeroMemory(&ModuleInfo, sizeof(ModuleInfo));
+		GetModuleInformation(GetCurrentProcess(), (HMODULE)ModuleAddress, &ModuleInfo, sizeof(ModuleInfo));
+		iPos = 0;
+		SizeOfImage = ModuleInfo.SizeOfImage;
+
+		LOOP_FOREVER
+		{
+			if (iPos >= SizeOfImage)
+				break;
+
+			Magic[0] = *(PULONG64)((ULONG_PTR)ModuleAddress + iPos + 0);
+			Magic[1] = *(PULONG64)((ULONG_PTR)ModuleAddress + iPos + 8);
+
+			if (Magic[0] == 0xCD15FFFFFF3885C7 && Magic[1] == 0xFFFFFF3C85C7075B)
+			{
+				//push Offset
+				/*
+				CPU Disasm
+				Address                      Hex dump                       Command                                      Comments
+				05B37A0F                     |> \68 5C9AC005                push offset 05C09A5C                         ; ASCII "149203383"
+				05B37A14                     |.  89B5 78FFFFFF              mov dword ptr [ebp-88],esi
+				05B37A1A                     |.  E8 4D650800                call 05BBDF6C
+
+				*/
+
+
+				iPos -= (10 + 5 + 6 + 4);
+				
+				//push
+				if (((PBYTE)ModuleAddress)[iPos - 1] == 0x68)
+				{
+					AddressOfPrivate = *(PULONG)((ULONG_PTR)ModuleAddress + iPos);
+
+					*PrivateKey = atoi((LPCSTR)AddressOfPrivate);
+					Status = STATUS_SUCCESS;
+
+					break;
+				}
+				else
+				{
+					iPos += (10 + 5 + 6 + 4) + sizeof(Magic[0]) * 2;
+				}
+			}
+			else
+			{
+				iPos++;
+			}
+		}
+
+	}
+
+	return Status;
+}
 
 int wmain(int argc, WCHAR* argv[])
 {
 	ULONG     Key;
-	if (FindEmoteKeyByParse(&Key) >= 0 || FindEmoteKeyByMark(&Key) >= 0)
+	if (FindEmoteKeyByParse(&Key) >= 0 || FindEmoteKeyByMark(&Key) >= 0 || FindEmoteKeyByEmotePlayer(&Key) >= 0)
 	{
 		printf("Private Key : %d\n", Key);
 	}
 	else
 	{
-		printf("Cannot Found Key\n");
+		printf("Cannot Find Key\n");
 	}
 	getchar();
 	return 0;
