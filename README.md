@@ -1,36 +1,31 @@
-﻿# KrkrExtract
+# KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files (IA32 & AMD64)  
 
-##[Other krkr Project]  
+## [Other krkr Project]  
  
 AlphaMovie Decoder:  
 https://github.com/xmoeproject/AlphaMovieDecoder
 
-tjs2Compiler:  
-https://github.com/xmoeproject/X-moe/tree/master/ByteCodeAnalysis/tjs2Compiler
 
-##[64Bit Version]  
+## [64Bit Version]  
 Under construction now.  
 64bit Version can only run with 64bit krkr engine.  
 
 
-##[Pending]  
+## [Pending]  
 TJS2 Decompiler  
 Optimize memory usage  
 
 
-##[What's new?]  
+## [What's new?]  
 Version 3.0.1.0  
 Added JIT-Compiler for universal patch.  
- 
 
+## [Note]  
+KrkrExtract will be an open source project soon.  
+KrkrExtract即将准备开源。  
 
-##[Note]  
-For long-term support, this project won't be an open source project at present.
-
-为了长远的支持，该工程现阶段将不会开源。  
-
-##[Tips]  
+## [Tips]  
 If you can't read Chinese:  
 Support packing and unpacked.  
 If System suggests you to exit the game and delete KrkrzTempWorker.xp3 to pack next folder,  
