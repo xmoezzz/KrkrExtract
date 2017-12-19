@@ -1,0 +1,96 @@
+﻿生成启动时间为 2017/12/19 16:07:04。
+     1>项目“I:\git\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt PsbDecompilerJson.cpp
+         PsbDecompilerJson.cpp
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Release\KrkrExtractDll.res" KrkrExtractDll.rc 
+       Link:
+         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"I:\git\KrkrExtract\Release\KrkrExtract.dll" /INCREMENTAL:NO /NOLOGO I:\git\KrkrExtract\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:win.manifest /manifestinput:"E:\VSProgram\Visual Studio 2013 Ultimate\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"I:\git\KrkrExtract\Release\KrkrExtract.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"I:\git\KrkrExtract\Release\KrkrExtract.lib" /MACHINE:X86 /SAFESEH /DLL Release\KrkrExtractDll.res
+         Release\adler32.obj
+         Release\AmvExtractor.obj
+         Release\compress.obj
+         Release\crc32.obj
+         Release\crc64.obj
+         Release\deflate.obj
+         Release\FakePNG.obj
+         Release\HandleTable.obj
+         Release\KrkrExtract.obj
+         Release\ImageWorkerNcb.obj
+         Release\inffast.obj
+         Release\inflate.obj
+         Release\inftrees.obj
+         Release\KrkrUniversalDumper.obj
+         Release\Main.obj
+         Release\KrkrTextDecode.obj
+         Release\KrkrUniversalPatch.obj
+         Release\lz4.obj
+         Release\lz4frame.obj
+         Release\lz4hc.obj
+         "Release\mt19937-64.obj"
+         Release\KrkrPacker.obj
+         Release\KrkrDumper.obj
+         Release\PEFile.obj
+         Release\PNGWorker.obj
+         Release\PsbDecompilerJson.obj
+         Release\PsbFile.obj
+         Release\PsbWorker.obj
+         Release\SavePNG.obj
+         Release\savetlg5.obj
+         Release\Slide.obj
+         Release\Tjs2Disasm.obj
+         Release\tjs.obj
+         Release\tjs.tab.obj
+         Release\tjsArray.obj
+         Release\tjsBinarySerializer.obj
+         Release\tjsByteCodeLoader.obj
+         Release\tjsCompileControl.obj
+         Release\tjsConfig.obj
+         Release\tjsConstArrayData.obj
+         Release\tjsDate.obj
+         Release\tjsdate.tab.obj
+         Release\tjsDateParser.obj
+         Release\tjsDebug.obj
+         Release\tjsDictionary.obj
+         Release\tjsDisassemble.obj
+         Release\tjsError.obj
+         Release\tjsException.obj
+         Release\tjsGlobalStringMap.obj
+         Release\tjsInterCodeExec.obj
+         Release\tjsInterCodeGen.obj
+         Release\tjsInterface.obj
+         Release\tjsLex.obj
+         Release\tjsMath.obj
+         Release\tjsMessage.obj
+         "Release\tjsMT19937ar-cok.obj"
+         Release\tjsNamespace.obj
+         Release\tjsNative.obj
+         Release\tjsObject.obj
+         Release\tjsObjectExtendable.obj
+         Release\tjsOctPack.obj
+         Release\tjspp.tab.obj
+         Release\tjsRandomGenerator.obj
+         Release\tjsRegExp.obj
+         Release\tjsScriptBlock.obj
+         Release\tjsScriptCache.obj
+         Release\tjsString.obj
+         Release\tjsUtils.obj
+         Release\tjsVariant.obj
+         Release\tjsVariantString.obj
+         Release\TLGDecoder.obj
+         Release\tp_stub.obj
+         Release\tree.obj
+         Release\uncompr.obj
+         Release\utils.obj
+         Release\XP3Parser.obj
+         Release\xxhash.obj
+         Release\zutil.obj
+            正在创建库 I:\git\KrkrExtract\Release\KrkrExtract.lib 和对象 I:\git\KrkrExtract\Release\KrkrExtract.exp
+         正在生成代码
+         已完成代码的生成
+         KrkrExtractDll.vcxproj -> I:\git\KrkrExtract\Release\KrkrExtract.dll
+     1>已完成生成项目“I:\git\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:18.74

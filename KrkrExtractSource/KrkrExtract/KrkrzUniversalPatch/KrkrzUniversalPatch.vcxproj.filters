@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="PsbCompiler">
+      <UniqueIdentifier>{da9615dc-df40-4beb-be45-ffb8d21701c9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tp_stub.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MyHook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KaresekaHook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseStream.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IStreamExXP3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamHolderXP3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TextPlugin.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbText.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CompilerSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\cc_stream.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_array.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_base.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_boolean.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_btree.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_collection.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_decimal.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_integer.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_null.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_object.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_resource.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_cc_string.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_compiler_center.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_link.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb_link_resource.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\psb.hpp">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCompiler\ResourcePair.h">
+      <Filter>PsbCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="KrkrzUniversalPatch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tp_stub.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MyHook.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KaresekaHook.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamHolderXP3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IStreamExXP3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbText.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_link_resource.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_compiler_center.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\cc_stream.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\compiler.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_array.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_base.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_boolean.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_btree.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_collection.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_decimal.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_integer.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_null.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_object.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_resource.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_cc_string.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb_link.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompiler\psb.cpp">
+      <Filter>PsbCompiler</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KrkrzUniversalPatch.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

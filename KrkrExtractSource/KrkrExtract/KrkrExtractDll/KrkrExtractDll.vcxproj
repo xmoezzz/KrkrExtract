@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E9360CFF-5BB0-406C-9273-BBC6AF644E89}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>KrkrExtractDll</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)\onig;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>KrkrExtract</TargetName>
+    <GenerateManifest>true</GenerateManifest>
+    <IncludePath>$(ProjectDir)\onig;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;KRKREXTRACTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)lib\onig_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;KRKREXTRACTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>$(SolutionDir)lib\onig_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="adler32.cpp" />
+    <ClCompile Include="AmvExtractor.cpp" />
+    <ClCompile Include="compress.cpp" />
+    <ClCompile Include="crc32.cpp" />
+    <ClCompile Include="crc64.cpp" />
+    <ClCompile Include="deflate.cpp" />
+    <ClCompile Include="FakePNG.cpp" />
+    <ClCompile Include="HandleTable.cpp" />
+    <ClCompile Include="KrkrExtract.cpp" />
+    <ClCompile Include="ImageWorkerNcb.cpp" />
+    <ClCompile Include="inffast.cpp" />
+    <ClCompile Include="inflate.cpp" />
+    <ClCompile Include="inftrees.cpp" />
+    <ClCompile Include="KrkrUniversalDumper.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="KrkrTextDecode.cpp" />
+    <ClCompile Include="KrkrUniversalPatch.cpp" />
+    <ClCompile Include="lz4.cpp" />
+    <ClCompile Include="lz4frame.cpp" />
+    <ClCompile Include="lz4hc.cpp" />
+    <ClCompile Include="mt19937-64.cpp" />
+    <ClCompile Include="KrkrPacker.cpp" />
+    <ClCompile Include="KrkrDumper.cpp" />
+    <ClCompile Include="PEFile.cpp" />
+    <ClCompile Include="PNGWorker.cpp" />
+    <ClCompile Include="PsbDecompilerJson.cpp" />
+    <ClCompile Include="PsbFile.cpp" />
+    <ClCompile Include="PsbWorker.cpp" />
+    <ClCompile Include="SavePNG.cpp" />
+    <ClCompile Include="savetlg5.cpp" />
+    <ClCompile Include="Slide.cpp" />
+    <ClCompile Include="Tjs2Disasm.cpp" />
+    <ClCompile Include="tjs2\tjs.cpp" />
+    <ClCompile Include="tjs2\tjs.tab.cpp" />
+    <ClCompile Include="tjs2\tjsArray.cpp" />
+    <ClCompile Include="tjs2\tjsBinarySerializer.cpp" />
+    <ClCompile Include="tjs2\tjsByteCodeLoader.cpp" />
+    <ClCompile Include="tjs2\tjsCompileControl.cpp" />
+    <ClCompile Include="tjs2\tjsConfig.cpp" />
+    <ClCompile Include="tjs2\tjsConstArrayData.cpp" />
+    <ClCompile Include="tjs2\tjsDate.cpp" />
+    <ClCompile Include="tjs2\tjsdate.tab.cpp" />
+    <ClCompile Include="tjs2\tjsDateParser.cpp" />
+    <ClCompile Include="tjs2\tjsDebug.cpp" />
+    <ClCompile Include="tjs2\tjsDictionary.cpp" />
+    <ClCompile Include="tjs2\tjsDisassemble.cpp" />
+    <ClCompile Include="tjs2\tjsError.cpp" />
+    <ClCompile Include="tjs2\tjsException.cpp" />
+    <ClCompile Include="tjs2\tjsGlobalStringMap.cpp" />
+    <ClCompile Include="tjs2\tjsInterCodeExec.cpp" />
+    <ClCompile Include="tjs2\tjsInterCodeGen.cpp" />
+    <ClCompile Include="tjs2\tjsInterface.cpp" />
+    <ClCompile Include="tjs2\tjsLex.cpp" />
+    <ClCompile Include="tjs2\tjsMath.cpp" />
+    <ClCompile Include="tjs2\tjsMessage.cpp" />
+    <ClCompile Include="tjs2\tjsMT19937ar-cok.cpp" />
+    <ClCompile Include="tjs2\tjsNamespace.cpp" />
+    <ClCompile Include="tjs2\tjsNative.cpp" />
+    <ClCompile Include="tjs2\tjsObject.cpp" />
+    <ClCompile Include="tjs2\tjsObjectExtendable.cpp" />
+    <ClCompile Include="tjs2\tjsOctPack.cpp" />
+    <ClCompile Include="tjs2\tjspp.tab.cpp" />
+    <ClCompile Include="tjs2\tjsRandomGenerator.cpp" />
+    <ClCompile Include="tjs2\tjsRegExp.cpp" />
+    <ClCompile Include="tjs2\tjsScriptBlock.cpp" />
+    <ClCompile Include="tjs2\tjsScriptCache.cpp" />
+    <ClCompile Include="tjs2\tjsString.cpp" />
+    <ClCompile Include="tjs2\tjsUtils.cpp" />
+    <ClCompile Include="tjs2\tjsVariant.cpp" />
+    <ClCompile Include="tjs2\tjsVariantString.cpp" />
+    <ClCompile Include="TLGDecoder.cpp" />
+    <ClCompile Include="tp_stub.cpp" />
+    <ClCompile Include="tree.cpp" />
+    <ClCompile Include="uncompr.cpp" />
+    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="XP3Parser.cpp" />
+    <ClCompile Include="xxhash.cpp" />
+    <ClCompile Include="zutil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Adler32Stream.h" />
+    <ClInclude Include="deflate.h" />
+    <ClInclude Include="FakePNG.h" />
+    <ClInclude Include="HandleTable.h" />
+    <ClInclude Include="KrkrExtract.h" />
+    <ClInclude Include="gzguts.h" />
+    <ClInclude Include="ImageWokerNcb.h" />
+    <ClInclude Include="inffast.h" />
+    <ClInclude Include="inflate.h" />
+    <ClInclude Include="inftrees.h" />
+    <ClInclude Include="KrkrExtend.h" />
+    <ClInclude Include="KrkrHeaders.h" />
+    <ClInclude Include="KrkrUniversalDumper.h" />
+    <ClInclude Include="KrkrUniversalPatch.h" />
+    <ClInclude Include="lz4.h" />
+    <ClInclude Include="lz4frame.h" />
+    <ClInclude Include="lz4frame_static.h" />
+    <ClInclude Include="lz4hc.h" />
+    <ClInclude Include="ml.h" />
+    <ClInclude Include="mt64.h" />
+    <ClInclude Include="MultiThread.h" />
+    <ClInclude Include="MyLib.h" />
+    <ClInclude Include="ncbind.h" />
+    <ClInclude Include="ncb_foreach.h" />
+    <ClInclude Include="ncb_invoke.h" />
+    <ClInclude Include="KrkrPacker.h" />
+    <ClInclude Include="KrkrDumper.h" />
+    <ClInclude Include="PEFile.h" />
+    <ClInclude Include="PNGWorker.h" />
+    <ClInclude Include="PsbFile.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SaveExCompress.h" />
+    <ClInclude Include="SavePNG.h" />
+    <ClInclude Include="savetlg5.h" />
+    <ClInclude Include="SectionProtector.h" />
+    <ClInclude Include="Slide.h" />
+    <ClInclude Include="Tjs2Disasm.h" />
+    <ClInclude Include="tjs2\tjs.h" />
+    <ClInclude Include="tjs2\tjs.tab.hpp" />
+    <ClInclude Include="tjs2\tjsArray.h" />
+    <ClInclude Include="tjs2\tjsBinarySerializer.h" />
+    <ClInclude Include="tjs2\tjsByteCodeLoader.h" />
+    <ClInclude Include="tjs2\tjsCommHead.h" />
+    <ClInclude Include="tjs2\tjsCompileControl.h" />
+    <ClInclude Include="tjs2\tjsConfig.h" />
+    <ClInclude Include="tjs2\tjsConstArrayData.h" />
+    <ClInclude Include="tjs2\tjsDate.h" />
+    <ClInclude Include="tjs2\tjsdate.tab.hpp" />
+    <ClInclude Include="tjs2\tjsDateParser.h" />
+    <ClInclude Include="tjs2\tjsDebug.h" />
+    <ClInclude Include="tjs2\tjsDictionary.h" />
+    <ClInclude Include="tjs2\tjsError.h" />
+    <ClInclude Include="tjs2\tjsErrorDefs.h" />
+    <ClInclude Include="tjs2\tjsErrorInc.h" />
+    <ClInclude Include="tjs2\tjsException.h" />
+    <ClInclude Include="tjs2\tjsGlobalStringMap.h" />
+    <ClInclude Include="tjs2\tjsHashSearch.h" />
+    <ClInclude Include="tjs2\tjsInterCodeExec.h" />
+    <ClInclude Include="tjs2\tjsInterCodeGen.h" />
+    <ClInclude Include="tjs2\tjsInterface.h" />
+    <ClInclude Include="tjs2\tjsLex.h" />
+    <ClInclude Include="tjs2\tjsMath.h" />
+    <ClInclude Include="tjs2\tjsMessage.h" />
+    <ClInclude Include="tjs2\tjsMT19937ar-cok.h" />
+    <ClInclude Include="tjs2\tjsNamespace.h" />
+    <ClInclude Include="tjs2\tjsNative.h" />
+    <ClInclude Include="tjs2\tjsObject.h" />
+    <ClInclude Include="tjs2\tjsObjectExtendable.h" />
+    <ClInclude Include="tjs2\tjsOctPack.h" />
+    <ClInclude Include="tjs2\tjspp.tab.hpp" />
+    <ClInclude Include="tjs2\tjsRandomGenerator.h" />
+    <ClInclude Include="tjs2\tjsRegExp.h" />
+    <ClInclude Include="tjs2\tjsScriptBlock.h" />
+    <ClInclude Include="tjs2\tjsScriptCache.h" />
+    <ClInclude Include="tjs2\tjsString.h" />
+    <ClInclude Include="tjs2\tjsTypes.h" />
+    <ClInclude Include="tjs2\tjsUtils.h" />
+    <ClInclude Include="tjs2\tjsVariant.h" />
+    <ClInclude Include="tjs2\tjsVariantString.h" />
+    <ClInclude Include="TLGDecoder.h" />
+    <ClInclude Include="tp_stub.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="Worker.h" />
+    <ClInclude Include="XP3Parser.h" />
+    <ClInclude Include="xxhash.h" />
+    <ClInclude Include="zconf.h" />
+    <ClInclude Include="zlib.h" />
+    <ClInclude Include="zutil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KrkrExtractDll.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="KrkrUniversalPatch.dll" />
+    <None Include="PatchLoader.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="win.manifest" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

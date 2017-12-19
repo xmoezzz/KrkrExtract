@@ -1,46 +1,46 @@
 # KrkrExtract
-A tool can extract and pack krkr2 and krkrz's xp3 files (IA32 & AMD64)  
+A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)  
 
-## [Other krkr Project]  
- 
+
+## OpenSource License  
+
+![Files](https://www.gnu.org/graphics/gplv3-127x51.png)
+
+All source code files are licensed under [GNU General Public License v3 (GPLv3)](https://www.gnu.org/licenses/quick-guide-gplv3.en.html).  
+If you want to modify KrkrExtract, please contact me.
+
+## Any differences between krkr2 and krkrz?
+My answer is NO DIFFERECES.  
+krkrz supports msvc while krkr2 can only built by bcb.  
+Some companies modified krkrz so we need more steps to unpack archives.  
+
+## Why universal patch compatible with krkr2?  
+krkr2 use bcb(C++ Builder, legency version...) as default compiler.   
+bcb will make code more complex so sometimes it's more difficult to analyze code automatically, plus, KrkrExtract can pack archives for krkr2.  
+
+## How to use & How to ...  
+I know maybe have many questions about KrkrExtract, Pls see the website below firstly.  
+[KrkrExtract Website](https://xmoeproject.github.io/KrkrExtract/)
+
+## Any problem about repack?  
+Why not try to use universal patch?  
+
+
+## Other krkr Project  
 AlphaMovie Decoder:  
-https://github.com/xmoeproject/AlphaMovieDecoder
+[AlphaMovie Decoder Project](https://github.com/xmoeproject/AlphaMovieDecoder)
 
 
-## [64Bit Version]  
-Under construction now.  
-64bit Version can only run with 64bit krkr engine.  
+## 64Bit Version 
+useless:)  
+I've removed all source codes about 64bit version.  
+I don't think any company will use 64bit version.  
 
 
-## [Pending]  
-TJS2 Decompiler  
-Optimize memory usage  
-
-
-## [What's new?]  
-Version 3.0.1.0  
-Added JIT-Compiler for universal patch.  
-
-## [Note]  
-KrkrExtract will be an open source project soon.  
-KrkrExtract即将准备开源。  
-
-## [Tips]  
-If you can't read Chinese:  
-Support packing and unpacked.  
-If System suggests you to exit the game and delete KrkrzTempWorker.xp3 to pack next folder,  
-you must follow this advice to avoid some packing issues.  
+## Website
+[KrkrExtract Website](https://xmoeproject.github.io/KrkrExtract/)
 
 
 
-[Bugs report]  
-1.Plz attach a capture and descript the issue.  
-2.Your system information.  
-3.The name(in Japanese) of the crashed game.  
-4.DO NOT ATTACH ANY DOWNLOAD LINK HERE, you can contact me by email.  
 
-1.请截图，并且描述问题。  
-2.系统信息。  
-3.出错游戏的名字（日文名）。  
-4.请不要在这里放任何链接，但你可以用过邮件联系我。  
 

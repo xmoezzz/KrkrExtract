@@ -1,0 +1,23 @@
+﻿生成启动时间为 2016/9/27 17:23:07。
+     1>项目“E:\Krkr2Packer\Krkr2Packer\Krkr2Packer.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Krkr2Packer.cpp
+         Krkr2Packer.cpp
+     1>Krkr2Packer.cpp(82): warning C4101: “szPath”: 未引用的局部变量
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Krkr2Packer\Release\Krkr2Packer.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\Krkr2Packer\Release\Krkr2Packer.pdb" /SUBSYSTEM:CONSOLE,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Krkr2Packer\Release\Krkr2Packer.lib" /MACHINE:X86 /SAFESEH Release\Krkr2Packer.obj
+         Release\stdafx.obj
+         正在生成代码
+         已完成代码的生成
+     1>zlib.lib(compress.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(compress.obj)”或在“E:\Krkr2Packer\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(deflate.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(deflate.obj)”或在“E:\Krkr2Packer\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(trees.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(trees.obj)”或在“E:\Krkr2Packer\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(adler32.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(adler32.obj)”或在“E:\Krkr2Packer\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(crc32.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(crc32.obj)”或在“E:\Krkr2Packer\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(zutil.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(zutil.obj)”或在“E:\Krkr2Packer\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+         Krkr2Packer.vcxproj -> E:\Krkr2Packer\Release\Krkr2Packer.exe
+     1>已完成生成项目“E:\Krkr2Packer\Krkr2Packer\Krkr2Packer.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:01.44

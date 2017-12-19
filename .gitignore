@@ -1,0 +1,13 @@
+*.slo
+*.lo
+*.so
+*.dylib
+*.o
+*.obj
+*.sdf
+*.lai
+*.la
+*.a
+*.out
+*.app
+

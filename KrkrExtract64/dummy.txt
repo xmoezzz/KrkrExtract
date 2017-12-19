@@ -1,7 +1,1 @@
-﻿64Bit Version:
-Only support tvpwin32(AMD64 Version)
-==================
-专治各种不服
-==================
-Todo：
-Auto dumping
+﻿useless:(
