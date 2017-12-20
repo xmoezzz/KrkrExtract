@@ -39,9 +39,9 @@ I don't think any company will use 64bit version.
 ## Website
 [KrkrExtract Website](https://xmoeproject.github.io/KrkrExtract/)
 
-##Special Thanks
+## Special Thanks
 感谢amemiya帮我纠正英文错误，丢人现眼了。  
-![Files](https://www.gnu.org/graphics/gplv3-127x51.png)
+![Files](https://github.com/xmoeproject/KrkrExtract/blob/master/img/shadiao.jpg)
 
 
 
