@@ -7,7 +7,6 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 ![Files](https://www.gnu.org/graphics/gplv3-127x51.png)
 
 All source code files are licensed under [GNU General Public License v3 (GPLv3)](https://www.gnu.org/licenses/quick-guide-gplv3.en.html).  
-If you want to modify KrkrExtract, please contact me.
 
 ## Any differences between krkr2 and krkrz?
 My answer is NO DIFFERECES.  
@@ -40,6 +39,9 @@ I don't think any company will use 64bit version.
 ## Website
 [KrkrExtract Website](https://xmoeproject.github.io/KrkrExtract/)
 
+##Special Thanks
+感谢amemiya帮我纠正英文错误，丢人现眼了。  
+![Files](https://www.gnu.org/graphics/gplv3-127x51.png)
 
 
 
