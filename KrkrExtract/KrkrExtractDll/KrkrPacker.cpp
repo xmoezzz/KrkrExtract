@@ -653,6 +653,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, 0);
+	tTJSVariant             ExecResult;
 
 	FileList.clear();
 	IterFiles(lpBasePack);
@@ -666,7 +667,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	if (Handle->DebugOn)
 		PrintConsoleW(L"Packing files...\n");
 
-	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
+	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
