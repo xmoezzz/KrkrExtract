@@ -375,77 +375,6 @@ HANDLE WINAPI HookCreateFileW(
 
 	Handle = GlobalData::GetGlobalData();
 
-	auto IsXp3File = [](HANDLE hFile)->BOOL
-	{
-		BOOL          Success;
-		LARGE_INTEGER OldOffset, NewOffset, Size;
-		BYTE          Mark[0x1000];
-		BYTE          Buffer[0x10000], *Xp3Signature;
-		DWORD         BytesRead;
-
-		static BYTE   XP3Header[] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
-
-		if (hFile == 0 || hFile == INVALID_HANDLE_VALUE)
-			return FALSE;
-		
-		OldOffset.QuadPart = 0;
-		NewOffset.QuadPart = 0;
-		SetFilePointerEx(hFile, NewOffset, &OldOffset, FILE_CURRENT);
-		GetFileSizeEx(hFile, &Size);
-		NewOffset.QuadPart = 0;
-		Success = FALSE;
-		SetFilePointerEx(hFile, NewOffset, NULL, FILE_BEGIN);
-		if (Size.QuadPart > sizeof(StaticXP3V2Magic))
-		{
-			if (Size.QuadPart >= 0x1000)
-			{
-				ReadFile(hFile, Mark, sizeof(Mark), NULL, NULL);
-				if (RtlCompareMemory(Mark, StaticXP3V2Magic, sizeof(StaticXP3V2Magic)) == sizeof(StaticXP3V2Magic))
-				{
-					Success = TRUE;
-				}
-				else
-				{
-					LOOP_ONCE
-					{
-						if (((PIMAGE_DOS_HEADER)Mark)->e_magic != IMAGE_DOS_SIGNATURE)
-							break;
-
-						SetFilePointer(hFile, 0x10, NULL, FILE_BEGIN);
-						for (LONG64 FileSize = Size.QuadPart; FileSize > 0; FileSize -= sizeof(Buffer))
-						{
-							ReadFile(hFile, Buffer, sizeof(Buffer), &BytesRead, NULL);
-
-							if (BytesRead < 0x10)
-								break;
-
-							Xp3Signature = Buffer;
-							for (ULONG_PTR Count = sizeof(Buffer) / 0x10; Count; Xp3Signature += 0x10, --Count)
-							{
-								if (RtlCompareMemory(Xp3Signature, XP3Header, sizeof(XP3Header)) == sizeof(XP3Header))
-								{
-									Success = TRUE;
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				ReadFile(hFile, Mark, sizeof(StaticXP3V2Magic), NULL, NULL);
-				if (RtlCompareMemory(Mark, StaticXP3V2Magic, sizeof(StaticXP3V2Magic)) == sizeof(StaticXP3V2Magic))
-					Success = TRUE;
-			}
-		}
-		SetFilePointerEx(hFile, OldOffset, NULL, FILE_BEGIN);
-		return Success;
-	};
-
-	//the same cs as CloseHandle
-	//tTJSCriticalSectionHolder Holder(FileCS);
-
 	Index = FileName.find_last_of(L'/');
 	if (Index != std::wstring::npos)
 		FileName = FileName.substr(Index + 1, std::wstring::npos);
@@ -454,72 +383,20 @@ HANDLE WINAPI HookCreateFileW(
 	if (Index != std::wstring::npos)
 		FileName = FileName.substr(Index + 1, std::wstring::npos);
 
-	Result = StubCreateFileW(lpFileName, dwDesiredAccess, dwShareMode,
-		lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
-
 	//krkr will not close the handle after unmount a xp3 archive.
 	if (Handle->CurrentTempFileName.find_last_of(L".xp3") != std::wstring::npos)
 		InternalFileName = Handle->CurrentTempFileName;
 	else
 		InternalFileName = L"KrkrzTempWorker.xp3";
 
-	//avoid attaching the temp file
-	if (!StrICompareW(FileName.c_str(), InternalFileName.c_str(), StrCmp_ToLower) && Result != INVALID_HANDLE_VALUE)
-		InterlockedExchangePointer(&(Handle->CurrentTempHandle), Result);
-	
-#if 0
-	else if (dwShareMode == FILE_SHARE_READ && dwCreationDisposition == OPEN_EXISTING && IsXp3File(Result))
-	{
-		for (auto& StrChar : FileName)
-			StrChar = CHAR_LOWER(StrChar);
+	Result = StubCreateFileW(lpFileName, dwDesiredAccess, dwShareMode,
+		lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
-		auto Item = Handle->FileInitList.find(FileName);
-		if (Item != Handle->FileInitList.end())
-			Item->second.hFile = Result;
-	}
-#endif
+	//trace this handle??
+	if (!StrICompareW(FileName.c_str(), InternalFileName.c_str(), StrCmp_ToLower) && Result != INVALID_HANDLE_VALUE && Result != 0 )
+		InterlockedExchangePointer(&(Handle->CurrentTempHandle), Result);
 
 	return Result;
-}
-
-
-API_POINTER(CloseHandle) StubCloseHandle = NULL;
-
-BOOL WINAPI HookCloseHandle(HANDLE hObject)
-{
-	//the same cs as CreateFileW
-	//tTJSCriticalSectionHolder Holder(FileCS);
-
-	/*
-	GlobalData* Handle;
-	BOOL        IsAllPackInited;
-
-	IsAllPackInited = TRUE;
-	Handle = GlobalData::GetGlobalData();
-
-	if (Handle->IsAllPackReaded == FALSE)
-	{
-		for (auto& Entry : Handle->FileInitList)
-		{
-			if (Entry.second.hFile == hObject)
-				Entry.second.Status = TRUE;
-
-			if (Entry.second.Status == FALSE)
-				IsAllPackInited = FALSE;
-		}
-
-		if (IsAllPackInited == FALSE)
-		{
-			//send windows notification
-			if (Handle->MainWindow)
-				SendMessageW(Handle->MainWindow, WM_UUPAK_OK, 0, 0);
-
-			//change the global flag
-			InterlockedExchange((LONG volatile *)&(Handle->IsAllPackReaded), TRUE);
-		}
-	}
-	*/
-	return StubCloseHandle(hObject);
 }
 
 
@@ -878,8 +755,7 @@ NTSTATUS WINAPI InitHook()
 
 		Mp::PATCH_MEMORY_DATA CommonPatch[] =
 		{
-			Mp::FunctionJumpVa(CreateFileW, HookCreateFileW, &StubCreateFileW),
-			Mp::FunctionJumpVa(CloseHandle, HookCloseHandle, &StubCloseHandle)
+			Mp::FunctionJumpVa(CreateFileW, HookCreateFileW, &StubCreateFileW)
 		};
 
 		Mp::PatchMemory(CommonPatch, countof(CommonPatch));

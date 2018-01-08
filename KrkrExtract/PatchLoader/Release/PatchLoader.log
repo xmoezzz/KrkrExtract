@@ -1,20 +1,14 @@
-﻿生成启动时间为 2017/12/18 14:58:51。
-     1>项目“I:\KrkrExtract\PatchLoader\PatchLoader.vcxproj”在节点 2 上(Build 个目标)。
-     1>ClCompile:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm- /MD /GS- /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt PatchLoader.cpp
-         PatchLoader.cpp
-       Link:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"I:\KrkrExtract\Release\PatchLoader.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"I:\KrkrExtract\Release\PatchLoader.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT:NO /IMPLIB:"I:\KrkrExtract\Release\PatchLoader.lib" /MACHINE:X86 /SAFESEH:NO Release\PatchLoader.obj
-         正在生成代码
-         已完成代码的生成
-         PatchLoader.vcxproj -> I:\KrkrExtract\Release\PatchLoader.exe
+﻿生成启动时间为 2018/01/08 19:53:48。
+     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\PatchLoader\PatchLoader.vcxproj”在节点 2 上(Build 个目标)。
+     1>Link:
+         PatchLoader.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\Release\PatchLoader.exe
        PostBuildEvent:
-         copy /Y "I:\KrkrExtract\Release\PatchLoader.exe" "I:\KrkrExtract\KrkrExtractDll\"
+         copy /Y "E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\Release\PatchLoader.exe" "E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\KrkrExtractDll\"
          
          :VCEnd
                  1 file(s) copied.
-     1>已完成生成项目“I:\KrkrExtract\PatchLoader\PatchLoader.vcxproj”(Build 个目标)的操作。
+     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\PatchLoader\PatchLoader.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:01.76
+已用时间 00:00:00.13

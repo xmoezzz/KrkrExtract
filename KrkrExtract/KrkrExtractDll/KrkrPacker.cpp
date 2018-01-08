@@ -1507,7 +1507,6 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 
 	XP3Header.IndexOffset = Offset;
 
-	// generate index, calculate index size first
 	Size.LowPart = 0;
 	pIndex = pXP3Index;
 
@@ -2048,6 +2047,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
+	tTJSVariant             ExecResult;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -2058,7 +2058,15 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	if (NT_FAILED(Status))
 		return Status;
 
-	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
+	//check the status
+	//1.If engine fail to mount the fake archive?
+	//2.logical bug
+	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	if (ExecResult.AsInteger() == FALSE)
+	{
+		MessageBoxW(Handle->MainWindow, L"Script exec error.", L"KrkrExtract", MB_OK);
+		return STATUS_UNSUCCESSFUL;
+	}
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
