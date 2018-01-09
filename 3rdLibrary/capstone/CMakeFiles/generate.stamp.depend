@@ -1,0 +1,22 @@
+# CMake generation dependency list for this directory.
+E:/capstone/CMakeLists.txt
+E:/capstone/CMakeFiles/3.3.2/CMakeSystem.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeSystemSpecificInitialize.cmake
+E:/capstone/CMakeFiles/3.3.2/CMakeCCompiler.cmake
+E:/capstone/CMakeFiles/3.3.2/CMakeCXXCompiler.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeGenericSystem.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Platform/Windows.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Platform/WindowsPaths.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeCInformation.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Platform/Windows-MSVC.cmake
+E:/capstone/CMakeFiles/3.3.2/CMakeRCCompiler.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeRCInformation.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeCXXInformation.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files (x86)/CMake/share/cmake-3.3/Modules/CMakeCommonLanguageInclude.cmake
+E:/capstone/capstone.pc.in

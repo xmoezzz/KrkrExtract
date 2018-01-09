@@ -71,6 +71,147 @@ KrkrPacker::~KrkrPacker()
 {
 }
 
+
+/////////////////////////////////////Common functions////////////////////////////////////////////
+
+#pragma pack(1)
+typedef struct _SYSTEM_HANDLE
+{
+	ULONG       ProcessId;
+	BYTE        ObjectTypeNumber;
+	BYTE        Flags;
+	USHORT      Handle;
+	PVOID       Object;
+	ACCESS_MASK GrantedAccess;
+} SYSTEM_HANDLE, *PSYSTEM_HANDLE;
+#pragma pack()
+
+
+auto AppendUnicodeString(LPWSTR lpwsString, PUNICODE_STRING UnicodeString)->BOOL
+{
+	ULONG Size;
+
+	if (!lpwsString || !UnicodeString)
+		return FALSE;
+
+	Size = StrLengthW(lpwsString);
+	RtlCopyMemory(&lpwsString[Size], UnicodeString->Buffer, UnicodeString->Length * 2);
+	return TRUE;
+};
+
+
+auto AppendString(LPWSTR lpwsString, LPCWSTR String)->BOOL
+{
+	ULONG Size;
+
+	if (!lpwsString || !String)
+		return FALSE;
+
+	Size = StrLengthW(lpwsString);
+	StrCopyW(&lpwsString[Size], String);
+	return TRUE;
+};
+
+auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
+{
+	NTSTATUS                       Status;
+	POBJECT_TYPE_INFORMATION       ObjectTypeInfo;
+	PSYSTEM_HANDLE_INFORMATION     HandleInfo;
+	ULONG                          HandleInfoSize;
+	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handle;
+	HANDLE                         DupHandle, ProcessHandle;
+	WCHAR                          Buffer[0x1000];
+	BYTE                           ObjectNameBuffer[0x1000];
+	UNICODE_STRING                 FileTag;
+	PUNICODE_STRING                ObjectNameInfo;
+	ULONG                          ReturnLength;
+
+	ProcessHandle  = OpenProcess(PROCESS_DUP_HANDLE, FALSE, GetCurrentProcessId());
+	HandleInfoSize = 0x10000;
+	HandleInfo     = (PSYSTEM_HANDLE_INFORMATION)AllocateMemoryP(HandleInfoSize);
+
+	while ((Status = NtQuerySystemInformation(
+		SystemHandleInformation,
+		HandleInfo,
+		HandleInfoSize,
+		NULL
+		)) == STATUS_INFO_LENGTH_MISMATCH)
+	{
+		HandleInfo = (PSYSTEM_HANDLE_INFORMATION)ReAllocateMemoryP(HandleInfo, HandleInfoSize *= 2);
+		if (HandleInfo == NULL)
+			return STATUS_NO_MEMORY;
+	}
+
+	for (ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
+	{
+		Handle = HandleInfo->Handles[i];
+		if (Handle.UniqueProcessId != GetCurrentProcessId())
+			continue;
+
+		DupHandle = 0;
+		Status = NtDuplicateObject(ProcessHandle, (HANDLE)Handle.HandleValue, GetCurrentProcess(), &DupHandle, 0, 0, 0);
+		if (NT_FAILED(Status))
+		{
+			PrintConsoleW(L"NtDuplicateObject failed (%08x)\n", Status);
+			continue;
+		}
+
+		ObjectTypeInfo = (decltype(ObjectTypeInfo))AllocateMemoryP(0x1000);
+		Status = NtQueryObject(DupHandle, ObjectTypeInformation, (PVOID)ObjectTypeInfo, 0x1000, NULL);
+		if (NT_FAILED(Status))
+		{
+			NtClose(DupHandle);
+			PrintConsoleW(L"NtQueryObject failed (%08x)\n", Status);
+			continue;
+		}
+
+		RtlInitUnicodeString(&FileTag, L"File");
+		if (RtlCompareUnicodeString(&ObjectTypeInfo->TypeName, &FileTag, FALSE) != 0)
+			continue;
+
+		if (Handle.GrantedAccess == 0x0012019f)
+		{
+			FormatStringW(Buffer, L"[%08x] (none)\n", Handle.HandleValue);
+			InfoList += Buffer;
+			NtClose(DupHandle);
+			continue;
+		}
+
+		Status = NtQueryObject(DupHandle, ObjectNameInformation, ObjectNameBuffer, 0x1000, &ReturnLength);
+		if (NT_FAILED(Status))
+		{
+			FormatStringW(Buffer, L"[%08x] (none)\n", Handle.HandleValue);
+			InfoList += Buffer;
+			NtClose(DupHandle);
+			continue;
+		}
+
+		ObjectNameInfo = (PUNICODE_STRING)ObjectNameBuffer;
+		if (ObjectNameInfo->Length)
+		{
+			FormatStringW(Buffer, L"[%08x] ", Handle.HandleValue);
+			AppendUnicodeString(Buffer, ObjectNameInfo);
+			AppendString(Buffer, L"\n");
+		}
+		else
+		{
+			FormatStringW(Buffer, L"[%08x] (unnamed)\n", Handle.HandleValue);
+		}
+
+		InfoList += Buffer;
+		NtClose(DupHandle);
+		FreeMemoryP(ObjectTypeInfo);
+		ObjectTypeInfo = NULL;
+	}
+
+	FreeMemoryP(HandleInfo);
+	return STATUS_SUCCESS;
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//                                     Packer
+/////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI KrkrPacker::DecryptWorker(ULONG EncryptOffset, PBYTE pBuffer, ULONG BufferSize, ULONG Hash)
 {
 	tTVPXP3ExtractionFilterInfo Info(0, pBuffer, BufferSize, Hash);
@@ -668,6 +809,11 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 		PrintConsoleW(L"Packing files...\n");
 
 	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	if (ExecResult.AsInteger() == FALSE)
+	{
+		MessageBoxW(Handle->MainWindow, L"Script exec error.(add)", L"KrkrExtract", MB_OK);
+		return STATUS_UNSUCCESSFUL;
+	}
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
@@ -958,7 +1104,9 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 
 	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" +  ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
 
-	CloseHandle(Handle->CurrentTempHandle);
+	if (Handle->CurrentTempHandle != 0 && Handle->CurrentTempHandle != INVALID_HANDLE_VALUE)
+		NtClose(Handle->CurrentTempHandle);
+
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 
 	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
@@ -1452,9 +1600,10 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 		wstring DummyName, HashName;
 		
 		DummyName = FileList[i] + L".dummy";
-		auto&& DummyLowerName = ToLowerString(DummyName.c_str());
+		auto DummyLowerName = ToLowerString(DummyName.c_str());
 
 		GenMD5Code(DummyLowerName.c_str(), HashName);
+
 		pIndex->info.FileName = HashName;
 		pIndex->info.FileNameLength = (USHORT)HashName.length();
 
@@ -2049,6 +2198,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
 	tTJSVariant             ExecResult;
+	wstring                 DebugInfo;
+	WCHAR                   CurrentDir[MAX_PATH];
+	ttstr                   VirtualArchive;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -2059,15 +2211,42 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	if (NT_FAILED(Status))
 		return Status;
 
+	RtlZeroMemory(CurrentDir, sizeof(CurrentDir));
+	GetCurrentDirectoryW(countof(CurrentDir) - 1, CurrentDir);
+
+	VirtualArchive = CurrentDir;
+	VirtualArchive += L"\\";
+	VirtualArchive += Handle->CurrentTempFileName.c_str();
+	VirtualArchive += L">";
+
+	//how to ensure this archive is mounted?
+	//by GetHandle?
+	TVPAddAutoPath(VirtualArchive);
 	//check the status
 	//1.If engine fail to mount the fake archive?
 	//2.logical bug
+	//3.DNOT USE TVPExecuteScript
+
+	
+#if 0
 	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
 	if (ExecResult.AsInteger() == FALSE)
 	{
-		MessageBoxW(Handle->MainWindow, L"Script exec error.", L"KrkrExtract", MB_OK);
+		Status = DisPlayProcessFileHandle(DebugInfo);
+		if (NT_FAILED(Status))
+		{
+			PrintConsoleW(L"DisPlayProcessFileHandle failed with status = %08x\n", Status);
+		}
+		else
+		{
+			PrintConsoleW(L"Handle status :\n");
+			PrintConsoleW(DebugInfo.c_str());
+		}
+		
+		MessageBoxW(Handle->MainWindow, L"Script exec error.(add)", L"KrkrExtract", MB_OK);
 		return STATUS_UNSUCCESSFUL;
 	}
+#endif
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
@@ -2135,7 +2314,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		IStream* st = TVPCreateIStream(FullName, TJS_BS_READ);
 		if (st == NULL)
 		{
-			wstring InfoW(L"Couldn't open :\n");
+			wstring InfoW(L"(virtual)Couldn't open :\n");
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
@@ -2374,9 +2553,12 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	FreeMemoryP(lpCompressBuffer);
 	FreeMemoryP(pXP3Index);
 
-	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
+	TVPRemoveAutoPath(VirtualArchive);
+	//TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
 
-	CloseHandle(Handle->CurrentTempHandle);
+	if (Handle->CurrentTempHandle != 0 && Handle->CurrentTempHandle != INVALID_HANDLE_VALUE)
+		NtClose(Handle->CurrentTempHandle);
+
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 
 	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
@@ -2410,6 +2592,7 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
+	tTJSVariant             ExecResult;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -2420,7 +2603,12 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 	if (NT_FAILED(Status))
 		return Status;
 
-	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
+	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	if (ExecResult.AsInteger() == FALSE)
+	{
+		MessageBoxW(Handle->MainWindow, L"Script exec error. (add)", L"KrkrExtract", MB_OK);
+		return STATUS_UNSUCCESSFUL;
+	}
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
@@ -2729,9 +2917,11 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 	FreeMemoryP(lpCompressBuffer);
 	FreeMemoryP(pXP3Index);
 
-	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
+	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
 
-	CloseHandle(Handle->CurrentTempHandle);
+	if (Handle->CurrentTempHandle != 0 && Handle->CurrentTempHandle != INVALID_HANDLE_VALUE)
+		NtClose(Handle->CurrentTempHandle);
+
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 
 	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
@@ -2766,6 +2956,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	BYTE                         FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER             XP3Header(FirstMagic, (ULONG64)0);
 	KRKRZ_M2_Senrenbanka_HEADER  SenrenBankaHeader;
+	tTJSVariant                  ExecResult;
 
 	FileList.clear();
 	IterFiles(lpBasePack);
@@ -2778,7 +2969,12 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	if (Handle->DebugOn)
 		PrintConsoleW(L"Packing files...\n");
 
-	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
+	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	if (ExecResult.AsInteger() == FALSE)
+	{
+		MessageBoxW(Handle->MainWindow, L"Script exec error. (add)", L"KrkrExtract", MB_OK);
+		return STATUS_UNSUCCESSFUL;
+	}
 	
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
@@ -3098,7 +3294,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 
 	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
 
-	CloseHandle(Handle->CurrentTempHandle);
+	if (Handle->CurrentTempHandle != 0 && Handle->CurrentTempHandle != INVALID_HANDLE_VALUE)
+		NtClose(Handle->CurrentTempHandle);
+
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 	
 	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());

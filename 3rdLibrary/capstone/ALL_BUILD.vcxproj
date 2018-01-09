@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{34366F99-11FB-4961-B3E4-F07131E19940}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+    <PropertyGroup>
+      <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\capstone\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\capstone\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\capstone\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\capstone\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\capstone\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule E:/capstone/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/capstone -BE:/capstone --check-stamp-file E:\capstone\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:/capstone/CMakeLists.txt;E:\capstone\CMakeLists.txt;E:\capstone\CMakeFiles\3.3.2\CMakeSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInitialize.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCCompiler.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCXXCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\WindowsPaths.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeRCCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;E:\capstone\capstone.pc.in;E:\capstone\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\capstone\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule E:/capstone/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/capstone -BE:/capstone --check-stamp-file E:\capstone\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:/capstone/CMakeLists.txt;E:\capstone\CMakeLists.txt;E:\capstone\CMakeFiles\3.3.2\CMakeSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInitialize.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCCompiler.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCXXCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\WindowsPaths.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeRCCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;E:\capstone\capstone.pc.in;E:\capstone\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\capstone\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Building Custom Rule E:/capstone/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/capstone -BE:/capstone --check-stamp-file E:\capstone\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:/capstone/CMakeLists.txt;E:\capstone\CMakeLists.txt;E:\capstone\CMakeFiles\3.3.2\CMakeSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInitialize.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCCompiler.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCXXCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\WindowsPaths.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeRCCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;E:\capstone\capstone.pc.in;E:\capstone\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:\capstone\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Building Custom Rule E:/capstone/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/capstone -BE:/capstone --check-stamp-file E:\capstone\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:/capstone/CMakeLists.txt;E:\capstone\CMakeLists.txt;E:\capstone\CMakeFiles\3.3.2\CMakeSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInitialize.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCCompiler.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeCXXCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\WindowsPaths.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;E:\capstone\CMakeFiles\3.3.2\CMakeRCCompiler.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.3\Modules\CMakeCommonLanguageInclude.cmake;E:\capstone\capstone.pc.in;E:\capstone\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:\capstone\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="E:/capstone/ZERO_CHECK.vcxproj">
+      <Project>FAF9CC0C-E861-4FD0-9384-F92DCDD96820</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/capstone-shared.vcxproj">
+      <Project>8DBC3385-452E-4D75-A710-EECA192C6427</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/capstone-static.vcxproj">
+      <Project>EF03D0ED-B28B-4B7A-86CD-0BC0055FA5E7</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/cstool.vcxproj">
+      <Project>BA381C2E-F534-42F2-85A3-20F461023AC7</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_arm.vcxproj">
+      <Project>FA5B3686-8F9C-44D6-B871-2D4389D9D7B0</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_arm64.vcxproj">
+      <Project>5B834489-42A6-40FD-B3DF-F1A10BE1B2C4</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_arm_regression.vcxproj">
+      <Project>1A23148E-3332-4BFF-91AA-CD0E5FF80739</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_basic.vcxproj">
+      <Project>A8BBB088-2B91-4731-822A-74105A374E46</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_detail.vcxproj">
+      <Project>D8D967FC-B26C-4CDC-A471-1A0CB880006C</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_iter.vcxproj">
+      <Project>A3C8A5F7-2FCF-4DEA-B5E1-2B88F0F81679</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_mips.vcxproj">
+      <Project>D5199554-D193-4C99-8F95-59AF03DF6CC2</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_ppc.vcxproj">
+      <Project>4CD77F87-06C5-4A0E-A94D-F79D15EE5067</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_skipdata.vcxproj">
+      <Project>1F20E70D-9D3D-4C16-BAFA-B78FDB106CAB</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_sparc.vcxproj">
+      <Project>41C2A04D-BCBF-40C1-B637-C8AB61965ED3</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_systemz.vcxproj">
+      <Project>6B964E21-C962-4DC8-B008-152AB832940F</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_x86.vcxproj">
+      <Project>55E1FE2D-B371-4967-8168-8B8EF763B7A8</Project>
+    </ProjectReference>
+    <ProjectReference Include="E:/capstone/test_xcore.vcxproj">
+      <Project>D5949EA9-4B53-473D-942E-A4CE414B08B8</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

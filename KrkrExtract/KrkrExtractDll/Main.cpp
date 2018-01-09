@@ -71,7 +71,13 @@ t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;         
 */
 
 
+
+/*
+1.Script exec bug?
+*/
+
 #include "my.h"
+#include <Psapi.h>
 #include "KrkrExtract.h"
 #include "FakePNG.h"
 #include "tp_stub.h"
@@ -357,7 +363,6 @@ FARPROC WINAPI HookGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 
 
 API_POINTER(CreateFileW) StubCreateFileW = NULL;
-tTJSCriticalSection      FileCS;
 
 HANDLE WINAPI HookCreateFileW(
 	LPCWSTR               lpFileName, 
@@ -372,6 +377,7 @@ HANDLE WINAPI HookCreateFileW(
 	ULONG_PTR   Index;
 	GlobalData* Handle;
 	HANDLE      Result;
+	MODULEINFO  ModuleInfo;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -383,17 +389,17 @@ HANDLE WINAPI HookCreateFileW(
 	if (Index != std::wstring::npos)
 		FileName = FileName.substr(Index + 1, std::wstring::npos);
 
-	//krkr will not close the handle after unmount a xp3 archive.
-	if (Handle->CurrentTempFileName.find_last_of(L".xp3") != std::wstring::npos)
-		InternalFileName = Handle->CurrentTempFileName;
-	else
-		InternalFileName = L"KrkrzTempWorker.xp3";
+	RtlZeroMemory(&ModuleInfo, sizeof(MODULEINFO));
+	GetModuleInformation(GetCurrentProcess(), GetModuleHandleW(NULL), &ModuleInfo, sizeof(MODULEINFO));
+	
+	if (IN_RANGE((ULONG_PTR)ModuleInfo.lpBaseOfDll, (ULONG_PTR)_ReturnAddress(), (ULONG_PTR)ModuleInfo.lpBaseOfDll + ModuleInfo.SizeOfImage))
+		PrintConsoleW(L"CreateFile : %s\n", lpFileName);
 
 	Result = StubCreateFileW(lpFileName, dwDesiredAccess, dwShareMode,
 		lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
 	//trace this handle??
-	if (!StrICompareW(FileName.c_str(), InternalFileName.c_str(), StrCmp_ToLower) && Result != INVALID_HANDLE_VALUE && Result != 0 )
+	if (!StrICompareW(FileName.c_str(), Handle->CurrentTempFileName.c_str(), StrCmp_ToLower) && Result != INVALID_HANDLE_VALUE && Result != 0)
 		InterlockedExchangePointer(&(Handle->CurrentTempHandle), Result);
 
 	return Result;
@@ -644,6 +650,8 @@ NTSTATUS WINAPI InitHook()
 	Handle = GlobalData::GetGlobalData();
 	Kernel32Handle = Nt_LoadLibrary(L"KERNEL32.dll");
 
+	Handle->DebugOn = 1;
+
 	PVOID hModule = Nt_GetExeModuleHandle();
 	*(FARPROC *)&pfTVPGetFunctionExporter = (FARPROC)Nt_GetProcAddress(hModule, "TVPGetFunctionExporter");
 
@@ -739,7 +747,7 @@ NTSTATUS WINAPI InitHook()
 
 		if (!Success)
 		{
-			Nt_DeleteFile(L"KrkrExtract.db");
+			//Nt_DeleteFile(L"KrkrExtract.db");
 
 			Mp::PATCH_MEMORY_DATA f[] =
 			{
