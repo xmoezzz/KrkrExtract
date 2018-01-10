@@ -1116,6 +1116,36 @@ Void InitRand(HMODULE hModule)
 	init_by_array64(Seeds, countof(Seeds));
 }
 
+LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
+{
+	NTSTATUS    Status;
+	NtFileDisk  File;
+	ULONG       Size;
+	PBYTE       Buffer;
+
+	static WCHAR ExceptionInfo[] = L"KrkrExtract crashed...\n"
+		                           L"Mini dump will be generated, pls send this file to developer\n";
+
+	//[+] init debug environment
+	//1. If data cache not exist, disassemble the executable file FROM DISK
+	//2. load data cache to segment tree. (we can marshal this tree into binary file)
+	//3. stack trace. (get the previous instruction from segment tree)
+	//4. write to file
+
+	LOOP_ONCE
+	{
+
+	};
+
+	ExceptionBox(ExceptionInfo, L"KrkrExtract Unhandled Exception");
+	Ps::ExitProcess(ExceptionPointer->ExceptionRecord->ExceptionCode);
+	//make compiler happy
+	return ExceptionContinueExecution;
+}
+
+
+
+
 OVERLOAD_CPP_METHOD_NEW_WITH_HEAP(Nt_CurrentPeb()->ProcessHeap);
 
 BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
@@ -1129,6 +1159,9 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 		ml::MlInitialize();
 		LdrDisableThreadCalloutsForDll(hModule);
 		InitRand(hModule);
+
+		AddVectoredExceptionHandler(FALSE, KrkrUnhandledExceptionFilter);
+
 		GlobalData::GetGlobalData();
 
 		if (!InitKrkrExtract(hModule))
