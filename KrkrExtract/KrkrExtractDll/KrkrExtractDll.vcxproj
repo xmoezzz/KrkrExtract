@@ -193,6 +193,7 @@
     <ClInclude Include="lz4frame.h" />
     <ClInclude Include="lz4frame_static.h" />
     <ClInclude Include="lz4hc.h" />
+    <ClInclude Include="MapMarshal.h" />
     <ClInclude Include="ml.h" />
     <ClInclude Include="mt64.h" />
     <ClInclude Include="MultiThread.h" />

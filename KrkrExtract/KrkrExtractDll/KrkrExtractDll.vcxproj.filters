@@ -46,6 +46,9 @@
     <Filter Include="tjs2">
       <UniqueIdentifier>{915d3b71-9d66-4ddb-8b2a-0fa6ee8de0b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\Debugger">
+      <UniqueIdentifier>{facce64b-3d48-4e0d-afa3-4526c49edb7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lz4frame.cpp">
@@ -547,6 +550,9 @@
     </ClInclude>
     <ClInclude Include="KrkrUniversalDumper.h">
       <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MapMarshal.h">
+      <Filter>头文件\Debugger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

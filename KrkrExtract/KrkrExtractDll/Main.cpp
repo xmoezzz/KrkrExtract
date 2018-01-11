@@ -1116,6 +1116,215 @@ Void InitRand(HMODULE hModule)
 	init_by_array64(Seeds, countof(Seeds));
 }
 
+#include "MapMarshal.h"
+#include "capstone/capstone.h"
+
+#pragma comment(lib, "capstone.lib")
+
+
+auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
+{
+	NTSTATUS                     Status;
+	HANDLE                       hFile;
+	ULONG                        CurrentAddress, CurrentCodeSize, Count;
+	PE_DATABASE                  Header;
+	PIMAGE_SECTION_HEADER        SectionHeader;
+	PIMAGE_NT_HEADERS            NtHeader;
+	CHAR                         DisasmLine[100];
+	CMarshalMap                  DisObj;
+	std::map<ULONG, CMarshalMap> MapList;
+	PBYTE                        pvFile;
+	LARGE_INTEGER                Size;
+	NtFileDisk                   File;
+	ULONG                        AllocSize;
+	STATSTG                      Stat;
+	LARGE_INTEGER                Offset;
+	PBYTE                        Buffer;
+	IStream*                     Stream;
+	csh                          CapstoneHandle;
+	cs_insn*                     CapstoneInsn;
+
+
+	if (FileName == NULL || DBName == NULL)
+		return STATUS_INVALID_PARAMETER;
+
+	hFile = StubCreateFileW(
+		FileName,
+		GENERIC_READ,
+		FILE_SHARE_READ,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		0);
+
+	if (hFile == 0 || hFile == INVALID_HANDLE_VALUE)
+	{
+		printf("CreateFile\n");
+		return 0;
+	}
+	
+	GetFileSizeEx(hFile, &Size);
+
+	HANDLE hMapFile = CreateFileMappingW(
+		hFile,
+		NULL,
+		PAGE_READONLY,
+		Size.HighPart,
+		Size.LowPart,
+		NULL);
+
+	if (hMapFile == 0 || hMapFile == INVALID_HANDLE_VALUE)
+	{
+		printf("CreateFileMapping\n");
+		return 0;
+	}
+
+	pvFile = (PBYTE)MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, 0);
+	if (pvFile == NULL)
+	{
+		NtClose(hMapFile);
+		NtClose(hFile);
+		return STATUS_MAPPED_FILE_SIZE_ZERO;
+	}
+
+	Header.Crc32      = 0;
+	Header.EntryCount = 0;
+	Header.Magic      = TAG4('Xmoe');
+
+	auto NtHeader = ImageNtHeaders(pvFile);
+	SectionHeader = IMAGE_FIRST_SECTION(NtHeader);
+
+	for (DWORD i = 0; i < NtHeader->FileHeader.NumberOfSections; i++, SectionHeader++)
+	{
+		if (FLAG_ON(SectionHeader->Characteristics, IMAGE_SCN_CNT_CODE) ||
+			FLAG_ON(SectionHeader->Characteristics, IMAGE_SCN_MEM_EXECUTE))
+		{
+			CurrentAddress  = NtHeader->OptionalHeader.ImageBase + SectionHeader->VirtualAddress;
+			CurrentCodeSize = SectionHeader->Misc.VirtualSize;
+
+			if (cs_open(CS_ARCH_X86, CS_MODE_32, &CapstoneHandle) != CS_ERR_OK)
+				continue;
+
+			Count = cs_disasm(CapstoneHandle, SectionHeader->PointerToRawData + pvFile, CurrentCodeSize, CurrentAddress, 0, &CapstoneInsn);
+			if (Count <= 0)
+				continue;
+
+			Header.EntryCount += Count;
+			for (ULONG j = 0; j < Count; j++)
+			{
+				FormatStringA(DisasmLine, "%s %s", CapstoneInsn[j].mnemonic, CapstoneInsn[j].op_str);
+
+				if (j == 0)
+					DisObj.PrevLength = 0;
+				else
+					DisObj.PrevLength = CapstoneInsn[j - 1].size;
+				
+				DisObj.Offset    = CapstoneInsn[j].address;
+				DisObj.InsLength = CapstoneInsn[j].size;
+				StrCopyA(DisObj.DisasmLine, DisasmLine);
+				MapList[CapstoneInsn[j].address] = DisObj;
+			}
+
+			cs_free(CapstoneInsn, Count);
+			cs_close(&CapstoneHandle);
+		}
+	}
+
+	UnmapViewOfFile(pvFile);
+	NtClose(hMapFile);
+	NtClose(hFile); 
+
+
+	Status = File.Create(DBName);
+	if (NT_FAILED(Status))
+		return Status;
+
+	File.Write(&Header, sizeof(Header));
+
+	AllocSize = 0x1000;
+	PBYTE  Buffer = (PBYTE)AllocateMemoryP(AllocSize);
+	if (Buffer == NULL)
+	{
+		File.Close();
+		return STATUS_NO_MEMORY;
+	}
+
+	for (auto Disasm : MapList)
+	{
+		Stream = Disasm.second.Marshal();
+		if (Stream == NULL)
+			continue;
+
+		Stream->Stat(&Stat, STATFLAG_DEFAULT);
+		Offset.QuadPart = 0;
+		Stream->Seek(Offset, FILE_BEGIN, 0);
+
+		if (Stat.cbSize.QuadPart > AllocSize)
+		{
+			AllocSize = Stat.cbSize.QuadPart;
+			Buffer = (PBYTE)ReAllocateMemoryP(Buffer, AllocSize);
+			if (Buffer == NULL)
+			{
+				File.Close();
+				return STATUS_NO_MEMORY;
+			}
+		}
+
+		Stream->Read(Buffer, Stat.cbSize.QuadPart, NULL);
+		File.Write(Buffer, Stat.cbSize.QuadPart);
+		Stream->Release();
+	}
+	FreeMemoryP(Buffer);
+	File.Close();
+
+	return STATUS_SUCCESS;
+};
+
+
+auto KrkrDBG_ReadPeDatabase(LPCWSTR DBName)->NTSTATUS
+{
+
+}
+
+//allocate memory by caller!
+auto KrkrDBG_ReadPrevInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG CurrentOffset, PCHAR Buffer, ULONG ccBuffer)->NTSTATUS
+{
+	NTSTATUS   Status;
+	ULONG      PreviousOffset;
+	
+	const auto Instruction = Holder.find(CurrentOffset);
+	if (Instruction == Holder.end())
+		return STATUS_UNSUCCESSFUL;
+
+	PreviousOffset = Instruction->second.Offset - Instruction->second.PrevLength;
+	const auto PrevInstruction = Holder.find(PreviousOffset);
+	if (PrevInstruction == Holder.end())
+		return STATUS_UNSUCCESSFUL;
+
+	RtlZeroMemory(Buffer, ccBuffer);
+	RtlCopyMemory(Buffer, PrevInstruction->second.DisasmLine, StrLengthA(PrevInstruction->second.DisasmLine));
+
+	return STATUS_SUCCESS;
+}
+
+
+//allocate memory by caller!
+auto KrkrDBG_ReadInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG CurrentOffset, PCHAR Buffer, ULONG ccBuffer)->NTSTATUS
+{
+	NTSTATUS   Status;
+	ULONG      PreviousOffset;
+
+	const auto Instruction = Holder.find(CurrentOffset);
+	if (Instruction == Holder.end())
+		return STATUS_UNSUCCESSFUL;
+
+	RtlZeroMemory(Buffer, ccBuffer);
+	RtlCopyMemory(Buffer, Instruction->second.DisasmLine, StrLengthA(Instruction->second.DisasmLine));
+
+	return STATUS_SUCCESS;
+}
+
+
 LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 {
 	NTSTATUS    Status;
@@ -1126,10 +1335,12 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	static WCHAR ExceptionInfo[] = L"KrkrExtract crashed...\n"
 		                           L"Mini dump will be generated, pls send this file to developer\n";
 
+
+
 	//[+] init debug environment
 	//1. If data cache not exist, disassemble the executable file FROM DISK
-	//2. load data cache to segment tree. (we can marshal this tree into binary file)
-	//3. stack trace. (get the previous instruction from segment tree)
+	//2. load data cache to binary search tree. (we can marshal this tree into binary file)
+	//3. stack trace. (get the previous instruction from binary search tree)
 	//4. write to file
 
 	LOOP_ONCE
