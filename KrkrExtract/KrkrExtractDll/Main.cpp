@@ -1158,10 +1158,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 		0);
 
 	if (hFile == 0 || hFile == INVALID_HANDLE_VALUE)
-	{
-		printf("CreateFile\n");
-		return 0;
-	}
+		return STATUS_NO_SUCH_FILE;
 	
 	GetFileSizeEx(hFile, &Size);
 
@@ -1174,10 +1171,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 		NULL);
 
 	if (hMapFile == 0 || hMapFile == INVALID_HANDLE_VALUE)
-	{
-		printf("CreateFileMapping\n");
-		return 0;
-	}
+		return STATUS_NO_SUCH_FILE;
 
 	pvFile = (PBYTE)MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, 0);
 	if (pvFile == NULL)
@@ -1281,9 +1275,73 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 };
 
 
-auto KrkrDBG_ReadPeDatabase(LPCWSTR DBName)->NTSTATUS
+auto KrkrDBG_ReadPeDatabase(std::map<ULONG, CMarshalMap>& MapList, LPCWSTR DBName)->NTSTATUS
 {
+	NTSTATUS           Status;
+	HANDLE             hFile, hMapFile;
+	LARGE_INTEGER      Size;
+	PPE_DATABASE       Header;
+	PBYTE              pvFile;
+	ULONG              Offset;
+	CMarshalMap        DisObj;
+	IStream*           Stream;
 
+	MapList.clear();
+
+	hFile = StubCreateFileW(
+		DBName,
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		0);
+
+	if (hFile == 0 || hFile == INVALID_HANDLE_VALUE)
+		return STATUS_NO_SUCH_FILE;
+	
+	GetFileSizeEx(hFile, &Size);
+
+	hMapFile = CreateFileMappingW(
+		hFile,
+		NULL,
+		PAGE_READONLY,
+		Size.HighPart,
+		Size.LowPart,
+		NULL);
+
+	if (hMapFile == 0 || hMapFile == INVALID_HANDLE_VALUE)
+		return STATUS_NO_SUCH_FILE;
+
+	pvFile = (PBYTE)MapViewOfFile(hMapFile, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
+	if (pvFile == NULL)
+	{
+		NtClose(hMapFile);
+		NtClose(hFile);
+		return STATUS_MAPPED_FILE_SIZE_ZERO;
+	}
+
+	Header = (PPE_DATABASE)pvFile;
+	Offset = sizeof(*Header);
+
+	for (ULONG i = 0; i < Header->EntryCount; i++)
+	{
+		Stream = SHCreateMemStream(pvFile + Offset, *(PDWORD)(pvFile + Offset));
+		if (!Stream)
+		{
+			//clean-up
+			UnmapViewOfFile(pvFile);
+			NtClose(hMapFile);
+			NtClose(hFile);
+		}
+		DisObj.UnMarshal(Stream);
+		MapList[DisObj.Offset] = DisObj;
+	}
+
+	UnmapViewOfFile(pvFile);
+	NtClose(hMapFile);
+	NtClose(hFile);
+	return STATUS_SUCCESS;
 }
 
 //allocate memory by caller!
@@ -1324,17 +1382,74 @@ auto KrkrDBG_ReadInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG C
 	return STATUS_SUCCESS;
 }
 
+#include <dbghelp.h>
+
+NTSTATUS CreateMiniDump2(PEXCEPTION_POINTERS ExceptionPointers, LPCWSTR ModuleBaseName)
+{
+	WCHAR                          MiniDumpFile[MAX_NTPATH];
+	NtFileDisk                     File;
+	BOOL                           Success;
+	NTSTATUS                       Status;
+	MINIDUMP_EXCEPTION_INFORMATION ExceptionInformation;
+
+
+	FormatStringW(MiniDumpFile, L"%s.dmp", ModuleBaseName);
+
+	Status = File.Create(MiniDumpFile);
+	FAIL_RETURN(Status);
+
+	ExceptionInformation.ClientPointers = FALSE;
+	ExceptionInformation.ExceptionPointers = ExceptionPointers;
+	ExceptionInformation.ThreadId = Ps::CurrentTid();
+
+	Success = MiniDumpWriteDump(
+		NtCurrentProcess(),
+		(ULONG_PTR)Ps::CurrentTeb()->ClientId.UniqueProcess,
+		File,
+		MiniDumpNormal,
+		&ExceptionInformation,
+		NULL,
+		NULL
+		);
+
+	File.Close();
+	return Success ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
+}
+
+
+BOOL CALLBACK EnumerateModuleCallBack(PCSTR ModuleName, DWORD ModuleBase, ULONG ModuleSize, PVOID UserContext)
+{
+	SymLoadModule(GetCurrentProcess(),
+		NULL,
+		ModuleName,
+		0,
+		ModuleBase,
+		ModuleSize);
+
+	return TRUE;
+}
+
+
+struct ModuleTrace
+{
+	DWORD64 CurrentAddress;
+	DWORD64 BaseAddress;
+	string  ModuleName;
+};
 
 LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 {
-	NTSTATUS    Status;
-	NtFileDisk  File;
-	ULONG       Size;
-	PBYTE       Buffer;
+	NTSTATUS              Status;
+	NtFileDisk            File;
+	ULONG                 Size;
+	PBYTE                 Buffer;
+	ULONG                 Count;
+	STACKFRAME64          StackFrame;
+	DWORD64               ModuleBase;
+	ModuleTrace           FullTrace[64];
 
 	static WCHAR ExceptionInfo[] = L"KrkrExtract crashed...\n"
 		                           L"Mini dump will be generated, pls send this file to developer\n";
-
 
 
 	//[+] init debug environment
@@ -1343,9 +1458,43 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	//3. stack trace. (get the previous instruction from binary search tree)
 	//4. write to file
 
+	//some bugs in DbgHelp.dll
+	//M$ forget to set LastError value in some APIs...
+	SymInitializeW(GetCurrentProcess(), NULL, TRUE);
+	EnumerateLoadedModules(GetCurrentProcess(), EnumerateModuleCallBack, NULL);
+
+	RtlZeroMemory(&StackFrame, sizeof(StackFrame));
+
+	StackFrame.AddrPC.Offset    = ExceptionPointer->ContextRecord->Eip;
+	StackFrame.AddrFrame.Offset = ExceptionPointer->ContextRecord->Ebp;
+	StackFrame.AddrStack.Offset = ExceptionPointer->ContextRecord->Esp;
+	StackFrame.AddrPC.Mode      = AddrModeFlat;
+	StackFrame.AddrFrame.Mode   = AddrModeFlat;
+	StackFrame.AddrStack.Mode   = AddrModeFlat;
+
 	LOOP_ONCE
 	{
+		while (StackWalk64(IMAGE_FILE_MACHINE_I386,
+			GetCurrentProcess(),
+			GetCurrentThread(),
+			&StackFrame,
+			ExceptionPointer->ContextRecord,
+			NULL,
+			&SymFunctionTableAccess64,
+			&SymGetModuleBase64,
+			NULL) &&
+			Count < countof(FullTrace))
+		{
+			ModuleBase = SymGetModuleBase(GetCurrentProcess(), (DWORD)StackFrame.AddrPC.Offset);
 
+			FullTrace[Count].BaseAddress    = ModuleBase;
+			FullTrace[Count].CurrentAddress = StackFrame.AddrPC.Offset;
+
+			//[+] DOTO !!! 
+			//some disassembler stuffs here
+
+			Count++;
+		}
 	};
 
 	ExceptionBox(ExceptionInfo, L"KrkrExtract Unhandled Exception");
