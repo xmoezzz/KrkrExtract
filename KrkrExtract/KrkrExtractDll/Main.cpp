@@ -1435,6 +1435,7 @@ struct ModuleTrace
 	DWORD64 CurrentAddress;
 	DWORD64 BaseAddress;
 	string  ModuleName;
+	wstring FullModulePath;
 };
 
 LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
@@ -1446,6 +1447,10 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	ULONG                 Count;
 	STACKFRAME64          StackFrame;
 	DWORD64               ModuleBase;
+	IMAGEHLP_MODULEW      ImageModule;
+	CHAR                  ModuleNameA[MAX_PATH];
+	INT                   Length;
+	BOOL                  Success;
 	ModuleTrace           FullTrace[64];
 
 	static WCHAR ExceptionInfo[] = L"KrkrExtract crashed...\n"
@@ -1490,10 +1495,43 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 			FullTrace[Count].BaseAddress    = ModuleBase;
 			FullTrace[Count].CurrentAddress = StackFrame.AddrPC.Offset;
 
-			//[+] DOTO !!! 
-			//some disassembler stuffs here
+			if (!ModuleBase)
+			{
+				FullTrace[Count].ModuleName = "???";
+				continue;
+			}
 
+			RtlZeroMemory(&ImageModule, sizeof(ImageModule));
+			ImageModule.SizeOfStruct = sizeof(ImageModule);
+
+			Success = SymGetModuleInfoW(GetCurrentProcess(), (DWORD)ModuleBase, &ImageModule);
+
+			if (Success && ImageModule.BaseOfImage != NULL)
+			{
+				LPCWSTR lpImageName = wcsrchr(ImageModule.ImageName, L'\\');
+				if (lpImageName)
+					lpImageName += 1;
+				else
+					lpImageName = ImageModule.ImageName;
+
+				Length = WideCharToMultiByte(CP_ACP, 0, lpImageName, StrLengthW(lpImageName), ModuleNameA, countof(ModuleNameA) - 1, NULL, NULL);
+				ModuleNameA[Length] = 0;
+
+				FullTrace[Count].ModuleName     = ModuleNameA;
+				FullTrace[Count].FullModulePath = ImageModule.ImageName;
+			}
+			else
+			{
+				FullTrace[Count].ModuleName = "???";
+			}
+			
 			Count++;
+		}
+
+		//some disassembler stuffs here
+		for (ULONG i = 0; i < Count; i++)
+		{
+
 		}
 	};
 
