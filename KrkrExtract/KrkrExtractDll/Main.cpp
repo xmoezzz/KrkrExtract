@@ -1122,6 +1122,35 @@ Void InitRand(HMODULE hModule)
 #pragma comment(lib, "capstone.lib")
 
 
+auto KrkrDBG_DisasmOneInstruction(PBYTE OpCode, ULONG_PTR Size, ULONG_PTR CurrentAddress, PSTR Buffer, ULONG ccBuffer)->NTSTATUS
+{
+	NTSTATUS                     Status;
+	csh                          CapstoneHandle;
+	cs_insn*                     CapstoneInsn;
+	SIZE_T                       Count;
+	
+	Status = STATUS_UNSUCCESSFUL;
+	LOOP_ONCE
+	{
+		if (cs_open(CS_ARCH_X86, CS_MODE_32, &CapstoneHandle) != CS_ERR_OK)
+			break;
+
+		if (IsBadReadPtr(OpCode, Size))
+			break;
+
+		Count = cs_disasm(CapstoneHandle, OpCode, Size, CurrentAddress, 0, &CapstoneInsn);
+		if (Count <= 0)
+			break;
+
+		_snprintf(Buffer, ccBuffer, "%s %s", CapstoneInsn[0].mnemonic, CapstoneInsn[0].op_str);
+
+		cs_free(CapstoneInsn, Count);
+		cs_close(&CapstoneHandle);
+		Status = STATUS_SUCCESS;
+	};
+	return Status;
+};
+
 auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 {
 	NTSTATUS                     Status;
@@ -1449,9 +1478,12 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	DWORD64               ModuleBase;
 	IMAGEHLP_MODULEW      ImageModule;
 	CHAR                  ModuleNameA[MAX_PATH];
+	CHAR                  DisasmLine[400];
+	WCHAR                 CurModuleName[MAX_PATH];
 	INT                   Length;
 	BOOL                  Success;
 	ModuleTrace           FullTrace[64];
+	FILE*                 DebugWriter;
 
 	static WCHAR ExceptionInfo[] = L"KrkrExtract crashed...\n"
 		                           L"Mini dump will be generated, pls send this file to developer\n";
@@ -1467,6 +1499,12 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	//M$ forget to set LastError value in some APIs...
 	SymInitializeW(GetCurrentProcess(), NULL, TRUE);
 	EnumerateLoadedModules(GetCurrentProcess(), EnumerateModuleCallBack, NULL);
+
+	//Create mini dump first
+	RtlZeroMemory(CurModuleName, sizeof(CurModuleName));
+	GetModuleFileNameW(GetModuleHandleW(NULL), CurModuleName, countof(CurModuleName) - 1);
+	CreateMiniDump2(ExceptionPointer, CurModuleName);
+
 
 	RtlZeroMemory(&StackFrame, sizeof(StackFrame));
 
@@ -1528,15 +1566,30 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 			Count++;
 		}
 
-		//some disassembler stuffs here
-		for (ULONG i = 0; i < Count; i++)
+		LOOP_ONCE
 		{
+			DebugWriter = fopen("KrkrExtract.crash.log", "wb");
+			if (!DebugWriter)
+				break;
 
+			//some disassembler stuffs here
+			for (ULONG i = 0; i < Count; i++)
+			{
+				Status = KrkrDBG_DisasmOneInstruction((PBYTE)FullTrace[i].CurrentAddress,
+					GetOpCodeSize32((PBYTE)FullTrace[i].CurrentAddress),
+					FullTrace[i].BaseAddress,
+					DisasmLine,
+					countof(DisasmLine) - 1);
+
+				fprintf(DebugWriter, "%08x %s (%s)\r\n", FullTrace[i].CurrentAddress, DisasmLine, FullTrace[i].ModuleName.c_str());
+			}
+			fclose(DebugWriter);
 		}
 	};
 
 	ExceptionBox(ExceptionInfo, L"KrkrExtract Unhandled Exception");
 	Ps::ExitProcess(ExceptionPointer->ExceptionRecord->ExceptionCode);
+
 	//make compiler happy
 	return ExceptionContinueExecution;
 }
