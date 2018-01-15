@@ -8,6 +8,10 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 
 All source code files are licensed under [GNU General Public License v3 (GPLv3)](https://www.gnu.org/licenses/quick-guide-gplv3.en.html).  
 
+## Note
+KrkrExtract has stopped developing.  
+If you have any needs, pls develop by yourself.  
+
 ## Any differences between krkr2 and krkrz?
 My answer is NO DIFFERECES.  
 krkrz supports msvc while krkr2 can only built by bcb.  

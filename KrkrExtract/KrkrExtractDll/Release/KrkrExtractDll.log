@@ -1,94 +1,137 @@
-﻿生成启动时间为 2018/01/09 17:19:00。
-     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
+﻿生成启动时间为 2018/1/15 23:50:53。
+     1>项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
+         D:\VSProgram\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt adler32.cpp AmvExtractor.cpp compress.cpp crc32.cpp crc64.cpp deflate.cpp FakePNG.cpp HandleTable.cpp KrkrExtract.cpp ImageWorkerNcb.cpp inffast.cpp inflate.cpp inftrees.cpp KrkrUniversalDumper.cpp Main.cpp KrkrTextDecode.cpp KrkrUniversalPatch.cpp lz4.cpp lz4frame.cpp lz4hc.cpp "mt19937-64.cpp" KrkrPacker.cpp KrkrDumper.cpp PEFile.cpp PNGWorker.cpp PsbDecompilerJson.cpp PsbFile.cpp PsbWorker.cpp SavePNG.cpp savetlg5.cpp Slide.cpp Tjs2Disasm.cpp tjs2\tjs.cpp tjs2\tjs.tab.cpp tjs2\tjsArray.cpp tjs2\tjsBinarySerializer.cpp tjs2\tjsByteCodeLoader.cpp tjs2\tjsCompileControl.cpp tjs2\tjsConfig.cpp tjs2\tjsConstArrayData.cpp tjs2\tjsDate.cpp tjs2\tjsdate.tab.cpp tjs2\tjsDateParser.cpp tjs2\tjsDebug.cpp tjs2\tjsDictionary.cpp tjs2\tjsDisassemble.cpp tjs2\tjsError.cpp tjs2\tjsException.cpp tjs2\tjsGlobalStringMap.cpp tjs2\tjsInterCodeExec.cpp tjs2\tjsInterCodeGen.cpp tjs2\tjsInterface.cpp tjs2\tjsLex.cpp tjs2\tjsMath.cpp tjs2\tjsMessage.cpp "tjs2\tjsMT19937ar-cok.cpp" tjs2\tjsNamespace.cpp tjs2\tjsNative.cpp tjs2\tjsObject.cpp tjs2\tjsObjectExtendable.cpp tjs2\tjsOctPack.cpp tjs2\tjspp.tab.cpp tjs2\tjsRandomGenerator.cpp tjs2\tjsRegExp.cpp tjs2\tjsScriptBlock.cpp tjs2\tjsScriptCache.cpp tjs2\tjsString.cpp tjs2\tjsUtils.cpp tjs2\tjsVariant.cpp tjs2\tjsVariantString.cpp TLGDecoder.cpp tp_stub.cpp tree.cpp uncompr.cpp utils.cpp XP3Parser.cpp xxhash.cpp zutil.cpp
+         adler32.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         AmvExtractor.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         compress.cpp
+         crc32.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         crc64.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         deflate.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         FakePNG.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         HandleTable.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         KrkrExtract.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         ImageWorkerNcb.cpp
+         inffast.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         inflate.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         inftrees.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         KrkrUniversalDumper.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
          Main.cpp
-       Link:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll" /INCREMENTAL:NO /NOLOGO E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:win.manifest /manifestinput:"E:\VSProgram\Visual Studio 2013 Ultimate\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib" /MACHINE:X86 /SAFESEH /DLL Release\KrkrExtractDll.res
-         Release\adler32.obj
-         Release\AmvExtractor.obj
-         Release\compress.obj
-         Release\crc32.obj
-         Release\crc64.obj
-         Release\deflate.obj
-         Release\FakePNG.obj
-         Release\HandleTable.obj
-         Release\KrkrExtract.obj
-         Release\ImageWorkerNcb.obj
-         Release\inffast.obj
-         Release\inflate.obj
-         Release\inftrees.obj
-         Release\KrkrUniversalDumper.obj
-         Release\Main.obj
-         Release\KrkrTextDecode.obj
-         Release\KrkrUniversalPatch.obj
-         Release\lz4.obj
-         Release\lz4frame.obj
-         Release\lz4hc.obj
-         "Release\mt19937-64.obj"
-         Release\KrkrPacker.obj
-         Release\KrkrDumper.obj
-         Release\PEFile.obj
-         Release\PNGWorker.obj
-         Release\PsbDecompilerJson.obj
-         Release\PsbFile.obj
-         Release\PsbWorker.obj
-         Release\SavePNG.obj
-         Release\savetlg5.obj
-         Release\Slide.obj
-         Release\Tjs2Disasm.obj
-         Release\tjs.obj
-         Release\tjs.tab.obj
-         Release\tjsArray.obj
-         Release\tjsBinarySerializer.obj
-         Release\tjsByteCodeLoader.obj
-         Release\tjsCompileControl.obj
-         Release\tjsConfig.obj
-         Release\tjsConstArrayData.obj
-         Release\tjsDate.obj
-         Release\tjsdate.tab.obj
-         Release\tjsDateParser.obj
-         Release\tjsDebug.obj
-         Release\tjsDictionary.obj
-         Release\tjsDisassemble.obj
-         Release\tjsError.obj
-         Release\tjsException.obj
-         Release\tjsGlobalStringMap.obj
-         Release\tjsInterCodeExec.obj
-         Release\tjsInterCodeGen.obj
-         Release\tjsInterface.obj
-         Release\tjsLex.obj
-         Release\tjsMath.obj
-         Release\tjsMessage.obj
-         "Release\tjsMT19937ar-cok.obj"
-         Release\tjsNamespace.obj
-         Release\tjsNative.obj
-         Release\tjsObject.obj
-         Release\tjsObjectExtendable.obj
-         Release\tjsOctPack.obj
-         Release\tjspp.tab.obj
-         Release\tjsRandomGenerator.obj
-         Release\tjsRegExp.obj
-         Release\tjsScriptBlock.obj
-         Release\tjsScriptCache.obj
-         Release\tjsString.obj
-         Release\tjsUtils.obj
-         Release\tjsVariant.obj
-         Release\tjsVariantString.obj
-         Release\TLGDecoder.obj
-         Release\tp_stub.obj
-         Release\tree.obj
-         Release\uncompr.obj
-         Release\utils.obj
-         Release\XP3Parser.obj
-         Release\xxhash.obj
-         Release\zutil.obj
-            正在创建库 E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib 和对象 E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.exp
-         正在生成代码
-         已完成代码的生成
-         KrkrExtractDll.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll
-     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”(Build 个目标)的操作。
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         KrkrTextDecode.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         KrkrUniversalPatch.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         lz4.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         lz4frame.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         lz4hc.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         正在编译...
+         mt19937-64.cpp
+         KrkrPacker.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         KrkrDumper.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         PEFile.cpp
+         PNGWorker.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         PsbDecompilerJson.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         PsbFile.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         PsbWorker.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         SavePNG.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         savetlg5.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         Slide.cpp
+         Tjs2Disasm.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         tjs.cpp
+         tjs.tab.cpp
+         tjsArray.cpp
+         tjsBinarySerializer.cpp
+         tjsByteCodeLoader.cpp
+         tjsCompileControl.cpp
+         tjsConfig.cpp
+         tjsConstArrayData.cpp
+         正在编译...
+         tjsDate.cpp
+         tjsdate.tab.cpp
+         tjsDateParser.cpp
+         tjsDebug.cpp
+         tjsDictionary.cpp
+         tjsDisassemble.cpp
+     1>tjs2\tjsDisassemble.cpp(325): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+     1>tjs2\tjsDisassemble.cpp(195): warning C4101: “buf”: 未引用的局部变量
+         tjsError.cpp
+         tjsException.cpp
+         tjsGlobalStringMap.cpp
+         tjsInterCodeExec.cpp
+         tjsInterCodeGen.cpp
+         tjsInterface.cpp
+         tjsLex.cpp
+         tjsMath.cpp
+         tjsMessage.cpp
+         tjsMT19937ar-cok.cpp
+         tjsNamespace.cpp
+         tjsNative.cpp
+         tjsObject.cpp
+         tjsObjectExtendable.cpp
+         正在编译...
+         tjsOctPack.cpp
+         tjspp.tab.cpp
+         tjsRandomGenerator.cpp
+         tjsRegExp.cpp
+         tjsScriptBlock.cpp
+     1>tjs2\tjsScriptBlock.cpp(505): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+     1>tjs2\tjsScriptBlock.cpp(510): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+     1>tjs2\tjsScriptBlock.cpp(515): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+     1>tjs2\tjsScriptBlock.cpp(538): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+     1>tjs2\tjsScriptBlock.cpp(543): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+     1>tjs2\tjsScriptBlock.cpp(548): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\swprintf.inl(85) : 参见“swprintf”的声明
+         tjsScriptCache.cpp
+         tjsString.cpp
+         tjsUtils.cpp
+         tjsVariant.cpp
+         tjsVariantString.cpp
+         TLGDecoder.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         tp_stub.cpp
+         tree.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         uncompr.cpp
+         utils.cpp
+         XP3Parser.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         xxhash.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+         zutil.cpp
+     1>D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\my.h(21270): fatal error C1083: 无法打开包括文件: “ntnls.h”: No such file or directory
+     1>已完成生成项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”(Build 个目标)的操作 - 失败。
 
-生成成功。
+生成失败。
 
-已用时间 00:00:15.34
+已用时间 00:00:21.81
