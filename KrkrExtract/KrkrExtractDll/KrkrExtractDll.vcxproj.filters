@@ -285,6 +285,12 @@
     <ClCompile Include="KrkrUniversalDumper.cpp">
       <Filter>源文件\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\sha1.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\md5.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -553,6 +559,15 @@
     </ClInclude>
     <ClInclude Include="MapMarshal.h">
       <Filter>头文件\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\sha1.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\md5.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="GenMD5Code.h">
+      <Filter>头文件\Lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

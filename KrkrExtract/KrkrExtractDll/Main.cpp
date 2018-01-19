@@ -76,7 +76,7 @@ t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;         
 1.Script exec bug?
 */
 
-#include "my.h"
+#include <my.h>
 #include <Psapi.h>
 #include "KrkrExtract.h"
 #include "FakePNG.h"
@@ -650,7 +650,6 @@ NTSTATUS WINAPI InitHook()
 	Handle = GlobalData::GetGlobalData();
 	Kernel32Handle = Nt_LoadLibrary(L"KERNEL32.dll");
 
-	Handle->DebugOn = 1;
 
 	PVOID hModule = Nt_GetExeModuleHandle();
 	*(FARPROC *)&pfTVPGetFunctionExporter = (FARPROC)Nt_GetProcAddress(hModule, "TVPGetFunctionExporter");
@@ -1214,7 +1213,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 	Header.EntryCount = 0;
 	Header.Magic      = TAG4('Xmoe');
 
-	auto NtHeader = ImageNtHeaders(pvFile);
+	NtHeader = ImageNtHeaders(pvFile);
 	SectionHeader = IMAGE_FIRST_SECTION(NtHeader);
 
 	for (DWORD i = 0; i < NtHeader->FileHeader.NumberOfSections; i++, SectionHeader++)
@@ -1265,7 +1264,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 	File.Write(&Header, sizeof(Header));
 
 	AllocSize = 0x1000;
-	PBYTE  Buffer = (PBYTE)AllocateMemoryP(AllocSize);
+	Buffer = (PBYTE)AllocateMemoryP(AllocSize);
 	if (Buffer == NULL)
 	{
 		File.Close();
@@ -1467,6 +1466,8 @@ struct ModuleTrace
 	wstring FullModulePath;
 };
 
+
+///[+] Check code here carefully!!!
 LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 {
 	NTSTATUS              Status;
@@ -1514,6 +1515,8 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	StackFrame.AddrPC.Mode      = AddrModeFlat;
 	StackFrame.AddrFrame.Mode   = AddrModeFlat;
 	StackFrame.AddrStack.Mode   = AddrModeFlat;
+
+	Count = 0;
 
 	LOOP_ONCE
 	{
@@ -1587,10 +1590,13 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 		}
 	};
 
-	ExceptionBox(ExceptionInfo, L"KrkrExtract Unhandled Exception");
-	Ps::ExitProcess(ExceptionPointer->ExceptionRecord->ExceptionCode);
-
-	//make compiler happy
+	//[-] modified
+	//ExceptionBox(ExceptionInfo, L"KrkrExtract Unhandled Exception");
+	//Ps::ExitProcess(ExceptionPointer->ExceptionRecord->ExceptionCode);
+	MessageBoxW(NULL, L"KrkrExtract Unhandled Exception", L"KrkrExtract", MB_OK | MB_ICONERROR);
+	
+	//[+] handled by system
+	//[+] DONT handle the exception because KrkrExtract may can extract archive now
 	return ExceptionContinueExecution;
 }
 
@@ -1611,7 +1617,7 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 		LdrDisableThreadCalloutsForDll(hModule);
 		InitRand(hModule);
 
-		AddVectoredExceptionHandler(FALSE, KrkrUnhandledExceptionFilter);
+		//AddVectoredExceptionHandler(FALSE, KrkrUnhandledExceptionFilter);
 
 		GlobalData::GetGlobalData();
 

@@ -31,7 +31,7 @@ public:
 	};
 };
 
-
+#if 1
 NTSTATUS FASTCALL TjsDecompileStorage(IStream* Stream, std::wstring& FileName)
 {
 	ULONG                       FileSize;
@@ -85,5 +85,20 @@ NTSTATUS FASTCALL TjsDecompileStorage(IStream* Stream, std::wstring& FileName)
 	FreeMemoryP(FileBuffer);
 	return STATUS_SUCCESS;
 }
+#else
+
+///[+] fake version
+NTSTATUS FASTCALL TjsDecompileStorage(IStream* Stream, std::wstring& FileName)
+{
+	UNREFERENCED_PARAMETER(Stream);
+	UNREFERENCED_PARAMETER(FileName);
+
+	///[+] return a "successful" status to caller
+	///[+] You can use separated tool instead
+	return STATUS_SUCCESS;
+}
+#endif
+
+
 
 

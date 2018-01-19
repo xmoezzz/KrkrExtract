@@ -809,11 +809,14 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 		PrintConsoleW(L"Packing files...\n");
 
 	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	
+#if 0
 	if (ExecResult.AsInteger() == FALSE)
 	{
 		MessageBoxW(Handle->MainWindow, L"Script exec error.(add)", L"KrkrExtract", MB_OK);
 		return STATUS_UNSUCCESSFUL;
 	}
+#endif
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
@@ -2183,6 +2186,47 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 }
 
 
+/*
+[+] M2 modified some code from krkrz
+_DWORD *__thiscall sub_427500(void *this)
+{
+	int v1; // eax
+	int v2; // esi
+	_DWORD *result; // eax
+	int v4; // [esp+0h] [ebp-28h]
+	void *Memory; // [esp+10h] [ebp-18h]
+	int v6; // [esp+14h] [ebp-14h]
+	int *v7; // [esp+18h] [ebp-10h]
+	int v8; // [esp+24h] [ebp-4h]
+
+	v7 = &v4;
+	v6 = 0;
+	v8 = 0;
+	v1 = sub_40EF60(this);  //[-] You should check here....wtf
+	v2 = v1;
+	v6 = v1;
+	v8 = -1;
+	result = operator new(0xCu);
+	Memory = result;
+	v8 = 2;
+	if (result)
+	{
+		*result = &tTVPIStreamAdapter::`vftable';
+		result[1] = v2;
+		result[2] = 1;
+	}
+	else
+	{
+		result = 0;
+	}
+	v8 = -1;
+	return result;
+}
+*/
+
+
+#define ENABLE_SCRIPT 1
+
 NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LPCWSTR OutName)
 {
 	NTSTATUS                Status;
@@ -2219,6 +2263,12 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	VirtualArchive += Handle->CurrentTempFileName.c_str();
 	VirtualArchive += L">";
 
+
+	//[+] Bug check here
+	//1.Hash generation error?
+	//2.chunk size error
+
+#if !defined(ENABLE_SCRIPT)
 	//how to ensure this archive is mounted?
 	//by GetHandle?
 	TVPAddAutoPath(VirtualArchive);
@@ -2228,8 +2278,11 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	//3.DNOT USE TVPExecuteScript
 
 	
-#if 0
+#else
+
 	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	
+#if 0   //[+] Return value is not reliable...
 	if (ExecResult.AsInteger() == FALSE)
 	{
 		Status = DisPlayProcessFileHandle(DebugInfo);
@@ -2244,8 +2297,10 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		}
 		
 		MessageBoxW(Handle->MainWindow, L"Script exec error.(add)", L"KrkrExtract", MB_OK);
-		return STATUS_UNSUCCESSFUL;
+		//return STATUS_UNSUCCESSFUL;
 	}
+#endif
+
 #endif
 
 	Status = FileXP3.Create(OutName);
@@ -2255,12 +2310,12 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		return Status;
 	}
 
-	BufferSize = 0x10000;
-	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
+	BufferSize       = 0x10000;
+	CompressedSize   = BufferSize;
+	lpBuffer         = AllocateMemoryP(BufferSize);
 	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
-	pIndex = pXP3Index;
+	pXP3Index        = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	pIndex           = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
 	{
@@ -2309,7 +2364,6 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		ttstr FullName(L"archive://./" + ttstr(Handle->CurrentTempFileName.c_str()) + L"/");
 		
 		FullName += DummyName.c_str();
-		
 
 		IStream* st = TVPCreateIStream(FullName, TJS_BS_READ);
 		if (st == NULL)
@@ -2318,6 +2372,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
+			Io::DeleteFileW(OutName);
 			FreeMemoryP(lpBuffer);
 			FreeMemoryP(lpCompressBuffer);
 			FreeMemoryP(pXP3Index);
@@ -2553,8 +2608,8 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	FreeMemoryP(lpCompressBuffer);
 	FreeMemoryP(pXP3Index);
 
-	TVPRemoveAutoPath(VirtualArchive);
-	//TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	//TVPRemoveAutoPath(VirtualArchive);
+	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
 
 	if (Handle->CurrentTempHandle != 0 && Handle->CurrentTempHandle != INVALID_HANDLE_VALUE)
 		NtClose(Handle->CurrentTempHandle);
@@ -2604,11 +2659,14 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 		return Status;
 
 	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	
+#if 0
 	if (ExecResult.AsInteger() == FALSE)
 	{
 		MessageBoxW(Handle->MainWindow, L"Script exec error. (add)", L"KrkrExtract", MB_OK);
 		return STATUS_UNSUCCESSFUL;
 	}
+#endif
 
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
@@ -2970,11 +3028,14 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 		PrintConsoleW(L"Packing files...\n");
 
 	TVPExecuteScript(ttstr(L"Storages.addAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
+	
+#if 0
 	if (ExecResult.AsInteger() == FALSE)
 	{
 		MessageBoxW(Handle->MainWindow, L"Script exec error. (add)", L"KrkrExtract", MB_OK);
 		return STATUS_UNSUCCESSFUL;
 	}
+#endif
 	
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
