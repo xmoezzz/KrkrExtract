@@ -177,6 +177,7 @@
     <ClCompile Include="zutil.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\DebuggerHandler.h" />
     <ClInclude Include="GenMD5Code.h" />
     <ClInclude Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\md5.h" />
     <ClInclude Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\sha1.h" />

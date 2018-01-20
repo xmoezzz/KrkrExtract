@@ -569,6 +569,9 @@
     <ClInclude Include="GenMD5Code.h">
       <Filter>头文件\Lib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\X%27moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\DebuggerHandler.h">
+      <Filter>头文件\Debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KrkrExtractDll.rc">

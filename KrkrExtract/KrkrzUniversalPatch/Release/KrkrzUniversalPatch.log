@@ -1,14 +1,110 @@
-﻿生成启动时间为 2018/01/08 19:53:48。
-     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\KrkrzUniversalPatch\KrkrzUniversalPatch.vcxproj”在节点 4 上(Build 个目标)。
-     1>Link:
-         KrkrzUniversalPatch.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\Release\KrkrUniversalPatch.dll
+﻿生成启动时间为 1/21/2018 12:44:50 AM。
+     1>项目“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrzUniversalPatch\KrkrzUniversalPatch.vcxproj”在节点 3 上(Build 个目标)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKRZUNIVERSALPATCH_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt IStreamExXP3.cpp KaresekaHook.cpp KrkrzUniversalPatch.cpp MyHook.cpp PsbCompiler\cc_stream.cpp PsbCompiler\compiler.cpp PsbCompiler\psb.cpp PsbCompiler\psb_cc.cpp PsbCompiler\psb_cc_array.cpp PsbCompiler\psb_cc_base.cpp PsbCompiler\psb_cc_boolean.cpp PsbCompiler\psb_cc_btree.cpp PsbCompiler\psb_cc_collection.cpp PsbCompiler\psb_cc_decimal.cpp PsbCompiler\psb_cc_integer.cpp PsbCompiler\psb_cc_null.cpp PsbCompiler\psb_cc_object.cpp PsbCompiler\psb_cc_resource.cpp PsbCompiler\psb_cc_string.cpp PsbCompiler\psb_compiler_center.cpp PsbCompiler\psb_link.cpp PsbCompiler\psb_link_resource.cpp PsbText.cpp StreamHolderXP3.cpp tp_stub.cpp
+         IStreamExXP3.cpp
+         KaresekaHook.cpp
+     1>KaresekaHook.cpp(653): warning C4018: “<”: 有符号/无符号不匹配
+         KrkrzUniversalPatch.cpp
+         MyHook.cpp
+         cc_stream.cpp
+         compiler.cpp
+         psb.cpp
+         psb_cc.cpp
+         psb_cc_array.cpp
+         psb_cc_base.cpp
+         psb_cc_boolean.cpp
+         psb_cc_btree.cpp
+         psb_cc_collection.cpp
+         psb_cc_decimal.cpp
+         psb_cc_integer.cpp
+         psb_cc_null.cpp
+         psb_cc_object.cpp
+         psb_cc_resource.cpp
+         psb_cc_string.cpp
+         psb_compiler_center.cpp
+         正在编译...
+         psb_link.cpp
+         psb_link_resource.cpp
+         PsbText.cpp
+     1>PsbText.cpp(81): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(88): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(95): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(123): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(131): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(151): warning C4244: “=”: 从“DWORD”转换到“char”，可能丢失数据
+     1>PsbText.cpp(154): warning C4018: “<=”: 有符号/无符号不匹配
+     1>PsbText.cpp(157): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(195) : 参见“strncpy”的声明
+     1>PsbText.cpp(213): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(256): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(277): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(347): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(425): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(443): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(500): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(518): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(575): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(602): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(659): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(686): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(728): warning C4018: “<=”: 有符号/无符号不匹配
+     1>PsbText.cpp(824): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(825): warning C4018: “>”: 有符号/无符号不匹配
+     1>PsbText.cpp(855): warning C4018: “<”: 有符号/无符号不匹配
+     1>PsbText.cpp(856): warning C4018: “>”: 有符号/无符号不匹配
+         StreamHolderXP3.cpp
+         tp_stub.cpp
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Release\KrkrzUniversalPatch.res" KrkrzUniversalPatch.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST:NO /DEBUG /PDB:"C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.lib" /MACHINE:X86 /SAFESEH /DLL Release\KrkrzUniversalPatch.res
+         Release\IStreamExXP3.obj
+         Release\KaresekaHook.obj
+         Release\KrkrzUniversalPatch.obj
+         Release\MyHook.obj
+         Release\cc_stream.obj
+         Release\compiler.obj
+         Release\psb.obj
+         Release\psb_cc.obj
+         Release\psb_cc_array.obj
+         Release\psb_cc_base.obj
+         Release\psb_cc_boolean.obj
+         Release\psb_cc_btree.obj
+         Release\psb_cc_collection.obj
+         Release\psb_cc_decimal.obj
+         Release\psb_cc_integer.obj
+         Release\psb_cc_null.obj
+         Release\psb_cc_object.obj
+         Release\psb_cc_resource.obj
+         Release\psb_cc_string.obj
+         Release\psb_compiler_center.obj
+         Release\psb_link.obj
+         Release\psb_link_resource.obj
+         Release\PsbText.obj
+         Release\StreamHolderXP3.obj
+         Release\tp_stub.obj
+            正在创建库 C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.lib 和对象 C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.exp
+         正在生成代码
+         已完成代码的生成
+     1>MyLibrary_x86_static.lib(my.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“MyLibrary_x86_static.lib(my.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(adler32.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(adler32.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(compress.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(compress.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(crc32.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(crc32.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(deflate.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(deflate.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(inflate.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(inflate.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(inftrees.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(inftrees.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(trees.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(trees.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(uncompr.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(uncompr.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(zutil.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(zutil.obj)”或在“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+         KrkrzUniversalPatch.vcxproj -> C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.dll
        PostBuildEvent:
-         copy /Y "E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\Release\KrkrUniversalPatch.dll" "E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\KrkrExtractDll\"
+         copy /Y "C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\Release\KrkrUniversalPatch.dll" "C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\"
          
          :VCEnd
                  1 file(s) copied.
-     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\KrkrzUniversalPatch\KrkrzUniversalPatch.vcxproj”(Build 个目标)的操作。
+     1>已完成生成项目“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrzUniversalPatch\KrkrzUniversalPatch.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:00.26
+已用时间 00:00:43.50

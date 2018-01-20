@@ -1601,6 +1601,32 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 }
 
 
+#include "DebuggerHandler.h"
+
+
+DWORD NTAPI ConsoleMoniterThread(PVOID Param)
+{
+	BOOL   Success;
+	DWORD  nRead;
+	static WCHAR CommandLine[4096];
+	
+	LOOP_FOREVER
+	{
+		RtlZeroMemory(CommandLine, sizeof(CommandLine));
+		Success = ReadConsoleW(GetStdHandle(STD_INPUT_HANDLE), CommandLine, sizeof(CommandLine) - 1, &nRead, NULL);
+		if (!Success)
+			goto NEXT_READ;
+
+		if (nRead >= sizeof(CommandLine))
+			PrintConsoleA("Debugger : Command line is too long\n");
+		else if (nRead)
+			ParseCommand(CommandLine);
+			
+	NEXT_READ:
+		Ps::Sleep(10);
+	}
+	return 0;
+}
 
 
 OVERLOAD_CPP_METHOD_NEW_WITH_HEAP(Nt_CurrentPeb()->ProcessHeap);
@@ -1617,10 +1643,11 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 		LdrDisableThreadCalloutsForDll(hModule);
 		InitRand(hModule);
 
+		GlobalData::GetGlobalData();
 		//AddVectoredExceptionHandler(FALSE, KrkrUnhandledExceptionFilter);
 
-		GlobalData::GetGlobalData();
-
+		Nt_CreateThread(ConsoleMoniterThread);
+		
 		if (!InitKrkrExtract(hModule))
 		{
 			ExceptionBox(L"Internal exception!");

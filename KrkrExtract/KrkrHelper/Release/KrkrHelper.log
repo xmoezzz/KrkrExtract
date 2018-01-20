@@ -1,9 +1,19 @@
-﻿生成启动时间为 2018/01/08 19:53:48。
-     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\KrkrHelper\KrkrHelper.vcxproj”在节点 3 上(Build 个目标)。
-     1>Link:
-         KrkrHelper.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\x64\Release\KrkrHelper.dll
-     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractSource\KrkrExtract\KrkrHelper\KrkrHelper.vcxproj”(Build 个目标)的操作。
+﻿生成启动时间为 1/21/2018 12:44:59 AM。
+     1>项目“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrHelper\KrkrHelper.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKRHELPER_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHs /MD /GS- /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /errorReport:prompt KrkrHelper.cpp
+         KrkrHelper.cpp
+     1>C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\my.h(31424): warning C4244: “参数”: 从“const ptrdiff_t”转换到“unsigned int”，可能丢失数据
+     1>C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\my.h(31431): warning C4244: “参数”: 从“const ptrdiff_t”转换到“unsigned int”，可能丢失数据
+     1>KrkrHelper.cpp(63): warning C4244: “=”: 从“Long_Ptr”转换到“DWORD”，可能丢失数据
+     1>KrkrHelper.cpp(316): warning C4244: “=”: 从“Long_Ptr”转换到“ULONG”，可能丢失数据
+     1>KrkrHelper.cpp(358): warning C4244: “=”: 从“LONG_PTR”转换到“NTSTATUS”，可能丢失数据
+     1>KrkrHelper.cpp(389): warning C4244: “=”: 从“LONG_PTR”转换到“NTSTATUS”，可能丢失数据
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\x64\Release\KrkrHelper.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\x64\Release\KrkrHelper.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT:NO /IMPLIB:"C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\x64\Release\KrkrHelper.lib" /MACHINE:X64 /DLL Release\KrkrHelper.obj
+     1>LINK : fatal error LNK1104: 无法打开文件“undoc_apphelp.lib”
+     1>已完成生成项目“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrHelper\KrkrHelper.vcxproj”(Build 个目标)的操作 - 失败。
 
-生成成功。
+生成失败。
 
-已用时间 00:00:00.15
+已用时间 00:00:03.45

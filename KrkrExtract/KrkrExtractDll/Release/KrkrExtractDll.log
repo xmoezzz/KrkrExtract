@@ -1,8 +1,7 @@
-﻿生成启动时间为 1/20/2018 1:38:26 AM。
-     1>项目“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
+﻿生成启动时间为 1/21/2018 12:44:50 AM。
+     1>项目“C:\Users\X'moe\Desktop\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 4 上(Build 个目标)。
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt KrkrPacker.cpp Main.cpp
-         KrkrPacker.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
          Main.cpp
      1>Main.cpp(1244): warning C4244: “=”: 从“uint64_t”转换到“ULONG”，可能丢失数据
      1>Main.cpp(1247): warning C4244: “参数”: 从“uint64_t”转换到“const unsigned long”，可能丢失数据
@@ -101,4 +100,4 @@
 
 生成成功。
 
-已用时间 00:00:24.16
+已用时间 00:00:25.97
