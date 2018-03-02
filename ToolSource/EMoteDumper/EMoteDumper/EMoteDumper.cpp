@@ -8,12 +8,12 @@
 #include <map>
 #include <algorithm>
 #include <assert.h>
-#include <windows.h> // for BITMAPINFOHEADER
+#include <windows.h>
 #include <zlib.h>
 #include <Psapi.h>
 #include <ntstatus.h>
 #include "PsbCommon.h"
-
+#include <my.h>
 
 
 #include "lz4.h"
@@ -21,6 +21,9 @@
 
 #pragma comment(lib, "zlib.lib")
 #pragma comment(lib, "psapi.lib")
+
+#pragma comment(lib, "MyLibrary_x86_static.lib")
+#pragma comment(lib, "jsoncpp.lib")
 
 #define TJS_W _T
 #define LZ4_MAGIC 0x184D2204
@@ -517,7 +520,7 @@ public:
 			if (data[(ULONG_PTR)pInfo->pRootCode] != 0x21)
 			{
 				MessageBoxW(NULL, L"Unable to get private for this emote file...\n", 0, 0);
-				ExitProcess(0);
+				::ExitProcess(0);
 			}
 		}
 
@@ -1339,6 +1342,8 @@ public:
 
 		CHAR  BuilderName[MAX_PATH] = { 0 };
 
+		WriteFile(lastDictName, (PBYTE)pData, FileSize);
+		
 		wsprintfA(BuilderName, "\"Binary::%d\"", Index);
 		BuildScript += BuilderName;
 	}
@@ -1355,6 +1360,7 @@ public:
 		case PsbValueBoolean:
 			BuildScript += node.AsInt() ? "true" : "false";
 			break;
+
 		case PsbValueInteger:
 			memset(NumStr, 0, sizeof(NumStr));
 			sprintf(NumStr, "%d", node.AsInt());
@@ -1366,6 +1372,7 @@ public:
 			sprintf(NumStr, "%lf", node.AsDouble());
 			BuildScript += NumStr;
 			break;
+
 		case PsbValueString:
 			quoteString(node.AsString());
 			break;
@@ -1376,6 +1383,7 @@ public:
 		case PsbValueArray:
 			dumpArray(node, indentstr);
 			break;
+
 		case PsbValueDictionay:
 			dumpDict(node, indentstr);
 			break;
@@ -1892,6 +1900,7 @@ public:
 		switch (node.GetType())
 		{
 		case PsbValueBinary:
+			
 			//dumpBinaryInternal(node);
 			break;
 
@@ -2034,14 +2043,62 @@ public:
 	}
 };
 
+
+ForceInline std::wstring FASTCALL GetPackageName(std::wstring& FileName)
+{
+	auto Index = FileName.find_last_of(L'\\');
+
+	if (Index != std::wstring::npos)
+		FileName = FileName.substr(Index + 1, std::wstring::npos);
+
+	Index = FileName.find_last_of(L'/');
+	if (Index != std::wstring::npos)
+		FileName = FileName.substr(Index + 1, std::wstring::npos);
+
+	return FileName;
+}
+
+
+ForceInline std::wstring FASTCALL ReplaceFileNameExtension(std::wstring& Path, PCWSTR NewExtensionName)
+{
+	ULONG_PTR Ptr;
+
+	Ptr = Path.find_last_of(L".");
+	if (Ptr == std::wstring::npos)
+		return Path + NewExtensionName;
+
+	return Path.substr(0, Ptr) + NewExtensionName;
+}
+
+ForceInline std::wstring FASTCALL GetFileBasePath(std::wstring& Path)
+{
+	ULONG_PTR Ptr;
+
+	auto PathFormat = Path;
+	for (auto& Ch : PathFormat)
+		if (Ch == L'/')
+			Ch = L'\\';
+
+	Ptr = PathFormat.find_last_of(L"\\");
+	if (Ptr == std::wstring::npos)
+		return std::wstring(NULL);
+
+	return Path.substr(0, Ptr);
+}
+
+
+#include "PsbFile.h"
+
 int _tmain(int argc, _TCHAR *argv[])
 {
+	ml::MlInitialize();
+
 	if (argc <= 1)
-	{
 		return 0;
-	}
+	
 	FILE* fp = _tfopen(argv[1], _T("rb"));
-	if (!fp) {
+	if (!fp) 
+	{
 		_tprintf(_T("file \"%s\" does not exist"), argv[1]);
 		return -1;
 	}
@@ -2051,6 +2108,11 @@ int _tmain(int argc, _TCHAR *argv[])
 	unsigned char *buf = new unsigned char[size];
 	fread(buf, size, 1, fp);
 	fclose(fp);
+
+	std::wstring FileName = ReplaceFileNameExtension(GetPackageName(std::wstring(argv[1])), L"");
+	std::wstring BaseName = GetFileBasePath(std::wstring(argv[1]));
+
+	//PsbJson::DecompilePsbJson(buf, size, BaseName.c_str(), FileName.c_str());
 
 	PSBFile psbf;
 	if (!psbf.InitFromBuff(buf, size))
@@ -2063,4 +2125,3 @@ int _tmain(int argc, _TCHAR *argv[])
 
 	return 0;
 }
-

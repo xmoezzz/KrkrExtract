@@ -32,6 +32,9 @@
     <ClInclude Include="xxhash.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="PsbFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EMoteDumper.cpp">
@@ -47,6 +50,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="xxhash.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonExporter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

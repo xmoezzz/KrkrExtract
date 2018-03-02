@@ -1,0 +1,18 @@
+(const) %[
+  "0b769049af9d40ef3f03998737bb02b5.png" => "Binary::7",
+  "23dfcb16544726bcdbe6881b6449e6ab.png" => "Binary::0",
+  "28cb27b3b988a7fff8a8818694f76d2b.png" => "Binary::8",
+  "38592a83a1d1fa75c6e8fddffdddd4cf.png" => "Binary::1",
+  "46c99d80834af36e0ea8794802f212be.png" => "Binary::4",
+  "8e1f0b67a31e0efe6e1102e6265166a2.png" => "Binary::6",
+  "9e723c0d2584160d925abd75579d00cd.png" => "Binary::9",
+  "af7c44eac3cf9afadba37eba88cd55bc.png" => "Binary::5",
+  "b431ca112e165f8d2c886f39b2cdfd09.png" => "Binary::2",
+  "e842a3dfc5465b03e0a1a402a6e632ca.png" => "Binary::3",
+  "sd001aa.png" => "Binary::13",
+  "sd001dd.png" => "Binary::10",
+  "sd001ea.png" => "Binary::11",
+  "sd001eb.png" => "Binary::12",
+  "sd001gf.png" => "Binary::14",
+  "sd001gh.png" => "Binary::15"
+]

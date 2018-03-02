@@ -82,14 +82,17 @@
     <ClInclude Include="lz4frame_static.h" />
     <ClInclude Include="lz4hc.h" />
     <ClInclude Include="PsbCommon.h" />
+    <ClInclude Include="PsbFile.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="xxhash.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EMoteDumper.cpp" />
+    <ClCompile Include="JsonExporter.cpp" />
     <ClCompile Include="lz4.c" />
     <ClCompile Include="lz4frame.c" />
     <ClCompile Include="lz4hc.c" />
+    <ClCompile Include="PsbFile.cpp" />
     <ClCompile Include="xxhash.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

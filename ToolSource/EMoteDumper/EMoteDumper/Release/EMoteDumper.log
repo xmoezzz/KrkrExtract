@@ -1,0 +1,190 @@
+﻿生成启动时间为 2018/03/02 15:08:27。
+     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\EMoteDumper\EMoteDumper.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt EMoteDumper.cpp
+         EMoteDumper.cpp
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(147): warning C4005: “STATUS_WAIT_0”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1983) : 参见“STATUS_WAIT_0”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(199): warning C4005: “STATUS_ABANDONED_WAIT_0”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1984) : 参见“STATUS_ABANDONED_WAIT_0”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(222): warning C4005: “STATUS_USER_APC”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1985) : 参见“STATUS_USER_APC”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(249): warning C4005: “STATUS_TIMEOUT”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1986) : 参见“STATUS_TIMEOUT”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(258): warning C4005: “STATUS_PENDING”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1987) : 参见“STATUS_PENDING”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(651): warning C4005: “DBG_EXCEPTION_HANDLED”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1988) : 参见“DBG_EXCEPTION_HANDLED”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(660): warning C4005: “DBG_CONTINUE”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1989) : 参见“DBG_CONTINUE”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(746): warning C4005: “STATUS_SEGMENT_NOTIFICATION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1990) : 参见“STATUS_SEGMENT_NOTIFICATION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1219): warning C4005: “DBG_TERMINATE_THREAD”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1991) : 参见“DBG_TERMINATE_THREAD”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1228): warning C4005: “DBG_TERMINATE_PROCESS”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1992) : 参见“DBG_TERMINATE_PROCESS”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1237): warning C4005: “DBG_CONTROL_C”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1993) : 参见“DBG_CONTROL_C”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1246): warning C4005: “DBG_PRINTEXCEPTION_C”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1994) : 参见“DBG_PRINTEXCEPTION_C”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1255): warning C4005: “DBG_RIPEXCEPTION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1995) : 参见“DBG_RIPEXCEPTION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1264): warning C4005: “DBG_CONTROL_BREAK”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1996) : 参见“DBG_CONTROL_BREAK”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1273): warning C4005: “DBG_COMMAND_EXCEPTION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1997) : 参见“DBG_COMMAND_EXCEPTION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1305): warning C4005: “STATUS_GUARD_PAGE_VIOLATION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1998) : 参见“STATUS_GUARD_PAGE_VIOLATION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1316): warning C4005: “STATUS_DATATYPE_MISALIGNMENT”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(1999) : 参见“STATUS_DATATYPE_MISALIGNMENT”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1327): warning C4005: “STATUS_BREAKPOINT”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2000) : 参见“STATUS_BREAKPOINT”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1338): warning C4005: “STATUS_SINGLE_STEP”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2001) : 参见“STATUS_SINGLE_STEP”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1641): warning C4005: “STATUS_LONGJUMP”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2002) : 参见“STATUS_LONGJUMP”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1668): warning C4005: “STATUS_UNWIND_CONSOLIDATE”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2003) : 参见“STATUS_UNWIND_CONSOLIDATE”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1735): warning C4005: “DBG_EXCEPTION_NOT_HANDLED”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2004) : 参见“DBG_EXCEPTION_NOT_HANDLED”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1864): warning C4005: “STATUS_ACCESS_VIOLATION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2005) : 参见“STATUS_ACCESS_VIOLATION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1873): warning C4005: “STATUS_IN_PAGE_ERROR”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2006) : 参见“STATUS_IN_PAGE_ERROR”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1891): warning C4005: “STATUS_INVALID_HANDLE”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2007) : 参见“STATUS_INVALID_HANDLE”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(1936): warning C4005: “STATUS_INVALID_PARAMETER”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2008) : 参见“STATUS_INVALID_PARAMETER”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(2036): warning C4005: “STATUS_NO_MEMORY”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2009) : 参见“STATUS_NO_MEMORY”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(2093): warning C4005: “STATUS_ILLEGAL_INSTRUCTION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2010) : 参见“STATUS_ILLEGAL_INSTRUCTION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(2174): warning C4005: “STATUS_NONCONTINUABLE_EXCEPTION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2011) : 参见“STATUS_NONCONTINUABLE_EXCEPTION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(2183): warning C4005: “STATUS_INVALID_DISPOSITION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2012) : 参见“STATUS_INVALID_DISPOSITION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3105): warning C4005: “STATUS_ARRAY_BOUNDS_EXCEEDED”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2013) : 参见“STATUS_ARRAY_BOUNDS_EXCEEDED”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3115): warning C4005: “STATUS_FLOAT_DENORMAL_OPERAND”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2014) : 参见“STATUS_FLOAT_DENORMAL_OPERAND”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3125): warning C4005: “STATUS_FLOAT_DIVIDE_BY_ZERO”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2015) : 参见“STATUS_FLOAT_DIVIDE_BY_ZERO”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3135): warning C4005: “STATUS_FLOAT_INEXACT_RESULT”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2016) : 参见“STATUS_FLOAT_INEXACT_RESULT”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3145): warning C4005: “STATUS_FLOAT_INVALID_OPERATION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2017) : 参见“STATUS_FLOAT_INVALID_OPERATION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3155): warning C4005: “STATUS_FLOAT_OVERFLOW”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2018) : 参见“STATUS_FLOAT_OVERFLOW”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3165): warning C4005: “STATUS_FLOAT_STACK_CHECK”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2019) : 参见“STATUS_FLOAT_STACK_CHECK”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3175): warning C4005: “STATUS_FLOAT_UNDERFLOW”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2020) : 参见“STATUS_FLOAT_UNDERFLOW”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3185): warning C4005: “STATUS_INTEGER_DIVIDE_BY_ZERO”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2021) : 参见“STATUS_INTEGER_DIVIDE_BY_ZERO”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3195): warning C4005: “STATUS_INTEGER_OVERFLOW”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2022) : 参见“STATUS_INTEGER_OVERFLOW”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(3205): warning C4005: “STATUS_PRIVILEGED_INSTRUCTION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2023) : 参见“STATUS_PRIVILEGED_INSTRUCTION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(4151): warning C4005: “STATUS_STACK_OVERFLOW”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2024) : 参见“STATUS_STACK_OVERFLOW”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(4668): warning C4005: “STATUS_DLL_NOT_FOUND”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2025) : 参见“STATUS_DLL_NOT_FOUND”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(4697): warning C4005: “STATUS_ORDINAL_NOT_FOUND”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2026) : 参见“STATUS_ORDINAL_NOT_FOUND”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(4707): warning C4005: “STATUS_ENTRYPOINT_NOT_FOUND”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2027) : 参见“STATUS_ENTRYPOINT_NOT_FOUND”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(4717): warning C4005: “STATUS_CONTROL_C_EXIT”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2028) : 参见“STATUS_CONTROL_C_EXIT”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(4795): warning C4005: “STATUS_DLL_INIT_FAILED”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2029) : 参见“STATUS_DLL_INIT_FAILED”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(7197): warning C4005: “STATUS_FLOAT_MULTIPLE_FAULTS”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2030) : 参见“STATUS_FLOAT_MULTIPLE_FAULTS”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(7207): warning C4005: “STATUS_FLOAT_MULTIPLE_TRAPS”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2031) : 参见“STATUS_FLOAT_MULTIPLE_TRAPS”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(7330): warning C4005: “STATUS_REG_NAT_CONSUMPTION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2032) : 参见“STATUS_REG_NAT_CONSUMPTION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(8523): warning C4005: “STATUS_STACK_BUFFER_OVERRUN”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2033) : 参见“STATUS_STACK_BUFFER_OVERRUN”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(8650): warning C4005: “STATUS_INVALID_CRUNTIME_PARAMETER”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2034) : 参见“STATUS_INVALID_CRUNTIME_PARAMETER”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(8713): warning C4005: “STATUS_ASSERTION_FAILURE”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2035) : 参见“STATUS_ASSERTION_FAILURE”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(11904): warning C4005: “STATUS_SXS_EARLY_DEACTIVATION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2037) : 参见“STATUS_SXS_EARLY_DEACTIVATION”的前一个定义
+     1>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\ntstatus.h(11913): warning C4005: “STATUS_SXS_INVALID_DEACTIVATION”: 宏重定义
+                 C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\winnt.h(2038) : 参见“STATUS_SXS_INVALID_DEACTIVATION”的前一个定义
+     1>EMoteDumper.cpp(32): warning C4005: “LOOP_ONCE”: 宏重定义
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\my.h(1124) : 参见“LOOP_ONCE”的前一个定义
+     1>EMoteDumper.cpp(33): warning C4005: “LOOP_FOREVER”: 宏重定义
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\my.h(1123) : 参见“LOOP_FOREVER”的前一个定义
+     1>EMoteDumper.cpp(98): warning C4244: “初始化”: 从“unsigned __int64”转换到“unsigned int”，可能丢失数据
+     1>EMoteDumper.cpp(102): warning C4244: “=”: 从“unsigned __int64”转换到“size_t”，可能丢失数据
+     1>EMoteDumper.cpp(117): warning C4244: “=”: 从“unsigned __int64”转换到“unsigned long”，可能丢失数据
+     1>EMoteDumper.cpp(320): warning C4244: “return”: 从“LONG64”转换到“double”，可能丢失数据
+     1>EMoteDumper.cpp(343): warning C4244: “return”: 从“float”转换到“LONG64”，可能丢失数据
+     1>EMoteDumper.cpp(345): warning C4244: “return”: 从“double”转换到“LONG64”，可能丢失数据
+     1>EMoteDumper.cpp(362): warning C4244: “return”: 从“LONG64”转换到“LONG”，可能丢失数据
+     1>EMoteDumper.cpp(364): warning C4244: “return”: 从“float”转换到“LONG”，可能丢失数据
+     1>EMoteDumper.cpp(366): warning C4244: “return”: 从“double”转换到“LONG”，可能丢失数据
+     1>EMoteDumper.cpp(381): warning C4244: “return”: 从“LONG”转换到“BOOLEAN”，可能丢失数据
+     1>EMoteDumper.cpp(383): warning C4244: “return”: 从“LONG64”转换到“BOOLEAN”，可能丢失数据
+     1>EMoteDumper.cpp(385): warning C4244: “return”: 从“float”转换到“BOOLEAN”，可能丢失数据
+     1>EMoteDumper.cpp(387): warning C4244: “return”: 从“double”转换到“BOOLEAN”，可能丢失数据
+     1>EMoteDumper.cpp(858): warning C4244: “参数”: 从“unsigned long”转换到“char”，可能丢失数据
+     1>EMoteDumper.cpp(1046): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1081): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1084): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1166): warning C4996: '_wfopen': This function or variable may be unsafe. Consider using _wfopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(590) : 参见“_wfopen”的声明
+     1>EMoteDumper.cpp(1185): warning C4996: '_wfopen': This function or variable may be unsafe. Consider using _wfopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(590) : 参见“_wfopen”的声明
+     1>EMoteDumper.cpp(1366): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(356) : 参见“sprintf”的声明
+     1>EMoteDumper.cpp(1372): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(356) : 参见“sprintf”的声明
+     1>EMoteDumper.cpp(1461): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1462): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1463): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1464): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1520): warning C4996: '_wfopen': This function or variable may be unsafe. Consider using _wfopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(590) : 参见“_wfopen”的声明
+     1>EMoteDumper.cpp(1556): warning C4996: '_wfopen': This function or variable may be unsafe. Consider using _wfopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(590) : 参见“_wfopen”的声明
+     1>EMoteDumper.cpp(1572): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1602): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1644): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1670): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1708): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1734): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1773): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1795): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1821): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1844): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1870): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1929): warning C4018: “<”: 有符号/无符号不匹配
+     1>EMoteDumper.cpp(1980): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(1981): warning C4244: “初始化”: 从“LONG64”转换到“int”，可能丢失数据
+     1>EMoteDumper.cpp(2099): warning C4996: '_wfopen': This function or variable may be unsafe. Consider using _wfopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdio.h(590) : 参见“_wfopen”的声明
+       Link:
+         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\EMoteDumper.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\EMoteDumper.pdb" /SUBSYSTEM:CONSOLE,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\EMoteDumper.lib" /MACHINE:X86 /SAFESEH Release\EMoteDumper.obj
+         Release\JsonExporter.obj
+         Release\lz4.obj
+         Release\lz4frame.obj
+         Release\lz4hc.obj
+         Release\PsbFile.obj
+         Release\xxhash.obj
+         正在生成代码
+         已完成代码的生成
+     1>zlib.lib(uncompr.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(uncompr.obj)”或在“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(inflate.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(inflate.obj)”或在“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(adler32.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(adler32.obj)”或在“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(crc32.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(crc32.obj)”或在“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(zutil.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(zutil.obj)”或在“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+     1>zlib.lib(inftrees.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“zlib.lib(inftrees.obj)”或在“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+         EMoteDumper.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\Release\EMoteDumper.exe
+     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\EMoteDumper\EMoteDumper\EMoteDumper.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:04.17
