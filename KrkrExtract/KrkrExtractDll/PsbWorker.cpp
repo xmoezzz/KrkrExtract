@@ -1398,6 +1398,8 @@ public:
 
 		CHAR  BuilderName[MAX_PATH] = { 0 };
 
+		WriteFile(lastDictName, (PBYTE)pData, FileSize);
+
 		FormatStringA(BuilderName, "\"Binary::%d\"", Index);
 		BuildScript += BuilderName;
 	}
