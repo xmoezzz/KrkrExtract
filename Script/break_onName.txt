@@ -1,0 +1,2 @@
+bp tvpwin32+0x26170 ".if(poi(poi(ecx)+4) == 0){g;}.else{ as /mu ${/v:streamName} poi(poi(ecx)+4); .block{ .if ($spat(@\"${streamName}\", \"*.pbd\")) { .echo ${streamName}; } .else { .echo not hit; gc; }}}"
+

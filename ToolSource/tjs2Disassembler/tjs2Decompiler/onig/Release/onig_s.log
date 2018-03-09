@@ -1,9 +1,9 @@
-﻿生成启动时间为 8/12/2017 8:26:26 PM。
-     1>项目“E:\tjs2Decompiler_old\tjs2Decompiler\onig\onig_s.vcxproj”在节点 2 上(Build 个目标)。
+﻿生成启动时间为 2018/03/05 19:52:11。
+     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\tjs2Decompiler\onig\onig_s.vcxproj”在节点 2 上(Build 个目标)。
      1>Lib:
-         onig_s.vcxproj -> E:\tjs2Decompiler_old\lib\onig_s.lib
-     1>已完成生成项目“E:\tjs2Decompiler_old\tjs2Decompiler\onig\onig_s.vcxproj”(Build 个目标)的操作。
+         onig_s.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\lib\onig_s.lib
+     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\tjs2Decompiler\onig\onig_s.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:00.04
+已用时间 00:00:00.07

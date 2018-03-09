@@ -1,10 +1,7 @@
-﻿生成启动时间为 8/12/2017 8:33:15 PM。
-     1>项目“E:\tjs2Decompiler_old\tjs2Decompiler\tjs2Decompiler.vcxproj”在节点 2 上(Build 个目标)。
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt tjs2\tjsDisassemble.cpp
-         tjsDisassemble.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\tjs2Decompiler_old\Release\tjs2Decompiler.exe" /INCREMENTAL:NO /NOLOGO E:\tjs2Decompiler_old\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\tjs2Decompiler_old\Release\tjs2Decompiler.pdb" /SUBSYSTEM:CONSOLE,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\tjs2Decompiler_old\Release\tjs2Decompiler.lib" /MACHINE:X86 /SAFESEH Release\TextStream.obj
+﻿生成启动时间为 2018/03/05 19:52:11。
+     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\tjs2Decompiler\tjs2Decompiler.vcxproj”在节点 2 上(Build 个目标)。
+     1>Link:
+         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\Release\tjs2Decompiler.exe" /INCREMENTAL:NO /NOLOGO E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\Release\tjs2Decompiler.pdb" /SUBSYSTEM:CONSOLE,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\Release\tjs2Decompiler.lib" /MACHINE:X86 /SAFESEH Release\TextStream.obj
          Release\tjs2Decompiler.obj
          Release\tjs.obj
          Release\tjs.tab.obj
@@ -47,9 +44,9 @@
          Release\TVPStream.obj
          正在生成代码
          已完成代码的生成
-         tjs2Decompiler.vcxproj -> E:\tjs2Decompiler_old\Release\tjs2Decompiler.exe
-     1>已完成生成项目“E:\tjs2Decompiler_old\tjs2Decompiler\tjs2Decompiler.vcxproj”(Build 个目标)的操作。
+         tjs2Decompiler.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\Release\tjs2Decompiler.exe
+     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\ToolSource\tjs2Disassembler\tjs2Decompiler\tjs2Decompiler.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:06.02
+已用时间 00:00:09.01

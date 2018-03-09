@@ -126,6 +126,7 @@ void tTJSInterCodeContext::Disassemble(
 			msg.printf(TJS_W("const %%%d, %ls"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i + 2])).c_str());
+
 			size = 3;
 			break;
 
