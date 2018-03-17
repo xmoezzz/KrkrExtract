@@ -1,6 +1,10 @@
 # KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)  
 
+## 什么鬼
+![Files](https://xmoeproject.github.io/KrkrExtract/img/smg.gif)
+
+ctf还有kirikiri题???
 
 ## OpenSource License  
 
