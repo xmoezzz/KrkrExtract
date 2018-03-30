@@ -49,6 +49,12 @@
     <Filter Include="头文件\Debugger">
       <UniqueIdentifier>{facce64b-3d48-4e0d-afa3-4526c49edb7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\M2">
+      <UniqueIdentifier>{509a3013-8ed2-4d2b-b355-86f887fc334f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\M2">
+      <UniqueIdentifier>{0aa60f82-88ea-480d-bfd1-bf248841b8fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lz4frame.cpp">
@@ -290,6 +296,9 @@
     </ClCompile>
     <ClCompile Include="md5.cpp">
       <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="RiddleJoker_Decode.cpp">
+      <Filter>源文件\M2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -571,6 +580,9 @@
     </ClInclude>
     <ClInclude Include="DebuggerHandler.h">
       <Filter>头文件\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtraDecoder.h">
+      <Filter>头文件\M2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -96,6 +96,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="md5.cpp" />
+    <ClCompile Include="RiddleJoker_Decode.cpp" />
     <ClCompile Include="sha1.cpp" />
     <ClCompile Include="adler32.cpp" />
     <ClCompile Include="AmvExtractor.cpp" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebuggerHandler.h" />
+    <ClInclude Include="ExtraDecoder.h" />
     <ClInclude Include="GenMD5Code.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="sha1.h" />

@@ -17,7 +17,11 @@ unsigned char *getDataFromMDF(const unsigned char *buff, unsigned long &size);
 
 KrkrDumper::KrkrDumper()
 {
+	IsIndex = FALSE;
 	hThread = INVALID_HANDLE_VALUE;
+
+	RtlZeroMemory(FileName, sizeof(FileName));
+	RtlZeroMemory(FileNameIndex, sizeof(FileNameIndex));
 }
 
 
@@ -285,6 +289,68 @@ NTSTATUS WINAPI KrkrDumper::ParseXP3File(PWCHAR lpFileName)
 	return Status;
 }
 
+NTSTATUS WINAPI KrkrDumper::ParseXP3iFile(PWCHAR lpFileName)
+{
+	NTSTATUS    Status;
+	NtFileDisk  File;
+	PBYTE       Buffer;
+	ULONG       Size, iPos, SavePos;
+	XP3Index    item;
+	GlobalData* Handle;
+
+	Handle = GlobalData::GetGlobalData();
+	Handle->IsM2Format = TRUE;
+
+	Status = File.Open(lpFileName);
+	if (NT_FAILED(Status))
+	{
+		PrintConsoleW(L"File.Open failed with status : %08x\n", Status);
+		return Status;
+	}
+
+	Size = File.GetSize32();
+	Buffer = (PBYTE)AllocateMemoryP(Size);
+	if (!Buffer)
+	{
+		PrintConsoleW(L"Memory allocation failed with status : %08x\n", Status);
+		File.Close();
+		return STATUS_NO_MEMORY;
+	}
+	File.Read(Buffer, Size);
+
+	iPos = 0;
+	while (iPos < Size)
+	{
+		iPos += 4;
+		ULONG64 ChunkSize = 0;
+		RtlCopyMemory(&ChunkSize, (Buffer + iPos), 8);
+		iPos += 8;
+		SavePos = iPos;
+		item.yuzu.ChunkSize.QuadPart = ChunkSize;
+		ULONG HashValue = 0;
+		RtlCopyMemory(&HashValue, (Buffer + iPos), 4);
+		iPos += 4;
+		item.yuzu.Hash = HashValue;
+		USHORT FileNameLen = 0;
+		RtlCopyMemory(&FileNameLen, (Buffer + iPos), 2);
+		iPos += 2;
+		wstring FileName((PCWSTR)(Buffer + iPos), FileNameLen);
+		item.yuzu.Name = FileName;
+		iPos = SavePos;
+		iPos += (ULONG)ChunkSize;
+		item.isM2Format = TRUE;
+		
+		if (!(FileName.length() > 3 && FileName[0] == L'$' && FileName[1] == L'$' && FileName[2] == L'$'))
+		{
+			Handle->ItemVector.push_back(item);
+			Handle->CountFile++;
+		}
+	}
+
+	FreeMemoryP(Buffer);
+	File.Close();
+	return STATUS_SUCCESS;
+}
 
 Void NTAPI KrkrDumper::AddPath(LPWSTR FileName)
 {
@@ -1211,7 +1277,12 @@ NTSTATUS NTAPI KrkrDumper::DoDump()
 
 	Handle->isRunning = TRUE;
 	Handle->DisableAll(Handle->MainWindow);
-	Status = ParseXP3File(FileName);
+	
+	if (!IsIndex)
+		Status = ParseXP3File(FileName);
+	else
+		Status = ParseXP3iFile(FileNameIndex);
+
 	Status = DumpFile();
 	return Status;
 }
@@ -1242,6 +1313,7 @@ HANDLE NTAPI StartDumper(LPCWSTR lpFileName)
 	{
 		LocalKrkrDumper->InternalReset();
 		LocalKrkrDumper->SetFile(lpFileName);
+		LocalKrkrDumper->IsIndex = FALSE;
 		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper->hThread);
 
 		if (NT_FAILED(Status))
@@ -1253,3 +1325,43 @@ HANDLE NTAPI StartDumper(LPCWSTR lpFileName)
 	return LocalKrkrDumper->hThread;
 }
 
+
+HANDLE NTAPI StartMiniDumper(LPCWSTR lpFileName)
+{
+	NTSTATUS     Status;
+	GlobalData*  Handle;
+
+	Handle = GlobalData::GetGlobalData();
+
+	if (LocalKrkrDumper == NULL)
+		LocalKrkrDumper = new KrkrDumper;
+
+	LOOP_ONCE
+	{
+		LocalKrkrDumper->InternalReset();
+
+		auto GetFileNameP = [](PCWSTR Name)->std::wstring
+		{
+			std::wstring FileName(Name);
+			auto Index = FileName.find_last_of(L'.');
+			if (Index != std::wstring::npos)
+				return FileName.substr(0, Index);
+
+			return FileName;
+		};
+		
+		auto FileName = GetFileNameP(lpFileName) + L".xp3";
+		LocalKrkrDumper->SetFile(FileName.c_str());
+		RtlZeroMemory(LocalKrkrDumper->FileNameIndex, countof(LocalKrkrDumper->FileNameIndex) * sizeof(WCHAR));
+		StrCopyW(LocalKrkrDumper->FileNameIndex, lpFileName);
+		LocalKrkrDumper->IsIndex = TRUE;
+		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper->hThread);
+		
+		if (NT_FAILED(Status))
+		{
+			MessageBoxW(NULL, L"Failed to Start Extraction Thread!", L"KrkrExtract", MB_OK);
+			break;
+		}
+	}
+	return LocalKrkrDumper->hThread;
+}

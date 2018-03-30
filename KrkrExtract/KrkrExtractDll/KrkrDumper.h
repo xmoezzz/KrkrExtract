@@ -18,8 +18,9 @@ public:
 	~KrkrDumper();
 
 	HANDLE hThread;
+	BOOL   IsIndex;
 	WCHAR  FileName[MAX_PATH];
-
+	WCHAR  FileNameIndex[MAX_PATH];
 
 	NTSTATUS NTAPI DoDump();
 	Void     NTAPI SetFile(LPCWSTR lpFile);
@@ -32,6 +33,7 @@ private:
 	NTSTATUS NTAPI DumpFileByRawFile();
 
 	NTSTATUS WINAPI ParseXP3File(PWCHAR lpFileName);
+	NTSTATUS WINAPI ParseXP3iFile(PWCHAR lpFileName);
 	NTSTATUS WINAPI ProcessXP3Archive(LPCWSTR FileName, NtFileDisk& file);
 	NTSTATUS WINAPI DumpFile();
 

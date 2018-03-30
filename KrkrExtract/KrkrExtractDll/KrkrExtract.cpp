@@ -1981,8 +1981,25 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					GlobalData::GetGlobalData()->WorkerThread = StartDumper(GlobalData::GetGlobalData()->DragFileName);
+					auto GetExtensionName = [](PCWSTR Name)->std::wstring
+					{
+						std::wstring FileName(Name);
+						auto Index = FileName.find_last_of(L'.');
+						if (Index != std::wstring::npos)
+							return FileName.substr(Index + 1, std::wstring::npos);
+						
+						return std::wstring(L"");
+					};
+
+					
+					auto ExtName = GetExtensionName(GlobalData::GetGlobalData()->DragFileName);
+					if (lstrcmpiW(ExtName.c_str(), L"xp3i") == 0)
+						GlobalData::GetGlobalData()->WorkerThread = StartMiniDumper(GlobalData::GetGlobalData()->DragFileName);
+					else
+						GlobalData::GetGlobalData()->WorkerThread = StartDumper(GlobalData::GetGlobalData()->DragFileName);
+					
 				}
+				DragFinish(hDrop);
 			}
 		}
 		else

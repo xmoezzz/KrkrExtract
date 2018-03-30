@@ -1,11 +1,14 @@
-﻿生成启动时间为 2018/03/02 15:35:23。
+﻿生成启动时间为 2018/03/30 23:16:20。
      1>项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt md5.cpp sha1.cpp adler32.cpp KrkrUniversalDumper.cpp Main.cpp lz4frame.cpp KrkrPacker.cpp KrkrDumper.cpp tjs2\tjsConfig.cpp
-         md5.cpp
-         sha1.cpp
-         adler32.cpp
+         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt FakePNG.cpp KrkrDumper.cpp KrkrExtract.cpp KrkrPacker.cpp KrkrTextDecode.cpp KrkrUniversalDumper.cpp KrkrUniversalPatch.cpp Main.cpp PsbWorker.cpp XP3Parser.cpp
+         FakePNG.cpp
+         KrkrDumper.cpp
+         KrkrExtract.cpp
+         KrkrPacker.cpp
+         KrkrTextDecode.cpp
          KrkrUniversalDumper.cpp
+         KrkrUniversalPatch.cpp
          Main.cpp
      1>Main.cpp(1244): warning C4244: “=”: 从“uint64_t”转换到“ULONG”，可能丢失数据
      1>Main.cpp(1247): warning C4244: “参数”: 从“uint64_t”转换到“const unsigned long”，可能丢失数据
@@ -13,15 +16,14 @@
      1>Main.cpp(1295): warning C4244: “参数”: 从“ULONGLONG”转换到“ULONG”，可能丢失数据
      1>Main.cpp(1296): warning C4244: “参数”: 从“ULONGLONG”转换到“ULONG_PTR”，可能丢失数据
      1>Main.cpp(1585): warning C4244: “参数”: 从“DWORD64”转换到“ULONG_PTR”，可能丢失数据
-         lz4frame.cpp
-         KrkrPacker.cpp
-         KrkrDumper.cpp
-         tjsConfig.cpp
-       ResourceCompile:
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Release\KrkrExtractDll.res" KrkrExtractDll.rc 
+         PsbWorker.cpp
+     1>PsbWorker.cpp(1428): warning C4996: '_gcvt': This function or variable may be unsafe. Consider using _gcvt_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdlib.h(786) : 参见“_gcvt”的声明
+         XP3Parser.cpp
        Link:
          E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll" /INCREMENTAL:NO /NOLOGO E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:win.manifest /manifestinput:"E:\VSProgram\Visual Studio 2013 Ultimate\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib" /MACHINE:X86 /SAFESEH /DLL Release\KrkrExtractDll.res
          Release\md5.obj
+         Release\RiddleJoker_Decode.obj
          Release\sha1.obj
          Release\adler32.obj
          Release\AmvExtractor.obj
@@ -109,4 +111,4 @@
 
 生成成功。
 
-已用时间 00:00:22.25
+已用时间 00:00:36.09
