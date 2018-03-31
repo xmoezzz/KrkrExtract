@@ -89,8 +89,27 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 
 #define szApplicationName   L"[X'moe]Welcome to KrkrExtract(version : %s, built on : %s)"
 #define szWindowClassName   L"XP3ExtractMainClass"
-#define _XP3ExtractVersion_ L"Ver 4.0.0.1"
+#define _XP3ExtractVersion_ L"Ver 4.0.0.2"
 
+
+class MemEntry
+{
+public:
+	MemEntry() : Buffer(NULL), Size(0), Hash(0){}
+
+	MemEntry& operator = (const MemEntry& Other)
+	{
+		Buffer = Other.Buffer;
+		Size   = Other.Size;
+		Hash   = Other.Hash;
+
+		return *this;
+	}
+
+	PVOID   Buffer;
+	ULONG   Size;
+	ULONG64 Hash;
+};
 
 class Xp3FileEntry
 {
@@ -236,6 +255,15 @@ public:
 	wstring                     CurrentTempFileName;
 	BOOL                        FakePngWorkerInited;
 	WCHAR                       CurFileName[MAX_PATH];
+	
+	std::map<ULONG64, MemEntry> SpecialChunkMap;
+	std::map<ULONG, MemEntry>   SpecialChunkMapBySize;
+
+
+	using SpecialChunkDecoderFunc = ULONG(CDECL*) (PBYTE, PBYTE, ULONG);
+	
+	BOOL                        IsSpcialChunkEncrypted;
+	SpecialChunkDecoderFunc     SpecialChunkDecoder;
 };
 
 //Init once

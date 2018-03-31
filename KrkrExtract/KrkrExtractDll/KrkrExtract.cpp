@@ -129,6 +129,9 @@ GlobalData::GlobalData() :
 	CurrentTempHandle = INVALID_HANDLE_VALUE;
 	FakePngWorkerInited = FALSE;
 	IsAllPackReaded = FALSE;
+
+	IsSpcialChunkEncrypted = FALSE;
+	SpecialChunkDecoder = NULL;
 }
 
 
@@ -144,6 +147,12 @@ Void NTAPI GlobalData::ExitKrkr()
 		DestroyWindow(MainWindow);
 	
 	MainWindow = NULL;
+
+	for (auto& Entry : SpecialChunkMap)
+		if (Entry.second.Buffer)
+			FreeMemoryP(Entry.second.Buffer);
+
+	SpecialChunkMap.clear();
 }
 
 GlobalData* GlobalData::GetGlobalData()

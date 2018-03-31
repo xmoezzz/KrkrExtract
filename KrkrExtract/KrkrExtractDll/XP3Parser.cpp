@@ -471,13 +471,13 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 	KRKRZ_COMPRESSED_INDEX  CompressedIndex;
 	PBYTE                   CompressedBuffer;
 	PBYTE                   IndexBuffer;
-	ULONG                   DecompSize, iPos;
+	ULONG                   DecompSize, iPos, DecodeSize;
 	DWORD                   Hash;
 	XP3Index                Item;
 	ULARGE_INTEGER          ChunkSize;
 	USHORT                  NameLength;
 	GlobalData*             Handle;
-	BOOL                    RawFailed, TotalFailed;
+	BOOL                    RawFailed;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -502,61 +502,54 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 
 	File.Read(CompressedBuffer, CompressedIndex.CompressedSize);
 
-	using ExtraDecodeFunc = ULONG(*)(BYTE*, BYTE*, ULONG);
-
-
-	///to do:
-	///useless, cxdec
-	///用断点找call proc
-	///先自己做pre hash， 干掉ReadFile
-	///对比hash，size 然后尝试解压，如果失败就去监控内存断点（硬件）
-	///找到第一次断下的位置，就是call proc
-	ExtraDecodeFunc ExtraDecoderList[] =
-	{
-		RJ_ExtraDecode
-	};
-
 	RawFailed = FALSE;
-	if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
-		(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+	if (!Handle->IsSpcialChunkEncrypted)
 	{
-		RawFailed = TRUE;
+		if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+			(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+		{
+			RawFailed = TRUE;
+		}
 	}
+	else 
+	{
+		if (Handle->SpecialChunkDecoder)
+		{
+			DecodeSize = 0x100;
+			if (DecodeSize < 0x100)
+				DecodeSize = CompressedIndex.CompressedSize;
+
+			Handle->SpecialChunkDecoder(CompressedBuffer, CompressedBuffer, DecodeSize);
+			DecompSize = CompressedIndex.DecompressedSize;
+			if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+				(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+			{
+				RawFailed = TRUE;
+			}
+		}
+		else
+		{
+			RawFailed = TRUE;
+		}
+	}
+
+#if 0
+	FILE* file = fopen("index.data","wb");
+	fwrite(IndexBuffer, 1, CompressedIndex.DecompressedSize, file);
+	fclose(file);
+
+	file = fopen("index_c.data", "wb");
+	fwrite(CompressedBuffer, 1, CompressedIndex.CompressedSize, file);
+	fclose(file);
+#endif
 
 	if (RawFailed)
 	{
-		TotalFailed = TRUE;
-		PBYTE  CompressedBuffer2 = (PBYTE)AllocateMemoryP(CompressedIndex.CompressedSize);
-		
-		for (ULONG i = 0; i < countof(ExtraDecoderList); i++)
-		{
-			RtlCopyMemory(CompressedBuffer2, CompressedBuffer, CompressedIndex.CompressedSize);
-			ExtraDecoderList[i](CompressedBuffer, CompressedBuffer2, CompressedIndex.CompressedSize);
+		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
+		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
 
-			DecompSize = CompressedIndex.DecompressedSize;
-			if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
-				(PBYTE)CompressedBuffer2, CompressedIndex.CompressedSize)) == Z_OK)
-			{
-				FILE* file = fopen("index.dat", "wb");
-				fwrite(CompressedBuffer2, 1, CompressedIndex.CompressedSize, file);
-				fclose(file);
-				TotalFailed = FALSE;
-				break;
-			}
-			else
-			{
-				FILE* file = fopen("index.dat", "wb");
-				fwrite(CompressedBuffer2, 1, CompressedIndex.CompressedSize, file);
-				fclose(file);
-			}
-		}
-
-		if (TotalFailed)
-		{
-			FreeMemoryP(CompressedBuffer2);
-			MessageBoxW(NULL, L"Failed to decompress special chunk", L"KrkrExtract", MB_OK);
-			return FALSE;
-		}
+		MessageBoxW(NULL, L"Failed to decompress special chunk", L"KrkrExtract", MB_OK);
+		return FALSE;
 	}
 
 	Handle->IsM2Format = TRUE;

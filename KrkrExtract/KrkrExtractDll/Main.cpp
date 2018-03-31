@@ -83,6 +83,7 @@ t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;         
 #include "tp_stub.h"
 #include "mt64.h"
 #include "MultiThread.h"
+#include "XP3Parser.h"
 
 #pragma comment(lib, "Psapi.lib")
 #pragma comment(lib, "Version.lib")
@@ -936,7 +937,7 @@ Void FASTCALL EnumerateFileInDirectory(LPCWSTR szPath, std::vector<std::wstring>
 	}
 }
 
-
+Void DetectCxdecAndInitEntry();
 
 //TVP(KIRIKIRI) Z core / Scripting Platform for Win32
 //TVP(KIRIKIRI) 2 core / Scripting Platform for Win32
@@ -989,6 +990,8 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 				};
 
 				Mp::PatchMemory(f, countof(f));
+
+				DetectCxdecAndInitEntry();
 				Handle->ModuleType = ModuleVersion::Krkrz;
 			}
 			FreeMemoryP(FileBuffer);
@@ -1097,6 +1100,656 @@ ULONG64 MurmurHash64B(const void * key, int len, ULONG seed = 0xEE6B27EB)
 	h = (h << 32) | h2;
 
 	return h;
+}
+
+#include "zlib.h"
+
+
+BOOL IsEncryptedSenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk& File)
+{
+	KRKRZ_COMPRESSED_INDEX  CompressedIndex;
+	PBYTE                   CompressedBuffer;
+	PBYTE                   IndexBuffer;
+	ULONG                   DecompSize, iPos;
+	DWORD                   Hash;
+	XP3Index                Item;
+	ULARGE_INTEGER          ChunkSize;
+	USHORT                  NameLength;
+	GlobalData*             Handle;
+	BOOL                    RawFailed, TotalFailed;
+
+	Handle = GlobalData::GetGlobalData();
+
+	RtlCopyMemory(&CompressedIndex, pDecompress, sizeof(KRKRZ_COMPRESSED_INDEX));
+	File.Seek(CompressedIndex.Offset.LowPart, FILE_BEGIN);
+
+	iPos = 0;
+	DecompSize = CompressedIndex.DecompressedSize;
+	IndexBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.DecompressedSize);
+	CompressedBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.CompressedSize);
+
+	if (!IndexBuffer || !CompressedBuffer)
+	{
+		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
+		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
+		return FALSE;
+	}
+
+	File.Read(CompressedBuffer, CompressedIndex.CompressedSize);
+
+	RawFailed = FALSE;
+	if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+		(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+	{
+		RawFailed = TRUE;
+	}
+
+	FreeMemoryP(IndexBuffer);
+	FreeMemoryP(CompressedBuffer);
+
+	return RawFailed;
+}
+
+Void AddToSenrenBankaEntry(LPCWSTR lpFileName, PBYTE pDecompress, ULONG Size, NtFileDisk& File)
+{
+	KRKRZ_COMPRESSED_INDEX  CompressedIndex;
+	PBYTE                   CompressedBuffer;
+	ULONG                   DecompSize, iPos;
+	DWORD                   Hash;
+	XP3Index                Item;
+	ULARGE_INTEGER          ChunkSize;
+	USHORT                  NameLength;
+	GlobalData*             Handle;
+	BOOL                    RawFailed, TotalFailed;
+
+	Handle = GlobalData::GetGlobalData();
+
+	RtlCopyMemory(&CompressedIndex, pDecompress, sizeof(KRKRZ_COMPRESSED_INDEX));
+	File.Seek(CompressedIndex.Offset.LowPart, FILE_BEGIN);
+
+	iPos = 0;
+	DecompSize = CompressedIndex.DecompressedSize;
+	CompressedBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.CompressedSize);
+
+	if (!CompressedBuffer)
+		return;
+	
+	File.Read(CompressedBuffer, CompressedIndex.CompressedSize);
+
+	MemEntry Entry;
+	Entry.Buffer = CompressedBuffer;
+	Entry.Size = CompressedIndex.CompressedSize;
+	Entry.Hash = MurmurHash64B(Entry.Buffer, Entry.Size);
+
+	Handle->SpecialChunkMap.insert(std::make_pair(Entry.Hash, Entry));
+	Handle->SpecialChunkMapBySize.insert(std::make_pair(Entry.Size, Entry));
+
+	PrintConsoleW(L"Entry for [%s] was added\n", lpFileName);
+}
+
+Void GetSenrenBankaEntry(LPCWSTR lpFileName)
+{
+	NTSTATUS                Status;
+	NtFileDisk              File;
+	ULONG                   Count;
+	KRKR2_XP3_HEADER        XP3Header;
+	KRKR2_XP3_DATA_HEADER   DataHeader;
+	PBYTE                   Indexdata;
+	LARGE_INTEGER           BeginOffset, Offset;
+	CHAR                    M2ChunkInfo[8];
+	GlobalData*             Handle;
+
+	Handle = GlobalData::GetGlobalData();
+
+	Status = File.Open(lpFileName);
+	if (NT_FAILED(Status))
+		return;
+
+	Count = 0;
+	BeginOffset.QuadPart = 0;
+	Status = File.Read(&XP3Header, sizeof(XP3Header));
+	RtlZeroMemory(M2ChunkInfo, sizeof(M2ChunkInfo));
+
+	if (NT_FAILED(Status))
+	{
+		File.Close();
+		return;
+	}
+
+	Status = STATUS_UNSUCCESSFUL;
+
+	if (RtlCompareMemory(StaticXP3V2Magic, XP3Header.Magic, sizeof(StaticXP3V2Magic)) != sizeof(StaticXP3V2Magic))
+		return;
+	
+
+	ULONG64 CompresseBufferSize = 0x1000;
+	ULONG64 DecompressBufferSize = 0x1000;
+	PBYTE pCompress = (PBYTE)AllocateMemoryP((ULONG)CompresseBufferSize);
+	PBYTE pDecompress = (PBYTE)AllocateMemoryP((ULONG)DecompressBufferSize);
+	DataHeader.OriginalSize = XP3Header.IndexOffset;
+
+	if (Handle->DebugOn)
+		PrintConsoleW(L"Index Offset %08x\n", (ULONG32)XP3Header.IndexOffset.QuadPart);
+
+	BOOL Result = FALSE;
+	do
+	{
+		Offset.QuadPart = DataHeader.OriginalSize.QuadPart + BeginOffset.QuadPart;
+		File.Seek(Offset, FILE_BEGIN);
+		if (NT_FAILED(File.Read(&DataHeader, sizeof(DataHeader))))
+		{
+			if (Handle->DebugOn)
+				PrintConsoleW(L"Couldn't Read Index Header\n");
+
+			File.Close();
+			FreeMemoryP(pCompress);
+			FreeMemoryP(pDecompress);
+			return;
+		}
+
+		if (DataHeader.ArchiveSize.HighPart != 0 || DataHeader.ArchiveSize.LowPart == 0)
+			continue;
+
+		if (DataHeader.ArchiveSize.LowPart > CompresseBufferSize)
+		{
+			CompresseBufferSize = DataHeader.ArchiveSize.LowPart;
+			pCompress = (PBYTE)ReAllocateMemoryP(pCompress, (ULONG)CompresseBufferSize);
+		}
+
+		if ((DataHeader.bZlib & 7) == 0)
+		{
+			Offset.QuadPart = -8;
+			File.Seek(Offset, FILE_CURRENT);
+		}
+
+		File.Read(pCompress, DataHeader.ArchiveSize.LowPart);
+
+		BOOL EncodeMark = DataHeader.bZlib & 7;
+
+		if (GlobalData::GetGlobalData()->DebugOn)
+			PrintConsoleW(L"Index Encode %x\n", DataHeader.bZlib);
+
+		if (EncodeMark == FALSE)
+		{
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleW(L"Index : Raw Data\n");
+
+			if (DataHeader.ArchiveSize.LowPart > DecompressBufferSize)
+			{
+				DecompressBufferSize = DataHeader.ArchiveSize.LowPart;
+				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+			}
+
+			RtlCopyMemory(pDecompress, pCompress, DataHeader.ArchiveSize.LowPart);
+			DataHeader.OriginalSize.LowPart = DataHeader.ArchiveSize.LowPart;
+		}
+		else
+		{
+
+			if (DataHeader.OriginalSize.LowPart > DecompressBufferSize)
+			{
+				DecompressBufferSize = DataHeader.OriginalSize.LowPart;
+				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+			}
+
+			DataHeader.OriginalSize.HighPart = DataHeader.OriginalSize.LowPart;
+			if (uncompress((PBYTE)pDecompress, (PULONG)&DataHeader.OriginalSize.HighPart,
+				(PBYTE)pCompress, DataHeader.ArchiveSize.LowPart) == Z_OK)
+			{
+				DataHeader.OriginalSize.LowPart = DataHeader.OriginalSize.HighPart;
+			}
+		}
+
+		if (GlobalData::GetGlobalData()->DebugOn)
+			PrintConsoleW(L"Index Size %08x\n", (ULONG32)DataHeader.OriginalSize.LowPart);
+
+		if (IsCompatXP3(pDecompress, DataHeader.OriginalSize.LowPart, &Handle->M2ChunkMagic))
+		{
+			FindChunkMagicFirst(pDecompress, DataHeader.OriginalSize.LowPart);
+
+			CopyMemory(M2ChunkInfo, &Handle->M2ChunkMagic, 4);
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleA("Chunk : %s\n", M2ChunkInfo);
+
+			switch (DetectCompressedChunk(pDecompress, DataHeader.OriginalSize.LowPart))
+			{
+			case FALSE:
+
+				PrintConsoleW(L"Pre-init : read [%s] special entry.\n", lpFileName);
+				AddToSenrenBankaEntry(lpFileName, pDecompress, DataHeader.OriginalSize.LowPart, File);
+				break;
+			}
+		}
+
+	} while (DataHeader.bZlib & 0x80);
+
+	File.Close();
+	FreeMemoryP(pCompress);
+	FreeMemoryP(pDecompress);
+}
+
+Void ReadSenrenBanka()
+{
+	WIN32_FIND_DATAW          FileInfo;
+	HANDLE                    FileHandle;
+	NtFileDisk                File;
+	std::vector<std::wstring> ArchiveList;
+	
+	FileHandle = Nt_FindFirstFile(L"*.xp3", &FileInfo);
+	if (FileHandle == 0 || FileHandle == INVALID_HANDLE_VALUE)
+		return;
+
+	do
+	{
+		PrintConsoleW(L"Pre init : found archive : %s\n", FileInfo.cFileName);
+		ArchiveList.push_back(FileInfo.cFileName);
+	} while (Nt_FindNextFile(FileHandle, &FileInfo));
+
+	for (auto& Entry : ArchiveList)
+	{
+		GetSenrenBankaEntry(Entry.c_str());
+	}
+	
+}
+
+
+class HardwareBreakpoint
+{
+public:
+	HardwareBreakpoint() { m_index = -1; }
+	~HardwareBreakpoint() { Clear(); }
+
+	// The enum values correspond to the values used by the Intel Pentium,
+	// so don't change them!
+	enum Condition { Write = 1, Read /* or write! */ = 3 };
+
+	void Set(void* address, int len /* 1, 2, or 4 */, Condition when)
+	{
+		CONTEXT cxt;
+		HANDLE thisThread = GetCurrentThread();
+
+		switch (len)
+		{
+		case 1: len = 0; break;
+		case 2: len = 1; break;
+		case 4: len = 3; break;
+		}
+
+		// The only registers we care about are the debug registers
+		cxt.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+
+		// Read the register values
+		GetThreadContext(thisThread, &cxt);
+
+		// Find an available hardware register
+		for (m_index = 0; m_index < 4; ++m_index)
+		{
+			if ((cxt.Dr7 & (1 << (m_index * 2))) == 0)
+				break;
+		}
+
+		switch (m_index)
+		{
+		case 0: cxt.Dr0 = (DWORD)address; break;
+		case 1: cxt.Dr1 = (DWORD)address; break;
+		case 2: cxt.Dr2 = (DWORD)address; break;
+		case 3: cxt.Dr3 = (DWORD)address; break;
+		}
+
+		SetBits(cxt.Dr7, 16 + (m_index * 4), 2, when);
+		SetBits(cxt.Dr7, 18 + (m_index * 4), 2, len);
+		SetBits(cxt.Dr7, m_index * 2, 1, 1);
+
+		// Write out the new debug registers
+		SetThreadContext(thisThread, &cxt);
+	}
+	void Clear(PCONTEXT Context)
+	{
+		SetBits(Context->Dr7, m_index * 2, 1, 0);
+		Context->Dr0 = 0;
+		Context->Dr1 = 0;
+		Context->Dr2 = 0;
+		Context->Dr3 = 0;
+		m_index = -1;
+	}
+
+	void Clear()
+	{
+		if (m_index != -1)
+		{
+			CONTEXT cxt;
+			HANDLE thisThread = GetCurrentThread();
+
+			// The only registers we care about are the debug registers
+			cxt.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+
+			// Read the register values
+			GetThreadContext(thisThread, &cxt);
+
+			SetBits(cxt.Dr7, m_index * 2, 1, 0);
+
+			// Write out the new debug registers
+			SetThreadContext(thisThread, &cxt);
+
+			m_index = -1;
+		}
+	}
+
+protected:
+
+	inline void SetBits(unsigned long& dw, int lowBit, int bits, int newValue)
+	{
+		int mask = (1 << bits) - 1; // e.g. 1 becomes 0001, 2 becomes 0011, 3 becomes 0111
+
+		dw = (dw & ~(mask << lowBit)) | (newValue << lowBit);
+	}
+
+	int m_index; // -1 means not set; 0-3 means we've set that hardware bp
+};
+
+API_POINTER(ReadFile) StubReadFile = NULL;
+HardwareBreakpoint   BreakPoint;
+BOOL                 BreakOnce = FALSE;
+ULONG                RetAddr = 0;
+PVOID ExceptionHandler = NULL;
+
+#define SET_DEBUG_REGISTER_FLAG 0x0000000
+
+LONG NTAPI FindPrivateProcHandler(PEXCEPTION_POINTERS pExceptionInfo)
+{
+	NTSTATUS    Status;
+	GlobalData* Handle;
+	DWORD       OldFlags;
+	PVOID       ModuleBase;
+	PDR7_INFO   Dr7;
+	ULONG       iPos, OpSize, RealRetAddr;
+	BOOL        FindRet;
+	DWORD       PreviousProtect;
+
+	Handle = GlobalData::GetGlobalData();
+	
+	PrintConsoleW(L"FindPrivateProcHandler : %08x -> %08x\n", pExceptionInfo->ExceptionRecord->ExceptionCode,
+		pExceptionInfo->ContextRecord->Eip);
+
+	if (BreakOnce == FALSE && pExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_SINGLE_STEP)
+	{
+		BreakPoint.Clear(pExceptionInfo->ContextRecord);
+		pExceptionInfo->ContextRecord->ContextFlags |= CONTEXT_DEBUG_REGISTERS | SET_DEBUG_REGISTER_FLAG;
+		
+		///get call proc
+		PrintConsoleW(L"eip %08x\n", pExceptionInfo->ContextRecord->Eip);
+		ModuleBase = GetImageBaseAddress((PVOID)pExceptionInfo->ContextRecord->Eip);
+		if (ModuleBase == NULL)
+		{
+			/// i will check current process memory in user land.
+			/// dump all hidden modules and find the target one.
+
+			PrintConsoleW(L"0ops...failed to get module base?\n");
+			PrintConsoleW(L"->launch memory search engine...\n");
+		}
+		else
+		{
+			PrintConsoleW(L"ahhh...I FOUND YOUR HIDDEN MODULE -> %08x\n", ModuleBase);
+			LdrAddRefDll(GET_MODULE_HANDLE_EX_FLAG_PIN, ModuleBase);
+		}
+
+		///[!!!] find retn
+		///because ebp will be overwrote...
+		iPos = pExceptionInfo->ContextRecord->Eip;
+		FindRet = FALSE;
+
+
+		/// [+] the best method: create sym cache
+		while (iPos < pExceptionInfo->ContextRecord->Eip + 0x300)
+		{
+			ULONG OpSize = GetOpCodeSize32((PVOID)iPos);
+			if (OpSize == 0 || OpSize == -1)
+				break;
+
+			if (OpSize == 1 && ((PBYTE)iPos)[0] == 0xC3)
+			{
+				FindRet = TRUE;
+				RetAddr = iPos;
+
+				BYTE Break = 0xCC;
+
+				VirtualProtect((PVOID)RetAddr, 1, PAGE_EXECUTE_READWRITE, &PreviousProtect);
+				WriteProcessMemory(GetCurrentProcess(), (LPVOID)RetAddr, &Break, 1, NULL);
+				VirtualProtect((PVOID)RetAddr, 1, PreviousProtect, &PreviousProtect);
+				break;
+			}
+
+			iPos += OpSize;
+		}
+		
+		BreakOnce = TRUE;
+		return EXCEPTION_CONTINUE_EXECUTION;
+	}
+	else if (RetAddr != 0 && pExceptionInfo->ContextRecord->Eip == RetAddr && pExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_BREAKPOINT)
+	{
+		BYTE Break = 0xC3;
+
+		VirtualProtect((PVOID)RetAddr, 1, PAGE_EXECUTE_READWRITE, &PreviousProtect);
+		WriteProcessMemory(GetCurrentProcess(), (LPVOID)RetAddr, &Break, 1, NULL);
+		VirtualProtect((PVOID)RetAddr, 1, PreviousProtect, &PreviousProtect);
+
+		RealRetAddr = ((PDWORD)(pExceptionInfo->ContextRecord->Esp))[0];
+		PrintConsoleW(L"ret addr : %08x\n", RealRetAddr);
+
+		///validate this call first
+		Handle->SpecialChunkDecoder = (GlobalData::SpecialChunkDecoderFunc)GetCallDestination(RealRetAddr - 5);
+		PrintConsoleW(L"ok, I GOT YOUR ROUTINE -> %p\n", Handle->SpecialChunkDecoder);
+
+		RetAddr = 0;
+		return EXCEPTION_CONTINUE_EXECUTION;
+	}
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+
+#include "SectionProtector.h"
+
+BOOL SetBpOnce = FALSE;
+RTL_CRITICAL_SECTION ReadFileLocker;
+
+BOOL
+WINAPI
+HookReadFile(
+ HANDLE hFile,
+ LPVOID lpBuffer,
+ DWORD nNumberOfBytesToRead,
+ LPDWORD lpNumberOfBytesRead,
+ LPOVERLAPPED lpOverlapped
+)
+{
+	BOOL        Success;
+	ULONG64     Hash;
+	GlobalData* Handle;
+
+	Handle = GlobalData::GetGlobalData();
+
+	SectionProtector<PRTL_CRITICAL_SECTION> AutoLocker(&ReadFileLocker);
+
+	Success = StubReadFile(hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
+	auto Entry = Handle->SpecialChunkMapBySize.find(nNumberOfBytesToRead);
+
+	if (Success && Entry != Handle->SpecialChunkMapBySize.end() && SetBpOnce == FALSE)
+	{
+		Hash = MurmurHash64B(lpBuffer, nNumberOfBytesToRead);
+		if (Hash == Entry->second.Hash) //also check name
+		{
+			SetBpOnce = TRUE;
+			//hw bp
+			ExceptionHandler = AddVectoredExceptionHandler(1, FindPrivateProcHandler);
+			if (!ExceptionHandler)
+				PrintConsoleW(L"Try to added handler, reason = %u\n", GetLastError());
+			else
+				PrintConsoleW(L"Exception was added.\n");
+
+			BreakPoint.Set(lpBuffer, 1, HardwareBreakpoint::Condition::Write);
+			PrintConsoleW(L"set bp : ok\n");
+		}
+	}
+	return Success;
+}
+
+
+Void DetectCxdecAndInitEntry()
+{
+	NTSTATUS                Status;
+	NtFileDisk              File;
+	ULONG                   Count;
+	KRKR2_XP3_HEADER        XP3Header;
+	KRKR2_XP3_DATA_HEADER   DataHeader;
+	PBYTE                   Indexdata;
+	LARGE_INTEGER           BeginOffset, Offset;
+	CHAR                    M2ChunkInfo[8];
+	GlobalData*             Handle;
+
+	Handle = GlobalData::GetGlobalData();
+
+	//AllocConsole();
+	Status = File.Open("data.xp3");
+	if (NT_FAILED(Status))
+		return; 
+
+	Count = 0;
+	BeginOffset.QuadPart = 0;
+	Status = File.Read(&XP3Header, sizeof(XP3Header));
+	RtlZeroMemory(M2ChunkInfo, sizeof(M2ChunkInfo));
+
+	if (NT_FAILED(Status))
+	{
+		File.Close();
+		return;
+	}
+
+	Status = STATUS_UNSUCCESSFUL;
+
+	if (RtlCompareMemory(StaticXP3V2Magic, XP3Header.Magic, sizeof(StaticXP3V2Magic)) != sizeof(StaticXP3V2Magic))
+	{
+		if (Handle->DebugOn)
+			PrintConsoleW(L"No a XP3 Package!\n");
+
+		return;
+	}
+
+	ULONG64 CompresseBufferSize = 0x1000;
+	ULONG64 DecompressBufferSize = 0x1000;
+	PBYTE pCompress = (PBYTE)AllocateMemoryP((ULONG)CompresseBufferSize);
+	PBYTE pDecompress = (PBYTE)AllocateMemoryP((ULONG)DecompressBufferSize);
+	DataHeader.OriginalSize = XP3Header.IndexOffset;
+
+
+	BOOL Result = FALSE;
+	do
+	{
+		Offset.QuadPart = DataHeader.OriginalSize.QuadPart + BeginOffset.QuadPart;
+		File.Seek(Offset, FILE_BEGIN);
+		if (NT_FAILED(File.Read(&DataHeader, sizeof(DataHeader))))
+		{
+			if (Handle->DebugOn)
+				PrintConsoleW(L"Couldn't Read Index Header\n");
+
+			File.Close();
+			FreeMemoryP(pCompress);
+			FreeMemoryP(pDecompress);
+			return;
+		}
+
+		if (DataHeader.ArchiveSize.HighPart != 0 || DataHeader.ArchiveSize.LowPart == 0)
+			continue;
+
+		if (DataHeader.ArchiveSize.LowPart > CompresseBufferSize)
+		{
+			CompresseBufferSize = DataHeader.ArchiveSize.LowPart;
+			pCompress = (PBYTE)ReAllocateMemoryP(pCompress, (ULONG)CompresseBufferSize);
+		}
+
+		if ((DataHeader.bZlib & 7) == 0)
+		{
+			Offset.QuadPart = -8;
+			File.Seek(Offset, FILE_CURRENT);
+		}
+
+		File.Read(pCompress, DataHeader.ArchiveSize.LowPart);
+
+		BOOL EncodeMark = DataHeader.bZlib & 7;
+
+		if (GlobalData::GetGlobalData()->DebugOn)
+			PrintConsoleW(L"Index Encode %x\n", DataHeader.bZlib);
+
+		if (EncodeMark == FALSE)
+		{
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleW(L"Index : Raw Data\n");
+
+			if (DataHeader.ArchiveSize.LowPart > DecompressBufferSize)
+			{
+				DecompressBufferSize = DataHeader.ArchiveSize.LowPart;
+				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+			}
+
+			RtlCopyMemory(pDecompress, pCompress, DataHeader.ArchiveSize.LowPart);
+			DataHeader.OriginalSize.LowPart = DataHeader.ArchiveSize.LowPart;
+		}
+		else
+		{
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleW(L"Index : Zlib Data\n");
+
+			if (DataHeader.OriginalSize.LowPart > DecompressBufferSize)
+			{
+				DecompressBufferSize = DataHeader.OriginalSize.LowPart;
+				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+			}
+
+			DataHeader.OriginalSize.HighPart = DataHeader.OriginalSize.LowPart;
+			if (uncompress((PBYTE)pDecompress, (PULONG)&DataHeader.OriginalSize.HighPart,
+				(PBYTE)pCompress, DataHeader.ArchiveSize.LowPart) == Z_OK)
+			{
+				DataHeader.OriginalSize.LowPart = DataHeader.OriginalSize.HighPart;
+			}
+		}
+
+		if (IsCompatXP3(pDecompress, DataHeader.OriginalSize.LowPart, &Handle->M2ChunkMagic))
+		{
+			FindChunkMagicFirst(pDecompress, DataHeader.OriginalSize.LowPart);
+
+			CopyMemory(M2ChunkInfo, &Handle->M2ChunkMagic, 4);
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleA("Chunk : %s\n", M2ChunkInfo);
+
+			switch (DetectCompressedChunk(pDecompress, DataHeader.OriginalSize.LowPart))
+			{
+			case FALSE:
+				
+				PrintConsoleW(L"Pre-init : found Special chunk.\n");
+
+				Result = IsEncryptedSenrenBanka(pDecompress, DataHeader.OriginalSize.LowPart, File);
+				if (Result)
+				{
+					Handle->IsSpcialChunkEncrypted = TRUE;
+					PrintConsoleW(L"Pre-init : Special chunk is encryped.\n");
+					ReadSenrenBanka();
+
+					Mp::PATCH_MEMORY_DATA fun[] = 
+					{
+						Mp::FunctionJumpVa(ReadFile, HookReadFile, &StubReadFile)
+					};
+
+					InitializeCriticalSection(&ReadFileLocker);
+					Mp::PatchMemory(fun, countof(fun));
+				}
+				break;
+			}
+		}
+
+	} while (DataHeader.bZlib & 0x80);
+
+	File.Close();
+	FreeMemoryP(pCompress);
+	FreeMemoryP(pDecompress);
 }
 
 Void InitRand(HMODULE hModule)
@@ -1644,6 +2297,8 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 		InitRand(hModule);
 
 		GlobalData::GetGlobalData();
+
+		//should be the last one to be handled
 		//AddVectoredExceptionHandler(FALSE, KrkrUnhandledExceptionFilter);
 
 		Nt_CreateThread(ConsoleMoniterThread);
