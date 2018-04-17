@@ -64,7 +64,7 @@ enum ModuleVersion
 {
 	Krkr2,
 	Krkrz, //M2
-	Krkr3  //看了看svn上的进度和开坑时间，简直有生之年
+	Krkr3  
 };
 
 
@@ -89,7 +89,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 
 #define szApplicationName   L"[X'moe]Welcome to KrkrExtract(version : %s, built on : %s)"
 #define szWindowClassName   L"XP3ExtractMainClass"
-#define _XP3ExtractVersion_ L"Ver 4.0.0.2"
+#define _XP3ExtractVersion_ L"Ver 4.0.0.3"
 
 
 class MemEntry

@@ -1,7 +1,7 @@
-﻿生成启动时间为 2018/03/31 18:10:04。
-     1>项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
+﻿生成启动时间为 2018/04/17 13:06:07。
+     1>项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt FakePNG.cpp KrkrDumper.cpp KrkrExtract.cpp KrkrPacker.cpp KrkrTextDecode.cpp KrkrUniversalDumper.cpp KrkrUniversalPatch.cpp Main.cpp PsbWorker.cpp XP3Parser.cpp
+         D:\VSProgram\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt FakePNG.cpp KrkrDumper.cpp KrkrExtract.cpp KrkrPacker.cpp KrkrTextDecode.cpp KrkrUniversalDumper.cpp KrkrUniversalPatch.cpp Main.cpp PsbWorker.cpp XP3Parser.cpp
          FakePNG.cpp
          KrkrDumper.cpp
          KrkrExtract.cpp
@@ -18,10 +18,10 @@
      1>Main.cpp(2238): warning C4244: “参数”: 从“DWORD64”转换到“ULONG_PTR”，可能丢失数据
          PsbWorker.cpp
      1>PsbWorker.cpp(1428): warning C4996: '_gcvt': This function or variable may be unsafe. Consider using _gcvt_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 E:\VSProgram\Visual Studio 2013 Ultimate\VC\include\stdlib.h(786) : 参见“_gcvt”的声明
+                 D:\VSProgram\Microsoft Visual Studio 12.0\VC\include\stdlib.h(786) : 参见“_gcvt”的声明
          XP3Parser.cpp
        Link:
-         E:\VSProgram\Visual Studio 2013 Ultimate\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll" /INCREMENTAL:NO /NOLOGO E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:win.manifest /manifestinput:"E:\VSProgram\Visual Studio 2013 Ultimate\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib" /MACHINE:X86 /SAFESEH /DLL Release\KrkrExtractDll.res
+         D:\VSProgram\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\GitPool\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll" /INCREMENTAL:NO /NOLOGO D:\GitPool\KrkrExtract\KrkrExtract\lib\onig_s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:win.manifest /manifestinput:"D:\VSProgram\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"D:\GitPool\KrkrExtract\KrkrExtract\Release\KrkrExtract.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"D:\GitPool\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib" /MACHINE:X86 /SAFESEH /DLL Release\KrkrExtractDll.res
          Release\md5.obj
          Release\RiddleJoker_Decode.obj
          Release\sha1.obj
@@ -103,12 +103,13 @@
          Release\XP3Parser.obj
          Release\xxhash.obj
          Release\zutil.obj
-            正在创建库 E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib 和对象 E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.exp
+            正在创建库 D:\GitPool\KrkrExtract\KrkrExtract\Release\KrkrExtract.lib 和对象 D:\GitPool\KrkrExtract\KrkrExtract\Release\KrkrExtract.exp
          正在生成代码
          已完成代码的生成
-         KrkrExtractDll.vcxproj -> E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll
-     1>已完成生成项目“E:\GitPool\KrkrExtract\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”(Build 个目标)的操作。
+     1>MyLibrary_x86_static.lib(my.obj) : warning LNK4099: 未找到 PDB“vc120.pdb”(使用“MyLibrary_x86_static.lib(my.obj)”或在“D:\GitPool\KrkrExtract\KrkrExtract\Release\vc120.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+         KrkrExtractDll.vcxproj -> D:\GitPool\KrkrExtract\KrkrExtract\Release\KrkrExtract.dll
+     1>已完成生成项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:34.31
+已用时间 00:00:11.96

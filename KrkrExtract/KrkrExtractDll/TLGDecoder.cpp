@@ -648,7 +648,7 @@ void *(*alloc)(DWORD)
 		}
 	}
 
-#if 0
+#if 1
 	if (pixel_bytes == 4) {
 		BYTE *rgba = pdib;
 		for (unsigned int y = 0; y < act_height; y++) {
