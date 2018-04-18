@@ -6,6 +6,9 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 
 ctf还有kirikiri题???
 
+## The Next Generation of KrkrExtract
+[KrkrzExtract Website](https://github.com/xmoeproject/KrkrzExtract)
+
 ## OpenSource License  
 
 ![Files](https://www.gnu.org/graphics/gplv3-127x51.png)
