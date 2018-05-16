@@ -226,7 +226,8 @@ NTSTATUS NTAPI KrkrPacker::GetSenrenBankaPackInfo(PBYTE IndexData, ULONG IndexSi
 	NTSTATUS                Status;
 	ULONG                   iPos;
 	PBYTE                   CompressedBuffer, IndexBuffer;
-	ULONG                   DecompSize;
+	ULONG                   DecompSize, DecodeSize;
+	BOOL                    RawFailed;
 	GlobalData*             Handle;
 
 
@@ -272,8 +273,39 @@ NTSTATUS NTAPI KrkrPacker::GetSenrenBankaPackInfo(PBYTE IndexData, ULONG IndexSi
 		return Status;
 	}
 
-	if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
-		(PBYTE)CompressedBuffer, SenrenBankaInfo.ArchiveSize)) != Z_OK)
+
+	RawFailed = FALSE;
+	if (!Handle->IsSpcialChunkEncrypted)
+	{
+		if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+			(PBYTE)CompressedBuffer, SenrenBankaInfo.ArchiveSize)) != Z_OK)
+		{
+			RawFailed = TRUE;
+		}
+	}
+	else
+	{
+		if (Handle->SpecialChunkDecoder)
+		{
+			DecodeSize = 0x100;
+			if (DecodeSize < 0x100)
+				DecodeSize = SenrenBankaInfo.ArchiveSize;
+
+			Handle->SpecialChunkDecoder(CompressedBuffer, CompressedBuffer, DecodeSize);
+			DecompSize = SenrenBankaInfo.OriginalSize;
+			if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+				(PBYTE)CompressedBuffer, SenrenBankaInfo.ArchiveSize)) != Z_OK)
+			{
+				RawFailed = TRUE;
+			}
+		}
+		else
+		{
+			RawFailed = TRUE;
+		}
+	}
+
+	if (RawFailed)
 	{
 		if (Handle->DebugOn)
 			PrintConsoleW(L"Failed to gather information(at Compressed block)\n");
@@ -3239,6 +3271,11 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	SenrenBankaHeader.ChunkSize = SenrenBankaInfo.ChunkSize;
 	SenrenBankaHeader.Offset = Offset;
 
+
+	if (Handle->IsSpcialChunkEncrypted && Handle->SpecialChunkDecoder)
+		Handle->SpecialChunkDecoder(lpBlockCompressed, lpBlockCompressed, 
+			SenrenBankaHeader.ArchiveSize <= 0x100 ? SenrenBankaHeader.ArchiveSize : 0x100);
+
 	FileXP3.Write(lpBlockCompressed, SenrenBankaHeader.ArchiveSize);
 	FreeMemoryP(lpBlockCompressed);
 
@@ -3604,6 +3641,11 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	FreeMemoryP(lpBlock);
 	SenrenBankaHeader.ChunkSize = SenrenBankaInfo.ChunkSize;
 	SenrenBankaHeader.Offset   = Offset;
+
+
+	if (Handle->IsSpcialChunkEncrypted && Handle->SpecialChunkDecoder)
+		Handle->SpecialChunkDecoder(lpBlockCompressed, lpBlockCompressed,
+		SenrenBankaHeader.ArchiveSize <= 0x100 ? SenrenBankaHeader.ArchiveSize : 0x100);
 
 	FileXP3.Write(lpBlockCompressed, SenrenBankaHeader.ArchiveSize);
 	FreeMemoryP(lpBlockCompressed);

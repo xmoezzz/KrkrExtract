@@ -1,9 +1,53 @@
-﻿生成启动时间为 2018/04/17 13:06:07。
+﻿生成启动时间为 5/16/2018 3:15:38 PM。
      1>项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\onig\onig_s.vcxproj”在节点 2 上(Build 个目标)。
      1>Lib:
+         D:\VSProgram\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\GitPool\KrkrExtract\KrkrExtract\lib\onig_s.lib" /NOLOGO /LTCG Release\ascii.obj
+         Release\big5.obj
+         Release\cp1251.obj
+         Release\euc_jp.obj
+         Release\euc_kr.obj
+         Release\euc_tw.obj
+         Release\gb18030.obj
+         Release\iso8859_1.obj
+         Release\iso8859_10.obj
+         Release\iso8859_11.obj
+         Release\iso8859_13.obj
+         Release\iso8859_14.obj
+         Release\iso8859_15.obj
+         Release\iso8859_16.obj
+         Release\iso8859_2.obj
+         Release\iso8859_3.obj
+         Release\iso8859_4.obj
+         Release\iso8859_5.obj
+         Release\iso8859_6.obj
+         Release\iso8859_7.obj
+         Release\iso8859_8.obj
+         Release\iso8859_9.obj
+         Release\koi8.obj
+         Release\koi8_r.obj
+         Release\sjis.obj
+         Release\unicode.obj
+         Release\utf16_be.obj
+         Release\utf16_le.obj
+         Release\utf32_be.obj
+         Release\utf32_le.obj
+         Release\utf8.obj
+         Release\regcomp.obj
+         Release\regenc.obj
+         Release\regerror.obj
+         Release\regexec.obj
+         Release\regext.obj
+         Release\reggnu.obj
+         Release\regparse.obj
+         Release\regposerr.obj
+         Release\regposix.obj
+         Release\regsyntax.obj
+         Release\regtrav.obj
+         Release\regversion.obj
+         Release\st.obj
          onig_s.vcxproj -> D:\GitPool\KrkrExtract\KrkrExtract\lib\onig_s.lib
      1>已完成生成项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\onig\onig_s.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:00.04
+已用时间 00:00:01.09

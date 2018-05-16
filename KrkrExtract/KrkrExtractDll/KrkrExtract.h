@@ -89,7 +89,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 
 #define szApplicationName   L"[X'moe]Welcome to KrkrExtract(version : %s, built on : %s)"
 #define szWindowClassName   L"XP3ExtractMainClass"
-#define _XP3ExtractVersion_ L"Ver 4.0.0.4"
+#define _XP3ExtractVersion_ L"Ver 4.0.0.5"
 
 
 class MemEntry

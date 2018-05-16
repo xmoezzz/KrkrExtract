@@ -1,4 +1,4 @@
-﻿生成启动时间为 2018/04/17 13:06:07。
+﻿生成启动时间为 5/16/2018 3:16:10 PM。
      1>项目“D:\GitPool\KrkrExtract\KrkrExtract\KrkrExtractDll\KrkrExtractDll.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
          D:\VSProgram\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KRKREXTRACTDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt FakePNG.cpp KrkrDumper.cpp KrkrExtract.cpp KrkrPacker.cpp KrkrTextDecode.cpp KrkrUniversalDumper.cpp KrkrUniversalPatch.cpp Main.cpp PsbWorker.cpp XP3Parser.cpp
@@ -112,4 +112,4 @@
 
 生成成功。
 
-已用时间 00:00:11.96
+已用时间 00:00:12.48
