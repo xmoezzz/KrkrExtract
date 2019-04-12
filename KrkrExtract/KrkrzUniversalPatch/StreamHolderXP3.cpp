@@ -8,17 +8,17 @@ mStream(nullptr)
 	mRtcBuffer = (PBYTE)Buffer;
 	mRtcBufferSize = BufferSize;
 
-	mStream = (MemoryStream*)AllocateMemoryP(sizeof(MemoryStream));
+	mStream = (MemoryStream*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(MemoryStream));
 	mStream->Init(mRtcBuffer, mRtcBufferSize);
 }
 
 StreamHolderXP3::~StreamHolderXP3()
 {
 	if (mRtcBuffer)
-		FreeMemoryP(mRtcBuffer);
+		HeapFree(GetProcessHeap(), 0, mRtcBuffer);
 
 	if (mStream)
-		FreeMemoryP(mStream);
+		HeapFree(GetProcessHeap(), 0, mStream);
 
 	mRtcBuffer = nullptr;
 	mRtcBufferSize = 0;

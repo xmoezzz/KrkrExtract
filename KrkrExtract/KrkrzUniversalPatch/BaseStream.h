@@ -1,6 +1,6 @@
 #pragma once
 
-#include "my.h"
+#include <my.h>
 
 typedef struct MemoryStream
 {
@@ -75,8 +75,9 @@ typedef struct MemoryStream
 			NewPos = Stop + Offset;
 			break;
 		default:
-			PrintConsoleW(L"Seek Error\n");
-			Ps::ExitProcess(-1);
+			//PrintConsoleW(L"Seek Error\n");
+			//ExitProcess(-1);
+			break;
 		}
 
 		if (NewPos < Base)

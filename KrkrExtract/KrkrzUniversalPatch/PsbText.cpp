@@ -1,5 +1,5 @@
 #include "PsbText.h"
-#include "my.h"
+#include <my.h>
 #include <vector>
 #include <string>
 
@@ -78,7 +78,7 @@ DWORD* M2CopyArray(BYTE* pOri, DWORD count, int type)
 	{
 	case 0xd:
 	{
-		for (int i = 0; i<count; i++)
+		for (DWORD i = 0; i<count; i++)
 			pArray[i] = pOri[i];
 	}
 	break;
@@ -1008,7 +1008,7 @@ MRESULT WINAPI SaveText(LPFILE_INFO lpFileInfo, PBYTE& OutBuffer, ULONG& OutSize
 	if (!pInfo->bIsCompressed)
 	{
 		OutSize = nNewStreamSize;
-		OutBuffer = (PBYTE)AllocateMemoryP(nNewStreamSize);
+		OutBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), 0, nNewStreamSize);
 
 		memcpy(OutBuffer, lpTemp, nNewStreamSize);
 
@@ -1029,7 +1029,7 @@ MRESULT WINAPI SaveText(LPFILE_INFO lpFileInfo, PBYTE& OutBuffer, ULONG& OutSize
 		}
 
 		OutSize = 8 + nNewStreamSize;
-		OutBuffer = (PBYTE)AllocateMemoryP(OutSize);
+		OutBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, OutSize);
 
 		memcpy(OutBuffer, magic, 8);
 		memcpy(OutBuffer + 8, tmp, nNewStreamSize);

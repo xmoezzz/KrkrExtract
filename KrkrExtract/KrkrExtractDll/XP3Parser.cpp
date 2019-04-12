@@ -39,7 +39,7 @@ NTSTATUS FindEmbededXp3OffsetSlow(NtFileDisk &file, PLARGE_INTEGER Offset)
 		Xp3Signature = Buffer;
 		for (ULONG_PTR Count = sizeof(Buffer) / 0x10; Count; Xp3Signature += 0x10, --Count)
 		{
-			if (!CompareMemory(Xp3Signature, XP3Header, sizeof(XP3Header)))
+			if (!memcmp(Xp3Signature, XP3Header, sizeof(XP3Header)))
 			{
 				Offset->QuadPart = file.GetCurrentPos64() - sizeof(Buffer) + (Xp3Signature - Buffer);
 				return STATUS_SUCCESS;
@@ -167,7 +167,7 @@ BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size)
 					CurOffset += 8 * 2;
 					CurOffset += 2;
 
-					if (!StrCompareW((LPCWSTR)(pDecompress + CurOffset), ProtectionInfo))
+					if (!lstrcmpW((LPCWSTR)(pDecompress + CurOffset), ProtectionInfo))
 					{
 						NotAdd = TRUE;
 						PtrOffset = EndOffset;
@@ -204,7 +204,7 @@ BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size)
 
 			Handle->IsM2Format = TRUE;
 
-			if (!StrCompareW(item.yuzu.Name.c_str(), ProtectionInfo))
+			if (!lstrcmpW(item.yuzu.Name.c_str(), ProtectionInfo))
 				NotAdd = TRUE;
 		}
 		else
@@ -304,7 +304,7 @@ BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size)
 					iPosAdd(4);
 
 					WCHAR FakeNameStr[60] = { 0 };
-					FormatStringW(FakeNameStr, L"%08X-%08X-%08X", FakeNameSegm1, FakeNameSegm2, FakeNameSegm3);
+					_swprintf(FakeNameStr, L"%08X-%08X-%08X", FakeNameSegm1, FakeNameSegm2, FakeNameSegm3);
 					item.info.FileName = FakeNameStr;
 				}
 				else
@@ -347,7 +347,7 @@ BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size)
 						NotAdd = TRUE;
 					}
 
-					if (!StrCompareW(ProtectionInfo, WideFileName.c_str()))
+					if (!lstrcmpW(ProtectionInfo, WideFileName.c_str()))
 					{
 						NotAdd = TRUE;
 					}
@@ -464,8 +464,6 @@ BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size)
 }
 
 
-#include "ExtraDecoder.h"
-
 BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk& File)
 {
 	KRKRZ_COMPRESSED_INDEX  CompressedIndex;
@@ -488,15 +486,15 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 
 	iPos = 0;
 	DecompSize       = CompressedIndex.DecompressedSize;
-	IndexBuffer      = (PBYTE)AllocateMemoryP(CompressedIndex.DecompressedSize);
-	CompressedBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.CompressedSize);
+	IndexBuffer      = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedIndex.DecompressedSize);
+	CompressedBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedIndex.CompressedSize);
 
 	if (!IndexBuffer || !CompressedBuffer)
 	{
 		MessageBoxW(NULL, L"Insufficient memory", L"KrkrExtract", MB_OK);
 
-		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
-		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
+		if (IndexBuffer)      HeapFree(GetProcessHeap(), 0, IndexBuffer);
+		if (CompressedBuffer) HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 		return FALSE;
 	}
 
@@ -545,8 +543,8 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 
 	if (RawFailed)
 	{
-		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
-		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
+		if (IndexBuffer)      HeapFree(GetProcessHeap(), 0, IndexBuffer);
+		if (CompressedBuffer) HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 
 		MessageBoxW(NULL, L"Failed to decompress special chunk", L"KrkrExtract", MB_OK);
 		return FALSE;
@@ -566,7 +564,7 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 		wstring FileName((PCWSTR)(IndexBuffer + iPos), NameLength);
 		iPos += (NameLength + 1) * 2;
 
-		if (!StrCompareW(FileName.c_str(), ProtectionInfo))
+		if (!lstrcmpW(FileName.c_str(), ProtectionInfo))
 			continue;
 
 		Item.yuzu.ChunkSize.QuadPart = ChunkSize.QuadPart;
@@ -580,8 +578,8 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 	}
 
 	Handle->CountFile = Handle->ItemVector.size();
-	FreeMemoryP(IndexBuffer);
-	FreeMemoryP(CompressedBuffer);
+	HeapFree(GetProcessHeap(), 0, IndexBuffer);
+	HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 
 	return TRUE;
 }
@@ -618,7 +616,7 @@ ULONG WINAPI FindChunkMagicFirst(PBYTE pDecompress, ULONG Size)
 		break;
 
 		default:
-			PrintConsole(L"Found krkrz\n");
+			PrintConsoleW(L"Found krkrz\n");
 			Handle->M2ChunkMagic = *(PDWORD)(pDecompress + PtrOffset);
 			return PackInfo::KrkrZ;
 		break;

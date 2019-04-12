@@ -10,13 +10,12 @@ NTSTATUS FASTCALL CopyExeIcon(PCWCHAR To, ULONG_PTR Check)
 	HRSRC      hRes;
 	HANDLE     hUpdateRes;
 
-	hExe       = (HMODULE)Nt_GetExeModuleHandle();
+	hExe       = GetModuleHandleW(NULL);
 	hUpdateRes = BeginUpdateResourceW(To, FALSE);
 	if (hUpdateRes == NULL)
 		return STATUS_UNSUCCESSFUL;
 
-
-	for (ULONG i = 0; i<Check; i++)
+	for (ULONG_PTR i = 0; i<Check; i++)
 	{
 		hRes = FindResource(hExe, MAKEINTRESOURCEW(i), RT_GROUP_ICON);
 		if (hRes != NULL)
@@ -29,12 +28,12 @@ NTSTATUS FASTCALL CopyExeIcon(PCWCHAR To, ULONG_PTR Check)
 	hRes = NULL;
 
 
-	for (ULONG i = 0; i<Check; i++)
+	for (ULONG_PTR i = 0; i<Check; i++)
 	{
 		if (FindResource(hExe, MAKEINTRESOURCEW(i), RT_ICON) != NULL)
 		{
 			i--;
-			for (ULONG rCount = i; rCount<(i + 32); rCount++)
+			for (ULONG_PTR rCount = i; rCount<(i + 32); rCount++)
 			{
 				hRes = FindResource(hExe, MAKEINTRESOURCEW(rCount), RT_ICON);
 				if (hRes != NULL)
@@ -48,7 +47,7 @@ NTSTATUS FASTCALL CopyExeIcon(PCWCHAR To, ULONG_PTR Check)
 	}
 	hRes = NULL;
 
-	for (ULONG i = 0; i<Check; i++){
+	for (ULONG_PTR i = 0; i<Check; i++){
 
 		hRes = FindResource(hExe, MAKEINTRESOURCEW(i), RT_VERSION);
 		if (hRes != NULL)
@@ -64,15 +63,6 @@ NTSTATUS FASTCALL CopyExeIcon(PCWCHAR To, ULONG_PTR Check)
 }
 
 
-EXTC ULONG
-InternalCopyUnicodeString(
-PUNICODE_STRING Unicode,
-PWCHAR          Buffer,
-ULONG_PTR       BufferCount,
-BOOL            IsDirectory = FALSE
-);
-
-
 
 IStream* LoadFromResource(HMODULE Module, UINT nResID, LPCWSTR lpTyp, BOOL Inject, HWND Handle)
 {
@@ -82,7 +72,7 @@ IStream* LoadFromResource(HMODULE Module, UINT nResID, LPCWSTR lpTyp, BOOL Injec
 	auto Nt_GetModuleFileBaseName = [](PVOID ModuleBase, LPWSTR Filename, ULONG_PTR BufferCount)->ULONG_PTR
 	{
 		ULONG_PTR               Length;
-		PEB_BASE               *Peb;
+		PEB                    *Peb;
 		PLDR_DATA_TABLE_ENTRY   LdrModule, FirstLdrModule;
 
 		Peb = Nt_CurrentPeb();
@@ -146,10 +136,10 @@ IStream* LoadFromResource(HMODULE Module, UINT nResID, LPCWSTR lpTyp, BOOL Injec
 			return NULL;
 		}
 
-		Nt_GetModuleFileBaseName(Nt_GetExeModuleHandle(), ExeFileBaseName, countof(ExeFileBaseName));
+		Nt_GetModuleFileBaseName(GetModuleHandleW(NULL), ExeFileBaseName, countof(ExeFileBaseName));
 
 		RtlZeroMemory(ShellData, 0x10);
-		RtlCopyMemory((PBYTE)ShellData + 0x10, ExeFileBaseName, StrLengthW(ExeFileBaseName) * sizeof(ExeFileBaseName[0]));
+		RtlCopyMemory((PBYTE)ShellData + 0x10, ExeFileBaseName, lstrlenW(ExeFileBaseName) * sizeof(ExeFileBaseName[0]));
 
 	}
 
@@ -342,11 +332,11 @@ NTSTATUS NTAPI MakePatch()
 	};
 
 	RtlZeroMemory(ExeFileName, countof(ExeFileName));
-	GetModuleFileNameW((HMODULE)Nt_GetExeModuleHandle(), ExeFileName, countof(ExeFileName));
+	GetModuleFileNameW((HMODULE)GetModuleHandleW(NULL), ExeFileName, countof(ExeFileName));
 	
 	LOOP_ONCE
 	{
-		if (Nt_GetFileAttributes(ExeFileName) == 0xFFFFFFFF)
+		if (GetFileAttributesW(ExeFileName) == 0xFFFFFFFF)
 		{
 			MessageBoxW(Handle->MainWindow, L"KrkrExtract couldn't open current executable file!", L"KrkrExtract", MB_OK);
 			Status = STATUS_UNSUCCESSFUL;
@@ -362,13 +352,13 @@ NTSTATUS NTAPI MakePatch()
 
 		Stream->Stat(&Stat, STATFLAG_DEFAULT);
 		Size = Stat.cbSize.LowPart;
-		Buffer = (PBYTE)AllocateMemoryP(Size);
+		Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Size);
 		Stream->Read(Buffer, Size, &BytesRead);
 		Status = File.Create(GetNameFileName(ExeFileName).c_str());
 		if (NT_FAILED(Status))
 		{
 			MessageBoxW(Handle->MainWindow, L"Universal patch :Couldn't write file", L"KrkrExtract", MB_OK);
-			FreeMemoryP(Buffer);
+			HeapFree(GetProcessHeap(), 0,Buffer);
 			break;
 		}
 
@@ -396,12 +386,12 @@ NTSTATUS NTAPI MakePatch()
 
 		Stream->Stat(&Stat, STATFLAG_DEFAULT);
 		Size = Stat.cbSize.LowPart;
-		Buffer = (PBYTE)ReAllocateMemoryP(Buffer, Size);
+		Buffer = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Buffer, Size);
 		Stream->Read(Buffer, Size, &BytesRead);
 		File.Write(Buffer, Size);
 		File.Close();
 		Stream->Release();
-		FreeMemoryP(Buffer);
+		HeapFree(GetProcessHeap(), 0,Buffer);
 
 		if (Handle->InheritIcon)
 			Status = CopyExeIcon(GetNameFileName(ExeFileName).c_str(), 512);

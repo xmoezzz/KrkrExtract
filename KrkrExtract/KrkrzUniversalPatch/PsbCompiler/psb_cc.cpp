@@ -110,7 +110,7 @@ psb_cc_base* psb_cc::pack(Json::Value& source_code)
 
 			sscanf_s(str.c_str(), "__CompilerBinary__(%u, '%[^']s')", &resource_index, FileName);
 
-			MultiByteToWideChar(CP_UTF8, 0, FileName, StrLengthA(FileName), UtfFileName, countof(UtfFileName));
+			MultiByteToWideChar(CP_UTF8, 0, FileName, lstrlenA(FileName), UtfFileName, countof(UtfFileName));
 
 			Item.Index = resource_index;
 			Item.FileName = UtfFileName;

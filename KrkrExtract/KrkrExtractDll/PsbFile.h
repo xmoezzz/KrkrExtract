@@ -72,8 +72,8 @@ enum PsbType
 class PsbValue 
 {
 public:
-	PsbValue(class PsbJsonExporter& Psb, PsbType Type, PByte& Buff);
-	PsbValue(class PsbJsonExporter& Psb, PByte&  Buff);
+	PsbValue(class PsbJsonExporter& Psb, PsbType Type, PBYTE& Buff);
+	PsbValue(class PsbJsonExporter& Psb, PBYTE&  Buff);
 
 	virtual ~PsbValue();
 	PsbType GetNodeType();
@@ -86,34 +86,34 @@ protected:
 class PsbNull : public PsbValue 
 {
 public:
-	PsbNull(class PsbJsonExporter& Psb, PByte& Buff, PsbType Type);
+	PsbNull(class PsbJsonExporter& Psb, PBYTE& Buff, PsbType Type);
 
 private:
-	PByte Buffer;
+	PBYTE Buffer;
 };
 
 class PsbBool : public PsbValue
 {
 public:
-	PsbBool(class PsbJsonExporter& Psb, PByte& Buff, PsbType Type);
+	PsbBool(class PsbJsonExporter& Psb, PBYTE& Buff, PsbType Type);
 	BOOLEAN GetBoolean();
 
 private:
-	PByte   Buffer;
+	PBYTE   Buffer;
 	BOOLEAN Value;
 };
 
 class PsbResource : public PsbValue
 {
 public:
-	PsbResource(class PsbJsonExporter& Psb, PByte& Buff, PsbType Type);
-	PByte   GetBuffer();
+	PsbResource(class PsbJsonExporter& Psb, PBYTE& Buff, PsbType Type);
+	PBYTE   GetBuffer();
 	ULONG   GetLength();
 	ULONG   GetIndex();
 
 protected:
 	ULONG ChunkIndex;
-	PByte ChunkBuffer;
+	PBYTE ChunkBuffer;
 	ULONG ChunkLength;
 };
 
@@ -122,9 +122,9 @@ class PsbNumber : public PsbValue
 public:
 	union PsbNumberValue
 	{
-		Float  FloatValue;
-		Double DoubleValue;
-		Int64  IntegerValue;
+		float  FloatValue;
+		double DoubleValue;
+		INT64  IntegerValue;
 	};
 
 	enum PsbNumberType
@@ -134,11 +134,11 @@ public:
 		DOUBLE
 	};
 
-	PsbNumber(class PsbJsonExporter& _Psb, PByte& Buff, PsbType Type);
+	PsbNumber(class PsbJsonExporter& _Psb, PBYTE& Buff, PsbType Type);
 
-	Float         GetFloat();
-	Double        GetDouble();
-	Int64         GetInteger();
+	float         GetFloat();
+	double        GetDouble();
+	INT64         GetInteger();
 	PsbNumberType GetNumberType();
 
 	static BOOLEAN IsNumberNode(PsbValue *_Value);
@@ -146,13 +146,13 @@ public:
 private:
 	PsbNumberValue Value;
 	PsbNumberType  NumberType;
-	PByte          Buffer;
+	PBYTE          Buffer;
 };
 
 class PsbArray : public PsbValue 
 {
 public:
-	PsbArray(class PsbJsonExporter& _Psb, PByte& Buff, PsbType _Type);
+	PsbArray(class PsbJsonExporter& _Psb, PBYTE& Buff, PsbType _Type);
 
 	ULONG Size();
 	ULONG Get(ULONG Index);
@@ -160,30 +160,30 @@ public:
 	ULONG  DataLength;
 	ULONG  EntryCount;
 	ULONG  EntryLength;
-	PByte  Buffer;
+	PBYTE  Buffer;
 };
 
 class PsbString : public PsbValue
 {
 public:
-	PsbString(class PsbJsonExporter& Psb, PByte& Buff);
+	PsbString(class PsbJsonExporter& Psb, PBYTE& Buff);
 	ULONG  GetIndex();
 	string GetString();
 
-	PByte  Buffer;
+	PBYTE  Buffer;
 };
 
 
 class PsbObject : public PsbValue
 {
 public:
-	PsbObject(class PsbJsonExporter& Psb, PByte& Buff);
+	PsbObject(class PsbJsonExporter& Psb, PBYTE& Buff);
 	~PsbObject();
 
 	ULONG  Size();
 	string GetName(ULONG Index);
-	PByte  GetData(ULONG Index);
-	PByte  GetData(const string& Name);
+	PBYTE  GetData(ULONG Index);
+	PBYTE  GetData(const string& Name);
 
 	template<class T> void Unpack(T*& Out, const string& Name);
 
@@ -191,48 +191,48 @@ public:
 public:
 	PsbArray*   Names;
 	PsbArray*   Offsets;
-	PByte       Buffer;
+	PBYTE       Buffer;
 };
 
 
 class PsbCollection : public PsbValue 
 {
 public:
-	PsbCollection(class PsbJsonExporter& Psb, PByte& Buff);
+	PsbCollection(class PsbJsonExporter& Psb, PBYTE& Buff);
 	~PsbCollection();
 
 	ULONG Size();
-	PByte Get(DWORD Index);
+	PBYTE Get(DWORD Index);
 
-	template<class T> Void Unpack(T*& Out, DWORD Index);
+	template<class T> VOID Unpack(T*& Out, DWORD Index);
 
 public:
 	PsbArray*   Offsets;
-	PByte       Buffer;
+	PBYTE       Buffer;
 };
 
 
 class PsbJsonExporter
 {
 public:
-	PsbJsonExporter(PByte Buff);
+	PsbJsonExporter(PBYTE Buff);
 	~PsbJsonExporter();
 
 	string     GetName(ULONG Index);
-	BOOL       GetNumber(PByte Buff, PsbNumber::PsbNumberValue &Value, PsbNumber::PsbNumberType &ValueType);
-	string     GetString(PByte Buff);
-	ULONG      GetStringIndex(PByte Buff);
+	BOOL       GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, PsbNumber::PsbNumberType &ValueType);
+	string     GetString(PBYTE Buff);
+	ULONG      GetStringIndex(PBYTE Buff);
 	PsbObject* GetObject();
-	PByte      GetChunk(PByte Buff);
-	ULONG      GetChunkLength(PByte Buff);
+	PBYTE      GetChunk(PBYTE Buff);
+	ULONG      GetChunkLength(PBYTE Buff);
 	PsbValue*  Unpack(unsigned char*& p);
 
-	template<class T> void Unpack(T*& out, PByte& Buff);
+	template<class T> void Unpack(T*& out, PBYTE& Buff);
 
 public:
-	ULONG      GetChunkIndex(PByte Buff);
+	ULONG      GetChunkIndex(PBYTE Buff);
 
-	PByte       Buffer;
+	PBYTE       Buffer;
 	PSBHDR*     Header;
 	PsbArray*   Str1;
 	PsbArray*   Str2;
@@ -241,7 +241,7 @@ public:
 	PCHAR       StringsData;
 	PsbArray*   ChunkOffsets;
 	PsbArray*   ChunkLengths;
-	PByte       ChunkData;
+	PBYTE       ChunkData;
 
 	PsbObject*     Objects;
 	PsbCollection* ExpireSuffixList;
@@ -249,7 +249,7 @@ public:
 };
 
 
-template<class T> Void PsbObject::Unpack(T*& Out, const string& Name)
+template<class T> VOID PsbObject::Unpack(T*& Out, const string& Name)
 {
 	Out = NULL;
 	auto Data = GetData(Name);
@@ -258,14 +258,14 @@ template<class T> Void PsbObject::Unpack(T*& Out, const string& Name)
 		Psb.Unpack(Out, Data);
 }
 
-template<class T> Void PsbCollection::Unpack(T*& Out, ULONG Index)
+template<class T> VOID PsbCollection::Unpack(T*& Out, ULONG Index)
 {
 	auto Data = Get(Index);
 
 	Psb.Unpack(Out, Data);
 }
 
-template<class T> Void PsbJsonExporter::Unpack(T*& Out, PByte& Buff) 
+template<class T> VOID PsbJsonExporter::Unpack(T*& Out, PBYTE& Buff) 
 {
 	Out = dynamic_cast<T*>(Unpack(Buff));
 }

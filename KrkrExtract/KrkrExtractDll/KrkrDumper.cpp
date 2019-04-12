@@ -3,7 +3,6 @@
 #include "KrkrExtend.h"
 #include "zlib.h"
 #include "MyLib.h"
-#include "Tjs2Disasm.h"
 #include <WindowsX.h>
 
 /********************************************/
@@ -31,7 +30,7 @@ KrkrDumper::~KrkrDumper()
 
 
 
-Void NTAPI KrkrDumper::InternalReset()
+VOID NTAPI KrkrDumper::InternalReset()
 {
 	GlobalData*   Handle;
 
@@ -309,7 +308,7 @@ NTSTATUS WINAPI KrkrDumper::ParseXP3iFile(PWCHAR lpFileName)
 	}
 
 	Size = File.GetSize32();
-	Buffer = (PBYTE)AllocateMemoryP(Size);
+	Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Size);
 	if (!Buffer)
 	{
 		PrintConsoleW(L"Memory allocation failed with status : %08x\n", Status);
@@ -347,12 +346,12 @@ NTSTATUS WINAPI KrkrDumper::ParseXP3iFile(PWCHAR lpFileName)
 		}
 	}
 
-	FreeMemoryP(Buffer);
+	HeapFree(GetProcessHeap(), 0, Buffer);
 	File.Close();
 	return STATUS_SUCCESS;
 }
 
-Void NTAPI KrkrDumper::AddPath(LPWSTR FileName)
+VOID NTAPI KrkrDumper::AddPath(LPWSTR FileName)
 {
 	ULONG iPos = 0;
 
@@ -375,10 +374,10 @@ Void NTAPI KrkrDumper::AddPath(LPWSTR FileName)
 	}
 }
 
-Void NTAPI KrkrDumper::SetFile(LPCWSTR lpFile)
+VOID NTAPI KrkrDumper::SetFile(LPCWSTR lpFile)
 {
 	RtlZeroMemory(FileName, countof(FileName) * sizeof(WCHAR));
-	StrCopyW(FileName, lpFile);
+	lstrcpyW(FileName, lpFile);
 }
 
 
@@ -444,8 +443,8 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 
 	ULONG64 CompresseBufferSize = 0x1000;
 	ULONG64 DecompressBufferSize = 0x1000;
-	PBYTE pCompress = (PBYTE)AllocateMemoryP((ULONG)CompresseBufferSize);
-	PBYTE pDecompress = (PBYTE)AllocateMemoryP((ULONG)DecompressBufferSize);
+	PBYTE pCompress   = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)CompresseBufferSize);
+	PBYTE pDecompress = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)DecompressBufferSize);
 	DataHeader.OriginalSize = XP3Header.IndexOffset;
 
 	if (Handle->DebugOn)
@@ -470,7 +469,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 		if (DataHeader.ArchiveSize.LowPart > CompresseBufferSize)
 		{
 			CompresseBufferSize = DataHeader.ArchiveSize.LowPart;
-			pCompress = (PBYTE)ReAllocateMemoryP(pCompress, (ULONG)CompresseBufferSize);
+			pCompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pCompress, (ULONG)CompresseBufferSize);
 		}
 		
 		if ((DataHeader.bZlib & 7) == 0)
@@ -494,7 +493,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 			if (DataHeader.ArchiveSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.ArchiveSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			RtlCopyMemory(pDecompress, pCompress, DataHeader.ArchiveSize.LowPart);
@@ -508,7 +507,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 			if (DataHeader.OriginalSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.OriginalSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			DataHeader.OriginalSize.HighPart = DataHeader.OriginalSize.LowPart;
@@ -578,9 +577,8 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 	} while (DataHeader.bZlib & 0x80);
 
 
-	FreeMemoryP(pCompress);
-	FreeMemoryP(pDecompress);
-
+	HeapFree(GetProcessHeap(), 0, pCompress);
+	HeapFree(GetProcessHeap(), 0, pDecompress);
 	return STATUS_SUCCESS;
 }
 
@@ -620,8 +618,8 @@ wstring FASTCALL FormatPathFull(LPCWSTR Path)
 		if (!Flag)
 		{
 			RtlZeroMemory(Buffer, countof(Buffer) * sizeof(WCHAR));
-			Nt_GetCurrentDirectory(countof(Buffer), Buffer);
-			FormatStringW(Buffer + StrLengthW(Buffer), L"/%s", Path);
+			GetCurrentDirectoryW(countof(Buffer), Buffer);
+			wsprintfW(Buffer + lstrlenW(Buffer), L"/%s", Path);
 			auto&& Result = FormatPathFull(Buffer);
 			return Result;
 		}
@@ -631,7 +629,7 @@ wstring FASTCALL FormatPathFull(LPCWSTR Path)
 
 
 
-Void FASTCALL FormatM2PackName(wstring& PackageName, ttstr& OutName)
+VOID FASTCALL FormatM2PackName(wstring& PackageName, ttstr& OutName)
 {
 	OutName.Clear();
 	OutName = L"archive://./";
@@ -640,7 +638,7 @@ Void FASTCALL FormatM2PackName(wstring& PackageName, ttstr& OutName)
 }
 
 
-Void DecryptWorker(ULONG64 EncryptOffset, PBYTE pBuffer, ULONG BufferSize, ULONG Hash)
+VOID DecryptWorker(ULONG64 EncryptOffset, PBYTE pBuffer, ULONG BufferSize, ULONG Hash)
 {
 	tTVPXP3ExtractionFilterInfo Info(0, pBuffer, BufferSize, Hash);
 	if (GlobalData::GetGlobalData()->pfGlobalXP3Filter != NULL)
@@ -752,7 +750,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 
 	Stream->Stat(&Stat, STATFLAG_DEFAULT);
 
-	Buffer = (PBYTE)AllocateMemoryP(Stat.cbSize.LowPart);
+	Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Stat.cbSize.LowPart);
 	if (!Buffer)
 	{
 		MessageBoxW(Handle->MainWindow, L"Failed to Allocate memory for tlg Decoder", L"KrkrExtract", MB_OK);
@@ -768,14 +766,14 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 	case TLG_RAW:
 		Offset.QuadPart = 0;
 		Stream->Seek(Offset, FILE_BEGIN, NULL);
-		FreeMemoryP(RawBuffer);
+		HeapFree(GetProcessHeap(), 0, RawBuffer);
 		return ProcessFile(Stream, OutFileName, it);
 
 	case TLG_SYS:
 		if (GlobalData::GetGlobalData()->DebugOn)
 			PrintConsoleW(L"Using System Decode Mode[TLG]\n");
 
-		FreeMemoryP(RawBuffer);
+		HeapFree(GetProcessHeap(), 0, RawBuffer);
 		SavePng(GetPackageName(wstring(OutFileName)).c_str(), FormatPathFull((wstring(OutFileName) + L".png").c_str()).c_str());
 		return Status;
 
@@ -828,9 +826,9 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 
 			if (NT_FAILED(Status))
 			{
-				FreeMemoryP(RawBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
 				if (TempDecode)
-					FreeMemoryP(OutBuffer);
+					HeapFree(GetProcessHeap(), 0, OutBuffer);
 
 				File.Close();
 				return STATUS_UNSUCCESSFUL;
@@ -838,9 +836,9 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 
 			File.Write(OutBuffer, OutSize);
 
-			FreeMemoryP(RawBuffer);
+			HeapFree(GetProcessHeap(), 0, RawBuffer);
 			if (TempDecode)
-				FreeMemoryP(OutBuffer);
+				HeapFree(GetProcessHeap(), 0, OutBuffer);
 		}
 		else if (Handle->GetTlgFlag() == TLG_PNG)
 		{
@@ -860,12 +858,12 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 					File.Close();
 				}
 
-				FreeMemoryP(RawBuffer);
-				FreeMemoryP(OutBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
+				HeapFree(GetProcessHeap(), 0, OutBuffer);
 			}
 			else
 			{
-				FreeMemoryP(RawBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
 				Offset.QuadPart = 0;
 				Stream->Seek(Offset, FILE_BEGIN, NULL);
 				return ProcessFile(Stream, OutFileName, it);
@@ -889,12 +887,12 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 					File.Close();
 				}
 
-				FreeMemoryP(RawBuffer);
-				FreeMemoryP(OutBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
+				HeapFree(GetProcessHeap(), 0, OutBuffer);
 			}
 			else
 			{
-				FreeMemoryP(RawBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
 				Offset.QuadPart = 0;
 				Stream->Seek(Offset, FILE_BEGIN, NULL);
 				return ProcessFile(Stream, OutFileName, it);
@@ -940,12 +938,12 @@ NTSTATUS NTAPI KrkrDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFileName, XP3
 
 	Stream->Stat(&Stat, STATFLAG_DEFAULT);
 	RtlZeroMemory(FileName, countof(FileName) * sizeof(WCHAR));
-	StrCopyW(FileName, OutFileName);
+	lstrcpyW(FileName, OutFileName);
 
 	LOOP_ONCE
 	{
 		Status = STATUS_SUCCESS;
-		OriBuffer = (PBYTE)AllocateMemoryP(Stat.cbSize.LowPart);
+		OriBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Stat.cbSize.LowPart);
 		if (!OriBuffer)
 		{
 			Status = STATUS_INSUFFICIENT_RESOURCES;
@@ -956,7 +954,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFileName, XP3
 
 		Status = STATUS_SUCCESS;
 		if (DecodeText(OriBuffer, Stat.cbSize.LowPart, FileName) != -1)
-			FreeMemoryP(OriBuffer);
+			HeapFree(GetProcessHeap(), 0, OriBuffer);
 		else
 			Status = ProcessFile(Stream, FileName, it);
 	}
@@ -979,7 +977,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 	STATSTG                                Stat;
 
 	RtlZeroMemory(CurDir, countof(CurDir) * sizeof(WCHAR));
-	Nt_GetCurrentDirectory(MAX_PATH, CurDir);
+	GetCurrentDirectoryW(MAX_PATH, CurDir);
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -1107,10 +1105,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 				}
 				else
 				{
-					if (RtlCompareMemory(Buffer, TjsMark, 8) == 8)
-						Status = TjsDecompileStorage(Stream, OutFilePathFull);
-					else
-						Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
+					Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
 				}
 			}
 			else
@@ -1148,10 +1143,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 				}
 				else
 				{
-					if (RtlCompareMemory(Buffer, TjsMark, 8) == 8)
-						Status = TjsDecompileStorage(Stream, OutFilePathFull);
-					else
-						Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
+					Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
 				}
 			}
 			else
@@ -1186,7 +1178,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 	Handle = GlobalData::GetGlobalData();
 	RtlZeroMemory(CurPath, countof(CurPath)*sizeof(WCHAR));
 
-	Nt_GetCurrentDirectory(MAX_PATH, CurPath);
+	GetCurrentDirectoryW(MAX_PATH, CurPath);
 
 	Status = FakeWorker.Open(FileName);
 	if (NT_FAILED(Status))
@@ -1204,8 +1196,8 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 
 		if (it.info.EncryptedFlag & 7)
 		{
-			OutBuffer = (PBYTE)AllocateMemoryP(it.info.ArchiveSize.LowPart);
-			WriteBuffer = (PBYTE)AllocateMemoryP(it.info.OriginalSize.LowPart);
+			OutBuffer   = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, it.info.ArchiveSize.LowPart);
+			WriteBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, it.info.OriginalSize.LowPart);
 
 			FakeWorker.Seek(it.segm.segm[0].Offset.LowPart, FILE_BEGIN);
 			FakeWorker.Read(OutBuffer, it.info.ArchiveSize.LowPart);
@@ -1218,19 +1210,19 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 			DecryptWorker(0, WriteBuffer, it.info.ArchiveSize.LowPart, it.adlr.Hash);
 			File.Write(WriteBuffer, it.info.OriginalSize.LowPart);
 
-			FreeMemoryP(WriteBuffer);
-			FreeMemoryP(OutBuffer);
+			HeapFree(GetProcessHeap(), 0, WriteBuffer);
+			HeapFree(GetProcessHeap(), 0, OutBuffer);
 		}
 		else
 		{
-			WriteBuffer = (PBYTE)AllocateMemoryP(it.info.OriginalSize.LowPart);
+			WriteBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, it.info.OriginalSize.LowPart);
 			FakeWorker.Seek(it.segm.segm[0].Offset.LowPart, FILE_BEGIN);
 			FakeWorker.Read(WriteBuffer, it.info.OriginalSize.LowPart);
 
 			DecryptWorker(0, WriteBuffer, it.info.ArchiveSize.LowPart, it.adlr.Hash);
 			File.Write(WriteBuffer, it.info.OriginalSize.LowPart);
 
-			FreeMemory(WriteBuffer);
+			HeapFree(GetProcessHeap(), 0, WriteBuffer);
 		}
 		File.Close();
 	}
@@ -1353,7 +1345,7 @@ HANDLE NTAPI StartMiniDumper(LPCWSTR lpFileName)
 		auto FileName = GetFileNameP(lpFileName) + L".xp3";
 		LocalKrkrDumper->SetFile(FileName.c_str());
 		RtlZeroMemory(LocalKrkrDumper->FileNameIndex, countof(LocalKrkrDumper->FileNameIndex) * sizeof(WCHAR));
-		StrCopyW(LocalKrkrDumper->FileNameIndex, lpFileName);
+		lstrcpyW(LocalKrkrDumper->FileNameIndex, lpFileName);
 		LocalKrkrDumper->IsIndex = TRUE;
 		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper->hThread);
 		

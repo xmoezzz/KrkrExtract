@@ -1,7 +1,7 @@
 #ifndef _Plugin_
 #define _Plugin_
 
-#include "my.h"
+#include <Windows.h>
 
 #define INTERFACE_VERSION		0x00030000
 #define TXTINTERFACE_VERSION	0x00010000

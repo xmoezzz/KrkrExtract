@@ -1,102 +1,29 @@
-//#pragma comment(linker, "/SECTION:.text,ERW /MERGE:.rdata=.text /MERGE:.data=.text")
-//#pragma comment(linker, "/SECTION:.Xmoe,ERW /MERGE:.text=.Xmoe")
-
-
-//#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-
-/*
-C0GGGCfttfttt;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;i;iiiiiiiiiiiiiiii
-.....,LfffLGCfttttttttttttttttttttLfLCLi,.......1;t.......,,,,,,,....,,,,,,,............
-.....,ffttf,..:f0000CfttttffLCCLft,1fLL ;Lf:tLt1LfL;t;;;;;;;iiiiii11111111111111111111111
-......tfttf,.......:11itL1i1tLLLLLLLLLLLLLLLLtf:,tLLLLLtfi;iiiiiiiii11ii11111iii1i1111111
-......1ittf,....fttLLt1tt1LftLLLLLLLLLLLLf::LLt1Lt1LL:LLLLLf11................
-......ii;tf,..LtCCttLLLLLLftLttLLLLLLLLLLLLLLLLf1ft1tt1t1111tttti,...............
-......ii;;f,.fCftLLLLLLLLLLL1fLtLLLLLLLCCfffffLCCtfftfttt1tt1tttt1t1i...............
-......ii;;i,.ffLLLLLLLLLLLLLLttCfCCffffCLLLf1t111t1tftLLLLLLLLLLLLttCff,.................
-......ii;;i,.CCCCCCCCCCCCCfi;it1f1LCCCftttLLLLLLLLLttftLLLLLLLLLLLL1tLftfL...............
-......ii;;i,.LCCCCCf:;;LGCCCCLLt1ttffCCCCCCLLLLLLLLLtfttLLLLLLLLLLLL11LftfLLL............
-......ii;;i,.::t.;;LLi;;;;;;;;;;;;;;;i;;;;;;LCCLLLLLLtLttLLLLLCCCCCCCtfCLfCCCLL..........
-......ii;;i:,.,;:i::;;;;;::..........,..,;;;;;;iCCCLLftLtLCCCCCCCCCCCCttCffCCCCC.........
-......ii;i,.:...:.........................i...::;;;1CCffLtLCCfffffftttf11LttLffff........
-......i1..,...1....  ...... ........,......,.......,;;;;;iffftLCCCCCLfft1tt1tttfffL......
-.....;.,.... ,..... ;...... ........i......:.............:;i;;iLfttfCCCCftCffCCCCCCC.....
-;;.:.ii............,....... ........:.......;..............i.;,:;;tGCCCCCfLCtLCCCCCCf....
-ft :L1,... ................ ........:.......:........ .i..  ;.;:tf,:;GCCCffCtfCCCCCCC....
-.t,CCi....;.......,........ ........;........;..  .... .,...fff,.....;;CCCtCCtCCCCCCCi...
-tLG;i.,.., .......1........ . .....:;........i:.............;Lffftii1.ii;CtfGffCCCCCCL...
-tCG; :.. ,   .....1    ....  ......i:;.......;:..........i...ti. .....:;t;1fCffCCCCCC;...
-tCG,.i............i.. ............,i.::......,.i:......;,,...,i. ....i t:t;;;ffCCCCC:....
-tCG.;:..i.........; .......:......:i .i......, ,1,..,:.:,.;...;.:....1.ti.1f;;;,......,::
-tC,.;...:....:....;........t......;;. :1.....,..:i......i.i...i.;....;,;1..;;;;tft1iii;;;
-tC.,t...:....t,...:1.....:.,:.....;:. .:....., ,,;;.....;,:...;.,....;:.:..,t::Lftt;;f;;t
-tC.;t...;....t.....:,....::.:.....1:,  ,i....:   ,;;....;:,;.,:.,...11;....:t.,Ltttt1,;f,
-t1.it...;....,....,i::...::.;i....i:,  .,;..,;  .,.,:...:;,:.,,.:...;1;,.......ftt1;i:1,i
-t:.1;...;.....:....;:i:,.;:..:;...:;,.  ,:..,.   .  :C1..,,,....;...i1t:.......ftt1,:1i.1
-f,.ti...1;....;....,:.;::.:. .,....,,.  ,,:,,.      .GL..,,,:...i,.1tft;.......ttt11i,,L.
-t,.;;...;;,...:;...:;. :::,,. .....,.. ..,,,,        GG.......:,,..;;fti,......1tt1,:1;,1
-f:;;t...;i;....1,...;:...,:GG      .... .,,..       .iG1     .,i..i;,;;t:......itt1;i,t,i
-ffLft1,.:;i;...,;,..;::.....G .          ..,         .GG     .,.i.;;,t;t;......itt1t1111t
-fCG. t:..i;;;,..1;i..:.,.  .GG           . .       ...G0..  .,;,:;i;1t;;;......1ftt  f. t
-fCGfft::.:i;i;;..i::.:...   .G:          ..      ...........::,t;i;fiLi;;......1fttff tt,
-fCGLLtt;,,1;11;;..i::;:.    .;G......          ..............;;;1i:iiL;;;......tfftLfffff
-fC0  tt;;.tt;;i;;;,;;;::.. ...GG..........     ............,,11;;;.;if;;;:..:..1LLf;:,,,.
-fC0  tti;;it11t;i;;1;i:;f.......,........       ..........,.:;;if;.;it;;;;..i..,
-fC0  t;;t;iL;1t;;i;;1;;;1i............ .          .........it;i;i:.;i1;;;;..i....
-LG0  f;;;1;t;11;;;fi;i;;ttf..........                   ..Li;;11;..,ii;;;;,.1...:
-LG0  i;;;11i;t;;;;1;;1t;iLii,....         ,1iL         .:iit:;;1;...i;;;;;;.;...i
-CCGi1;;;;ifi;t,;;;;;i;;;ifiiiG..                    .,tCiii::1i1:...i;;;;;;.i....
-GGGG1;;;;it;;t.;;;;;i;;,;tiiiii1it;. .          ..:;:::tiii.:11i:...t;;;;;;.i.....
-,,,,;;;1;tt;tt.;;;;;;;;.iiiiiiifiiiiiiiit1;...,G:::::::tii1.11ii,...1;i;;;;;;,...i.......
-...i;;;;ttf;;1.;;;;i:;..tiiiii11iiiiiiiGCGGGGGGGGGGGGGGG0i1.itii....,;f;;;;;;;...........
-..:;;;1;ttf;i;,;;;;i::..1i;iiitiiiiiiifGGGGGGGGGGGGGGGGGLi;1i1ii.....;i;;;;;;i....;.....C
-..;;;;;Lffi11,;;;;i1:...G:;f1ii1fL::::G000GGGGGGGGGGG000;;,1iiii.... f;;;;;;;t....;111i;C
-,1;;;t1fff;Lt.;;;;Lf,...G:,,,,,,,,,,,,fGGGGGGGGGGGGGG00G::i::::f.....1;1;;;;;;.... 111ttL
-:;;;;;0000;Gi.;;;:,:...tG,,,,,,,,,,,,,,GGGGGGGGGGGGG00,,,:1:::::1....1:tft1;;;:....f:::;i
-;;;;tt,,,it, .;;1,,,...CG,,,,,,,,,,,,,,L00GGGGGGGGG0,,,,,,:,,,:,1....t;LLLC8L;t....;:::::
-;;;i1,,.,t,;.;;L,:, ..,GGt,.........f...GGGGGGGCCC.     .,,    ,:....1CLLG:,  i.....1::::
-;;;i.,.,,1,..;1,,,;...t;;................CCCCCCC.  ;..........;;:....tCLG,    .:....t::::
-;;f:,,,,,i; .;.,,,t..;G:..............:;i.CCCC i:...............i;...itL.   ;  :....;1:,:
-;tt,,,,,t,..;:;:,:1..fG...,;iiii11111t,i1.;Lti:;iii;,...........t:...;i    .    :....iii;
-;i,,,,,,1; .1.:1,1,.;GC..,::;iiii1i1iii,,:.t1;itt1i11ii;:......::f;.,;;          ....i1,:
-t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;          ;...;;,,
-,,,,,,,ii .1 ,,,1;;GLf;,..........i11,i000f:i:...............,;.LLC;:;1,    ...  ,....i1,
-,,,,,,i, .,  ,,,iiGLL 1::........;i1.i00000i.1;..,;.........:i,LLLtf;;t   ,,,,    ....;;:
-::,,:::; ... ,,,;:LLL  ii1ft1111ti;.;f0;10Gt..t:..111t;...;ii,tLL0,:;;1 :i;,i.    1...;i1
-11tttff .i , ,;;:1LLL  ft11t,,. ;:..;CG0GtLG..ii...,i1111f11t.LLL:,:;;i:::::    t:;....;.
-,,,,:, .,.,, ,fL;iLLL    ..    ::..,;GGGGiLL...1;..i ,11ti,.,CLLL:1 ;it,::     i1CC:...;:
-,,,,,,..1.,,.,:111LLL         L:...::GGGG:CL1..1i...  ....   LLL::: i1;:.      :fL1C...:;
-,,,:t .; ,,,,,,i::CCC        C;....::GGGG::CC..;;....       CLLLii,:1t,    .....L1i:....;
-:,:i .;:.,,,,,,i;1CCC       C1....:.1GGG;  CC;.;,...i       CCC,:i,i11.,,,,,....1f1ti...;
-,:: .;t ,,,,,::1;1GCC      Cf.....;,C:LG,..iC1.i....1     .CCCt::f, i;,,,,,,,,;1;:LCC...,
-*/
-
-
-
-/*
-1.Script exec bug?
-*/
-
 #include <my.h>
 #include <Psapi.h>
+#include "hook.h"
 #include "KrkrExtract.h"
 #include "FakePNG.h"
 #include "tp_stub.h"
 #include "mt64.h"
 #include "MultiThread.h"
 #include "XP3Parser.h"
+#include "shlwapi.h"
 
 #pragma comment(lib, "Psapi.lib")
 #pragma comment(lib, "Version.lib")
-#pragma comment(lib, "ntdll.lib")
-#pragma comment(lib, "MyLibrary_x86_static.lib")
+#pragma comment(lib, "zlibstatic.lib")
+#pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Dbghelp.lib")
+#pragma comment(lib, "jsoncpp.lib")
 
-EXTERN_C MY_DLL_EXPORT HRESULT NTAPI V2Link(iTVPFunctionExporter *exporter)
+
+extern "C" HRESULT NTAPI V2Link(iTVPFunctionExporter *exporter)
 {
 	TVPInitImportStub(exporter);
 	return S_OK;
 }
 
-EXTERN_C MY_DLL_EXPORT HRESULT NTAPI V2Unlink()
+extern "C" MY_DLL_EXPORT HRESULT NTAPI V2Unlink()
 {
 	return S_OK;
 }
@@ -106,7 +33,7 @@ ULONG_PTR g_FakeExtractionFilter = NULL;
 TVPXP3ArchiveExtractionFilterFunc   g_RealFilter = NULL;
 ULONG_PTR                           g_FakeReturnAddress = NULL;
 
-ASM Void WINAPI FakeExtractionFilterAsm(tTVPXP3ExtractionFilterInfo * /* info */)
+ASM VOID WINAPI FakeExtractionFilterAsm(tTVPXP3ExtractionFilterInfo * /* info */)
 {
 	INLINE_ASM
 	{
@@ -121,7 +48,7 @@ ASM Void WINAPI FakeExtractionFilterAsm(tTVPXP3ExtractionFilterInfo * /* info */
 	}
 }
 
-Void WINAPI FakeExtractionFilterWithException(tTVPXP3ExtractionFilterInfo *info)
+VOID WINAPI FakeExtractionFilterWithException(tTVPXP3ExtractionFilterInfo *info)
 {
 	SEH_TRY
 	{
@@ -132,7 +59,7 @@ Void WINAPI FakeExtractionFilterWithException(tTVPXP3ExtractionFilterInfo *info)
 	}
 }
 
-ASM Void WINAPI FakeExtractionFilter(tTVPXP3ExtractionFilterInfo* /* info */)
+ASM VOID WINAPI FakeExtractionFilter(tTVPXP3ExtractionFilterInfo* /* info */)
 {
 	INLINE_ASM
 	{
@@ -238,7 +165,7 @@ TVPXP3ArchiveExtractionFilterFunc WINAPI InitFakeFilter(PBOOL Result)
 		return NULL;
 	}
 
-	DosHeader = (PIMAGE_DOS_HEADER)Nt_GetExeModuleHandle();
+	DosHeader = (PIMAGE_DOS_HEADER)GetModuleHandleW(NULL);
 	NtHeader = (PIMAGE_NT_HEADERS)((ULONG_PTR)DosHeader + DosHeader->e_lfanew);
 	SectionHeader = (PIMAGE_SECTION_HEADER)((ULONG_PTR)NtHeader + NtHeader->FileHeader.SizeOfOptionalHeader + sizeof(*NtHeader) - sizeof(NtHeader->OptionalHeader));
 
@@ -258,11 +185,11 @@ PVOID WINAPI HookLoadLibraryA(LPCSTR lpFileName)
 	PWSTR   UnicodeName;
 	ULONG   Length, OutLength;
 	
-	Length      = (StrLengthA(lpFileName) + 1) * 2;
+	Length      = (lstrlenA(lpFileName) + 1) * 2;
 	UnicodeName = (PWSTR)AllocStack(Length);
 
 	RtlZeroMemory(UnicodeName, Length);
-	RtlMultiByteToUnicodeN(UnicodeName, Length, &OutLength, lpFileName, Length / 2 - 1);
+	RtlMultiByteToUnicodeN(UnicodeName, Length, &OutLength, (PSTR)lpFileName, Length / 2 - 1);
 
 	Result = StubLoadLibraryW(UnicodeName);
 
@@ -302,9 +229,9 @@ void WINAPI HookTVPSetXP3ArchiveExtractionFilter(tTVPXP3ArchiveExtractionFilter 
 
 	tTVPXP3ArchiveExtractionFilter FakeFilter = InitFakeFilter(&Result);
 	if (Result)
-		_InterlockedExchangePointer((PVOID volatile*)&(Handle->pfGlobalXP3Filter), (void*)FakeFilter);
+		InterlockedExchangePointer((PVOID volatile*)&(Handle->pfGlobalXP3Filter), (void*)FakeFilter);
 	else
-		_InterlockedExchangePointer((PVOID volatile*)&(Handle->pfGlobalXP3Filter), (void*)filter);
+		InterlockedExchangePointer((PVOID volatile*)&(Handle->pfGlobalXP3Filter), (void*)filter);
 
 	if (Handle->DebugOn)
 		PrintConsoleW(L"Filter ProcAddr : %p\n", filter);
@@ -336,11 +263,11 @@ iTVPFunctionExporter* WINAPI HookTVPGetFunctionExporter()
 		Handle->FakePngWorkerInited = TRUE;
 		
 		pfTVPSetXP3ArchiveExtractionFilter = (XP3Filter)TVPGetImportFuncPtr(funcname);
+		Target = pfTVPSetXP3ArchiveExtractionFilter;
 		
 		if (pfTVPSetXP3ArchiveExtractionFilter != nullptr)
 		{
-			Target = pfTVPSetXP3ArchiveExtractionFilter;
-			Mp::PATCH_MEMORY_DATA p[] = 
+			Mp::PATCH_MEMORY_DATA p[] =
 			{
 				Mp::FunctionJumpVa(Target, HookTVPSetXP3ArchiveExtractionFilter, &pfTVPSetXP3ArchiveExtractionFilter)
 			};
@@ -356,7 +283,7 @@ iTVPFunctionExporter* WINAPI HookTVPGetFunctionExporter()
 
 FARPROC WINAPI HookGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
-	if (!StrCompareA(lpProcName, "GetSystemWow64DirectoryA"))
+	if (!lstrcmpA(lpProcName, "GetSystemWow64DirectoryA"))
 		return NULL;
 	
 	return GlobalData::GetGlobalData()->StubGetProcAddress(hModule, lpProcName);
@@ -400,10 +327,42 @@ HANDLE WINAPI HookCreateFileW(
 		lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
 	//trace this handle??
-	if (!StrICompareW(FileName.c_str(), Handle->CurrentTempFileName.c_str(), StrCmp_ToLower) && Result != INVALID_HANDLE_VALUE && Result != 0)
+	if (!lstrcmpiW(FileName.c_str(), Handle->CurrentTempFileName.c_str()) && Result != INVALID_HANDLE_VALUE && Result != 0)
 		InterlockedExchangePointer(&(Handle->CurrentTempHandle), Result);
 
 	return Result;
+}
+
+
+
+BOOL WINAPI CreateProcessW2(
+	_In_opt_ LPCWSTR lpApplicationName,
+	_Inout_opt_ LPWSTR lpCommandLine,
+	_In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	_In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	_In_ BOOL bInheritHandles,
+	_In_ DWORD dwCreationFlags,
+	_In_opt_ LPVOID lpEnvironment,
+	_In_opt_ LPCWSTR lpCurrentDirectory,
+	_In_ LPSTARTUPINFOW lpStartupInfo,
+	_Out_ LPPROCESS_INFORMATION lpProcessInformation)
+{
+	HANDLE   NewToken;
+
+	NewToken = NULL;
+	return GlobalData::GetGlobalData()->StubCreateProcessInternalW(
+		NULL,
+		lpApplicationName,
+		lpCommandLine,
+		lpProcessAttributes,
+		lpThreadAttributes,
+		bInheritHandles,
+		dwCreationFlags,
+		lpEnvironment,
+		lpCurrentDirectory,
+		lpStartupInfo,
+		lpProcessInformation,
+		&NewToken);
 }
 
 
@@ -454,13 +413,10 @@ PHANDLE                 phNewToken
 		lpProcessInformation->hThread,
 		&FullDllPath,
 		IsSuspended
-		);
+	);
 
 	return TRUE;
 }
-
-
-//InitHookNull()
 
 
 /*
@@ -652,7 +608,7 @@ NTSTATUS WINAPI InitHook()
 	Kernel32Handle = Nt_LoadLibrary(L"KERNEL32.dll");
 
 
-	PVOID hModule = Nt_GetExeModuleHandle();
+	PVOID hModule = GetModuleHandleW(NULL);
 	*(FARPROC *)&pfTVPGetFunctionExporter = (FARPROC)Nt_GetProcAddress(hModule, "TVPGetFunctionExporter");
 
 	//Krkr2 & normal Krkrz Module
@@ -661,7 +617,7 @@ NTSTATUS WINAPI InitHook()
 		Target = pfTVPGetFunctionExporter;
 		Mp::PATCH_MEMORY_DATA p[] =
 		{
-			Mp::FunctionJumpVa( Target, HookTVPGetFunctionExporter, &pfTVPGetFunctionExporter )
+			Mp::FunctionJumpVa(Target, HookTVPGetFunctionExporter, &pfTVPGetFunctionExporter)
 		};
 
 		if (Handle->DebugOn)
@@ -672,78 +628,6 @@ NTSTATUS WINAPI InitHook()
 	else
 	{
 		Success = FALSE;
-
-		/*
-		LOOP_ONCE
-		{
-			Status = File.Open(L"KrkrExtract.db");
-			if (NT_FAILED(Status))
-				break;
-
-			Size = File.GetSize32();
-			if (Size != 8 + sizeof(PVOID))
-				break;
-
-			File.Read(&Crc, 8);
-			File.Read(&ExporterPointer, sizeof(PVOID));
-
-			ExporterPointer = Nt_DecodePointer(ExporterPointer, LODWORD(Crc));
-			if (Crc != GenerationCRC64(0, (LPCBYTE)&ExporterPointer, sizeof(PVOID)))
-				break;
-
-			//find "mov     eax, offset TVPFunctionExporter" then hook it
-			ExporterPointer = PtrAdd((PBYTE)ExporterPointer, (PBYTE)Nt_GetExeModuleHandle());
-
-			DosHeader = (PIMAGE_DOS_HEADER)Nt_GetExeModuleHandle();
-			NtHeader = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DosHeader + DosHeader->e_lfanew);
-			SectionHeader = IMAGE_FIRST_SECTION(NtHeader);
-
-			//check here!
-			for (ULONG_PTR i = 0; i < NtHeader->FileHeader.NumberOfSections; i++, SectionHeader++)
-			{
-				CurrentSection = SectionHeader->VirtualAddress + (PBYTE)DosHeader;
-				CurrentSectionSize = SectionHeader->Misc.VirtualSize;
-				CurrentCodePtr = 0;
-
-				if (SectionHeader->Characteristics & IMAGE_SCN_CNT_CODE)
-				{
-					while (CurrentCodePtr < CurrentSectionSize)
-					{
-						//mov eax, mem.offset
-						if (CurrentSection[CurrentCodePtr] == 0xB8 &&
-							GetOpCodeSize32(&CurrentSection[CurrentCodePtr]) == 5)
-						{
-							if (*(PDWORD)&CurrentSection[CurrentCodePtr + 1] == (DWORD)ExporterPointer)
-							{
-								//we have more five bytes executable buffer, 
-								//hook it, and receive the notification when the exporter have already been initialized
-
-								Mp::PATCH_MEMORY_DATA p[] =
-								{
-									Mp::FunctionJumpVa(CurrentCodePtr + CurrentSection, InitHookPureAsm, NULL)
-								};
-								KrkrExporter = ExporterPointer;
-								InitHookPureAsm_End = CurrentCodePtr + CurrentSection + 5;
-
-								Mp::PatchMemory(p, countof(p));
-
-								Success = TRUE;
-								Status = STATUS_SUCCESS;
-								break;
-							}
-							CurrentCodePtr += 5;
-						}
-						else
-						{
-							CodeSize = GetOpCodeSize32(&CurrentSection[CurrentCodePtr]);
-							CurrentCodePtr += CodeSize;
-						}
-					}
-				}
-			}//end of LOOP_ONCE
-		}
-		File.Close();
-		*/
 
 		if (!Success)
 		{
@@ -828,7 +712,7 @@ INT NTAPI HookMultiByteToWideChar(
 }
 
 
-Void FASTCALL EnumerateFileInDirectory(LPCWSTR szPath, std::vector<std::wstring>& FileList)
+VOID FASTCALL EnumerateFileInDirectory(LPCWSTR szPath, std::vector<std::wstring>& FileList)
 {
 	WIN32_FIND_DATAW FindFileData;
 	HANDLE           hListFile;
@@ -836,8 +720,8 @@ Void FASTCALL EnumerateFileInDirectory(LPCWSTR szPath, std::vector<std::wstring>
 	NtFileDisk       File;
 	NTSTATUS         Status;
 
-	FormatStringW(FilePath, L"%s\\*.*", szPath);
-	hListFile = Nt_FindFirstFile(FilePath, &FindFileData);
+	wsprintfW(FilePath, L"%s\\*.*", szPath);
+	hListFile = FindFirstFile(FilePath, &FindFileData);
 
 	auto IsXp3File = [](HANDLE hFile)->BOOL
 	{
@@ -912,20 +796,20 @@ Void FASTCALL EnumerateFileInDirectory(LPCWSTR szPath, std::vector<std::wstring>
 	{
 		do
 		{
-			if(StrCompareW(FindFileData.cFileName, L".") == 0 ||
-			   StrCompareW(FindFileData.cFileName, L"..") == 0)
+			if(lstrcmpW(FindFileData.cFileName, L".") == 0 ||
+			   lstrcmpW(FindFileData.cFileName, L"..") == 0)
 			{
 				continue;
 			}
 
 			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				FormatStringW(FilePath, L"%s\\%s", szPath, FindFileData.cFileName);
+				wsprintfW(FilePath, L"%s\\%s", szPath, FindFileData.cFileName);
 				EnumerateFileInDirectory(FilePath, FileList);
 			}
 			else
 			{
-				FormatStringW(FilePath, L"%s\\%s", szPath, FindFileData.cFileName);
+				wsprintfW(FilePath, L"%s\\%s", szPath, FindFileData.cFileName);
 				Status = File.Open(FilePath);
 				if(NT_SUCCESS(Status) && IsXp3File(File.GetHandle()))
 					FileList.push_back(FilePath);
@@ -933,11 +817,12 @@ Void FASTCALL EnumerateFileInDirectory(LPCWSTR szPath, std::vector<std::wstring>
 				File.Close();
 			}
 
-		} while (Nt_FindNextFile(hListFile, &FindFileData));
+		} while (FindNextFile(hListFile, &FindFileData));
+		FindClose(hListFile);
 	}
 }
 
-Void DetectCxdecAndInitEntry();
+VOID DetectCxdecAndInitEntry();
 
 //TVP(KIRIKIRI) Z core / Scripting Platform for Win32
 //TVP(KIRIKIRI) 2 core / Scripting Platform for Win32
@@ -965,7 +850,7 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 		Handle = GlobalData::GetGlobalData();
 
 		RtlZeroMemory(FileName,   countof(FileName) * sizeof(FileName[0]));
-		Nt_GetModuleFileName(Nt_GetExeModuleHandle(), FileName,  MAX_PATH * 2);
+		GetModuleFileNameW(GetModuleHandleW(NULL), FileName,  MAX_PATH * 2);
 
 		LOOP_ONCE
 		{
@@ -975,18 +860,18 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 
 			Status     = STATUS_INSUFFICIENT_RESOURCES;
 			FileSize   = File.GetSize32();
-			FileBuffer = (PBYTE)AllocateMemoryP(FileSize);
+			FileBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, FileSize);
 			
 			if (!FileBuffer)
 				break;
 
 			File.Read(FileBuffer, FileSize);
-			if (Handle->FindCodeSlow((PCChar)FileBuffer, FileSize, (PCHAR)Pattern, StrLengthW(Pattern) * 2))
+			if (Handle->FindCodeSlow((PCCHAR)FileBuffer, FileSize, (PCHAR)Pattern, lstrlenW(Pattern) * 2))
 			{
 				//ensure the codepage
-				Mp::PATCH_MEMORY_DATA f[] = 
+				Mp::PATCH_MEMORY_DATA f[] =
 				{
-					Mp::FunctionJumpVa(MultiByteToWideChar, HookMultiByteToWideChar, &StubMultiByteToWideChar )
+					Mp::FunctionJumpVa(MultiByteToWideChar, HookMultiByteToWideChar, &StubMultiByteToWideChar)
 				};
 
 				Mp::PatchMemory(f, countof(f));
@@ -994,7 +879,8 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 				DetectCxdecAndInitEntry();
 				Handle->ModuleType = ModuleVersion::Krkrz;
 			}
-			FreeMemoryP(FileBuffer);
+			HeapFree(GetProcessHeap(), 0, FileBuffer);
+			FileBuffer = NULL;
 		}
 		File.Close();
 		return Status;
@@ -1008,41 +894,13 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 			break;
 
 		//Handle->DebugOn = TRUE;
-		Io::DeleteFileW(L"KrkrExtractFailed.txt");
+		DeleteFileW(L"KrkrExtractFailed.txt");
 		
 		Handle->SetDllModule(hModule);
 		
 		//insert all xp3 files, including exe
 		RtlZeroMemory(ExeDirectory, sizeof(ExeDirectory));
 		Nt_GetExeDirectory(ExeDirectory, countof(ExeDirectory));
-
-		/*
-		EnumerateFileInDirectory(ExeDirectory, FileList);
-
-		for (auto& StringItem : FileList)
-		{
-			for (auto& ItemChar : StringItem)
-				ItemChar = CHAR_LOWER(ItemChar);
-
-			Index = StringItem.find_last_of(L'\\');
-			Index2 = StringItem.find_last_of(L'/');
-
-			if (Index == wstring::npos && Index2 == wstring::npos)
-				CurFileName = StringItem;
-			else if (Index == wstring::npos && Index2 != wstring::npos)
-				CurFileName = StringItem.substr(Index2 + 1, wstring::npos);
-			else if (Index != wstring::npos && Index2 == wstring::npos)
-				CurFileName = StringItem.substr(Index + 1, wstring::npos);
-			else
-				CurFileName = StringItem.substr(max(Index, Index2) + 1, wstring::npos);
-
-
-			PrintConsoleW(L"found %s\n", CurFileName.c_str());
-
-			Xp3FileEntry Entry;
-			Handle->FileInitList.insert(std::make_pair(CurFileName, Entry));
-		}
-		*/
 
 		Success = NT_FAILED(CheckKrkrZ()) ? FALSE : TRUE;
 		Success = NT_FAILED(InitHook())   ? FALSE : TRUE;
@@ -1124,14 +982,16 @@ BOOL IsEncryptedSenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk& File)
 	File.Seek(CompressedIndex.Offset.LowPart, FILE_BEGIN);
 
 	iPos = 0;
-	DecompSize = CompressedIndex.DecompressedSize;
-	IndexBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.DecompressedSize);
-	CompressedBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.CompressedSize);
+	DecompSize       = CompressedIndex.DecompressedSize;
+	IndexBuffer      = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedIndex.DecompressedSize);
+	CompressedBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedIndex.CompressedSize);
 
 	if (!IndexBuffer || !CompressedBuffer)
 	{
-		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
-		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
+		if (IndexBuffer)      HeapFree(GetProcessHeap(), 0, IndexBuffer);
+		if (CompressedBuffer) HeapFree(GetProcessHeap(), 0, CompressedBuffer);
+		IndexBuffer      = NULL;
+		CompressedBuffer = NULL;
 		return FALSE;
 	}
 
@@ -1144,18 +1004,17 @@ BOOL IsEncryptedSenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk& File)
 		RawFailed = TRUE;
 	}
 
-	FreeMemoryP(IndexBuffer);
-	FreeMemoryP(CompressedBuffer);
+	HeapFree(GetProcessHeap(), 0, IndexBuffer);
+	HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 
 	return RawFailed;
 }
 
-Void AddToSenrenBankaEntry(LPCWSTR lpFileName, PBYTE pDecompress, ULONG Size, NtFileDisk& File)
+VOID AddToSenrenBankaEntry(LPCWSTR lpFileName, PBYTE pDecompress, ULONG Size, NtFileDisk& File)
 {
 	KRKRZ_COMPRESSED_INDEX  CompressedIndex;
 	PBYTE                   CompressedBuffer;
 	ULONG                   DecompSize, iPos;
-	DWORD                   Hash;
 	XP3Index                Item;
 	ULARGE_INTEGER          ChunkSize;
 	USHORT                  NameLength;
@@ -1169,7 +1028,7 @@ Void AddToSenrenBankaEntry(LPCWSTR lpFileName, PBYTE pDecompress, ULONG Size, Nt
 
 	iPos = 0;
 	DecompSize = CompressedIndex.DecompressedSize;
-	CompressedBuffer = (PBYTE)AllocateMemoryP(CompressedIndex.CompressedSize);
+	CompressedBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedIndex.CompressedSize);
 
 	if (!CompressedBuffer)
 		return;
@@ -1187,7 +1046,7 @@ Void AddToSenrenBankaEntry(LPCWSTR lpFileName, PBYTE pDecompress, ULONG Size, Nt
 	PrintConsoleW(L"Entry for [%s] was added\n", lpFileName);
 }
 
-Void GetSenrenBankaEntry(LPCWSTR lpFileName)
+VOID GetSenrenBankaEntry(LPCWSTR lpFileName)
 {
 	NTSTATUS                Status;
 	NtFileDisk              File;
@@ -1224,8 +1083,8 @@ Void GetSenrenBankaEntry(LPCWSTR lpFileName)
 
 	ULONG64 CompresseBufferSize = 0x1000;
 	ULONG64 DecompressBufferSize = 0x1000;
-	PBYTE pCompress = (PBYTE)AllocateMemoryP((ULONG)CompresseBufferSize);
-	PBYTE pDecompress = (PBYTE)AllocateMemoryP((ULONG)DecompressBufferSize);
+	PBYTE pCompress   = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)CompresseBufferSize);
+	PBYTE pDecompress = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)DecompressBufferSize);
 	DataHeader.OriginalSize = XP3Header.IndexOffset;
 
 	if (Handle->DebugOn)
@@ -1242,8 +1101,8 @@ Void GetSenrenBankaEntry(LPCWSTR lpFileName)
 				PrintConsoleW(L"Couldn't Read Index Header\n");
 
 			File.Close();
-			FreeMemoryP(pCompress);
-			FreeMemoryP(pDecompress);
+			HeapFree(GetProcessHeap(), 0, pCompress);
+			HeapFree(GetProcessHeap(), 0, pDecompress);
 			return;
 		}
 
@@ -1253,7 +1112,7 @@ Void GetSenrenBankaEntry(LPCWSTR lpFileName)
 		if (DataHeader.ArchiveSize.LowPart > CompresseBufferSize)
 		{
 			CompresseBufferSize = DataHeader.ArchiveSize.LowPart;
-			pCompress = (PBYTE)ReAllocateMemoryP(pCompress, (ULONG)CompresseBufferSize);
+			pCompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pCompress, (ULONG)CompresseBufferSize);
 		}
 
 		if ((DataHeader.bZlib & 7) == 0)
@@ -1277,7 +1136,7 @@ Void GetSenrenBankaEntry(LPCWSTR lpFileName)
 			if (DataHeader.ArchiveSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.ArchiveSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			RtlCopyMemory(pDecompress, pCompress, DataHeader.ArchiveSize.LowPart);
@@ -1289,7 +1148,7 @@ Void GetSenrenBankaEntry(LPCWSTR lpFileName)
 			if (DataHeader.OriginalSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.OriginalSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			DataHeader.OriginalSize.HighPart = DataHeader.OriginalSize.LowPart;
@@ -1324,18 +1183,18 @@ Void GetSenrenBankaEntry(LPCWSTR lpFileName)
 	} while (DataHeader.bZlib & 0x80);
 
 	File.Close();
-	FreeMemoryP(pCompress);
-	FreeMemoryP(pDecompress);
+	HeapFree(GetProcessHeap(), 0, pCompress);
+	HeapFree(GetProcessHeap(), 0, pDecompress);
 }
 
-Void ReadSenrenBanka()
+VOID ReadSenrenBanka()
 {
 	WIN32_FIND_DATAW          FileInfo;
 	HANDLE                    FileHandle;
 	NtFileDisk                File;
 	std::vector<std::wstring> ArchiveList;
 	
-	FileHandle = Nt_FindFirstFile(L"*.xp3", &FileInfo);
+	FileHandle = FindFirstFileW(L"*.xp3", &FileInfo);
 	if (FileHandle == 0 || FileHandle == INVALID_HANDLE_VALUE)
 		return;
 
@@ -1343,13 +1202,14 @@ Void ReadSenrenBanka()
 	{
 		PrintConsoleW(L"Pre init : found archive : %s\n", FileInfo.cFileName);
 		ArchiveList.push_back(FileInfo.cFileName);
-	} while (Nt_FindNextFile(FileHandle, &FileInfo));
+	} while (FindNextFileW(FileHandle, &FileInfo));
 
 	for (auto& Entry : ArchiveList)
 	{
 		GetSenrenBankaEntry(Entry.c_str());
 	}
 	
+	FindClose(FileHandle);
 }
 
 
@@ -1594,7 +1454,7 @@ HookReadFile(
 }
 
 
-Void DetectCxdecAndInitEntry()
+VOID DetectCxdecAndInitEntry()
 {
 	NTSTATUS                Status;
 	NtFileDisk              File;
@@ -1636,8 +1496,8 @@ Void DetectCxdecAndInitEntry()
 
 	ULONG64 CompresseBufferSize = 0x1000;
 	ULONG64 DecompressBufferSize = 0x1000;
-	PBYTE pCompress = (PBYTE)AllocateMemoryP((ULONG)CompresseBufferSize);
-	PBYTE pDecompress = (PBYTE)AllocateMemoryP((ULONG)DecompressBufferSize);
+	PBYTE pCompress   = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)CompresseBufferSize);
+	PBYTE pDecompress = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)DecompressBufferSize);
 	DataHeader.OriginalSize = XP3Header.IndexOffset;
 
 
@@ -1652,8 +1512,10 @@ Void DetectCxdecAndInitEntry()
 				PrintConsoleW(L"Couldn't Read Index Header\n");
 
 			File.Close();
-			FreeMemoryP(pCompress);
-			FreeMemoryP(pDecompress);
+			HeapFree(GetProcessHeap(), 0, pCompress);
+			HeapFree(GetProcessHeap(), 0, pDecompress);
+			pCompress   = NULL;
+			pDecompress = NULL;
 			return;
 		}
 
@@ -1663,7 +1525,7 @@ Void DetectCxdecAndInitEntry()
 		if (DataHeader.ArchiveSize.LowPart > CompresseBufferSize)
 		{
 			CompresseBufferSize = DataHeader.ArchiveSize.LowPart;
-			pCompress = (PBYTE)ReAllocateMemoryP(pCompress, (ULONG)CompresseBufferSize);
+			pCompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pCompress, (ULONG)CompresseBufferSize);
 		}
 
 		if ((DataHeader.bZlib & 7) == 0)
@@ -1687,7 +1549,7 @@ Void DetectCxdecAndInitEntry()
 			if (DataHeader.ArchiveSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.ArchiveSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			RtlCopyMemory(pDecompress, pCompress, DataHeader.ArchiveSize.LowPart);
@@ -1701,7 +1563,7 @@ Void DetectCxdecAndInitEntry()
 			if (DataHeader.OriginalSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.OriginalSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			DataHeader.OriginalSize.HighPart = DataHeader.OriginalSize.LowPart;
@@ -1733,9 +1595,10 @@ Void DetectCxdecAndInitEntry()
 					PrintConsoleW(L"Pre-init : Special chunk is encryped.\n");
 					ReadSenrenBanka();
 
+					StubReadFile = ReadFile;
 					Mp::PATCH_MEMORY_DATA fun[] = 
 					{
-						Mp::FunctionJumpVa(ReadFile, HookReadFile, &StubReadFile)
+						Mp::FunctionJumpVa( ReadFile, HookReadFile, &StubReadFile)
 					};
 
 					InitializeCriticalSection(&ReadFileLocker);
@@ -1748,11 +1611,11 @@ Void DetectCxdecAndInitEntry()
 	} while (DataHeader.bZlib & 0x80);
 
 	File.Close();
-	FreeMemoryP(pCompress);
-	FreeMemoryP(pDecompress);
+	HeapFree(GetProcessHeap(), 0, pCompress);
+	HeapFree(GetProcessHeap(), 0, pDecompress);
 }
 
-Void InitRand(HMODULE hModule)
+VOID InitRand(HMODULE hModule)
 {
 	ULONG64  Seeds[4];
 	WCHAR    Path[MAX_PATH];
@@ -1760,10 +1623,10 @@ Void InitRand(HMODULE hModule)
 	RtlZeroMemory(Path, countof(Path) * 2);
 	Nt_GetExeDirectory(Path, MAX_PATH);
 	
-	Seeds[0] = MakeQword(Nt_GetCurrentProcessId(),     Nt_GetCurrentThreadId());
+	Seeds[0] = MakeQword(GetCurrentProcessId(),     GetCurrentThreadId());
 	Seeds[1] = MakeQword(Nt_CurrentPeb()->ProcessHeap, Nt_CurrentTeb()->EnvironmentPointer);
-	Seeds[2] = MurmurHash64B(Path, StrLengthW(Path) * 2);
-	Seeds[3] = MakeQword(hModule, Nt_GetExeModuleHandle());
+	Seeds[2] = MurmurHash64B(Path, lstrlenW(Path) * 2);
+	Seeds[3] = MakeQword(hModule, GetModuleHandleW(NULL));
 
 	init_by_array64(Seeds, countof(Seeds));
 }
@@ -1887,7 +1750,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 			Header.EntryCount += Count;
 			for (ULONG j = 0; j < Count; j++)
 			{
-				FormatStringA(DisasmLine, "%s %s", CapstoneInsn[j].mnemonic, CapstoneInsn[j].op_str);
+				wsprintfA(DisasmLine, "%s %s", CapstoneInsn[j].mnemonic, CapstoneInsn[j].op_str);
 
 				if (j == 0)
 					DisObj.PrevLength = 0;
@@ -1896,7 +1759,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 				
 				DisObj.Offset    = CapstoneInsn[j].address;
 				DisObj.InsLength = CapstoneInsn[j].size;
-				StrCopyA(DisObj.DisasmLine, DisasmLine);
+				lstrcpyA(DisObj.DisasmLine, DisasmLine);
 				MapList[CapstoneInsn[j].address] = DisObj;
 			}
 
@@ -1917,7 +1780,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 	File.Write(&Header, sizeof(Header));
 
 	AllocSize = 0x1000;
-	Buffer = (PBYTE)AllocateMemoryP(AllocSize);
+	Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, AllocSize);
 	if (Buffer == NULL)
 	{
 		File.Close();
@@ -1937,7 +1800,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 		if (Stat.cbSize.QuadPart > AllocSize)
 		{
 			AllocSize = Stat.cbSize.QuadPart;
-			Buffer = (PBYTE)ReAllocateMemoryP(Buffer, AllocSize);
+			Buffer = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Buffer, AllocSize);
 			if (Buffer == NULL)
 			{
 				File.Close();
@@ -1949,7 +1812,7 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 		File.Write(Buffer, Stat.cbSize.QuadPart);
 		Stream->Release();
 	}
-	FreeMemoryP(Buffer);
+	HeapFree(GetProcessHeap(), 0, Buffer);
 	File.Close();
 
 	return STATUS_SUCCESS;
@@ -1958,7 +1821,6 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 
 auto KrkrDBG_ReadPeDatabase(std::map<ULONG, CMarshalMap>& MapList, LPCWSTR DBName)->NTSTATUS
 {
-	NTSTATUS           Status;
 	HANDLE             hFile, hMapFile;
 	LARGE_INTEGER      Size;
 	PPE_DATABASE       Header;
@@ -2041,7 +1903,7 @@ auto KrkrDBG_ReadPrevInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULO
 		return STATUS_UNSUCCESSFUL;
 
 	RtlZeroMemory(Buffer, ccBuffer);
-	RtlCopyMemory(Buffer, PrevInstruction->second.DisasmLine, StrLengthA(PrevInstruction->second.DisasmLine));
+	RtlCopyMemory(Buffer, PrevInstruction->second.DisasmLine, lstrlenA(PrevInstruction->second.DisasmLine));
 
 	return STATUS_SUCCESS;
 }
@@ -2050,7 +1912,6 @@ auto KrkrDBG_ReadPrevInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULO
 //allocate memory by caller!
 auto KrkrDBG_ReadInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG CurrentOffset, PCHAR Buffer, ULONG ccBuffer)->NTSTATUS
 {
-	NTSTATUS   Status;
 	ULONG      PreviousOffset;
 
 	const auto Instruction = Holder.find(CurrentOffset);
@@ -2058,7 +1919,7 @@ auto KrkrDBG_ReadInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG C
 		return STATUS_UNSUCCESSFUL;
 
 	RtlZeroMemory(Buffer, ccBuffer);
-	RtlCopyMemory(Buffer, Instruction->second.DisasmLine, StrLengthA(Instruction->second.DisasmLine));
+	RtlCopyMemory(Buffer, Instruction->second.DisasmLine, lstrlenA(Instruction->second.DisasmLine));
 
 	return STATUS_SUCCESS;
 }
@@ -2067,25 +1928,26 @@ auto KrkrDBG_ReadInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG C
 
 NTSTATUS CreateMiniDump2(PEXCEPTION_POINTERS ExceptionPointers, LPCWSTR ModuleBaseName)
 {
-	WCHAR                          MiniDumpFile[MAX_NTPATH];
+	WCHAR                          MiniDumpFile[MAX_PATH];
 	NtFileDisk                     File;
 	BOOL                           Success;
 	NTSTATUS                       Status;
 	MINIDUMP_EXCEPTION_INFORMATION ExceptionInformation;
 
 
-	FormatStringW(MiniDumpFile, L"%s.dmp", ModuleBaseName);
+	wsprintfW(MiniDumpFile, L"%s.dmp", ModuleBaseName);
 
 	Status = File.Create(MiniDumpFile);
-	FAIL_RETURN(Status);
+	if (NT_FAILED(Status))
+		return Status;
 
 	ExceptionInformation.ClientPointers = FALSE;
 	ExceptionInformation.ExceptionPointers = ExceptionPointers;
-	ExceptionInformation.ThreadId = Ps::CurrentTid();
+	ExceptionInformation.ThreadId = GetCurrentThreadId();
 
 	Success = MiniDumpWriteDump(
 		NtCurrentProcess(),
-		(ULONG_PTR)Ps::CurrentTeb()->ClientId.UniqueProcess,
+		(ULONG_PTR)Nt_CurrentTeb()->ClientId.UniqueProcess,
 		File,
 		MiniDumpNormal,
 		&ExceptionInformation,
@@ -2126,7 +1988,6 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 	NTSTATUS              Status;
 	NtFileDisk            File;
 	ULONG                 Size;
-	PBYTE                 Buffer;
 	ULONG                 Count;
 	STACKFRAME64          StackFrame;
 	DWORD64               ModuleBase;
@@ -2208,7 +2069,7 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 				else
 					lpImageName = ImageModule.ImageName;
 
-				Length = WideCharToMultiByte(CP_ACP, 0, lpImageName, StrLengthW(lpImageName), ModuleNameA, countof(ModuleNameA) - 1, NULL, NULL);
+				Length = WideCharToMultiByte(CP_ACP, 0, lpImageName, lstrlenW(lpImageName), ModuleNameA, countof(ModuleNameA) - 1, NULL, NULL);
 				ModuleNameA[Length] = 0;
 
 				FullTrace[Count].ModuleName     = ModuleNameA;
@@ -2276,13 +2137,10 @@ DWORD NTAPI ConsoleMoniterThread(PVOID Param)
 			ParseCommand(CommandLine);
 			
 	NEXT_READ:
-		Ps::Sleep(10);
+		Sleep(10);
 	}
 	return 0;
 }
-
-
-OVERLOAD_CPP_METHOD_NEW_WITH_HEAP(Nt_CurrentPeb()->ProcessHeap);
 
 BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 {
@@ -2292,7 +2150,6 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		//AllocConsole();
-		ml::MlInitialize();
 		LdrDisableThreadCalloutsForDll(hModule);
 		InitRand(hModule);
 
@@ -2306,7 +2163,7 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 		if (!InitKrkrExtract(hModule))
 		{
 			ExceptionBox(L"Internal exception!");
-			Ps::ExitProcess(-1);
+			ExitProcess(-1);
 		}
 
 	break;

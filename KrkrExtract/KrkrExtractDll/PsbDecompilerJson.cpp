@@ -20,9 +20,9 @@ using std::map;
 #define LZ4_MAGIC 0x184D2204
 #endif
 
-Void TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbCollection *Offsets, string EntryName, Json::Value &Root);
+VOID TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbCollection *Offsets, string EntryName, Json::Value &Root);
 
-Void TraversalObjectTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbObject *Objects, string ObjectName, Json::Value &Root)
+VOID TraversalObjectTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbObject *Objects, string ObjectName, Json::Value &Root)
 {
 	PsbValue *Value = NULL;
 
@@ -137,7 +137,7 @@ Void TraversalObjectTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, Psb
 
 			Json::Value Node(Json::stringValue);
 			
-			FormatStringA(IndexName, "%d", Resource->GetIndex());
+			wsprintfA(IndexName, "%d", Resource->GetIndex());
 			ResNode[Resource->GetIndex()] = EntryName;
 			Node = "__CompilerBinary__(" + (string)IndexName + ", '" + EntryName + "')";
 			Root[EntryName] = Node;
@@ -151,7 +151,7 @@ Void TraversalObjectTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, Psb
 	}
 }
 
-Void TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbCollection *Offsets, string EntryName, Json::Value &Root) 
+VOID TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbCollection *Offsets, string EntryName, Json::Value &Root) 
 {
 	PsbValue *Value = NULL;
 
@@ -261,7 +261,7 @@ Void TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, Ps
 
 				Json::Value Node(Json::stringValue);
 
-				FormatStringA(IndexName, "%d", Resource->GetIndex());
+				wsprintfA(IndexName, "%d", Resource->GetIndex());
 				ResNode[Resource->GetIndex()] = EntryName;
 				Node = "__CompilerBinary__(" + (string)IndexName + ", '" + EntryName + "')";
 
@@ -277,7 +277,7 @@ Void TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, Ps
 }
 
 
-Void ExportResource(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, LPCWSTR FileName, LPCWSTR DirName)
+VOID ExportResource(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, LPCWSTR FileName, LPCWSTR DirName)
 {
 	NTSTATUS Status;
 
@@ -301,7 +301,7 @@ Void ExportResource(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, LPCWSTR 
 		ULONG Offset = _Psb.ChunkOffsets->Get(i);
 		ULONG Length = _Psb.ChunkLengths->Get(i);
 
-		FormatStringW(OutputName, L"%s\\%s", ResDirName.c_str(), BinaryName);
+		wsprintfW(OutputName, L"%s\\%s", ResDirName.c_str(), BinaryName);
 
 		NtFileDisk File;
 		Status = File.Create(OutputName);
@@ -362,7 +362,7 @@ NTSTATUS NTAPI FindEmoteKeyByMark(PULONG PrivateKey)
 				iPos += 0x20;
 				AddressOfPrivate = *(PULONG)((ULONG_PTR)hModule + iPos);
 
-				*PrivateKey = StringToInt32A((LPCSTR)AddressOfPrivate);
+				*PrivateKey = StringToInt32A((LPSTR)AddressOfPrivate);
 				Status = STATUS_SUCCESS;
 
 				break;
@@ -426,7 +426,7 @@ NTSTATUS NTAPI FindEmoteKeyByParse(PULONG PrivateKey)
 				iPos += 0x10;
 				AddressOfPrivate = *(PULONG)((ULONG_PTR)FilterTextureAddress + iPos);
 
-				*PrivateKey = StringToInt32A((LPCSTR)AddressOfPrivate);
+				*PrivateKey = StringToInt32A((LPSTR)AddressOfPrivate);
 				Status = STATUS_SUCCESS;
 
 				break;
@@ -500,7 +500,7 @@ NTSTATUS NTAPI FindEmoteKeyByEmotePlayer(PULONG PrivateKey)
 				{
 					AddressOfPrivate = *(PULONG)((ULONG_PTR)ModuleAddress + iPos);
 
-					*PrivateKey = StringToInt32A((LPCSTR)AddressOfPrivate);
+					*PrivateKey = StringToInt32A((LPSTR)AddressOfPrivate);
 					Status = STATUS_SUCCESS;
 
 					break;
@@ -564,10 +564,10 @@ static unsigned char *getDataFromMDF(const unsigned char *buff, unsigned long &s
 	if (size <= 10 || *(PDWORD)buff == TAG3("mdf")) return NULL;
 
 	ULONG Uncompsize = *(unsigned long*)&buff[4];
-	PBYTE uncomp = (PBYTE)AllocateMemoryP(Uncompsize);
+	PBYTE uncomp = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Uncompsize);
 	if (Z_OK != uncompress(uncomp, &Uncompsize, buff + 8, size - 8))
 	{
-		FreeMemoryP(uncomp);
+		HeapFree(GetProcessHeap(), 0, uncomp);
 		return NULL;
 	}
 	size = Uncompsize;
@@ -602,18 +602,18 @@ static unsigned char *getDataFromLz4(PBYTE buff, ULONG &size)
 
 	pos = srcSize;
 	dstPos = 0;
-	uncompr_data = (PBYTE)AllocateMemoryP(LODWORD(frameInfo.contentSize));
+	uncompr_data = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, LoDword(frameInfo.contentSize));
 
 	do
 	{
-		dstSize = LODWORD(frameInfo.contentSize) - dstPos;
+		dstSize = LoDword(frameInfo.contentSize) - dstPos;
 		srcSize = size - pos;
 
 		err = LZ4F_decompress(context, &uncompr_data[dstPos], &dstSize, &buff[pos], &srcSize, NULL);
 
 		if (LZ4F_isError(err))
 		{
-			FreeMemoryP(uncompr_data);
+			HeapFree(GetProcessHeap(), 0, uncompr_data);
 			return nullptr;
 		}
 
@@ -621,7 +621,7 @@ static unsigned char *getDataFromLz4(PBYTE buff, ULONG &size)
 		pos += srcSize;
 	} while (err);
 
-	size = LODWORD(frameInfo.contentSize);
+	size = LoDword(frameInfo.contentSize);
 	return uncompr_data;
 }
 
@@ -648,7 +648,7 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 	PsbStream->Stat(&Stat, STATFLAG_DEFAULT);
 
 	Length = Stat.cbSize.LowPart;
-	Buffer = (PBYTE)AllocateMemoryP(Length);
+	Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Length);
 	if (!Buffer)
 		return STATUS_NO_MEMORY;
 
@@ -672,7 +672,7 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 
 			if (uncomp)
 			{
-				FreeMemoryP(Buffer);
+				HeapFree(GetProcessHeap(), 0, Buffer);
 				Buffer = uncomp;
 			}
 		}
@@ -701,7 +701,7 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 
 	if (pInfo->Version != 2 && pInfo->Version != 3)
 	{
-		FreeMemoryP(Buffer);
+		HeapFree(GetProcessHeap(), 0, Buffer);
 		return STATUS_NO_MATCH;
 	}
 	else
@@ -727,7 +727,7 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 
 			if (Buffer[(ULONG_PTR)pInfo->pRootCode] != 0x21)
 			{
-				FreeMemoryP(Buffer);
+				HeapFree(GetProcessHeap(), 0, Buffer);
 				return STATUS_UNSUCCESSFUL;
 			}
 		}
@@ -738,10 +738,10 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 	TraversalObjectTree(Psb, ResNode, Objects, "", Root);
 
 	string Output = Root.toStyledString();
-	File.Write((PVoid)Output.c_str(), Output.length());
+	File.Write((PVOID)Output.c_str(), Output.length());
 	File.Close();
 
 	ExportResource(Psb, ResNode, FileName, BasePath);
-	FreeMemoryP(Buffer);
+	HeapFree(GetProcessHeap(), 0, Buffer);
 	return Status;
 }

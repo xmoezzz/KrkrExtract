@@ -62,7 +62,7 @@ public:
 		Stream->Write(&Offset,     sizeof(Offset),     NULL);
 		Stream->Write(&InsLength,  sizeof(InsLength),  NULL);
 		Stream->Write(&PrevLength, sizeof(PrevLength), NULL);
-		ChunkLength = StrLengthA(DisasmLine) + 1;
+		ChunkLength = lstrlenA(DisasmLine) + 1;
 		Stream->Write(&ChunkLength, sizeof(ChunkLength), NULL);
 		Stream->Write(DisasmLine, ChunkLength, NULL);
 		Stream->Stat(&Stat, STATFLAG_DEFAULT);

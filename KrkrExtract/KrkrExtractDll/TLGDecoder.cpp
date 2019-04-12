@@ -506,7 +506,7 @@ int dir
 
 void* my_malloc(DWORD Size)
 {
-	return AllocateMemoryP(Size);
+	return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Size);
 }
 
 int
@@ -683,7 +683,7 @@ DWORD *ret_actual_data_length
 	UNREFERENCED_PARAMETER(tlg_size);
 
 	outsize = tlg6_header->width * 4 * tlg6_header->height;
-	out = (BYTE *)AllocateMemoryP(outsize);
+	out = (BYTE *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, outsize);
 	if (!out)
 		return -1;
 
@@ -692,13 +692,13 @@ DWORD *ret_actual_data_length
 	int main_count = tlg6_header->width / TVP_TLG6_W_BLOCK_SIZE;
 	int fraction = tlg6_header->width - main_count * TVP_TLG6_W_BLOCK_SIZE;
 
-	BYTE *bit_pool = (BYTE *)AllocateMemoryP((tlg6_header->max_bit_length / 8 + 5 + 3) & ~3);
-	ULONG *pixelbuf = (ULONG *)AllocateMemoryP((4 * tlg6_header->width * TVP_TLG6_H_BLOCK_SIZE + 1 + 3) & ~3);
-	BYTE *filter_types = (BYTE *)AllocateMemoryP((x_block_count * y_block_count + 3) & ~3);
-	ULONG *zeroline = (ULONG *)AllocateMemoryP(tlg6_header->width * 4);
+	BYTE *bit_pool     = (BYTE *) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (tlg6_header->max_bit_length / 8 + 5 + 3) & ~3);
+	ULONG *pixelbuf    = (ULONG *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (4 * tlg6_header->width * TVP_TLG6_H_BLOCK_SIZE + 1 + 3) & ~3);
+	BYTE *filter_types = (BYTE *) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (x_block_count * y_block_count + 3) & ~3);
+	ULONG *zeroline    = (ULONG *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, tlg6_header->width * 4);
 	if (!bit_pool || !pixelbuf || !filter_types || !zeroline)
 	{
-		FreeMemoryP(out);
+		HeapFree(GetProcessHeap(), 0, out);
 		return -1;
 	}
 
@@ -773,12 +773,13 @@ DWORD *ret_actual_data_length
 				break;
 			default:
 				if (byte_length & 3)
-					FreeMemoryP(bit_pool);
-				FreeMemoryP(zeroline);
-				FreeMemoryP(filter_types);
-				FreeMemoryP(pixelbuf);
-				FreeMemoryP(bit_pool);
-				FreeMemoryP(out);
+					HeapFree(GetProcessHeap(), 0, bit_pool);
+
+				HeapFree(GetProcessHeap(), 0, zeroline);
+				HeapFree(GetProcessHeap(), 0, filter_types);
+				HeapFree(GetProcessHeap(), 0, pixelbuf);
+				HeapFree(GetProcessHeap(), 0, bit_pool);
+				HeapFree(GetProcessHeap(), 0, out);
 				return -2;
 			}
 		}
@@ -828,10 +829,10 @@ DWORD *ret_actual_data_length
 			prevline = curline;
 		}
 	}
-	FreeMemoryP(zeroline);
-	FreeMemoryP(filter_types);
-	FreeMemoryP(pixelbuf);
-	FreeMemoryP(bit_pool);
+	HeapFree(GetProcessHeap(), 0, zeroline);
+	HeapFree(GetProcessHeap(), 0, filter_types);
+	HeapFree(GetProcessHeap(), 0, pixelbuf);
+	HeapFree(GetProcessHeap(), 0, bit_pool);
 
 	BYTE *b = out;
 	DWORD pixels = tlg6_header->width * tlg6_header->height;
@@ -847,12 +848,11 @@ DWORD *ret_actual_data_length
 		0 - tlg6_header->height, 32, ret_actual_data,
 		ret_actual_data_length, my_malloc))
 	{
-		FreeMemoryP(out);
+		HeapFree(GetProcessHeap(), 0, out);
 		return -1;
 	}
 
-	FreeMemoryP(out);
-
+	HeapFree(GetProcessHeap(), 0, out);
 	return 0;
 }
 
@@ -1009,7 +1009,7 @@ BOOL DecodeTLG5(PVOID lpInBuffer, ULONG uInSize, PVOID *ppOutBuffer, PULONG pOut
 	KRKR2_TLG5_HEADER*  pTLGHeader;
 	IMAGE_BITMAP_HEADER BitmpHeader;
 	int                 width, height, colors, blockheight;
-	LongPtr             stride;
+	LONG_PTR            stride;
 
 	pTLGHeader = (KRKR2_TLG5_HEADER *)pbInBuffer;
 	colors = pTLGHeader->Colors;
@@ -1021,7 +1021,7 @@ BOOL DecodeTLG5(PVOID lpInBuffer, ULONG uInSize, PVOID *ppOutBuffer, PULONG pOut
 	blockheight = pTLGHeader->BlockHeight;
 
 	InitBitmapHeader(&BitmpHeader, width, height, 32, &stride);
-	pbOutBuffer = (PBYTE)AllocateMemoryP(stride * height + sizeof(BitmpHeader));
+	pbOutBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, stride * height + sizeof(BitmpHeader));
 	if (pbOutBuffer == NULL)
 		return FALSE;
 
@@ -1044,12 +1044,12 @@ BOOL DecodeTLG5(PVOID lpInBuffer, ULONG uInSize, PVOID *ppOutBuffer, PULONG pOut
 	for (int i = 0; i < colors; i++)
 		outbuf[i] = NULL;
 
-	text = (UCHAR*)AllocateMemoryP(4096);
+	text = (UCHAR*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 4096);
 	memset(text, 0, 4096);
 
-	inbuf = (UCHAR*)AllocateMemoryP(blockheight * width + 10);
+	inbuf = (UCHAR*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, blockheight * width + 10);
 	for (int i = 0; i < colors; i++)
-		outbuf[i] = (UCHAR*)AllocateMemoryP(blockheight * width + 10);
+		outbuf[i] = (UCHAR*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, blockheight * width + 10);
 
 	UCHAR *prevline = NULL;
 	for (int y_blk = 0; y_blk < height; y_blk += blockheight)
@@ -1153,10 +1153,10 @@ BOOL DecodeTLG5(PVOID lpInBuffer, ULONG uInSize, PVOID *ppOutBuffer, PULONG pOut
 		}
 	}
 
-	if (inbuf) FreeMemoryP(inbuf);
-	if (text) FreeMemoryP(text);
+	if (inbuf) HeapFree(GetProcessHeap(), 0, inbuf);
+	if (text)  HeapFree(GetProcessHeap(), 0, text);
 	for (int i = 0; i < colors; i++)
-		if (outbuf[i]) FreeMemoryP(outbuf[i]);
+		if (outbuf[i]) HeapFree(GetProcessHeap(), 0, outbuf[i]);
 
 	return TRUE;
 }

@@ -89,7 +89,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 
 #define szApplicationName   L"[X'moe]Welcome to KrkrExtract(version : %s, built on : %s)"
 #define szWindowClassName   L"XP3ExtractMainClass"
-#define _XP3ExtractVersion_ L"Ver 4.0.0.5"
+#define _XP3ExtractVersion_ L"Ver 4.0.1.0"
 
 
 class MemEntry
@@ -129,7 +129,7 @@ class GlobalData
 	GlobalData();
 	~GlobalData();
 
-	Void NTAPI ExitKrkr();
+	VOID NTAPI ExitKrkr();
 
 	static GlobalData* Handle;
 
@@ -147,6 +147,7 @@ public:
 	BOOL                            isRunning;
 	BOOL                            DebugOn;
 	BOOL                            IsAllPackReaded;
+	static BOOL                     WindowIsInited;
 
 	std::vector<std::wstring>              FileNameList;
 	std::map<std::wstring, Xp3FileEntry>   FileInitList;
@@ -198,33 +199,34 @@ public:
 	ULONG     AddPsbFlag(ULONG Flag);
 	ULONG     DeletePsbFlag(ULONG Flag);
 	BOOL      PsbFlagOn(ULONG Flag);
-	Void      DebugPsbFlag();
+	VOID      DebugPsbFlag();
 
-	Void      SetFolder(LPCWSTR Name);
-	Void      SetGuessPack(LPCWSTR Name);
-	Void      SetOutputPack(LPCWSTR Name);
+	VOID      SetFolder(LPCWSTR Name);
+	VOID      SetGuessPack(LPCWSTR Name);
+	VOID      SetOutputPack(LPCWSTR Name);
 
-	Void      GetFolder(LPWSTR Name, ULONG BufferMaxLength);
-	Void      GetGuessPack(LPWSTR Name, ULONG BufferMaxLength);
-	Void      GetOutputPack(LPWSTR Name, ULONG BufferMaxLength);
+	VOID      GetFolder(LPWSTR Name, ULONG BufferMaxLength);
+	VOID      GetGuessPack(LPWSTR Name, ULONG BufferMaxLength);
+	VOID      GetOutputPack(LPWSTR Name, ULONG BufferMaxLength);
 
-	BOOL      FindCodeSlow(PCChar Start, ULONG Size, PCChar Pattern, ULONG PatternLen);
+	BOOL      FindCodeSlow(PCCHAR Start, ULONG Size, PCCHAR Pattern, ULONG PatternLen);
 
-	Void      AddFileEntry(PCWSTR FileName, ULONG Length);
+	VOID      AddFileEntry(PCWSTR FileName, ULONG Length);
+	VOID      VirtualConsolePrint(PCWSTR Format, ...);
 
 	NTSTATUS NTAPI InitWindow();
-	NTSTATUS NTAPI InitHook(LPCWSTR ModuleName, PVoid ImageBase);
+	NTSTATUS NTAPI InitHook(LPCWSTR ModuleName, PVOID ImageBase);
 	NTSTATUS NTAPI InitHookNull();
 
-	Void NTAPI EnableAll(HWND hWnd);
-	Void NTAPI DisableAll(HWND hWnd);
-	Void NTAPI AdjustCP(HWND hWnd);
-	Void NTAPI SetProcess(HWND hWnd, ULONG Value);
-	Void NTAPI SetCount(DWORD Count);
-	Void NTAPI SetCurFile(DWORD iPos);
-	Void NTAPI ForceReset();
-	Void NTAPI Reset();
-	Void NTAPI SetDllModule(HMODULE hModule);
+	VOID NTAPI EnableAll(HWND hWnd);
+	VOID NTAPI DisableAll(HWND hWnd);
+	VOID NTAPI AdjustCP(HWND hWnd);
+	VOID NTAPI SetProcess(HWND hWnd, ULONG Value);
+	VOID NTAPI SetCount(DWORD Count);
+	VOID NTAPI SetCurFile(DWORD iPos);
+	VOID NTAPI ForceReset();
+	VOID NTAPI Reset();
+	VOID NTAPI SetDllModule(HMODULE hModule);
 
 	ForceInline static wstring FASTCALL GetUpperExtName(wstring& FileName)
 	{

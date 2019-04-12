@@ -106,7 +106,7 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 	if (size == 0)
 		return -1;
 
-	pImageCodecInfo = (Gdiplus::ImageCodecInfo*)AllocateMemoryP(size);
+	pImageCodecInfo = (Gdiplus::ImageCodecInfo*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
 	if (pImageCodecInfo == NULL)
 		return -1; 
 
@@ -114,15 +114,15 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 
 	for (UINT j = 0; j < num; ++j)
 	{
-		if (StrCompareW(pImageCodecInfo[j].MimeType, format) == 0)
+		if (lstrcmpW(pImageCodecInfo[j].MimeType, format) == 0)
 		{
 			*pClsid = pImageCodecInfo[j].Clsid;
-			FreeMemoryP(pImageCodecInfo);
+			HeapFree(GetProcessHeap(), 0, pImageCodecInfo);
 			return j; 
 		}
 	}
 
-	FreeMemoryP(pImageCodecInfo);
+	HeapFree(GetProcessHeap(), 0, pImageCodecInfo);
 	return -1;
 }
 
@@ -307,17 +307,17 @@ void tTVPMemoryStream::Init()
 //---------------------------------------------------------------------------
 void * tTVPMemoryStream::Alloc(size_t size)
 {
-	return AllocateMemoryP(size);
+	return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
 }
 //---------------------------------------------------------------------------
 void * tTVPMemoryStream::Realloc(void *orgblock, size_t size)
 {
-	return ReAllocateMemoryP(orgblock, size);
+	return HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orgblock, size);
 }
 //---------------------------------------------------------------------------
 void tTVPMemoryStream::Free(void *block)
 {
-	FreeMemoryP(block);
+	HeapFree(GetProcessHeap(), 0, block);
 }
 
 class tTVPIStreamAdapter2 : public IStream
@@ -538,7 +538,7 @@ static BOOL  g_InitGdiPlus = FALSE;
 static CLSID g_EncoderClsid;
 static CLSID g_EncoderClsidJPG;
 
-Void InitGdiPlus()
+VOID InitGdiPlus()
 {
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;

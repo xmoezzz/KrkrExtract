@@ -102,9 +102,9 @@ You can contact the author at :
 /**************************************
 *  Memory routines
 **************************************/
-#define ALLOCATOR(n,s) AllocateMemoryP(n * s)
-#define FREEMEM        FreeMemoryP
-#define MEM_INIT       my_memset_inline
+#define ALLOCATOR(n,s) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, n * s)
+#define FREEMEM(s)     HeapFree(GetProcessHeap(), 0, s)
+#define MEM_INIT       memset
 
 
 /**************************************

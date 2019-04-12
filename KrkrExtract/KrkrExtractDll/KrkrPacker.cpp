@@ -14,7 +14,7 @@ wstring ToLowerString(LPCWSTR lpString)
 {
 	wstring Result;
 
-	for (LONG_PTR i = 0; i < StrLengthW(lpString); i++)
+	for (LONG_PTR i = 0; i < lstrlenW(lpString); i++)
 		Result += (WCHAR)CHAR_LOWER(lpString[i]);
 	
 	return Result;
@@ -51,7 +51,7 @@ KrkrPacker::KrkrPacker() :
 }
 
 
-Void NTAPI KrkrPacker::Init()
+VOID NTAPI KrkrPacker::Init()
 {
 	KrkrPackType = PackInfo::UnknownPack;
 	DecryptionKey = 0;
@@ -94,7 +94,7 @@ auto AppendUnicodeString(LPWSTR lpwsString, PUNICODE_STRING UnicodeString)->BOOL
 	if (!lpwsString || !UnicodeString)
 		return FALSE;
 
-	Size = StrLengthW(lpwsString);
+	Size = lstrlenW(lpwsString);
 	RtlCopyMemory(&lpwsString[Size], UnicodeString->Buffer, UnicodeString->Length * 2);
 	return TRUE;
 };
@@ -107,11 +107,15 @@ auto AppendString(LPWSTR lpwsString, LPCWSTR String)->BOOL
 	if (!lpwsString || !String)
 		return FALSE;
 
-	Size = StrLengthW(lpwsString);
-	StrCopyW(&lpwsString[Size], String);
+	Size = lstrlenW(lpwsString);
+	lstrcpyW(&lpwsString[Size], String);
 	return TRUE;
 };
 
+
+//DON't use this function...
+//f**k Windows, it's very hard to get handles in UserMode, because kernel will
+//try to marshal everything we need then copy to UserLand
 auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 {
 	NTSTATUS                       Status;
@@ -128,7 +132,7 @@ auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 
 	ProcessHandle  = OpenProcess(PROCESS_DUP_HANDLE, FALSE, GetCurrentProcessId());
 	HandleInfoSize = 0x10000;
-	HandleInfo     = (PSYSTEM_HANDLE_INFORMATION)AllocateMemoryP(HandleInfoSize);
+	HandleInfo     = (PSYSTEM_HANDLE_INFORMATION)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, HandleInfoSize);
 
 	while ((Status = NtQuerySystemInformation(
 		SystemHandleInformation,
@@ -137,7 +141,7 @@ auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 		NULL
 		)) == STATUS_INFO_LENGTH_MISMATCH)
 	{
-		HandleInfo = (PSYSTEM_HANDLE_INFORMATION)ReAllocateMemoryP(HandleInfo, HandleInfoSize *= 2);
+		HandleInfo = (PSYSTEM_HANDLE_INFORMATION)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, HandleInfo, HandleInfoSize *= 2);
 		if (HandleInfo == NULL)
 			return STATUS_NO_MEMORY;
 	}
@@ -156,7 +160,7 @@ auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 			continue;
 		}
 
-		ObjectTypeInfo = (decltype(ObjectTypeInfo))AllocateMemoryP(0x1000);
+		ObjectTypeInfo = (decltype(ObjectTypeInfo))HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 0x1000);
 		Status = NtQueryObject(DupHandle, ObjectTypeInformation, (PVOID)ObjectTypeInfo, 0x1000, NULL);
 		if (NT_FAILED(Status))
 		{
@@ -171,7 +175,7 @@ auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 
 		if (Handle.GrantedAccess == 0x0012019f)
 		{
-			FormatStringW(Buffer, L"[%08x] (none)\n", Handle.HandleValue);
+			wsprintfW(Buffer, L"[%08x] (none)\n", Handle.HandleValue);
 			InfoList += Buffer;
 			NtClose(DupHandle);
 			continue;
@@ -180,7 +184,7 @@ auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 		Status = NtQueryObject(DupHandle, ObjectNameInformation, ObjectNameBuffer, 0x1000, &ReturnLength);
 		if (NT_FAILED(Status))
 		{
-			FormatStringW(Buffer, L"[%08x] (none)\n", Handle.HandleValue);
+			wsprintfW(Buffer, L"[%08x] (none)\n", Handle.HandleValue);
 			InfoList += Buffer;
 			NtClose(DupHandle);
 			continue;
@@ -189,22 +193,22 @@ auto DisPlayProcessFileHandle(wstring& InfoList)->NTSTATUS
 		ObjectNameInfo = (PUNICODE_STRING)ObjectNameBuffer;
 		if (ObjectNameInfo->Length)
 		{
-			FormatStringW(Buffer, L"[%08x] ", Handle.HandleValue);
+			wsprintfW(Buffer, L"[%08x] ", Handle.HandleValue);
 			AppendUnicodeString(Buffer, ObjectNameInfo);
 			AppendString(Buffer, L"\n");
 		}
 		else
 		{
-			FormatStringW(Buffer, L"[%08x] (unnamed)\n", Handle.HandleValue);
+			wsprintfW(Buffer, L"[%08x] (unnamed)\n", Handle.HandleValue);
 		}
 
 		InfoList += Buffer;
 		NtClose(DupHandle);
-		FreeMemoryP(ObjectTypeInfo);
+		HeapFree(GetProcessHeap(), 0, ObjectTypeInfo);
 		ObjectTypeInfo = NULL;
 	}
 
-	FreeMemoryP(HandleInfo);
+	HeapFree(GetProcessHeap(), 0, HandleInfo);
 	return STATUS_SUCCESS;
 };
 
@@ -250,15 +254,15 @@ NTSTATUS NTAPI KrkrPacker::GetSenrenBankaPackInfo(PBYTE IndexData, ULONG IndexSi
 	RtlCopyMemory(SenrenBankaInfo.ProductName, (IndexData + iPos), SenrenBankaInfo.LengthOfProduct * sizeof(WCHAR));
 
 	DecompSize       = SenrenBankaInfo.OriginalSize;
-	IndexBuffer      = (PBYTE)AllocateMemoryP(SenrenBankaInfo.OriginalSize);
-	CompressedBuffer = (PBYTE)AllocateMemoryP(SenrenBankaInfo.ArchiveSize);
+	IndexBuffer      = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, SenrenBankaInfo.OriginalSize);
+	CompressedBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, SenrenBankaInfo.ArchiveSize);
 
 	if (!IndexBuffer || !CompressedBuffer)
 	{
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory", L"KrkrExtract", MB_OK);
 
-		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
-		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
+		if (IndexBuffer)      HeapFree(GetProcessHeap(), 0, IndexBuffer);
+		if (CompressedBuffer) HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -266,8 +270,8 @@ NTSTATUS NTAPI KrkrPacker::GetSenrenBankaPackInfo(PBYTE IndexData, ULONG IndexSi
 	Status = file.Read(CompressedBuffer, SenrenBankaInfo.ArchiveSize);
 	if (NT_FAILED(Status))
 	{
-		FreeMemoryP(IndexBuffer);
-		FreeMemoryP(CompressedBuffer);
+		HeapFree(GetProcessHeap(), 0, IndexBuffer);
+		HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 
 		MessageBoxW(Handle->MainWindow, L"Couldn't decompress the special block", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		return Status;
@@ -316,8 +320,8 @@ NTSTATUS NTAPI KrkrPacker::GetSenrenBankaPackInfo(PBYTE IndexData, ULONG IndexSi
 
 	M2SubChunkMagic = *(PDWORD)IndexBuffer;
 
-	FreeMemoryP(IndexBuffer);
-	FreeMemoryP(CompressedBuffer);
+	HeapFree(GetProcessHeap(), 0, IndexBuffer);
+	HeapFree(GetProcessHeap(), 0, CompressedBuffer);
 
 	return STATUS_SUCCESS;
 }
@@ -383,8 +387,8 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 
 	ULONG64 CompresseBufferSize = 0x1000;
 	ULONG64 DecompressBufferSize = 0x1000;
-	PBYTE pCompress = (PBYTE)AllocateMemoryP((ULONG)CompresseBufferSize);
-	PBYTE pDecompress = (PBYTE)AllocateMemoryP((ULONG)DecompressBufferSize);
+	PBYTE pCompress = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)CompresseBufferSize);
+	PBYTE pDecompress = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)DecompressBufferSize);
 	DataHeader.OriginalSize = XP3Header.IndexOffset;
 
 
@@ -399,8 +403,8 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 		if (NT_FAILED(Status))
 		{
 			MessageBoxW(Handle->MainWindow, L"Couldn't Read Index Header", L"KrkrExtract", MB_OK);
-			FreeMemoryP(pCompress);
-			FreeMemoryP(pDecompress);
+			HeapFree(GetProcessHeap(), 0, pCompress);
+			HeapFree(GetProcessHeap(), 0, pDecompress);
 			File.Close();
 			return STATUS_UNSUCCESSFUL;
 		}
@@ -411,7 +415,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 		if (DataHeader.ArchiveSize.LowPart > CompresseBufferSize)
 		{
 			CompresseBufferSize = DataHeader.ArchiveSize.LowPart;
-			pCompress = (PBYTE)ReAllocateMemoryP(pCompress, (ULONG)CompresseBufferSize);
+			pCompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pCompress, (ULONG)CompresseBufferSize);
 		}
 
 		if ((DataHeader.bZlib & 7) == 0)
@@ -428,7 +432,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 			if (DataHeader.ArchiveSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.ArchiveSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 			CopyMemory(pDecompress, pCompress, DataHeader.ArchiveSize.LowPart);
 			DataHeader.OriginalSize.LowPart = DataHeader.ArchiveSize.LowPart;
@@ -441,7 +445,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 			if (DataHeader.OriginalSize.LowPart > DecompressBufferSize)
 			{
 				DecompressBufferSize = DataHeader.OriginalSize.LowPart;
-				pDecompress = (PBYTE)ReAllocateMemoryP(pDecompress, (ULONG)DecompressBufferSize);
+				pDecompress = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pDecompress, (ULONG)DecompressBufferSize);
 			}
 
 			DataHeader.OriginalSize.HighPart = DataHeader.OriginalSize.LowPart;
@@ -483,8 +487,8 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 
 		if (KrkrPackType == PackInfo::UnknownPack)
 		{
-			FreeMemoryP(pCompress);
-			FreeMemoryP(pDecompress);
+			HeapFree(GetProcessHeap(), 0, pCompress);
+			HeapFree(GetProcessHeap(), 0, pDecompress);
 			File.Close();
 
 			MessageBoxW(Handle->MainWindow, L"Unknown Pack Type", L"KrkrExtract", MB_OK | MB_ICONERROR);
@@ -494,7 +498,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 	} while (DataHeader.bZlib & 0x80);
 
 
-	PrintConsole(L"Packer Type %d\n", KrkrPackType);
+	PrintConsoleW(L"Packer Type %d\n", KrkrPackType);
 
 	//
 	if (KrkrPackType == PackInfo::NormalPack && Handle->pfGlobalXP3Filter == NULL)
@@ -512,15 +516,15 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 		}
 	}
 
-	FreeMemoryP(pCompress);
-	FreeMemoryP(pDecompress);
+	HeapFree(GetProcessHeap(), 0, pCompress);
+	HeapFree(GetProcessHeap(), 0, pDecompress);
 	File.Close();
 
 	return STATUS_SUCCESS;;
 }
 
 
-Void WINAPI KrkrPacker::InternalReset()
+VOID WINAPI KrkrPacker::InternalReset()
 {
 	GlobalData*   Handle;
 
@@ -564,9 +568,9 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexNormal *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexNormal *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -574,9 +578,9 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 		
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -586,7 +590,7 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 	for (ULONG i = 0; i < FileList.size(); ++pIndex, i++)
 	{
 		WCHAR OutInfo[MAX_PATH];
-		FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
 		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
 
@@ -619,7 +623,7 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 
 		File.Read(lpBuffer, Size.LowPart, &BytesTransfered);
@@ -631,9 +635,9 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			File.Close();
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_IO_DEVICE_ERROR;
 		}
 
@@ -700,12 +704,12 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -803,9 +807,9 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 
 	MessageBoxW(Handle->MainWindow, L"Making Package : Successful", L"KrkrExtract", MB_OK);
 	return STATUS_SUCCESS;
@@ -859,9 +863,9 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexNormal *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexNormal *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -869,9 +873,9 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -881,7 +885,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	for (ULONG i = 0; i < FileList.size(); ++pIndex, i++)
 	{
 		WCHAR OutInfo[MAX_PATH];
-		FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
 		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
 
@@ -903,7 +907,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 
 		ttstr FullName(L"file://./");
 
-		StrLen = StrLengthW(lpBasePack);
+		StrLen = lstrlenW(lpBasePack);
 
 		for (ULONG Index = 0; Index < StrLen; Index++)
 		{
@@ -936,9 +940,9 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -950,7 +954,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 		BytesTransfered.QuadPart = 0;
 		Stream->Read(lpBuffer, Size.LowPart, &BytesTransfered.LowPart);
@@ -961,9 +965,9 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -1030,12 +1034,12 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -1133,9 +1137,9 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 
 	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" +  ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
 
@@ -1144,7 +1148,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 
-	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
+	Status = DeleteFileW(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
 		wstring OutputInfo;
@@ -1185,7 +1189,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 
 	RandNum = genrand64_int64();
 	RtlZeroMemory(CurTempFileName, countof(CurTempFileName) * 2);
-	FormatStringW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HIDWORD(RandNum), LODWORD(RandNum));
+	wsprintfW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HiDword(RandNum), LoDword(RandNum));
 	Handle->CurrentTempFileName = CurTempFileName;
 
 	Status = FileXP3.Create(Handle->CurrentTempFileName.c_str());
@@ -1197,9 +1201,9 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexNormal *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexNormal *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -1207,9 +1211,9 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -1219,7 +1223,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 	for (ULONG i = 0; i < FileList.size(); ++pIndex, i++)
 	{
 		WCHAR OutInfo[MAX_PATH];
-		FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
 		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
 
@@ -1252,7 +1256,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 
 		File.Read(lpBuffer, Size.LowPart, &BytesTransfered);
@@ -1264,16 +1268,16 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			File.Close();
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_IO_DEVICE_ERROR;
 		}
 
 		pIndex->segm.segm->Offset = Offset;
 
 		pIndex->info.FileName = FileList[i] + L".dummy";
-		pIndex->info.FileNameLength = (USHORT)(FileList[i].size() + StrLengthW(L".dummy"));
+		pIndex->info.FileNameLength = (USHORT)(FileList[i].size() + lstrlenW(L".dummy"));
 
 		pIndex->adlr.Hash = adler32(1, (Bytef *)lpBuffer, BytesTransfered.LowPart);
 
@@ -1333,12 +1337,12 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -1436,9 +1440,9 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 	return STATUS_SUCCESS;
 }
 
@@ -1455,7 +1459,7 @@ NTSTATUS NTAPI KrkrPacker::IterFiles(LPCWSTR lpPath)
 	RtlZeroMemory(&FindFileData, sizeof(WIN32_FIND_DATAW));
 	RtlZeroMemory(FilePath, countof(FilePath) * sizeof(WCHAR));
 
-	FormatStringW(FilePath, L"%s%s", lpPath, L"\\*.*");
+	wsprintfW(FilePath, L"%s%s", lpPath, L"\\*.*");
 
 	hFind = FindFirstFileW(FilePath, &FindFileData);
 	if (hFind == INVALID_HANDLE_VALUE)
@@ -1465,7 +1469,7 @@ NTSTATUS NTAPI KrkrPacker::IterFiles(LPCWSTR lpPath)
 
 	do
 	{
-		if (!StrCompareW(FindFileData.cFileName, L".") || !StrCompareW(FindFileData.cFileName, L".."))
+		if (!lstrcmpW(FindFileData.cFileName, L".") || !lstrcmpW(FindFileData.cFileName, L".."))
 			continue;
 		else if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			continue;
@@ -1482,7 +1486,7 @@ NTSTATUS NTAPI KrkrPacker::IterFiles(LPCWSTR lpPath)
 }
 
 
-Void FormatPathNormal(wstring& PackageName, ttstr& out)
+VOID FormatPathNormal(wstring& PackageName, ttstr& out)
 {
 	out.Clear();
 	out = L"file://./";
@@ -1520,7 +1524,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 
 	RandNum = genrand64_int64();
 	RtlZeroMemory(CurTempFileName, countof(CurTempFileName) * 2);
-	FormatStringW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HIDWORD(RandNum), LODWORD(RandNum));
+	wsprintfW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HiDword(RandNum), LoDword(RandNum));
 	Handle->CurrentTempFileName = CurTempFileName;
 
 	Status = FileXP3.Create(Handle->CurrentTempFileName.c_str());
@@ -1532,9 +1536,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexM2 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -1542,9 +1546,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 		
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -1556,9 +1560,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 	{
 		MessageBoxW(Handle->MainWindow, L"No File to be packed", L"KrkrExtract", MB_OK);
 		FileXP3.Close();
-		FreeMemoryP(lpBuffer);
-		FreeMemoryP(lpCompressBuffer);
-		FreeMemoryP(pXP3Index);
+		HeapFree(GetProcessHeap(), 0, lpBuffer);
+		HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_UNSUCCESSFUL;
 	}
 
@@ -1567,7 +1571,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 		if (Handle->MainWindow)
 		{
 			WCHAR OutInfo[MAX_PATH];
-			FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+			wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
 		}
 
@@ -1602,9 +1606,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 			InfoW += FullName;
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return Status;
 		}
 
@@ -1612,7 +1616,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 
 		File.Read(lpBuffer, Size.LowPart, &BytesTransfered);
@@ -1624,9 +1628,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			File.Close();
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_IO_DEVICE_ERROR;
 		}
 
@@ -1713,12 +1717,12 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -1841,9 +1845,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 	PackChunkList.clear();
 	return STATUS_SUCCESS;
 }
@@ -1872,7 +1876,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 
 	RandNum = genrand64_int64();
 	RtlZeroMemory(CurTempFileName, countof(CurTempFileName) * 2);
-	FormatStringW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HIDWORD(RandNum), LODWORD(RandNum));
+	wsprintfW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HiDword(RandNum), LoDword(RandNum));
 	Handle->CurrentTempFileName = CurTempFileName;
 
 	Status = FileXP3.Create(Handle->CurrentTempFileName.c_str());
@@ -1885,9 +1889,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer         = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexM2 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -1895,9 +1899,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 		
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -1909,9 +1913,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 	{
 		MessageBoxW(Handle->MainWindow, L"No File to be packed", L"KrkrExtract", MB_OK);
 		FileXP3.Close();
-		FreeMemoryP(lpBuffer);
-		FreeMemoryP(lpCompressBuffer);
-		FreeMemoryP(pXP3Index);
+		HeapFree(GetProcessHeap(), 0, lpBuffer);
+		HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_UNSUCCESSFUL;
 	}
 
@@ -1920,7 +1924,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 		if (Handle->MainWindow)
 		{
 			WCHAR OutInfo[MAX_PATH];
-			FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+			wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
 		}
 
@@ -1956,9 +1960,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 			InfoW += FullName;
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return Status;
 		}
 
@@ -1966,7 +1970,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 
 		File.Read(lpBuffer, Size.LowPart, &BytesTransfered);
@@ -1978,9 +1982,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			File.Close();
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_IO_DEVICE_ERROR;
 		}
 
@@ -2079,12 +2083,12 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -2211,9 +2215,9 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 	return STATUS_SUCCESS;
 }
 
@@ -2344,9 +2348,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 
 	BufferSize       = 0x10000;
 	CompressedSize   = BufferSize;
-	lpBuffer         = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index        = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer         = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index        = (SMyXP3IndexM2 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex           = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -2354,9 +2358,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 		
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -2368,7 +2372,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		if (Handle->MainWindow)
 		{
 			WCHAR OutInfo[MAX_PATH];
-			FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+			wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
 			Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
 		}
@@ -2404,10 +2408,10 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			Io::DeleteFileW(OutName);
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			DeleteFileW(OutName);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -2417,7 +2421,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 		st->Read(lpBuffer, Size.LowPart, &BytesTransfered.LowPart);
 		
@@ -2427,9 +2431,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -2508,12 +2512,12 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -2636,9 +2640,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 
 	//TVPRemoveAutoPath(VirtualArchive);
 	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
@@ -2648,7 +2652,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 
-	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
+	Status = DeleteFileW(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
 		MessageBoxW(Handle->MainWindow, L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"KrkrzTempWorker.xp3\" to make the next package!!!", 
@@ -2709,9 +2713,9 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexM2 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -2719,9 +2723,9 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 		
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -2733,7 +2737,7 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 		if (Handle->MainWindow)
 		{
 			WCHAR OutInfo[MAX_PATH];
-			FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+			wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
 			Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
 		}
@@ -2769,9 +2773,9 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -2781,7 +2785,7 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 		st->Read(lpBuffer, Size.LowPart, &BytesTransfered.LowPart);
 
@@ -2791,9 +2795,9 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -2871,12 +2875,12 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
@@ -3003,9 +3007,9 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 
 	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"), &ExecResult);
 
@@ -3014,7 +3018,7 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 
-	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
+	Status = DeleteFileW(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
 		MessageBoxW(Handle->MainWindow, L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"KrkrzTempWorker.xp3\" to make the next package!!!",
@@ -3078,9 +3082,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexM2 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -3088,9 +3092,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 
-		if (lpBuffer)         FreeMemoryP(lpBuffer);
-		if (lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if (pXP3Index)        FreeMemoryP(pXP3Index);
+		if (lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if (lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if (pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -3101,7 +3105,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	{
 		WCHAR OutInfo[MAX_PATH];
 		RtlZeroMemory(OutInfo, countof(OutInfo) * sizeof(WCHAR));
-		FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
+		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
 		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
 
@@ -3133,9 +3137,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -3146,7 +3150,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 		
 		Stream->Read(lpBuffer, Size.LowPart, &BytesTransfered.LowPart);
@@ -3157,9 +3161,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 			InfoW += FileList[i];
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_UNSUCCESSFUL;
 		}
 		
@@ -3229,25 +3233,25 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
 	// generate index to lpCompressBuffer
 	
-	lpBlock = (PBYTE)AllocateMemoryP(FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2));
-	lpBlockCompressed = (PBYTE)AllocateMemoryP(FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2);
+	lpBlock = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2));
+	lpBlockCompressed = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2);
 
 	BlockSize = 0;
 	for (ULONG i = 0; i < FileList.size(); i++)
 	{
 		RtlCopyMemory((lpBlock + BlockSize), &M2SubChunkMagic, 4);
 		BlockSize += 4;
-		ChunkSize.QuadPart = sizeof(DWORD) + sizeof(USHORT) + (StrLengthW(FileList[i].c_str()) + 1) * 2;
+		ChunkSize.QuadPart = sizeof(DWORD) + sizeof(USHORT) + (lstrlenW(FileList[i].c_str()) + 1) * 2;
 		RtlCopyMemory((lpBlock + BlockSize), &(ChunkSize.QuadPart), 8);
 		BlockSize += 8;
 		RtlCopyMemory((lpBlock + BlockSize), &M2Hash, 4);
@@ -3264,10 +3268,10 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	SenrenBankaHeader.OriginalSize = BlockSize;
 	SenrenBankaHeader.Magic = Handle->M2ChunkMagic;
 	SenrenBankaHeader.LengthOfProduct = SenrenBankaInfo.LengthOfProduct;
-	StrCopyW(SenrenBankaHeader.ProductName, SenrenBankaInfo.ProductName);
+	lstrcpyW(SenrenBankaHeader.ProductName, SenrenBankaInfo.ProductName);
 	SenrenBankaHeader.ArchiveSize = FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2;
 	compress2(lpBlockCompressed, &SenrenBankaHeader.ArchiveSize, lpBlock, BlockSize, Z_BEST_COMPRESSION);
-	FreeMemoryP(lpBlock);
+	HeapFree(GetProcessHeap(), 0, lpBlock);
 	SenrenBankaHeader.ChunkSize = SenrenBankaInfo.ChunkSize;
 	SenrenBankaHeader.Offset = Offset;
 
@@ -3277,7 +3281,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 			SenrenBankaHeader.ArchiveSize <= 0x100 ? SenrenBankaHeader.ArchiveSize : 0x100);
 
 	FileXP3.Write(lpBlockCompressed, SenrenBankaHeader.ArchiveSize);
-	FreeMemoryP(lpBlockCompressed);
+	HeapFree(GetProcessHeap(), 0, lpBlockCompressed);
 
 	Offset.QuadPart += SenrenBankaHeader.ArchiveSize;
 	XP3Header.IndexOffset = Offset;
@@ -3296,8 +3300,8 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	BlockSize += 4;
 	*(PUSHORT)((PBYTE)lpCompressBuffer + BlockSize) = SenrenBankaHeader.LengthOfProduct;
 	BlockSize += 2;
-	RtlCopyMemory(((PBYTE)lpCompressBuffer + BlockSize), SenrenBankaHeader.ProductName, (StrLengthW(SenrenBankaHeader.ProductName) + 1) * 2);
-	BlockSize += (StrLengthW(SenrenBankaHeader.ProductName) + 1) * 2;
+	RtlCopyMemory(((PBYTE)lpCompressBuffer + BlockSize), SenrenBankaHeader.ProductName, (lstrlenW(SenrenBankaHeader.ProductName) + 1) * 2);
+	BlockSize += (lstrlenW(SenrenBankaHeader.ProductName) + 1) * 2;
 
 	pIndex = pXP3Index;
 	pbIndex = (PBYTE)lpCompressBuffer + BlockSize;
@@ -3386,9 +3390,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 
 	TVPExecuteScript(ttstr(L"Storages.removeAutoPath(System.exePath + \"" + ttstr(Handle->CurrentTempFileName.c_str()) + L"\" + \">\");"));
 
@@ -3397,7 +3401,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 
 	InterlockedExchangePointer(&(Handle->CurrentTempHandle), INVALID_HANDLE_VALUE);
 	
-	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
+	Status = DeleteFileW(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
 		wstring OutputInfo = L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"";
@@ -3439,7 +3443,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 
 	RandNum = genrand64_int64();
 	RtlZeroMemory(CurTempFileName, countof(CurTempFileName) * 2);
-	FormatStringW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HIDWORD(RandNum), LODWORD(RandNum));
+	wsprintfW(CurTempFileName, L"KrkrzTempWorker_%08x%08x.xp3", HiDword(RandNum), LoDword(RandNum));
 	Handle->CurrentTempFileName = CurTempFileName;
 
 	RtlZeroMemory(&SenrenBankaHeader, sizeof(SenrenBankaHeader));
@@ -3454,9 +3458,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	
 	BufferSize = 0x10000;
 	CompressedSize = BufferSize;
-	lpBuffer = AllocateMemoryP(BufferSize);
-	lpCompressBuffer = AllocateMemoryP(CompressedSize);
-	pXP3Index = (SMyXP3IndexM2 *)AllocateMemoryP(sizeof(*pXP3Index) * FileList.size());
+	lpBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
+	lpCompressBuffer = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CompressedSize);
+	pXP3Index = (SMyXP3IndexM2 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*pXP3Index) * FileList.size());
 	pIndex = pXP3Index;
 
 	if (!lpBuffer || !lpCompressBuffer || !pXP3Index)
@@ -3464,9 +3468,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 		MessageBoxW(Handle->MainWindow, L"Insufficient memory to make package!!", L"KrkrExtract", MB_OK | MB_ICONERROR);
 		FileXP3.Close();
 
-		if(lpBuffer)         FreeMemoryP(lpBuffer);
-		if(lpCompressBuffer) FreeMemoryP(lpCompressBuffer);
-		if(pXP3Index)        FreeMemoryP(pXP3Index);
+		if(lpBuffer)         HeapFree(GetProcessHeap(), 0, lpBuffer);
+		if(lpCompressBuffer) HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		if(pXP3Index)        HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
@@ -3478,9 +3482,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	{
 		MessageBoxW(Handle->MainWindow, L"No File to be packed", L"KrkrExtract", MB_OK);
 		FileXP3.Close();
-		FreeMemoryP(lpBuffer);
-		FreeMemoryP(lpCompressBuffer);
-		FreeMemoryP(pXP3Index);
+		HeapFree(GetProcessHeap(), 0, lpBuffer);
+		HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+		HeapFree(GetProcessHeap(), 0, pXP3Index);
 		return STATUS_UNSUCCESSFUL;
 	}
 	
@@ -3510,9 +3514,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 			InfoW += FullName;
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return Status;
 		}
 
@@ -3520,7 +3524,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 		if (Size.LowPart > BufferSize)
 		{
 			BufferSize = Size.LowPart;
-			lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+			lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 		}
 
 		File.Read(lpBuffer, Size.LowPart, &BytesTransfered);
@@ -3532,9 +3536,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 			MessageBoxW(Handle->MainWindow, InfoW.c_str(), L"KrkrExtract", MB_OK);
 			File.Close();
 			FileXP3.Close();
-			FreeMemoryP(lpBuffer);
-			FreeMemoryP(lpCompressBuffer);
-			FreeMemoryP(pXP3Index);
+			HeapFree(GetProcessHeap(), 0, lpBuffer);
+			HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+			HeapFree(GetProcessHeap(), 0, pXP3Index);
 			return STATUS_IO_DEVICE_ERROR;
 		}
 
@@ -3601,44 +3605,44 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	if (Size.LowPart > CompressedSize)
 	{
 		CompressedSize = Size.LowPart;
-		lpCompressBuffer = ReAllocateMemoryP(lpCompressBuffer, CompressedSize);
+		lpCompressBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpCompressBuffer, CompressedSize);
 	}
 	if (Size.LowPart * 2 > BufferSize)
 	{
 		BufferSize = Size.LowPart * 2;
-		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
+		lpBuffer = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, lpBuffer, BufferSize);
 	}
 
-	lpBlock = (PBYTE)AllocateMemoryP(FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2));
-	lpBlockCompressed = (PBYTE)AllocateMemoryP(FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2);
+	lpBlock = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2));
+	lpBlockCompressed = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2);
 
 	BlockSize = 0;
 	for (ULONG i = 0; i < FileList.size(); i++)
 	{
 		RtlCopyMemory((lpBlock + BlockSize), &M2SubChunkMagic, 4);
 		BlockSize += 4;
-		ChunkSize.QuadPart = sizeof(DWORD) + sizeof(USHORT) + (FileList[i].length() + StrLengthW(L".dummy") + 1) * 2;
+		ChunkSize.QuadPart = sizeof(DWORD) + sizeof(USHORT) + (FileList[i].length() + lstrlenW(L".dummy") + 1) * 2;
 		RtlCopyMemory((lpBlock + BlockSize), &(ChunkSize.QuadPart), 8);
 		BlockSize += 8;
 		RtlCopyMemory((lpBlock + BlockSize), &M2Hash, 4);
 		BlockSize += 4;
 
-		USHORT NameLength = (USHORT)(StrLengthW(FileList[i].c_str()) + StrLengthW(L".dummy"));
+		USHORT NameLength = (USHORT)(lstrlenW(FileList[i].c_str()) + lstrlenW(L".dummy"));
 		RtlCopyMemory((lpBlock + BlockSize), &NameLength, 2);
 		BlockSize += 2;
 		RtlCopyMemory((lpBlock + BlockSize), FileList[i].c_str(), FileList[i].size() * 2);
 		BlockSize += FileList[i].size() * 2;
-		RtlCopyMemory((lpBlock + BlockSize), L".dummy", (StrLengthW(L".dummy") + 1) * 2);
-		BlockSize += (StrLengthW(L".dummy") + 1) * 2;
+		RtlCopyMemory((lpBlock + BlockSize), L".dummy", (lstrlenW(L".dummy") + 1) * 2);
+		BlockSize += (lstrlenW(L".dummy") + 1) * 2;
 	}
 	
 	SenrenBankaHeader.OriginalSize = BlockSize;
 	SenrenBankaHeader.Magic = Handle->M2ChunkMagic;
 	SenrenBankaHeader.LengthOfProduct = SenrenBankaInfo.LengthOfProduct;
-	StrCopyW(SenrenBankaHeader.ProductName, SenrenBankaInfo.ProductName);
+	lstrcpyW(SenrenBankaHeader.ProductName, SenrenBankaInfo.ProductName);
 	SenrenBankaHeader.ArchiveSize = FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2;
 	compress2(lpBlockCompressed, &SenrenBankaHeader.ArchiveSize, lpBlock, BlockSize, Z_BEST_COMPRESSION);
-	FreeMemoryP(lpBlock);
+	HeapFree(GetProcessHeap(), 0, lpBlock);
 	SenrenBankaHeader.ChunkSize = SenrenBankaInfo.ChunkSize;
 	SenrenBankaHeader.Offset   = Offset;
 
@@ -3648,7 +3652,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 		SenrenBankaHeader.ArchiveSize <= 0x100 ? SenrenBankaHeader.ArchiveSize : 0x100);
 
 	FileXP3.Write(lpBlockCompressed, SenrenBankaHeader.ArchiveSize);
-	FreeMemoryP(lpBlockCompressed);
+	HeapFree(GetProcessHeap(), 0, lpBlockCompressed);
 
 	Offset.QuadPart += SenrenBankaHeader.ArchiveSize;
 	XP3Header.IndexOffset = Offset;
@@ -3667,8 +3671,8 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	BlockSize += 4;
 	*(PUSHORT)((PBYTE)lpCompressBuffer + BlockSize) = SenrenBankaHeader.LengthOfProduct;
 	BlockSize += 2;
-	RtlCopyMemory(((PBYTE)lpCompressBuffer + BlockSize), SenrenBankaHeader.ProductName, (StrLengthW(SenrenBankaHeader.ProductName) + 1) * 2);
-	BlockSize += (StrLengthW(SenrenBankaHeader.ProductName) + 1) * 2;
+	RtlCopyMemory(((PBYTE)lpCompressBuffer + BlockSize), SenrenBankaHeader.ProductName, (lstrlenW(SenrenBankaHeader.ProductName) + 1) * 2);
+	BlockSize += (lstrlenW(SenrenBankaHeader.ProductName) + 1) * 2;
 	
 	
 	pIndex = pXP3Index;
@@ -3757,9 +3761,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	FileXP3.Write(&XP3Header, sizeof(XP3Header), &BytesTransfered);
 	FileXP3.Close();
 
-	FreeMemoryP(lpBuffer);
-	FreeMemoryP(lpCompressBuffer);
-	FreeMemoryP(pXP3Index);
+	HeapFree(GetProcessHeap(), 0, lpBuffer);
+	HeapFree(GetProcessHeap(), 0, lpCompressBuffer);
+	HeapFree(GetProcessHeap(), 0, pXP3Index);
 
 	
 	return STATUS_SUCCESS;
@@ -3844,7 +3848,7 @@ HANDLE NTAPI StartPacker()
 
 	GlobalData::GetGlobalData()->isRunning = TRUE;
 
-	Io::DeleteFileW(L"KrkrzTempWorker.xp3");
+	DeleteFileW(L"KrkrzTempWorker.xp3");
 
 	Handle->GetFolder(BasePack, countof(BasePack));
 

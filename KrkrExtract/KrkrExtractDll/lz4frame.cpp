@@ -50,9 +50,9 @@ You can contact the author at :
 *  Memory routines
 **************************************/
 #include "my.h"
-#define ALLOCATOR(s)   AllocateMemoryP(s)
-#define FREEMEM        FreeMemoryP
-#define MEM_INIT       my_memset_inline
+#define ALLOCATOR(s)   HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, s)
+#define FREEMEM(s)     HeapFree(GetProcessHeap(), 0, s)
+#define MEM_INIT       memset
 
 
 /**************************************

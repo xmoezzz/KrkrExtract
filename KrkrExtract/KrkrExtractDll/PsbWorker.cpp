@@ -1,70 +1,3 @@
-/*
-C0GGGCfttfttt;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;i;iiiiiiiiiiiiiiii
-.....,LfffLGCfttttttttttttttttttttLfLCLi,.......1;t.......,,,,,,,....,,,,,,,............
-.....,ffttf,..:f0000CfttttffLCCLft,1fLL ;Lf:tLt1LfL;t;;;;;;;iiiiii11111111111111111111111
-......tfttf,.......:11itL1i1tLLLLLLLLLLLLLLLLtf:,tLLLLLtfi;iiiiiiiii11ii11111iii1i1111111
-......1ittf,....fttLLt1tt1LftLLLLLLLLLLLLf::LLt1Lt1LL:LLLLLf11................
-......ii;tf,..LtCCttLLLLLLftLttLLLLLLLLLLLLLLLLf1ft1tt1t1111tttti,...............
-......ii;;f,.fCftLLLLLLLLLLL1fLtLLLLLLLCCfffffLCCtfftfttt1tt1tttt1t1i...............
-......ii;;i,.ffLLLLLLLLLLLLLLttCfCCffffCLLLf1t111t1tftLLLLLLLLLLLLttCff,.................
-......ii;;i,.CCCCCCCCCCCCCfi;it1f1LCCCftttLLLLLLLLLttftLLLLLLLLLLLL1tLftfL...............
-......ii;;i,.LCCCCCf:;;LGCCCCLLt1ttffCCCCCCLLLLLLLLLtfttLLLLLLLLLLLL11LftfLLL............
-......ii;;i,.::t.;;LLi;;;;;;;;;;;;;;;i;;;;;;LCCLLLLLLtLttLLLLLCCCCCCCtfCLfCCCLL..........
-......ii;;i:,.,;:i::;;;;;::..........,..,;;;;;;iCCCLLftLtLCCCCCCCCCCCCttCffCCCCC.........
-......ii;i,.:...:.........................i...::;;;1CCffLtLCCfffffftttf11LttLffff........
-......i1..,...1....  ...... ........,......,.......,;;;;;iffftLCCCCCLfft1tt1tttfffL......
-.....;.,.... ,..... ;...... ........i......:.............:;i;;iLfttfCCCCftCffCCCCCCC.....
-;;.:.ii............,....... ........:.......;..............i.;,:;;tGCCCCCfLCtLCCCCCCf....
-ft :L1,... ................ ........:.......:........ .i..  ;.;:tf,:;GCCCffCtfCCCCCCC....
-.t,CCi....;.......,........ ........;........;..  .... .,...fff,.....;;CCCtCCtCCCCCCCi...
-tLG;i.,.., .......1........ . .....:;........i:.............;Lffftii1.ii;CtfGffCCCCCCL...
-tCG; :.. ,   .....1    ....  ......i:;.......;:..........i...ti. .....:;t;1fCffCCCCCC;...
-tCG,.i............i.. ............,i.::......,.i:......;,,...,i. ....i t:t;;;ffCCCCC:....
-tCG.;:..i.........; .......:......:i .i......, ,1,..,:.:,.;...;.:....1.ti.1f;;;,......,::
-tC,.;...:....:....;........t......;;. :1.....,..:i......i.i...i.;....;,;1..;;;;tft1iii;;;
-tC.,t...:....t,...:1.....:.,:.....;:. .:....., ,,;;.....;,:...;.,....;:.:..,t::Lftt;;f;;t
-tC.;t...;....t.....:,....::.:.....1:,  ,i....:   ,;;....;:,;.,:.,...11;....:t.,Ltttt1,;f,
-t1.it...;....,....,i::...::.;i....i:,  .,;..,;  .,.,:...:;,:.,,.:...;1;,.......ftt1;i:1,i
-t:.1;...;.....:....;:i:,.;:..:;...:;,.  ,:..,.   .  :C1..,,,....;...i1t:.......ftt1,:1i.1
-f,.ti...1;....;....,:.;::.:. .,....,,.  ,,:,,.      .GL..,,,:...i,.1tft;.......ttt11i,,L.
-t,.;;...;;,...:;...:;. :::,,. .....,.. ..,,,,        GG.......:,,..;;fti,......1tt1,:1;,1
-f:;;t...;i;....1,...;:...,:GG      .... .,,..       .iG1     .,i..i;,;;t:......itt1;i,t,i
-ffLft1,.:;i;...,;,..;::.....G .          ..,         .GG     .,.i.;;,t;t;......itt1t1111t
-fCG. t:..i;;;,..1;i..:.,.  .GG           . .       ...G0..  .,;,:;i;1t;;;......1ftt  f. t
-fCGfft::.:i;i;;..i::.:...   .G:          ..      ...........::,t;i;fiLi;;......1fttff tt,
-fCGLLtt;,,1;11;;..i::;:.    .;G......          ..............;;;1i:iiL;;;......tfftLfffff
-fC0  tt;;.tt;;i;;;,;;;::.. ...GG..........     ............,,11;;;.;if;;;:..:..1LLf;:,,,.
-fC0  tti;;it11t;i;;1;i:;f.......,........       ..........,.:;;if;.;it;;;;..i..,
-fC0  t;;t;iL;1t;;i;;1;;;1i............ .          .........it;i;i:.;i1;;;;..i....
-LG0  f;;;1;t;11;;;fi;i;;ttf..........                   ..Li;;11;..,ii;;;;,.1...:
-LG0  i;;;11i;t;;;;1;;1t;iLii,....         ,1iL         .:iit:;;1;...i;;;;;;.;...i
-CCGi1;;;;ifi;t,;;;;;i;;;ifiiiG..                    .,tCiii::1i1:...i;;;;;;.i....
-GGGG1;;;;it;;t.;;;;;i;;,;tiiiii1it;. .          ..:;:::tiii.:11i:...t;;;;;;.i.....
-,,,,;;;1;tt;tt.;;;;;;;;.iiiiiiifiiiiiiiit1;...,G:::::::tii1.11ii,...1;i;;;;;;,...i.......
-...i;;;;ttf;;1.;;;;i:;..tiiiii11iiiiiiiGCGGGGGGGGGGGGGGG0i1.itii....,;f;;;;;;;...........
-..:;;;1;ttf;i;,;;;;i::..1i;iiitiiiiiiifGGGGGGGGGGGGGGGGGLi;1i1ii.....;i;;;;;;i....;.....C
-..;;;;;Lffi11,;;;;i1:...G:;f1ii1fL::::G000GGGGGGGGGGG000;;,1iiii.... f;;;;;;;t....;111i;C
-,1;;;t1fff;Lt.;;;;Lf,...G:,,,,,,,,,,,,fGGGGGGGGGGGGGG00G::i::::f.....1;1;;;;;;.... 111ttL
-:;;;;;0000;Gi.;;;:,:...tG,,,,,,,,,,,,,,GGGGGGGGGGGGG00,,,:1:::::1....1:tft1;;;:....f:::;i
-;;;;tt,,,it, .;;1,,,...CG,,,,,,,,,,,,,,L00GGGGGGGGG0,,,,,,:,,,:,1....t;LLLC8L;t....;:::::
-;;;i1,,.,t,;.;;L,:, ..,GGt,.........f...GGGGGGGCCC.     .,,    ,:....1CLLG:,  i.....1::::
-;;;i.,.,,1,..;1,,,;...t;;................CCCCCCC.  ;..........;;:....tCLG,    .:....t::::
-;;f:,,,,,i; .;.,,,t..;G:..............:;i.CCCC i:...............i;...itL.   ;  :....;1:,:
-;tt,,,,,t,..;:;:,:1..fG...,;iiii11111t,i1.;Lti:;iii;,...........t:...;i    .    :....iii;
-;i,,,,,,1; .1.:1,1,.;GC..,::;iiii1i1iii,,:.t1;itt1i11ii;:......::f;.,;;          ....i1,:
-t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;          ;...;;,,
-,,,,,,,ii .1 ,,,1;;GLf;,..........i11,i000f:i:...............,;.LLC;:;1,    ...  ,....i1,
-,,,,,,i, .,  ,,,iiGLL 1::........;i1.i00000i.1;..,;.........:i,LLLtf;;t   ,,,,    ....;;:
-::,,:::; ... ,,,;:LLL  ii1ft1111ti;.;f0;10Gt..t:..111t;...;ii,tLL0,:;;1 :i;,i.    1...;i1
-11tttff .i , ,;;:1LLL  ft11t,,. ;:..;CG0GtLG..ii...,i1111f11t.LLL:,:;;i:::::    t:;....;.
-,,,,:, .,.,, ,fL;iLLL    ..    ::..,;GGGGiLL...1;..i ,11ti,.,CLLL:1 ;it,::     i1CC:...;:
-,,,,,,..1.,,.,:111LLL         L:...::GGGG:CL1..1i...  ....   LLL::: i1;:.      :fL1C...:;
-,,,:t .; ,,,,,,i::CCC        C;....::GGGG::CC..;;....       CLLLii,:1t,    .....L1i:....;
-:,:i .;:.,,,,,,i;1CCC       C1....:.1GGG;  CC;.;,...i       CCC,:i,i11.,,,,,....1f1ti...;
-,:: .;t ,,,,,::1;1GCC      Cf.....;,C:LG,..iC1.i....1     .CCCt::f, i;,,,,,,,,;1;:LCC...,
-*/
-
-
 #include "zlib.h"
 #include "tp_stub.h"
 #include "KrkrExtract.h"
@@ -75,7 +8,7 @@ t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;         
 #include "ml.h"
 
 
-Void FASTCALL OutputInfo(const WCHAR* Info)
+VOID FASTCALL OutputInfo(const WCHAR* Info)
 {
 	if (GlobalData::GetGlobalData()->DebugOn)
 		PrintConsoleW(Info);
@@ -145,10 +78,10 @@ unsigned char *getDataFromMDF(const unsigned char *buff, unsigned long &size)
 	if (size <= 10 || *(PDWORD)buff == TAG3("mdf")) return NULL;
 
 	ULONG Uncompsize = *(unsigned long*)&buff[4];
-	PBYTE uncomp = (PBYTE)AllocateMemoryP(Uncompsize);
+	PBYTE uncomp = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Uncompsize);
 	if (Z_OK != uncompress(uncomp, &Uncompsize, buff + 8, size - 8))
 	{
-		FreeMemoryP(uncomp);
+		HeapFree(GetProcessHeap(), 0, uncomp);
 		return NULL;
 	}
 	size = Uncompsize;
@@ -184,18 +117,18 @@ unsigned char *getDataFromLz4(const unsigned char *buff, unsigned long &size)
 
 	pos = srcSize;
 	dstPos = 0;
-	uncompr_data = (PBYTE)AllocateMemoryP(LODWORD(frameInfo.contentSize));
+	uncompr_data = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, LoDword(frameInfo.contentSize));
 
 	do
 	{
-		dstSize = LODWORD(frameInfo.contentSize) - dstPos;
+		dstSize = LoDword(frameInfo.contentSize) - dstPos;
 		srcSize = size - pos;
 
 		err = LZ4F_decompress(context, &uncompr_data[dstPos], &dstSize, &buff[pos], &srcSize, NULL);
 
 		if (LZ4F_isError(err))
 		{
-			FreeMemoryP(uncompr_data);
+			HeapFree(GetProcessHeap(), 0, uncompr_data);
 			return nullptr;
 		}
 
@@ -203,7 +136,7 @@ unsigned char *getDataFromLz4(const unsigned char *buff, unsigned long &size)
 		pos += srcSize;
 	} while (err);
 
-	size = LODWORD(frameInfo.contentSize);
+	size = LoDword(frameInfo.contentSize);
 	return uncompr_data;
 }
 
@@ -668,7 +601,7 @@ public:
 					iPos += 0x20;
 					AddressOfPrivate = *(PULONG)((ULONG_PTR)hModule + iPos);
 					
-					*PrivateKey = StringToInt32A((LPCSTR)AddressOfPrivate);
+					*PrivateKey = StringToInt32A((LPSTR)AddressOfPrivate);
 					Status = STATUS_SUCCESS;
 
 					break;
@@ -732,7 +665,7 @@ public:
 					iPos += 0x10;
 					AddressOfPrivate = *(PULONG)((ULONG_PTR)FilterTextureAddress + iPos);
 
-					*PrivateKey = StringToInt32A((LPCSTR)AddressOfPrivate);
+					*PrivateKey = StringToInt32A((LPSTR)AddressOfPrivate);
 					Status = STATUS_SUCCESS;
 
 					break;
@@ -806,7 +739,7 @@ public:
 					{
 						AddressOfPrivate = *(PULONG)((ULONG_PTR)ModuleAddress + iPos);
 
-						*PrivateKey = StringToInt32A((LPCSTR)AddressOfPrivate);
+						*PrivateKey = StringToInt32A((LPSTR)AddressOfPrivate);
 						Status = STATUS_SUCCESS;
 						
 						break;
@@ -829,7 +762,7 @@ public:
 
 	~PSBObject()
 	{
-		FreeMemoryP(Data);
+		HeapFree(GetProcessHeap(), 0, Data);
 	}
 
 private:
@@ -978,7 +911,7 @@ public:
 				
 				if (uncomp)
 				{
-					FreeMemoryP(buff);
+					HeapFree(GetProcessHeap(), 0, buff);
 					buff = uncomp;
 				}
 			}
@@ -1074,7 +1007,7 @@ public:
 				else if ((UCHAR)ch < 0x20)
 				{
 					CHAR buf[256];
-					FormatStringA(buf, "\\u%04x", ch);
+					wsprintfA(buf, "\\u%04x", ch);
 					BuildScript += buf;
 				}
 				else
@@ -1162,9 +1095,9 @@ public:
 
 		it = bitmapInfo.find("compress");
 		bool allocBitmap = false;
-		if (it != bitmapInfo.end() && !StrCompareA(it->second.AsString(), "RL"))
+		if (it != bitmapInfo.end() && !lstrcmpA(it->second.AsString(), "RL"))
 		{
-			unsigned char *uncomp = (PBYTE)AllocateMemoryP(pixelbytes * width * height);
+			unsigned char *uncomp = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pixelbytes * width * height);
 			if (pixelbytes == 1)
 				DecompressRLE<unsigned char>(uncomp, pixeldata, pixdatasize);
 			else
@@ -1179,7 +1112,8 @@ public:
 		//
 		WriteBmp(lastDictName, width, height, pixeldata, pal, pixelbytes);
 
-		if (allocBitmap) FreeMemoryP((PVOID)pixeldata);
+		if (allocBitmap) 
+			HeapFree(GetProcessHeap(), 0, (PVOID)pixeldata);
 
 		BuildScript += "(const) %[\r\n";
 		string indentstr2 = indentstr + INDENT;
@@ -1290,7 +1224,7 @@ public:
 
 	void SaveEmoteImage(string& FileName, PBYTE Stream, const PsbTextureMetaData& meta)
 	{
-		auto pixels = (PBYTE)AllocateMemoryP(meta.Width * meta.Height * 4);
+		auto pixels = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, meta.Width * meta.Height * 4);
 
 		if (!pixels)
 		{
@@ -1301,12 +1235,12 @@ public:
 		if (GlobalData::GetGlobalData()->DebugOn)
 			PrintConsoleW(L"Emote size : %d x %d\n", meta.Width, meta.Height);
 
-		if (!StrCompareA("RGBA8", meta.TexType))
+		if (!lstrcmpA("RGBA8", meta.TexType))
 		{
 			ReadRgba8(Stream, meta, pixels);
 			WriteBmp(FileName, meta.Width, meta.Height, pixels, NULL, 4);
 		}
-		else if (!StrCompareA("RGBA4444", meta.TexType))
+		else if (!lstrcmpA("RGBA4444", meta.TexType))
 		{
 			ReadRgba4444(Stream, meta, pixels);
 			WriteBmp(FileName, meta.Width, meta.Height, pixels, NULL, 4);
@@ -1317,7 +1251,7 @@ public:
 		}
 
 		if (pixels)
-			FreeMemoryP(pixels);
+			HeapFree(GetProcessHeap(), 0, pixels);
 	}
 
 	USHORT ToUInt16(LPBYTE value, ULONG index)
@@ -1330,7 +1264,7 @@ public:
 		int dst_stride = meta.Width * 4;
 		int src_stride = meta.FullWidth * 2;
 		int dst = 0;
-		auto row = (PBYTE)AllocateMemoryP(src_stride);
+		auto row = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, src_stride);
 
 		for (ULONG i = 0; i < meta.Height; ++i)
 		{
@@ -1346,7 +1280,7 @@ public:
 				output[dst++] = (byte)((p & 0xF000u) * 0xFFu / 0xF000u);
 			}
 		}
-		FreeMemory(row);
+		HeapFree(GetProcessHeap(), 0, row);
 	}
 
 	void ReadRgba8(LPBYTE input, const PsbTextureMetaData meta, LPBYTE output)
@@ -1400,7 +1334,7 @@ public:
 
 		WriteFile(lastDictName, (PBYTE)pData, FileSize);
 
-		FormatStringA(BuilderName, "\"Binary::%d\"", Index);
+		wsprintfA(BuilderName, "\"Binary::%d\"", Index);
 		BuildScript += BuilderName;
 	}
 
@@ -1418,7 +1352,7 @@ public:
 			break;
 		case PsbValueInteger:
 			memset(NumStr, 0, sizeof(NumStr));
-			FormatStringA(NumStr, "%d", node.AsInt());
+			wsprintfA(NumStr, "%d", node.AsInt());
 			BuildScript += NumStr;
 			break;
 
@@ -1427,7 +1361,7 @@ public:
 			
 			_gcvt(node.AsDouble(), 60, NumStr);
 			
-			if (NumStr[StrLengthA(NumStr) - 1] == '.')
+			if (NumStr[lstrlenA(NumStr) - 1] == '.')
 				lstrcatA(NumStr, "0");
 			
 			BuildScript += NumStr;
@@ -1529,7 +1463,7 @@ public:
 					info.Height = truncated_height;
 					info.DataSize = pixdatasize;
 
-					StrCopyA(info.TexType, TextureType);
+					lstrcpyA(info.TexType, TextureType);
 
 					SaveEmoteImage(FileName, (LPBYTE)pixeldata, info);
 				}
@@ -1539,7 +1473,7 @@ public:
 	}
 
 
-	Void dumpPimg(const PSBNode& node)
+	VOID dumpPimg(const PSBNode& node)
 	{
 		PsbArray arr1(node.pCode + 1);
 		PsbArray arr2(node.pCode + 1 + arr1.nBytes);
@@ -1587,7 +1521,7 @@ public:
 			GlobalData::GetGlobalData()->PsbFlagOn(PSB_IMAGE))
 		{
 			//Dump Binary File: Emote, RL/Bitmap, Other
-			if (!StrICompareW(FileExtension.c_str(), L"PIMG", StrCmp_ToUpper))
+			if (!lstrcmpiW(FileExtension.c_str(), L"PIMG"))
 				dumpPimg(node);
 			else if (!dumpEmote(node))
 				dumpAllFile(node);
@@ -1742,7 +1676,7 @@ public:
 
 
 						if (SelInfo.find("text") != SelInfo.end() &&
-							StrLengthA(SelInfo["text"].AsString()))
+							lstrlenA(SelInfo["text"].AsString()))
 						{
 							File.Print(NULL, "%s\r\n", SelInfo["text"].AsString());
 						}
@@ -1843,7 +1777,7 @@ public:
 					}
 
 					if (TitleInfo.find("title") != TitleInfo.end() &&
-						StrLengthA(TitleInfo["title"].AsString()))
+						lstrlenA(TitleInfo["title"].AsString()))
 					{
 						File.Print(NULL, "%s\r\n", TitleInfo["title"].AsString());
 					}
@@ -1954,7 +1888,7 @@ public:
 	}
 
 
-	Void dumpAllFile(const PSBNode& node)
+	VOID dumpAllFile(const PSBNode& node)
 	{
 		switch (node.GetType())
 		{
@@ -2049,7 +1983,7 @@ public:
 		bool allocBitmap = false;
 		if (it != bitmapInfo.end() && !strcmp(it->second.AsString(), "RL"))
 		{
-			unsigned char *uncomp = (PBYTE)AllocateMemoryP(pixelbytes * width * height);
+			unsigned char *uncomp = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pixelbytes * width * height);
 			if (pixelbytes == 1)
 				DecompressRLE<unsigned char>(uncomp, pixeldata, pixdatasize);
 			else
@@ -2064,8 +1998,8 @@ public:
 		//
 		WriteBmp(lastDictName, width, height, pixeldata, pal, pixelbytes);
 
-		if (allocBitmap) FreeMemoryP((PVOID)pixeldata);
-
+		if (allocBitmap)
+			HeapFree(GetProcessHeap(), 0, (PVOID)pixeldata);
 
 		for (it = bitmapInfo.begin(); it != bitmapInfo.end(); ++it)
 			dumpAllFile(it->second);
@@ -2104,7 +2038,7 @@ int WINAPI ExtractPsb(IStream* InFile, BOOL Image, BOOL Script, const wstring& E
 	STATSTG t;
 	InFile->Stat(&t, STATFLAG_DEFAULT);
 	ULONG nRead;
-	unsigned char *buf = (PBYTE)AllocateMemoryP(t.cbSize.LowPart);
+	unsigned char *buf = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, t.cbSize.LowPart);
 	InFile->Read(buf, t.cbSize.LowPart, &nRead);
 
 	PSBFile psbf;
@@ -2112,7 +2046,8 @@ int WINAPI ExtractPsb(IStream* InFile, BOOL Image, BOOL Script, const wstring& E
 	{
 		//SafeDumper
 		OutputInfo(L"Invalid Psb file\n");
-		if (buf) FreeMemory(buf);
+		if (buf)
+			HeapFree(GetProcessHeap(), 0, buf);
 
 		return -2;
 	}

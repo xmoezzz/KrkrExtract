@@ -1,6 +1,6 @@
 #pragma once
 
-#include "my.h"
+#include <my.h>
 #include <string>
 
 ForceInline std::wstring FASTCALL GetFileName(std::wstring& Path)

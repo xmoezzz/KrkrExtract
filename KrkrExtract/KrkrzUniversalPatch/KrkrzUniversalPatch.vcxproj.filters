@@ -113,9 +113,6 @@
     <ClCompile Include="tp_stub.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MyHook.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="KaresekaHook.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

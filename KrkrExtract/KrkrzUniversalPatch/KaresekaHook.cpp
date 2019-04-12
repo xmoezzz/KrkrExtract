@@ -8,6 +8,8 @@
 #include "CompilerSet.h"
 
 #pragma comment(lib, "jsoncpp.lib")
+#pragma comment(lib, "detours.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 using std::wstring;
 
@@ -22,7 +24,7 @@ PVOID GetTVPCreateStreamCall()
 
 	Kareseka = GetKareseka();
 
-	LOOP_ONCE
+	for(BOOL Condition = FALSE; Condition != TRUE; Condition = TRUE)
 	{
 		CallTVPCreateStreamCall = NULL;
 
@@ -33,7 +35,7 @@ PVOID GetTVPCreateStreamCall()
 		CallIStream = NULL;
 		OpOffset = 0;
 
-		LOOP_FOREVER
+		while(true)
 		{
 			if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0xCC)
 			break;
@@ -69,11 +71,11 @@ PVOID GetTVPCreateStreamCall()
 			OpOffset += OpSize;
 		}
 
-			if (!CallIStream)
-				break;
+		if (!CallIStream)
+			break;
 
 		OpOffset = 0;
-		LOOP_FOREVER
+		while(true)
 		{
 			if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
 			break;
@@ -91,7 +93,7 @@ PVOID GetTVPCreateStreamCall()
 			OpOffset += OpSize;
 		}
 
-			LOOP_FOREVER
+		while(true)
 		{
 			if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
 			break;
@@ -115,7 +117,7 @@ PVOID GetTVPCreateStreamCall()
 			OpOffset += OpSize;
 		}
 
-		LOOP_FOREVER
+		while(true)
 		{
 			if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
 			break;
@@ -147,7 +149,7 @@ PVOID GetTVPCreateStreamCall()
 }
 
 
-tTJSBinaryStream* FASTCALL CallTVPCreateStream(const ttstr& FilePath)
+tTJSBinaryStream* __fastcall CallTVPCreateStream(const ttstr& FilePath)
 {
 	tTJSBinaryStream* Stream;
 	KaresekaHook*     Handle;
@@ -165,7 +167,7 @@ tTJSBinaryStream* FASTCALL CallTVPCreateStream(const ttstr& FilePath)
 	return Handle->StubTVPCreateStream(FilePath, TJS_BS_READ);
 }
 
-IStream* FASTCALL ConvertBStreamToIStream(tTJSBinaryStream* BStream)
+IStream* __fastcall ConvertBStreamToIStream(tTJSBinaryStream* BStream)
 {
 	KaresekaHook* Kareseka;
 	IStream*      Stream;
@@ -179,7 +181,7 @@ IStream* FASTCALL ConvertBStreamToIStream(tTJSBinaryStream* BStream)
 	IStreamAdapterVTableOffset = Kareseka->IStreamAdapterVtable;
 	Stream = NULL;
 
-	INLINE_ASM
+	__asm
 	{
 		push 0xC;
 		call CallHostAlloc;
@@ -242,7 +244,7 @@ KaresekaHook::KaresekaHook()
 	FileSystemInited     = FALSE;
 }
 
-KaresekaHook* FASTCALL GetKareseka()
+KaresekaHook* __fastcall GetKareseka()
 {
 	if (KaresekaHook::Handle == NULL)
 		KaresekaHook::Handle = new KaresekaHook();
@@ -305,7 +307,7 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 
 	FileName = GetKrkrFileName(lpFileName);
 	
-	LOOP_ONCE
+	for (BOOL Condition = FALSE; Condition != TRUE; Condition = TRUE)
 	{
 		StreamAdapter = nullptr;
 
@@ -324,10 +326,10 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 				TempBuffer = NULL;
 				TempSize = 0;
 				Status = CompilePsbFull(FileName, TempBuffer, TempSize, QueryFileAPI);
-				if (NT_FAILED(Status))
+				if (!NT_SUCCESS(Status))
 				{
 					if (TempBuffer)
-						FreeMemoryP(TempBuffer);
+						HeapFree(GetProcessHeap(), 0, TempBuffer);
 
 					break;
 				}
@@ -339,7 +341,7 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 				if (NT_FAILED(Status) || !TextBuffer || !TextSize)
 				{
 					if (TempBuffer)
-						FreeMemoryP(TempBuffer);
+						HeapFree(GetProcessHeap(), 0, TempBuffer);
 
 					break;
 				}
@@ -348,13 +350,13 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 				if (Status != 0)
 				{
 					if (TempBuffer)
-						FreeMemoryP(TempBuffer);
+						HeapFree(GetProcessHeap(), 0, TempBuffer);
 
 					if (TextBuffer)
-						FreeMemoryP(TextBuffer);
+						HeapFree(GetProcessHeap(), 0, TextBuffer);
 
 					if (FileBuffer)
-						FreeMemoryP(FileBuffer);
+						HeapFree(GetProcessHeap(), 0, FileBuffer);
 
 					FileBuffer = NULL;
 					FileSize   = 0;
@@ -368,7 +370,7 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 				if (NT_FAILED(Status))
 				{
 					if (FileBuffer)
-						FreeMemoryP(FileBuffer);
+						HeapFree(GetProcessHeap(), 0, FileBuffer);
 
 					FileBuffer = NULL;
 					FileSize = 0;
@@ -376,7 +378,7 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 			}
 		}
 
-		if (NT_FAILED(Status) || !FileBuffer || !FileSize)
+		if (!NT_SUCCESS(Status) || !FileBuffer || !FileSize)
 			break;
 
 		Holder        = new StreamHolderXP3(FileBuffer, FileSize);
@@ -386,7 +388,7 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 }
 
 
-tTJSBinaryStream* FASTCALL HookTVPCreateStream(const ttstr & _name, tjs_uint32 flags)
+tTJSBinaryStream* __fastcall HookTVPCreateStream(const ttstr & _name, tjs_uint32 flags)
 {
 	KaresekaHook*      Kareseka;
 	tTJSBinaryStream*  Stream;
@@ -394,7 +396,7 @@ tTJSBinaryStream* FASTCALL HookTVPCreateStream(const ttstr & _name, tjs_uint32 f
 
 	Kareseka = GetKareseka();
 
-	LOOP_ONCE
+	for (BOOL Condition = FALSE; Condition != TRUE; Condition = TRUE)
 	{
 		Stream  = NULL;
 		IStream = NULL;
@@ -429,17 +431,19 @@ HRESULT WINAPI HookV2Link(iTVPFunctionExporter *exporter)
 		Kareseka->TVPFunctionExporter = exporter;
 		Kareseka->StubTVPCreateStream = (FuncCreateStream)GetTVPCreateStreamCall();
 
-		INLINE_PATCH_DATA f[] =
+		Mp::PATCH_MEMORY_DATA f[] =
 		{
-			{ Kareseka->StubTVPCreateStream, HookTVPCreateStream, (PVOID*)&(Kareseka->StubTVPCreateStream) }
+			Mp::FunctionJumpVa(Kareseka->StubTVPCreateStream, HookTVPCreateStream, &(Kareseka->StubTVPCreateStream))
 		};
 
-		Status = InlinePatchMemory(f, countof(f));
+		Status = Mp::PatchMemory(f, countof(f));
 		Inited = TRUE;
 	}
 	return Kareseka->StubV2Link(exporter);
 }
 
+
+API_POINTER(MultiByteToWideChar) OldMultiByteToWideChar = NULL;
 
 int WINAPI HookMultiByteToWideChar(
 	UINT   CodePage,
@@ -463,7 +467,7 @@ int WINAPI HookMultiByteToWideChar(
 	}
 
 	return
-		MultiByteToWideChar(
+		OldMultiByteToWideChar(
 		CodePage,
 		dwFlags,
 		lpMultiByteStr,
@@ -492,13 +496,13 @@ NTSTATUS KaresekaHook::QueryFile(LPCWSTR QueryPathName, LPCWSTR FileName, PBYTE&
 	{
 		LOOP_ONCE
 		{
-			FormatStringW(FullFileName, L"ProjectDir\\%s", FileName);
+			wsprintfW(FullFileName, L"ProjectDir\\%s", FileName);
 			Status = File.Open(FullFileName);
 			if (NT_FAILED(Status))
 				break;
 
 			FileSize = File.GetSize32();
-			FileBuffer = (PBYTE)AllocateMemoryP(FileSize);
+			FileBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, FileSize);
 			if (!FileBuffer)
 			{
 				FileSize = 0;
@@ -538,7 +542,7 @@ NTSTATUS KaresekaHook::InitKrkrHook(LPCWSTR lpFileName, PVOID Module)
 		if (Module == NULL)
 			break;
 
-		Length = StrLengthW(lpFileName);
+		Length = lstrlenW(lpFileName);
 		if (Length <= 4)
 			break;
 
@@ -551,12 +555,12 @@ NTSTATUS KaresekaHook::InitKrkrHook(LPCWSTR lpFileName, PVOID Module)
 		if (pV2Link == NULL)
 			break;
 
-		INLINE_PATCH_DATA f[] =
+		Mp::PATCH_MEMORY_DATA f[] =
 		{
-			{ pV2Link, HookV2Link, (PVOID*)&StubV2Link }
+			Mp::FunctionJumpVa(pV2Link, HookV2Link, &StubV2Link)
 		};
 
-		Status = InlinePatchMemory(f, countof(f));
+		Status = Mp::PatchMemory(f, countof(f));
 		Inited = TRUE;
 	}
 	return Status;
@@ -572,21 +576,21 @@ HMODULE WINAPI HookLoadLibraryW(LPCWSTR lpLibFileName)
 
 
 	Kareseka = GetKareseka();
-	LengthOfName = StrLengthW(lpLibFileName);
+	LengthOfName = lstrlenW(lpLibFileName);
 
-	Module = LoadLibraryW(lpLibFileName);
+	Module = (HMODULE)Nt_LoadLibrary((PWSTR)lpLibFileName);
 	Kareseka->InitKrkrHook(lpLibFileName, Module);
 	return Module;
 }
 
 PVOID NTAPI XmoeAllocateMemory(ULONG_PTR Size)
 {
-	return AllocateMemoryP(Size);
+	return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Size);
 }
 
 VOID  NTAPI XmoeFreeMemory(PVOID Mem)
 {
-	FreeMemoryP(Mem);
+	HeapFree(GetProcessHeap(), 0, Mem);
 }
 
 #pragma comment(linker, "/EXPORT:XmoeLinker=_XmoeLinker@0,PRIVATE")
@@ -598,30 +602,31 @@ static BYTE Utf8Bom[3] = { 0xEF, 0xBB, 0xBF };
 
 BOOL KaresekaHook::Init(HMODULE hModule)
 {
-	NTSTATUS      Status;
-	LPCWSTR       Message;
-	PVOID         FakeCompiler;
-	PVOID         ExeModule, FsModule;
-	PBYTE         Buffer;
-	ULONG         Size;
-	ULONG64       Hash;
+	NTSTATUS                  Status;
+	LPCWSTR                   Message;
+	PVOID                     FakeCompiler;
+	PVOID                     ExeModule, FsModule;
+	PBYTE                     Buffer;
+	ULONG                     Size;
+	ULONG64                   Hash;
 
 	m_SelfModule = hModule;
-	ExeModule = Nt_GetExeModuleHandle();
+	ExeModule    = GetModuleHandleW(NULL);
 
-	IAT_PATCH_DATA f[] =
+
+	Mp::PATCH_MEMORY_DATA f[] =
 	{
-		{ ExeModule, LoadLibraryW,        HookLoadLibraryW,        "Kernel32.dll" },
-		{ ExeModule, MultiByteToWideChar, HookMultiByteToWideChar, "Kernel32.dll" }
+		Mp::FunctionJumpVa(LoadLibraryW,        HookLoadLibraryW),
+		Mp::FunctionJumpVa(MultiByteToWideChar, HookMultiByteToWideChar, &OldMultiByteToWideChar)
 	};
 
 	LOOP_ONCE
 	{
-		Status = IATPatchMemory(f, countof(f));
+		Status = Mp::PatchMemory(f, countof(f));
 		if (NT_FAILED(Status))
 		{
 			MessageBoxW(NULL, L"Couldn't patch memory!", L"KrkrUniversalPatch", MB_OK | MB_ICONERROR);
-			Ps::ExitProcess(0);
+			ExitProcess(0);
 		}
 
 		FsModule = Nt_LoadLibrary(L"KrkrFile.dll");
@@ -629,7 +634,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 			break;
 
 		XmoeInitFileSystem = (API_POINTER(InitFileSystem))Nt_GetProcAddress(FsModule, "XmoeInitFileSystem");
-		XmoeQueryFile      = (API_POINTER(::QueryFile))Nt_GetProcAddress(FsModule, "QueryFile");
+		XmoeQueryFile      = (API_POINTER(::QueryFile))   Nt_GetProcAddress(FsModule, "QueryFile");
 
 		if (!XmoeQueryFile || !XmoeQueryFile)
 		{
@@ -650,7 +655,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 	{
 		std::string Result;
 
-		for (ULONG i = 0; i < StrLengthA(FileName); i++)
+		for (ULONG i = 0; i < lstrlenA(FileName); i++)
 		{
 			if (FileName[i] <= 'Z' && FileName[i] >= 'A')
 				Result += tolower(FileName[i]);
@@ -667,7 +672,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 		ULONG       iPos = 0;
 		ReadLine.clear();
 
-		LOOP_FOREVER
+		while(true)
 		{
 			if (iPos >= Size)
 			break;
@@ -729,7 +734,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 
 			JITList.insert(FileName);
 		}
-		FreeMemoryP(Buffer);
+		HeapFree(GetProcessHeap(), 0, Buffer);
 	}
 
 	if (NT_SUCCESS(QueryFile(L"compiler_text.ini", L"_compiler_text.ini", Buffer, Size, Hash)))
@@ -747,7 +752,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 
 			TextList.insert(FileName);
 		}
-		FreeMemoryP(Buffer);
+		HeapFree(GetProcessHeap(), 0, Buffer);
 	}
 
 	return NT_SUCCESS(Status);

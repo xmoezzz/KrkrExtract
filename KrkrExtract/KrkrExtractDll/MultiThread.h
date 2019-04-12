@@ -1,6 +1,6 @@
 #pragma once
 
-#include "my.h"
+#include <Windows.h>
 
 class tTJSCriticalSection
 {

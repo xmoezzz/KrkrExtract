@@ -559,8 +559,8 @@ int LZ4_compress_HC(const char* src, char* dst, int srcSize, int maxDstSize, int
 *  Streaming Functions
 **************************************/
 /* allocation */
-LZ4_streamHC_t* LZ4_createStreamHC(void) { return (LZ4_streamHC_t*)AllocateMemoryP(sizeof(LZ4_streamHC_t)); }
-int             LZ4_freeStreamHC(LZ4_streamHC_t* LZ4_streamHCPtr) { FreeMemoryP(LZ4_streamHCPtr); return 0; }
+LZ4_streamHC_t* LZ4_createStreamHC(void) { return (LZ4_streamHC_t*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LZ4_streamHC_t)); }
+int             LZ4_freeStreamHC(LZ4_streamHC_t* LZ4_streamHCPtr) { HeapFree(GetProcessHeap(), 0, LZ4_streamHCPtr); return 0; }
 
 
 /* initialization */

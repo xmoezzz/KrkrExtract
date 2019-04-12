@@ -2,7 +2,7 @@
 #ifndef _SECTIONPROTECTOR_H_00185e71_a85a_4b7a_bc62_08ac6375404c_
 #define _SECTIONPROTECTOR_H_00185e71_a85a_4b7a_bc62_08ac6375404c_
 
-#include "my.h"
+#include <my.h>
 
 #if SUPPORT_VA_ARGS_MACRO
 
@@ -26,15 +26,15 @@
 
 #define PROTECT_SECTION_INLINE ForceInline
 
-ML_NAMESPACE_BEGIN(SectionProtectorTypes)
-
-enum
+namespace SectionProtectorTypes
 {
-	SharedLock,
-	ExclusiveLock,
-};
+	enum
+	{
+		SharedLock,
+		ExclusiveLock,
+	};
 
-ML_NAMESPACE_END_(SectionProtectorTypes);
+};
 
 class SectionProtectorBase
 {

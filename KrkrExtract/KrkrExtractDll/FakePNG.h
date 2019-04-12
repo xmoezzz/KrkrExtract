@@ -67,10 +67,10 @@ t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;         
 
 #pragma once
 
-#include "my.h"
+#include <my.h>
 #include "tp_stub.h"
 
-Void WINAPI InitLayer();
-Void WINAPI SavePng(LPCWSTR FileName, LPCWSTR Path);
+VOID WINAPI InitLayer();
+VOID WINAPI SavePng(LPCWSTR FileName, LPCWSTR Path);
 
 HRESULT WINAPI ImageWorkerV2Link(iTVPFunctionExporter *exporter);

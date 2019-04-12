@@ -23,11 +23,11 @@ public:
 	WCHAR  FileNameIndex[MAX_PATH];
 
 	NTSTATUS NTAPI DoDump();
-	Void     NTAPI SetFile(LPCWSTR lpFile);
-	Void     NTAPI InternalReset();
+	VOID     NTAPI SetFile(LPCWSTR lpFile);
+	VOID     NTAPI InternalReset();
 
 private:
-	Void NTAPI AddPath(LPWSTR lpPath);
+	VOID NTAPI AddPath(LPWSTR lpPath);
 
 	NTSTATUS NTAPI DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix);
 	NTSTATUS NTAPI DumpFileByRawFile();

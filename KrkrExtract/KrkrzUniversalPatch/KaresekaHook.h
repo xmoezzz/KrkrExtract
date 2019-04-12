@@ -1,11 +1,11 @@
 #pragma once
 
-#include "my.h"
+#include <my.h>
 #include "tp_stub.h"
 #include <set>
 
 typedef HRESULT(NTAPI *FuncV2Link)(iTVPFunctionExporter *);
-typedef tTJSBinaryStream* (FASTCALL * FuncCreateStream)(const ttstr &, tjs_uint32);
+typedef tTJSBinaryStream* (__fastcall * FuncCreateStream)(const ttstr &, tjs_uint32);
 typedef PVOID(CDECL * FuncHostAlloc)(ULONG);
 
 
@@ -46,4 +46,4 @@ private:
 	std::set<std::wstring> TextList;
 };
 
-KaresekaHook* FASTCALL GetKareseka();
+KaresekaHook* __fastcall GetKareseka();

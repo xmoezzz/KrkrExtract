@@ -12,12 +12,12 @@ public:
 	~KrkrUniversalDumper();
 
 	NTSTATUS NTAPI DoDump();
-	Void     NTAPI InternalReset();
+	VOID     NTAPI InternalReset();
 
 	HANDLE   hThread;
 
 private:
-	Void NTAPI AddPath(LPWSTR lpPath);
+	VOID NTAPI AddPath(LPWSTR lpPath);
 
 	NTSTATUS WINAPI DumpFile();
 

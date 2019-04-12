@@ -7,11 +7,11 @@
 #include "KrkrExtract.h"
 #include "KrkrExtend.h"
 #include "MyLib.h"
-#include "Tjs2Disasm.h"
 #include "FakePNG.h"
 #include "PNGWorker.h"
 #include "TLGDecoder.h"
 #include "tp_stub.h"
+#include <shlwapi.h>
 
 PVOID GetTVPCreateStreamCall();
 tTJSBinaryStream* FASTCALL CallTVPCreateStream(const ttstr& FilePath);
@@ -29,7 +29,7 @@ KrkrUniversalDumper::~KrkrUniversalDumper()
 }
 
 
-Void NTAPI KrkrUniversalDumper::InternalReset()
+VOID NTAPI KrkrUniversalDumper::InternalReset()
 {
 	GlobalData*   Handle;
 
@@ -38,7 +38,7 @@ Void NTAPI KrkrUniversalDumper::InternalReset()
 }
 
 
-Void NTAPI KrkrUniversalDumper::AddPath(LPWSTR FileName)
+VOID NTAPI KrkrUniversalDumper::AddPath(LPWSTR FileName)
 {
 	ULONG iPos = 0;
 
@@ -163,7 +163,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 
 	Stream->Stat(&Stat, STATFLAG_DEFAULT);
 
-	Buffer = (PBYTE)AllocateMemoryP(Stat.cbSize.LowPart);
+	Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Stat.cbSize.LowPart);
 	if (!Buffer)
 	{
 		MessageBoxW(Handle->MainWindow, L"Failed to Allocate memory for tlg Decoder", L"KrkrExtract", MB_OK);
@@ -179,14 +179,14 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 	case TLG_RAW:
 		Offset.QuadPart = 0;
 		Stream->Seek(Offset, FILE_BEGIN, NULL);
-		FreeMemoryP(RawBuffer);
+		HeapFree(GetProcessHeap(), 0, RawBuffer);
 		return ProcessFile(Stream, OutFileName);
 
 	case TLG_SYS:
 		if (GlobalData::GetGlobalData()->DebugOn)
 			PrintConsoleW(L"Using System Decode Mode[TLG]\n");
 
-		FreeMemoryP(RawBuffer);
+		HeapFree(GetProcessHeap(), 0, RawBuffer);
 		SavePng(GetPackageName(wstring(OutFileName)).c_str(), FormatPathFull((wstring(OutFileName) + L".png").c_str()).c_str());
 		return Status;
 
@@ -239,19 +239,20 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 
 			if (NT_FAILED(Status))
 			{
-				FreeMemoryP(RawBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
 				if (TempDecode)
-					FreeMemoryP(OutBuffer);
+					HeapFree(GetProcessHeap(), 0, OutBuffer);
 
+				TempDecode = NULL;
 				File.Close();
 				return STATUS_UNSUCCESSFUL;
 			}
 
 			File.Write(OutBuffer, OutSize);
 
-			FreeMemoryP(RawBuffer);
+			HeapFree(GetProcessHeap(), 0, RawBuffer);
 			if (TempDecode)
-				FreeMemoryP(OutBuffer);
+				HeapFree(GetProcessHeap(), 0, OutBuffer);
 		}
 		else if (Handle->GetTlgFlag() == TLG_PNG)
 		{
@@ -271,12 +272,12 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 					File.Close();
 				}
 
-				FreeMemoryP(RawBuffer);
-				FreeMemoryP(OutBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
+				HeapFree(GetProcessHeap(), 0, OutBuffer);
 			}
 			else
 			{
-				FreeMemoryP(RawBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
 				Offset.QuadPart = 0;
 				Stream->Seek(Offset, FILE_BEGIN, NULL);
 				return ProcessFile(Stream, OutFileName);
@@ -300,12 +301,12 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 					File.Close();
 				}
 
-				FreeMemoryP(RawBuffer);
-				FreeMemoryP(OutBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
+				HeapFree(GetProcessHeap(), 0, OutBuffer);
 			}
 			else
 			{
-				FreeMemoryP(RawBuffer);
+				HeapFree(GetProcessHeap(), 0, RawBuffer);
 				Offset.QuadPart = 0;
 				Stream->Seek(Offset, FILE_BEGIN, NULL);
 				return ProcessFile(Stream, OutFileName);
@@ -351,12 +352,12 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFile
 
 	Stream->Stat(&Stat, STATFLAG_DEFAULT);
 	RtlZeroMemory(FileName, countof(FileName) * sizeof(WCHAR));
-	StrCopyW(FileName, OutFileName);
+	lstrcpyW(FileName, OutFileName);
 
 	LOOP_ONCE
 	{
 		Status = STATUS_SUCCESS;
-	OriBuffer = (PBYTE)AllocateMemoryP(Stat.cbSize.LowPart);
+	OriBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Stat.cbSize.LowPart);
 	if (!OriBuffer)
 	{
 		Status = STATUS_INSUFFICIENT_RESOURCES;
@@ -367,7 +368,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFile
 
 	Status = STATUS_SUCCESS;
 	if (DecodeText(OriBuffer, Stat.cbSize.LowPart, FileName) != -1)
-		FreeMemoryP(OriBuffer);
+		HeapFree(GetProcessHeap(), 0, OriBuffer);
 	else
 		Status = ProcessFile(Stream, FileName);
 	}
@@ -388,7 +389,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 	Handle = GlobalData::GetGlobalData();
 
 	RtlZeroMemory(CurDir, countof(CurDir) * sizeof(WCHAR));
-	Nt_GetCurrentDirectory(MAX_PATH, CurDir);
+	GetCurrentDirectoryW(MAX_PATH, CurDir);
 
 	OutFilePath += CurDir;
 	OutFilePath += L"\\KrkrExtract_Output\\";
@@ -473,17 +474,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 							Offset.QuadPart = 0;
 							Stream->Seek(Offset, FILE_BEGIN, &NewOffset);
 
-							if (Stat.cbSize.LowPart < 8)
-							{
-								Status = ProcessTEXT(Stream, OutFilePathFull.c_str());
-							}
-							else
-							{
-								if (RtlCompareMemory(Buffer, TjsMark, 8) == 8)
-									Status = TjsDecompileStorage(Stream, OutFilePathFull);
-								else
-									Status = ProcessTEXT(Stream, OutFilePathFull.c_str());
-							}
+							Status = ProcessTEXT(Stream, OutFilePathFull.c_str());
 						}
 						else
 						{
@@ -497,7 +488,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 					}
 					else
 					{
-						if (ExtName == L"TJS" && Handle->GetTjsFlag() == TJS2_DECOM)
+						if (ExtName == L"TJS")
 						{
 							BYTE           Buffer[8];
 							LARGE_INTEGER  Offset;
@@ -520,10 +511,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 							}
 							else
 							{
-								if (RtlCompareMemory(Buffer, TjsMark, 8) == 8)
-									Status = TjsDecompileStorage(Stream, OutFilePathFull);
-								else
-									Status = ProcessFile(Stream, OutFilePathFull.c_str());
+								Status = ProcessFile(Stream, OutFilePathFull.c_str());
 							}
 						}
 						else

@@ -98,7 +98,7 @@ ForceInline Void WINAPI GenMD5Code(LPCWSTR FileName, LPCWSTR ProjectName, wstrin
 
 #include "md5.h"
 
-ForceInline Void WINAPI GenMD5Code(const WCHAR* FileName, wstring& OutHex)
+ForceInline VOID WINAPI GenMD5Code(const WCHAR* FileName, wstring& OutHex)
 {
 	unsigned char OutBuffer[16];
 
@@ -124,7 +124,7 @@ ForceInline Void WINAPI GenMD5Code(const WCHAR* FileName, wstring& OutHex)
 	}
 }
 
-ForceInline Void WINAPI GenMD5Code(const WCHAR* FileName, const WCHAR* ProjectName, wstring& OutHex)
+ForceInline VOID WINAPI GenMD5Code(const WCHAR* FileName, const WCHAR* ProjectName, wstring& OutHex)
 {
 	unsigned char OutBuffer[16];
 
@@ -156,7 +156,7 @@ ForceInline Void WINAPI GenMD5Code(const WCHAR* FileName, const WCHAR* ProjectNa
 #endif
 
 
-ForceInline Void FASTCALL FormatPath(wstring& Package, ttstr& out)
+ForceInline VOID FASTCALL FormatPath(wstring& Package, ttstr& out)
 {
 	out = L"file://./";
 	for (SIZE_T iPos = 0; iPos < Package.length(); iPos++)

@@ -20,8 +20,8 @@ public:
 	KrkrPacker();
 	~KrkrPacker();
 
-	Void   NTAPI Init();
-	Void   NTAPI InternalReset();
+	VOID   NTAPI Init();
+	VOID   NTAPI InternalReset();
 
 
 	NTSTATUS NTAPI DetactPackFormat(LPCWSTR lpFileName);
@@ -49,7 +49,7 @@ public:
 
 	NTSTATUS NTAPI IterFiles(LPCWSTR lpPath);
 
-	Void NTAPI DecryptWorker(ULONG EncryptOffset, PBYTE pBuffer, ULONG BufferSize,  ULONG Hash);
+	VOID NTAPI DecryptWorker(ULONG EncryptOffset, PBYTE pBuffer, ULONG BufferSize,  ULONG Hash);
 
 	ULONG                             KrkrPackType;
 	vector<wstring>                   FileList;

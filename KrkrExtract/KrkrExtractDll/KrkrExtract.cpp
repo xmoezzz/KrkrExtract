@@ -2,11 +2,15 @@
 #include "resource.h"
 #include "FakePNG.h"
 #include "Worker.h"
+#include "hook.h"
 #include "KrkrUniversalPatch.h"
 #include "KrkrUniversalDumper.h"
 #include <Shlobj.h>
 #include <WindowsX.h>
 #include "MultiThread.h"
+#include "DebuggerHandler.h"
+
+BOOL GlobalData::WindowIsInited = FALSE;
 
 NTSTATUS NTAPI InitExporter(iTVPFunctionExporter *exporter)
 {
@@ -21,10 +25,10 @@ NTSTATUS NTAPI InitExporter(iTVPFunctionExporter *exporter)
 
 	LOOP_ONCE
 	{
-		ExecuteHandle = (PBYTE)Nt_GetExeModuleHandle();
-		PointRva = PtrSub((PBYTE)exporter, ExecuteHandle);
+		ExecuteHandle = (PBYTE)GetModuleHandleW(NULL);
+		PointRva      = (PBYTE)exporter - (ULONG_PTR)ExecuteHandle;
 		Crc = GenerationCRC64(0, (LPCBYTE)&PointRva, sizeof(PVOID));
-		EncodedExporter = Nt_EncodePointer(PointRva, LODWORD(Crc));
+		EncodedExporter = Nt_EncodePointer(PointRva, LoDword(Crc));
 
 		//lookup Image Entries to make sure CurrentFile is 
 
@@ -102,7 +106,7 @@ GlobalData::GlobalData() :
 	IsProtection(FALSE),
 	InheritIcon(FALSE)
 {
-	hHostModule = (HMODULE)Nt_GetExeModuleHandle();
+	hHostModule = (HMODULE)GetModuleHandleW(NULL);
 	Inited = FALSE;
 
 	RtlZeroMemory(GuessPack,    countof(GuessPack)    * sizeof(WCHAR));
@@ -141,7 +145,7 @@ GlobalData::~GlobalData()
 }
 
 
-Void NTAPI GlobalData::ExitKrkr()
+VOID NTAPI GlobalData::ExitKrkr()
 {
 	if (MainWindow)
 		DestroyWindow(MainWindow);
@@ -150,7 +154,7 @@ Void NTAPI GlobalData::ExitKrkr()
 
 	for (auto& Entry : SpecialChunkMap)
 		if (Entry.second.Buffer)
-			FreeMemoryP(Entry.second.Buffer);
+			HeapFree(GetProcessHeap(), 0, Entry.second.Buffer);
 
 	SpecialChunkMap.clear();
 }
@@ -163,12 +167,12 @@ GlobalData* GlobalData::GetGlobalData()
 	return Handle;
 }
 
-Void NTAPI GlobalData::SetDllModule(HMODULE hModule)
+VOID NTAPI GlobalData::SetDllModule(HMODULE hModule)
 {
 	Handle->hSelfModule = hModule;
 
 	RtlZeroMemory(SelfPath, MAX_PATH * 2);
-	Nt_GetModuleFileName(hModule, SelfPath, MAX_PATH);
+	GetModuleFileNameW(hModule, SelfPath, MAX_PATH);
 }
 
 ULONG GlobalData::SetTextFlag(ULONG Flag)
@@ -260,7 +264,7 @@ BOOL GlobalData::PsbFlagOn(ULONG Flag)
 		return FLAG_ON(this->PsbFlag, Flag);
 }
 ;
-Void GlobalData::DebugPsbFlag()
+VOID GlobalData::DebugPsbFlag()
 {
 	static WCHAR f[] = L"false";
 	static WCHAR t[] = L"true";
@@ -274,44 +278,44 @@ Void GlobalData::DebugPsbFlag()
 		FLAG_ON(PsbFlag, PSB_ANM)   ? t : f);
 }
 
-Void GlobalData::SetFolder(LPCWSTR Name)
+VOID GlobalData::SetFolder(LPCWSTR Name)
 {
 	RtlZeroMemory(Folder, countof(Folder) * sizeof(WCHAR));
-	StrCopyW(Folder, Name);
+	lstrcpyW(Folder, Name);
 }
 
-Void GlobalData::SetGuessPack(LPCWSTR Name)
+VOID GlobalData::SetGuessPack(LPCWSTR Name)
 {
 	RtlZeroMemory(GuessPack, countof(GuessPack) * sizeof(WCHAR));
-	StrCopyW(GuessPack, Name);
+	lstrcpyW(GuessPack, Name);
 }
 
-void GlobalData::SetOutputPack(LPCWSTR Name)
+VOID GlobalData::SetOutputPack(LPCWSTR Name)
 {
 	RtlZeroMemory(OutPack, countof(OutPack) * sizeof(WCHAR));
-	StrCopyW(OutPack, Name);
+	lstrcpyW(OutPack, Name);
 }
 
-Void GlobalData::GetFolder(LPWSTR Name, ULONG BufferMaxLength)
+VOID GlobalData::GetFolder(LPWSTR Name, ULONG BufferMaxLength)
 {
 	RtlZeroMemory(Name, BufferMaxLength * sizeof(WCHAR));
-	StrCopyW(Name, Folder);
+	lstrcpyW(Name, Folder);
 }
 
-Void GlobalData::GetGuessPack(LPWSTR Name, ULONG BufferMaxLength)
+VOID GlobalData::GetGuessPack(LPWSTR Name, ULONG BufferMaxLength)
 {
 	RtlZeroMemory(Name, BufferMaxLength * sizeof(WCHAR));
-	StrCopyW(Name, GuessPack);
+	lstrcpyW(Name, GuessPack);
 }
 
-Void GlobalData::GetOutputPack(LPWSTR Name, ULONG BufferMaxLength)
+VOID GlobalData::GetOutputPack(LPWSTR Name, ULONG BufferMaxLength)
 {
 	RtlZeroMemory(Name, BufferMaxLength * sizeof(WCHAR));
-	StrCopyW(Name, OutPack);
+	lstrcpyW(Name, OutPack);
 }
 
 
-BOOL GlobalData::FindCodeSlow(PCChar Start, ULONG Size, PCChar Pattern, ULONG PatternLen)
+BOOL GlobalData::FindCodeSlow(PCCHAR Start, ULONG Size, PCCHAR Pattern, ULONG PatternLen)
 {
 	return KMP(Start, Size, Pattern, PatternLen) ? TRUE : FALSE;
 	return TRUE;
@@ -319,7 +323,7 @@ BOOL GlobalData::FindCodeSlow(PCChar Start, ULONG Size, PCChar Pattern, ULONG Pa
 
 tTJSCriticalSection  CS; //Entry CS
 
-Void GlobalData::AddFileEntry(PCWSTR FileName, ULONG Length)
+VOID GlobalData::AddFileEntry(PCWSTR FileName, ULONG Length)
 {
 	BOOL                 FindDot;
 
@@ -344,6 +348,28 @@ Void GlobalData::AddFileEntry(PCWSTR FileName, ULONG Length)
 
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+VOID HookMessageKeyDown(MSG* msg)
+{
+	HWND  hCmd;
+	WCHAR CmdLine[1000];
+
+	if (msg->message != WM_KEYDOWN)
+		return;
+
+	hCmd = GetDlgItem(GlobalData::GetGlobalData()->MainWindow, IDC_CMD);
+	if (hCmd == NULL || hCmd != msg->hwnd)
+		return;
+
+	if (msg->wParam == VK_RETURN)
+	{
+		RtlZeroMemory(CmdLine, sizeof(CmdLine));
+		GetWindowTextW(hCmd, CmdLine, countof(CmdLine));
+		SetWindowTextW(hCmd, L"");
+		ParseCommand(CmdLine);
+	}
+}
+
+
 NTSTATUS NTAPI GlobalData::InitWindow()
 {
 	NTSTATUS       Status;
@@ -354,9 +380,8 @@ NTSTATUS NTAPI GlobalData::InitWindow()
 	RtlZeroMemory(FullApplicationTitle, countof(FullApplicationTitle) * sizeof(WCHAR));
 	RtlZeroMemory(WinText, countof(WinText) * sizeof(WCHAR));
 
-	FormatStringW(FullApplicationTitle, szApplicationName, _XP3ExtractVersion_, MAKE_WSTRING(__DATE__) L" " MAKE_WSTRING(__TIME__));
-
-	StrCopyW(WinText, FullApplicationTitle);
+	wsprintfW(FullApplicationTitle, szApplicationName, _XP3ExtractVersion_, MAKE_WSTRING(__DATE__) L" " MAKE_WSTRING(__TIME__));
+	lstrcpyW(WinText, FullApplicationTitle);
 
 	LOOP_ONCE
 	{
@@ -383,18 +408,26 @@ NTSTATUS NTAPI GlobalData::InitWindow()
 		ShowWindow(MainWindow, SW_SHOW);
 		UpdateWindow(MainWindow);
 
+		InterlockedExchange((PLONG)&GlobalData::WindowIsInited, TRUE);
+		VirtualConsolePrint(
+			L"[+] Virtual Console initializated, type `help` to see list of commands");
+
 		Status = STATUS_SUCCESS;
 
 		while (GetMessageW(&msg, NULL, NULL, NULL))
 		{
-			if (msg.message == WM_KEYDOWN)
-			{
-				SendMessageW(MainWindow, msg.message, msg.wParam, msg.lParam);
-			}
-			else if (!IsDialogMessageW(MainWindow, &msg))
+			if (!IsDialogMessageW(MainWindow, &msg))
 			{
 				TranslateMessage(&msg);
 				DispatchMessageW(&msg);
+			}
+			else
+			{
+				if (msg.message == WM_KEYDOWN)
+				{
+					HookMessageKeyDown(&msg);
+				}
+				SendMessageW(MainWindow, msg.message, msg.wParam, msg.lParam);
 			}
 		}
 	}
@@ -446,47 +479,6 @@ NTSTATUS NTAPI GlobalData::InitHookNull()
 	return Status;
 }
 
-
-NTSTATUS FASTCALL ValidateShellCode(LPCWSTR ModuleName, PVOID ImageBase)
-{
-	PLDR_MODULE   XcodeLdr;
-
-	static CHAR SearchName[] = "void ::TVPSetXP3ArchiveExtractionFilter(tTVPXP3ArchiveExtractionFilter)";
-
-	auto GetModuleLdr = [&]()->PLDR_MODULE
-	{
-		LPCWSTR ModuleNameP = ModuleName;
-		ModuleNameP = StrFindLastCharW(ModuleNameP, L'\\');
-		if (ModuleNameP != NULL)
-			ModuleName = ModuleNameP + 1;
-
-		LDR_MODULE *Ldr, *FirstLdr;
-
-		Ldr = FIELD_BASE(Nt_CurrentPeb()->Ldr->InInitializationOrderModuleList.Flink, LDR_MODULE, InInitializationOrderLinks);
-		FirstLdr = Ldr;
-
-		do
-		{
-			Ldr = FIELD_BASE(Ldr->InInitializationOrderLinks.Flink, LDR_MODULE, InInitializationOrderLinks);
-			if (Ldr->DllBase == NULL)
-				continue;
-
-			if (Ldr->DllBase == ImageBase)
-				return Ldr;
-
-		} while (FirstLdr != Ldr);
-
-		return NULL;
-	};
-
-	XcodeLdr = GetModuleLdr();
-	
-	if (!XcodeLdr)
-		return STATUS_NO_SUCH_FILE;
-	
-	return KMP(XcodeLdr->DllBase, XcodeLdr->SizeOfImage, SearchName, StrLengthA(SearchName)) ? STATUS_UNSUCCESSFUL : STATUS_SUCCESS;
-}
-
 NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 {
 	NTSTATUS    Status;
@@ -505,7 +497,7 @@ NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 		if (ImageBase == NULL)
 			break;
 
-		Length = StrLengthW(ModuleName);
+		Length = lstrlenW(ModuleName);
 		if (Length <= 4)
 			break;
 
@@ -517,16 +509,13 @@ NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 		if (Nt_GetProcAddress(ImageBase, "FlushInstructionCache"))
 			break;
 
-		//if (NT_FAILED(ValidateShellCode(ModuleName, ImageBase)))
-		//	break;
-
 		pV2Link = Nt_GetProcAddress(ImageBase, "V2Link");
 		if (pV2Link == NULL)
 			break;
 
 		Mp::PATCH_MEMORY_DATA f[] =
 		{
-			Mp::FunctionJumpVa(pV2Link, HookV2Link, &StubV2Link )
+			Mp::FunctionJumpVa(pV2Link, HookV2Link, &StubV2Link)
 		};
 
 		Status = Mp::PatchMemory(f, countof(f));
@@ -537,24 +526,24 @@ NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 	return Status;
 }
 
-Void NTAPI GlobalData::SetCurFile(DWORD iPos)
+VOID NTAPI GlobalData::SetCurFile(DWORD iPos)
 {
 	WCHAR         TextBuffer[MAX_PATH];
 
 	RtlZeroMemory(TextBuffer, countof(TextBuffer) * sizeof(WCHAR));
 
-	FormatStringW(TextBuffer, L"Processing : [%d / %d]", iPos, CountFile);
+	wsprintfW(TextBuffer, L"Processing : [%d / %d]", iPos, CountFile);
 	SetWindowTextW(MainWindow, TextBuffer);
 	SetProcess(MainWindow, (ULONG)(((float)iPos / (float)CountFile) * 100.0));
 }
 
-Void NTAPI GlobalData::SetCount(DWORD Count)
+VOID NTAPI GlobalData::SetCount(DWORD Count)
 {
 	CountFile = Count;
 }
 
 
-Void NTAPI GlobalData::Reset()
+VOID NTAPI GlobalData::Reset()
 {
 	WCHAR FullApplicationTitle[512];
 
@@ -564,7 +553,7 @@ Void NTAPI GlobalData::Reset()
 	IsM2Format = FALSE;
 	RtlZeroMemory(CurFileName, countof(CurFileName) * sizeof(WCHAR));
 
-	FormatStringW(FullApplicationTitle, szApplicationName, _XP3ExtractVersion_, MAKE_WSTRING(__DATE__) L" " MAKE_WSTRING(__TIME__));
+	wsprintfW(FullApplicationTitle, szApplicationName, _XP3ExtractVersion_, MAKE_WSTRING(__DATE__) L" " MAKE_WSTRING(__TIME__));
 
 	SetWindowTextW(MainWindow, FullApplicationTitle);
 	EnableAll(MainWindow);
@@ -573,7 +562,7 @@ Void NTAPI GlobalData::Reset()
 }
 
 //在每一次进行操作之前
-Void NTAPI GlobalData::ForceReset()
+VOID NTAPI GlobalData::ForceReset()
 {
 	DWORD         ExitCode;
 	WCHAR         FullApplicationTitle[512];
@@ -591,7 +580,7 @@ Void NTAPI GlobalData::ForceReset()
 			Timeout.QuadPart = 500;
 			NtWaitForSingleObject(WorkerThread, TRUE, &Timeout);
 			if (GetExitCodeThread(WorkerThread, &ExitCode) == STILL_ACTIVE)
-				Nt_TerminateThread(WorkerThread, 0);
+				TerminateThread(WorkerThread, 0);
 		}
 	}
 	NtClose(WorkerThread);
@@ -602,7 +591,7 @@ Void NTAPI GlobalData::ForceReset()
 	IsM2Format = FALSE;
 	RtlZeroMemory(CurFileName, countof(CurFileName) * sizeof(WCHAR));
 
-	FormatStringW(FullApplicationTitle, szApplicationName, _XP3ExtractVersion_, MAKE_WSTRING(__DATE__) L" " MAKE_WSTRING(__TIME__));
+	wsprintfW(FullApplicationTitle, szApplicationName, _XP3ExtractVersion_, MAKE_WSTRING(__DATE__) L" " MAKE_WSTRING(__TIME__));
 
 	SetWindowTextW(MainWindow, FullApplicationTitle);
 	EnableAll(MainWindow);
@@ -621,7 +610,7 @@ Void NTAPI GlobalData::ForceReset()
 #define CheckItem(x)   SendMessageW(x, BM_SETCHECK, BST_UNCHECKED, 0)
 #define UnCheckItem(x) SendMessageW(x, BM_SETCHECK, BST_CHECKED, 0)
 
-Void WINAPI GlobalData::EnableAll(HWND hWnd)
+VOID WINAPI GlobalData::EnableAll(HWND hWnd)
 {
 	HWND hPNGRaw = GetItemX(IDC_PNG_RAW);
 	HWND hPNGSys = GetItemX(IDC_PNG_SYSTEM);
@@ -715,7 +704,7 @@ Void WINAPI GlobalData::EnableAll(HWND hWnd)
 		DisableX(hUButton);
 }
 
-Void NTAPI GlobalData::DisableAll(HWND hWnd)
+VOID NTAPI GlobalData::DisableAll(HWND hWnd)
 {
 	HWND hPNGRaw = GetItemX(IDC_PNG_RAW);
 	HWND hPNGSys = GetItemX(IDC_PNG_SYSTEM);
@@ -812,14 +801,36 @@ Void NTAPI GlobalData::DisableAll(HWND hWnd)
 
 
 
-Void WINAPI GlobalData::AdjustCP(HWND hWnd)
+VOID WINAPI GlobalData::AdjustCP(HWND hWnd)
 {
 }
 
-Void WINAPI GlobalData::SetProcess(HWND hWnd, ULONG Value)
+VOID WINAPI GlobalData::SetProcess(HWND hWnd, ULONG Value)
 {
 	HWND hProcess = GetItemX(IDC_PROGRESS1);
 	SendMessageW(hProcess, PBM_SETPOS, Value, 0);
+}
+
+VOID GlobalData::VirtualConsolePrint(PCWSTR Format, ...)
+{
+	BOOL        Success;
+	ULONG       Length;
+	WCHAR       Buffer[0xF00 / 2];
+	va_list     Args;
+	HANDLE      StdOutput;
+	HWND        VirtualConsole;
+
+	if (MainWindow == NULL)
+		return;
+
+	va_start(Args, Format);
+	Length = _vsnwprintf(Buffer, countof(Buffer) - 1, Format, Args);
+	if (Length == -1)
+		return;
+	
+	VirtualConsole = GetDlgItem(MainWindow, IDC_VCONSOLE);
+	if (VirtualConsole)
+		ListBox_AddString(VirtualConsole, Buffer);
 }
 
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -960,7 +971,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		NtFileDisk File;
 
 		RtlZeroMemory(DataName, countof(DataName) * sizeof(WCHAR));
-		Nt_GetCurrentDirectory(MAX_PATH, DataName);
+		GetCurrentDirectoryW(MAX_PATH, DataName);
 		lstrcatW(DataName, L"\\data.xp3");
 		if (NT_SUCCESS(File.Open(DataName)))
 		{
@@ -978,7 +989,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case SC_CLOSE:
-			Ps::ExitProcess(0);
+			ExitProcess(0);
 			break;
 		}
 	}
@@ -998,6 +1009,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		wmEvent = HIWORD(wParam);
 		switch (wmId)
 		{
+
 		case IDC_PACK_EDIT_FOLDER:
 		{
 			switch (wmEvent)
@@ -1821,7 +1833,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				OpenInfo.nMaxFile = sizeof(lpString) / 2;
 				OpenInfo.lpstrTitle = L"Select an original xp3 file";
 
-				Nt_GetCurrentDirectory(MAX_PATH, CurDir);
+				GetCurrentDirectoryW(MAX_PATH, CurDir);
 				OpenInfo.lpstrInitialDir = CurDir;
 				OpenInfo.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
 				BOOL Result = GetOpenFileNameW(&OpenInfo);
@@ -1864,7 +1876,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				OpenInfo.nMaxFile = sizeof(lpString) / 2;
 				OpenInfo.lpstrTitle = L"Output xp3 file";
 
-				Nt_GetCurrentDirectory(MAX_PATH, CurDir);
+				GetCurrentDirectoryW(MAX_PATH, CurDir);
 				OpenInfo.lpstrInitialDir = CurDir;
 				OpenInfo.Flags = OFN_EXPLORER;
 				BOOL Result = GetOpenFileNameW(&OpenInfo);
@@ -1969,7 +1981,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			DragQueryFileW(hDrop, 0, GlobalData::GetGlobalData()->DragFileName, MAX_PATH);
 			DragFinish(hDrop);
 
-			ULONG FileAttr = Nt_GetFileAttributes(GlobalData::GetGlobalData()->DragFileName);
+			ULONG FileAttr = GetFileAttributesW(GlobalData::GetGlobalData()->DragFileName);
 			if (FileAttr == INVALID_FILE_ATTRIBUTES)
 			{
 				DragFinish(hDrop);
@@ -2020,7 +2032,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	break;
 
 	case WM_DESTROY:
-		Ps::ExitProcess(0);
+		ExitProcess(0);
 	break;
 	}
 	return 0;

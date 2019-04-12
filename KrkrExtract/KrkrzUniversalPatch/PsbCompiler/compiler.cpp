@@ -3,12 +3,12 @@
 
 PVOID NTAPI AllocateMemoryInternal(ULONG_PTR Size)
 {
-	return AllocateMemoryP(Size);
+	return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Size);
 }
 
 VOID  NTAPI FreeMemoryInternal(PVOID Mem)
 {
-	FreeMemoryP(Mem);
+	HeapFree(GetProcessHeap(), 0, Mem);
 }
 
 
@@ -30,28 +30,28 @@ NTSTATUS NTAPI CompilePsbFull(wstring& FileName, PBYTE& OutBuffer, ULONG& OutSiz
 
 	if (!pcc.require_compile(FileName, SrcBuffer, SrcSize, AllocateMemoryInternal, FreeMemoryInternal, QueryFileFunc))
 	{
-		FreeMemoryP(SrcBuffer);
+		HeapFree(GetProcessHeap(), 0, SrcBuffer);
 		return false;
 	}
 
 	if (!pcc.compile())
 	{
-		FreeMemoryP(SrcBuffer);
+		HeapFree(GetProcessHeap(), 0, SrcBuffer);
 		return false;
 	}
 
 	if(!pcc.link())
 	{
-		FreeMemoryP(SrcBuffer);
+		HeapFree(GetProcessHeap(), 0, SrcBuffer);
 		return false;
 	}
 
 	if (!pcc.write_file(OutBuffer, OutSize))
 	{
-		FreeMemoryP(SrcBuffer);
+		HeapFree(GetProcessHeap(), 0, SrcBuffer);
 		return false;
 	}
 
-	FreeMemoryP(SrcBuffer);
+	HeapFree(GetProcessHeap(), 0, SrcBuffer);
 	return true;
 }

@@ -43,17 +43,8 @@
     <Filter Include="源文件\SDK">
       <UniqueIdentifier>{e865394c-47c8-4383-9d3d-e3cae2b0e4ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="tjs2">
-      <UniqueIdentifier>{915d3b71-9d66-4ddb-8b2a-0fa6ee8de0b8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Debugger">
       <UniqueIdentifier>{facce64b-3d48-4e0d-afa3-4526c49edb7c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\M2">
-      <UniqueIdentifier>{509a3013-8ed2-4d2b-b355-86f887fc334f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\M2">
-      <UniqueIdentifier>{0aa60f82-88ea-480d-bfd1-bf248841b8fa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -111,36 +102,6 @@
     <ClCompile Include="lz4hc.cpp">
       <Filter>源文件\Lib</Filter>
     </ClCompile>
-    <ClCompile Include="adler32.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="compress.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="crc32.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="deflate.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="zutil.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="tree.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="uncompr.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="inflate.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="inffast.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="inftrees.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
     <ClCompile Include="xxhash.cpp">
       <Filter>源文件\Lib</Filter>
     </ClCompile>
@@ -162,123 +123,6 @@
     <ClCompile Include="PsbDecompilerJson.cpp">
       <Filter>源文件\Core</Filter>
     </ClCompile>
-    <ClCompile Include="tjs2\tjs.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjs.tab.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsArray.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsBinarySerializer.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsByteCodeLoader.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsCompileControl.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsConfig.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsConstArrayData.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsDate.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsdate.tab.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsDateParser.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsDebug.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsDictionary.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsDisassemble.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsError.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsException.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsGlobalStringMap.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsInterCodeExec.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsInterCodeGen.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsInterface.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsLex.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsMath.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsMessage.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsMT19937ar-cok.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsNamespace.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsNative.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsObject.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsObjectExtendable.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsOctPack.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjspp.tab.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsRandomGenerator.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsRegExp.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsScriptBlock.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsScriptCache.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsString.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsUtils.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsVariant.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="tjs2\tjsVariantString.cpp">
-      <Filter>tjs2</Filter>
-    </ClCompile>
-    <ClCompile Include="Tjs2Disasm.cpp">
-      <Filter>源文件\Core</Filter>
-    </ClCompile>
     <ClCompile Include="AmvExtractor.cpp">
       <Filter>源文件\KrkrExtend</Filter>
     </ClCompile>
@@ -297,8 +141,8 @@
     <ClCompile Include="md5.cpp">
       <Filter>源文件\Lib</Filter>
     </ClCompile>
-    <ClCompile Include="RiddleJoker_Decode.cpp">
-      <Filter>源文件\M2</Filter>
+    <ClCompile Include="DebuggerHandler.cpp">
+      <Filter>源文件\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -389,24 +233,6 @@
     <ClInclude Include="mt64.h">
       <Filter>头文件\Lib</Filter>
     </ClInclude>
-    <ClInclude Include="zutil.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="deflate.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="gzguts.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="inflate.h">
-      <Filter>头文件\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="inftrees.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="inffast.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
     <ClInclude Include="KrkrExtract.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
@@ -425,142 +251,10 @@
     <ClInclude Include="PsbFile.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
-    <ClInclude Include="tjs2\tjs.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjs.tab.hpp">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsArray.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsBinarySerializer.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsByteCodeLoader.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsCommHead.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsCompileControl.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsConfig.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsConstArrayData.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsDate.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsdate.tab.hpp">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsDateParser.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsDebug.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsDictionary.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsError.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsErrorDefs.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsErrorInc.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsException.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsGlobalStringMap.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsHashSearch.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsInterCodeExec.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsInterCodeGen.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsInterface.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsLex.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsMath.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsMessage.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsMT19937ar-cok.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsNamespace.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsNative.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsObject.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsObjectExtendable.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsOctPack.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjspp.tab.hpp">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsRandomGenerator.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsRegExp.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsScriptBlock.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsScriptCache.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsString.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsTypes.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsUtils.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsVariant.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="tjs2\tjsVariantString.h">
-      <Filter>tjs2</Filter>
-    </ClInclude>
-    <ClInclude Include="Tjs2Disasm.h">
-      <Filter>头文件\Core</Filter>
-    </ClInclude>
     <ClInclude Include="MultiThread.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
     <ClInclude Include="HandleTable.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="SectionProtector.h">
       <Filter>头文件\Lib</Filter>
     </ClInclude>
     <ClInclude Include="KrkrUniversalDumper.h">
@@ -575,14 +269,14 @@
     <ClInclude Include="md5.h">
       <Filter>头文件\Lib</Filter>
     </ClInclude>
-    <ClInclude Include="GenMD5Code.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
     <ClInclude Include="DebuggerHandler.h">
       <Filter>头文件\Debugger</Filter>
     </ClInclude>
-    <ClInclude Include="ExtraDecoder.h">
-      <Filter>头文件\M2</Filter>
+    <ClInclude Include="hook.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionProtector.h">
+      <Filter>头文件\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

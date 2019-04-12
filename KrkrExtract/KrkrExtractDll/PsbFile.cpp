@@ -1,12 +1,12 @@
 #include "PsbFile.h"
 
-PsbValue::PsbValue(class PsbJsonExporter& _Psb, PsbType _Type, PByte& Buff) :
+PsbValue::PsbValue(class PsbJsonExporter& _Psb, PsbType _Type, PBYTE& Buff) :
 	Psb(_Psb),
 	Type(_Type)
 {
 }
 
-PsbValue::PsbValue(class PsbJsonExporter& _Psb, PByte& Buff) : 
+PsbValue::PsbValue(class PsbJsonExporter& _Psb, PBYTE& Buff) : 
 	Psb(_Psb)
 {
 }
@@ -21,14 +21,14 @@ PsbValue::~PsbValue()
 {
 }
 
-PsbNull::PsbNull(class PsbJsonExporter&  _Psb, PByte& Buff, PsbType _Type) : 
+PsbNull::PsbNull(class PsbJsonExporter&  _Psb, PBYTE& Buff, PsbType _Type) : 
 	PsbValue(_Psb, _Type, Buff)
 {
 	Buffer = Buff;
 }
 
 
-PsbBool::PsbBool(class PsbJsonExporter&  _Psb, PByte& Buff, PsbType _Type) : 
+PsbBool::PsbBool(class PsbJsonExporter&  _Psb, PBYTE& Buff, PsbType _Type) : 
 	PsbValue(_Psb, _Type, Buff)
 {
 	switch (_Type)
@@ -52,7 +52,7 @@ BOOLEAN PsbBool::GetBoolean()
 	return Value;
 }
 
-PsbResource::PsbResource(class PsbJsonExporter&  _Psb, PByte& Buff, PsbType _Type) :
+PsbResource::PsbResource(class PsbJsonExporter&  _Psb, PBYTE& Buff, PsbType _Type) :
 	PsbValue(_Psb, _Type, Buff), 
 	ChunkIndex(-1)
 {
@@ -66,7 +66,7 @@ ULONG PsbResource::GetIndex()
 	return ChunkIndex;
 }
 
-PByte PsbResource::GetBuffer()
+PBYTE PsbResource::GetBuffer()
 {
 	return ChunkBuffer;
 }
@@ -77,24 +77,24 @@ ULONG PsbResource::GetLength()
 }
 
 
-PsbNumber::PsbNumber(class PsbJsonExporter& _Psb, PByte& Buff, PsbType _Type) :
+PsbNumber::PsbNumber(class PsbJsonExporter& _Psb, PBYTE& Buff, PsbType _Type) :
 	PsbValue(_Psb, _Type, Buff)
 {
 	Buffer = Buff;
 	_Psb.GetNumber(Buff, Value, NumberType);
 }
 
-Int64 PsbNumber::GetInteger()
+INT64 PsbNumber::GetInteger()
 {
 	return Value.IntegerValue;
 }
 
-Float PsbNumber::GetFloat()
+float PsbNumber::GetFloat()
 {
 	return Value.FloatValue;
 }
 
-Double PsbNumber::GetDouble()
+double PsbNumber::GetDouble()
 {
 	return Value.DoubleValue;
 }
@@ -116,7 +116,7 @@ BOOLEAN PsbNumber::IsNumberNode(PsbValue *_Value)
 }
 
 
-PsbArray::PsbArray(class PsbJsonExporter& _Psb, PByte& Buff, PsbType _Type) :
+PsbArray::PsbArray(class PsbJsonExporter& _Psb, PBYTE& Buff, PsbType _Type) :
 	PsbValue(_Psb, _Type, Buff),
 	DataLength(0)
 {
@@ -158,7 +158,7 @@ ULONG PsbArray::Get(ULONG Index)
 }
 
 
-PsbString::PsbString(PsbJsonExporter& _Psb, PByte& Buff) : 
+PsbString::PsbString(PsbJsonExporter& _Psb, PBYTE& Buff) : 
 	PsbValue(_Psb, TYPE_STRING_N1, Buff),
 	Buffer(--Buff)
 {
@@ -174,7 +174,7 @@ string PsbString::GetString()
 	return Psb.GetString(Buffer);
 }
 
-PsbObject::PsbObject(PsbJsonExporter& _Psb, PByte& Buff) : 
+PsbObject::PsbObject(PsbJsonExporter& _Psb, PBYTE& Buff) : 
 	PsbValue(_Psb, TYPE_OBJECTS, Buff),
 	Buffer(Buff)
 {
@@ -216,7 +216,7 @@ PBYTE PsbObject::GetData(const string& Name)
 
 
 
-PsbCollection::PsbCollection(PsbJsonExporter& _Psb, PByte& Buff) : 
+PsbCollection::PsbCollection(PsbJsonExporter& _Psb, PBYTE& Buff) : 
 	PsbValue(_Psb, TYPE_COLLECTION, Buff)
 {
 	Offsets = new PsbArray(_Psb, Buff, (PsbType)Buff[0]);
@@ -324,7 +324,7 @@ BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, Ps
 	};
 
 	BYTE    Type = *Buff++;
-	Int64   ParseValue;
+	INT64   ParseValue;
 
 	switch (TYPE_TO_KIND[Type])
 	{
@@ -345,7 +345,7 @@ BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, Ps
 		for (ULONG i = 0; i < n; i++) 
 			ParseValue |= *Buff++ << (i * 8);
 
-		Int64 mask = (Int64)1 << ((n * 8) - 1);
+		INT64 mask = (INT64)1 << ((n * 8) - 1);
 		if (ParseValue & mask) 
 		{
 			for (int i = n * 8; i < sizeof(ParseValue) * 8; i++)
@@ -360,7 +360,7 @@ BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, Ps
 	case 9:
 		if (Type == 0x1E) 
 		{
-			Value.FloatValue = *(PFloat)Buff;
+			Value.FloatValue = *(float*)Buff;
 			NumberType = PsbNumber::PsbNumberType::FLOAT;
 		}
 		else if (Type == 0x1D) 
@@ -373,7 +373,7 @@ BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, Ps
 	case 10:
 		if (Type == 0x1F) 
 		{
-			Value.DoubleValue = *(PDouble)Buff;
+			Value.DoubleValue = *(double*)Buff;
 			NumberType = PsbNumber::PsbNumberType::DOUBLE;
 			Buff += 8;
 		}
@@ -386,7 +386,7 @@ BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, Ps
 	return TRUE;
 }
 
-string PsbJsonExporter::GetString(PByte p) 
+string PsbJsonExporter::GetString(PBYTE p) 
 {
 	ULONG n = *p++ - 0x14;
 	ULONG v = 0;
@@ -397,7 +397,7 @@ string PsbJsonExporter::GetString(PByte p)
 	return StringsData + Strings->Get(v);
 }
 
-ULONG PsbJsonExporter::GetStringIndex(PByte p)
+ULONG PsbJsonExporter::GetStringIndex(PBYTE p)
 {
 	ULONG n = *p++ - 0x14;
 	ULONG v = 0;
@@ -413,17 +413,17 @@ PsbObject* PsbJsonExporter::GetObject()
 	return Objects;
 }
 
-PBYTE PsbJsonExporter::GetChunk(PByte p)
+PBYTE PsbJsonExporter::GetChunk(PBYTE p)
 {
 	return ChunkData + ChunkOffsets->Get(GetChunkIndex(p));
 }
 
-ULONG PsbJsonExporter::GetChunkLength(PByte p)
+ULONG PsbJsonExporter::GetChunkLength(PBYTE p)
 {
 	return ChunkLengths->Get(GetChunkIndex(p));
 }
 
-PsbValue* PsbJsonExporter::Unpack(PByte& p)
+PsbValue* PsbJsonExporter::Unpack(PBYTE& p)
 {
 	BYTE Type = *p++;
 

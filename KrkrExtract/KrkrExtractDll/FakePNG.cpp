@@ -73,7 +73,7 @@ t,,,,,,;,..: ,,,:i.;GCi.........,;;111f1ii11...1i;..,:;;:,....,::LC.,;;         
 static BOOL Inited = FALSE;
 
 
-Void WINAPI InitLayer()
+VOID WINAPI InitLayer()
 {
 	GlobalData*  Handle;
 
@@ -95,7 +95,7 @@ Void WINAPI InitLayer()
 }
 
 
-Void WINAPI SavePng(LPCWSTR FileName, LPCWSTR Path)
+VOID WINAPI SavePng(LPCWSTR FileName, LPCWSTR Path)
 {
 	wstring Code;
 

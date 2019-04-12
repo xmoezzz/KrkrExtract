@@ -1,12 +1,12 @@
 #ifndef _PSB_TEXT_
 #define _PSB_TEXT_
 
-#include <Windows.h>
+#include <my.h>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include "TextPlugin.h"
-//#include "PsbTextHeader.h"
+
 EXTERN_C
 {
 #include "zlib.h"
@@ -17,7 +17,6 @@ using std::wstring;
 
 #pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "zlib.lib")
-#pragma comment(lib, "MyLibrary_x86_static.lib")
 
 #define		PSBVALTYPE_ARRAY	0x20
 #define		PSBVALTYPE_DICT		0x21

@@ -4,7 +4,6 @@
 BOOL FASTCALL KaresekaInit(PVOID hModule)
 {
 	KaresekaHook* Kareseka;
-	ml::MlInitialize();
 	Kareseka = GetKareseka();
 	return NT_SUCCESS(Kareseka->Init((HMODULE)hModule));
 }
