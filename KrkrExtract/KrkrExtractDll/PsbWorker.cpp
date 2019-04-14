@@ -2012,7 +2012,7 @@ public:
 		auto Index = Name.find_last_of(L'.');
 
 		if (Index == wstring::npos)
-			return nullptr;
+			return {};
 		else
 		{
 			wstring Result;

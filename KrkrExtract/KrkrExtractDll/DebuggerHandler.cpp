@@ -604,7 +604,7 @@ NTSTATUS FASTCALL ParseCommand(LPCWSTR lpCmd)
 
 		Size = File.GetSize32();
 		Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Size);
-		if (Buffer = NULL)
+		if (Buffer == NULL)
 		{
 			PrintConsoleW(L"dtl : Insufficient memory\n");
 			File.Close();
