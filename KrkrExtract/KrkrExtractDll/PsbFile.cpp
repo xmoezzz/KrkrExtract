@@ -343,7 +343,7 @@ BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, Ps
 
 		ParseValue = 0;
 		for (ULONG i = 0; i < n; i++) 
-			ParseValue |= *Buff++ << (i * 8);
+			ParseValue |= static_cast<INT64>(*Buff++) << (i * 8);
 
 		INT64 mask = (INT64)1 << ((n * 8) - 1);
 		if (ParseValue & mask) 

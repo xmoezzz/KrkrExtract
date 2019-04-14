@@ -394,7 +394,7 @@ get_number(unsigned char* p, psb_number_t::psb_number_value_t &value, psb_number
 		uint32_t n = type - 4;
 
 		for (uint32_t i = 0; i < n; i++) {
-			v |= *p++ << (i * 8);
+			v |= static_cast<int64_t>(*p++) << (i * 8);
 		}
 		
 		int64_t mask = (int64_t)1 << ((n * 8) - 1);

@@ -21,7 +21,7 @@ ForceInline std::wstring FASTCALL GetFileNameExtension(std::wstring& Path)
 
 	Ptr = Path.find_last_of(L".");
 	if (Ptr == std::wstring::npos)
-		return NULL;
+		return {};
 
 	return Path.substr(Ptr + 1, std::wstring::npos);
 }

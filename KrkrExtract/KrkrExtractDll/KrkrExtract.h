@@ -241,7 +241,7 @@ public:
 			return Result;
 		}
 
-		return nullptr;
+		return {};
 	}
 
 	HWND                        MainWindow;

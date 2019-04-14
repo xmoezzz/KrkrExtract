@@ -225,7 +225,7 @@ bool PEFile::writePadding(HANDLE fileHandle, long paddingSize) {
 	char* padding = new char[paddingSize];
 	memset(padding, 0, paddingSize);
 	WriteFile(fileHandle, padding, paddingSize, &bytesWritten, NULL);
-	delete padding;
+	delete[] padding;
 
 	return (bytesWritten == paddingSize);
 }

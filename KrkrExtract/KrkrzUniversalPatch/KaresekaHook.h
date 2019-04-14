@@ -3,6 +3,7 @@
 #include <my.h>
 #include "tp_stub.h"
 #include <set>
+#include <string>
 
 typedef HRESULT(NTAPI *FuncV2Link)(iTVPFunctionExporter *);
 typedef tTJSBinaryStream* (__fastcall * FuncCreateStream)(const ttstr &, tjs_uint32);

@@ -636,7 +636,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 		XmoeInitFileSystem = (API_POINTER(InitFileSystem))Nt_GetProcAddress(FsModule, "XmoeInitFileSystem");
 		XmoeQueryFile      = (API_POINTER(::QueryFile))   Nt_GetProcAddress(FsModule, "QueryFile");
 
-		if (!XmoeQueryFile || !XmoeQueryFile)
+		if (!XmoeInitFileSystem || !XmoeQueryFile)
 		{
 			MessageBoxW(NULL, L"Invalid FileSystem module!", L"KrkrUniversalPatch", MB_OK | MB_ICONERROR);
 			break;
