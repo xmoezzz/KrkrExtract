@@ -529,7 +529,6 @@ NTSTATUS KaresekaHook::InitKrkrHook(LPCWSTR lpFileName, PVOID Module)
 	NTSTATUS    Status;
 	ULONG_PTR   Length;
 	ULONG64     Extension;
-	DWORD       ThreadId;
 	PVOID       pV2Link;
 
 	LOOP_ONCE
@@ -570,7 +569,6 @@ NTSTATUS KaresekaHook::InitKrkrHook(LPCWSTR lpFileName, PVOID Module)
 HMODULE WINAPI HookLoadLibraryW(LPCWSTR lpLibFileName)
 {
 	ULONG_PTR     LengthOfName;
-	WCHAR         SelfModuleName[MAX_PATH];
 	HMODULE       Module;
 	KaresekaHook*  Kareseka;
 
@@ -603,8 +601,6 @@ static BYTE Utf8Bom[3] = { 0xEF, 0xBB, 0xBF };
 BOOL KaresekaHook::Init(HMODULE hModule)
 {
 	NTSTATUS                  Status;
-	LPCWSTR                   Message;
-	PVOID                     FakeCompiler;
 	PVOID                     ExeModule, FsModule;
 	PBYTE                     Buffer;
 	ULONG                     Size;
@@ -655,7 +651,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 	{
 		std::string Result;
 
-		for (ULONG i = 0; i < lstrlenA(FileName); i++)
+		for (INT i = 0; i < lstrlenA(FileName); i++)
 		{
 			if (FileName[i] <= 'Z' && FileName[i] >= 'A')
 				Result += tolower(FileName[i]);

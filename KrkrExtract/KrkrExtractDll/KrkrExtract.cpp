@@ -373,7 +373,6 @@ VOID HookMessageKeyDown(MSG* msg)
 NTSTATUS NTAPI GlobalData::InitWindow()
 {
 	NTSTATUS       Status;
-	GlobalData*    Handle;
 	WCHAR          FullApplicationTitle[512];
 	MSG            msg;
 
@@ -484,7 +483,6 @@ NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 	NTSTATUS    Status;
 	ULONG_PTR   Length;
 	ULONG64     Extension;
-	DWORD       ThreadId;
 	PVOID       pV2Link;
 
 	LOOP_ONCE
@@ -813,11 +811,9 @@ VOID WINAPI GlobalData::SetProcess(HWND hWnd, ULONG Value)
 
 VOID GlobalData::VirtualConsolePrint(PCWSTR Format, ...)
 {
-	BOOL        Success;
 	ULONG       Length;
 	WCHAR       Buffer[0xF00 / 2];
 	va_list     Args;
-	HANDLE      StdOutput;
 	HWND        VirtualConsole;
 
 	if (MainWindow == NULL)

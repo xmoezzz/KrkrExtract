@@ -591,18 +591,8 @@ NTSTATUS WINAPI InitHook()
 {
 	NtFileDisk            File;
 	BOOL                  Success;
-	NTSTATUS              Status;
 	PVOID                 Kernel32Handle, Target;
 	GlobalData*           Handle;
-	PVOID                 ExporterPointer;
-	ULONG                 Size;
-	ULONG64               Crc;
-	PIMAGE_DOS_HEADER     DosHeader;
-	PIMAGE_NT_HEADERS32   NtHeader;
-	PIMAGE_SECTION_HEADER SectionHeader;
-	PBYTE                 CurrentSection;
-	ULONG_PTR             CurrentSectionSize;
-	ULONG_PTR             CurrentCodePtr, CodeSize;
 
 	Handle = GlobalData::GetGlobalData();
 	Kernel32Handle = Nt_LoadLibrary(L"KERNEL32.dll");
@@ -834,7 +824,6 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 	vector<wstring> FileList;
 	WCHAR           ExeDirectory[MAX_PATH];
 	wstring         CurFileName;
-	ULONG_PTR       Index, Index2;
 
 	static WCHAR Pattern[] = L"TVP(KIRIKIRI) Z core / Scripting Platform for Win32";
 
@@ -969,12 +958,9 @@ BOOL IsEncryptedSenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk& File)
 	PBYTE                   CompressedBuffer;
 	PBYTE                   IndexBuffer;
 	ULONG                   DecompSize, iPos;
-	DWORD                   Hash;
 	XP3Index                Item;
-	ULARGE_INTEGER          ChunkSize;
-	USHORT                  NameLength;
 	GlobalData*             Handle;
-	BOOL                    RawFailed, TotalFailed;
+	BOOL                    RawFailed;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -1016,10 +1002,7 @@ VOID AddToSenrenBankaEntry(LPCWSTR lpFileName, PBYTE pDecompress, ULONG Size, Nt
 	PBYTE                   CompressedBuffer;
 	ULONG                   DecompSize, iPos;
 	XP3Index                Item;
-	ULARGE_INTEGER          ChunkSize;
-	USHORT                  NameLength;
 	GlobalData*             Handle;
-	BOOL                    RawFailed, TotalFailed;
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -1053,7 +1036,6 @@ VOID GetSenrenBankaEntry(LPCWSTR lpFileName)
 	ULONG                   Count;
 	KRKR2_XP3_HEADER        XP3Header;
 	KRKR2_XP3_DATA_HEADER   DataHeader;
-	PBYTE                   Indexdata;
 	LARGE_INTEGER           BeginOffset, Offset;
 	CHAR                    M2ChunkInfo[8];
 	GlobalData*             Handle;
@@ -1317,12 +1299,9 @@ PVOID ExceptionHandler = NULL;
 
 LONG NTAPI FindPrivateProcHandler(PEXCEPTION_POINTERS pExceptionInfo)
 {
-	NTSTATUS    Status;
 	GlobalData* Handle;
-	DWORD       OldFlags;
 	PVOID       ModuleBase;
-	PDR7_INFO   Dr7;
-	ULONG       iPos, OpSize, RealRetAddr;
+	ULONG       iPos, RealRetAddr;
 	BOOL        FindRet;
 	DWORD       PreviousProtect;
 
@@ -1461,7 +1440,6 @@ VOID DetectCxdecAndInitEntry()
 	ULONG                   Count;
 	KRKR2_XP3_HEADER        XP3Header;
 	KRKR2_XP3_DATA_HEADER   DataHeader;
-	PBYTE                   Indexdata;
 	LARGE_INTEGER           BeginOffset, Offset;
 	CHAR                    M2ChunkInfo[8];
 	GlobalData*             Handle;
@@ -1657,7 +1635,7 @@ auto KrkrDBG_DisasmOneInstruction(PBYTE OpCode, ULONG_PTR Size, ULONG_PTR Curren
 		if (Count <= 0)
 			break;
 
-		_snprintf(Buffer, ccBuffer, "%s %s", CapstoneInsn[0].mnemonic, CapstoneInsn[0].op_str);
+		snprintf(Buffer, ccBuffer, "%s %s", CapstoneInsn[0].mnemonic, CapstoneInsn[0].op_str);
 
 		cs_free(CapstoneInsn, Count);
 		cs_close(&CapstoneHandle);
@@ -1757,10 +1735,10 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 				else
 					DisObj.PrevLength = CapstoneInsn[j - 1].size;
 				
-				DisObj.Offset    = CapstoneInsn[j].address;
+				DisObj.Offset    = (ULONG)CapstoneInsn[j].address;
 				DisObj.InsLength = CapstoneInsn[j].size;
 				lstrcpyA(DisObj.DisasmLine, DisasmLine);
-				MapList[CapstoneInsn[j].address] = DisObj;
+				MapList[(ULONG)CapstoneInsn[j].address] = DisObj;
 			}
 
 			cs_free(CapstoneInsn, Count);
@@ -1797,9 +1775,9 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 		Offset.QuadPart = 0;
 		Stream->Seek(Offset, FILE_BEGIN, 0);
 
-		if (Stat.cbSize.QuadPart > AllocSize)
+		if (Stat.cbSize.LowPart > AllocSize)
 		{
-			AllocSize = Stat.cbSize.QuadPart;
+			AllocSize = Stat.cbSize.LowPart;
 			Buffer = (PBYTE)HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Buffer, AllocSize);
 			if (Buffer == NULL)
 			{
@@ -1808,8 +1786,8 @@ auto KrkrDBG_CreatePeDatabase(LPCWSTR FileName, LPCWSTR DBName)->NTSTATUS
 			}
 		}
 
-		Stream->Read(Buffer, Stat.cbSize.QuadPart, NULL);
-		File.Write(Buffer, Stat.cbSize.QuadPart);
+		Stream->Read(Buffer, Stat.cbSize.LowPart, NULL);
+		File.Write(Buffer, Stat.cbSize.LowPart);
 		Stream->Release();
 	}
 	HeapFree(GetProcessHeap(), 0, Buffer);
@@ -1890,7 +1868,6 @@ auto KrkrDBG_ReadPeDatabase(std::map<ULONG, CMarshalMap>& MapList, LPCWSTR DBNam
 //allocate memory by caller!
 auto KrkrDBG_ReadPrevInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG CurrentOffset, PCHAR Buffer, ULONG ccBuffer)->NTSTATUS
 {
-	NTSTATUS   Status;
 	ULONG      PreviousOffset;
 	
 	const auto Instruction = Holder.find(CurrentOffset);
@@ -1912,8 +1889,6 @@ auto KrkrDBG_ReadPrevInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULO
 //allocate memory by caller!
 auto KrkrDBG_ReadInstruction(const std::map<ULONG, CMarshalMap>& Holder, ULONG CurrentOffset, PCHAR Buffer, ULONG ccBuffer)->NTSTATUS
 {
-	ULONG      PreviousOffset;
-
 	const auto Instruction = Holder.find(CurrentOffset);
 	if (Instruction == Holder.end())
 		return STATUS_UNSUCCESSFUL;
@@ -1987,7 +1962,6 @@ LONG NTAPI KrkrUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionPointer)
 {
 	NTSTATUS              Status;
 	NtFileDisk            File;
-	ULONG                 Size;
 	ULONG                 Count;
 	STACKFRAME64          StackFrame;
 	DWORD64               ModuleBase;

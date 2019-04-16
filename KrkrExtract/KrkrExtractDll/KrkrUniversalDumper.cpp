@@ -106,8 +106,6 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessPSB(IStream* Stream, LPCWSTR OutFileN
 	NTSTATUS    Status;
 	NtFileDisk  File;
 	STATSTG     Stat;
-	PBYTE       Buffer;
-	ULONG       ReadSize;
 	GlobalData* Handle;
 
 	Handle = GlobalData::GetGlobalData();
@@ -152,8 +150,9 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 {
 	NTSTATUS         Status;
 	STATSTG          Stat;
-	LARGE_INTEGER    Tranferred, WriteSize, TempSize, Offset;
-	ULONG            ReadSize, OutSize;
+	LARGE_INTEGER    Offset;
+	ULONG            ReadSize;
+	ULONG            OutSize;
 	PBYTE            Buffer, RawBuffer, OutBuffer;
 	BOOL             TempDecode;
 	NtFileDisk       File;
@@ -321,10 +320,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileN
 NTSTATUS NTAPI KrkrUniversalDumper::ProcessPNG(IStream* Stream, LPCWSTR OutFileName)
 {
 	NTSTATUS         Status;
-	STATSTG          Stat;
 	NtFileDisk       File;
-	LARGE_INTEGER    Tranferred, WriteSize, TempSize;
-	ULONG            ReadSize;
 
 	if (GlobalData::GetGlobalData()->GetPngFlag() == PNG_SYS)
 	{

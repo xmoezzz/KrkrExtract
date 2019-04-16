@@ -388,7 +388,6 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 	ULONG                   Count;
 	KRKR2_XP3_HEADER        XP3Header;
 	KRKR2_XP3_DATA_HEADER   DataHeader;
-	PBYTE                   Indexdata;
 	LARGE_INTEGER           BeginOffset, Offset;
 	CHAR                    M2ChunkInfo[8];
 
@@ -693,8 +692,6 @@ NTSTATUS NTAPI KrkrDumper::ProcessPSB(IStream* Stream, LPCWSTR OutFileName, XP3I
 	NTSTATUS    Status;
 	NtFileDisk  File;
 	STATSTG     Stat;
-	PBYTE       Buffer;
-	ULONG       ReadSize;
 	GlobalData* Handle;
 
 	Handle = GlobalData::GetGlobalData();
@@ -739,7 +736,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 {
 	NTSTATUS         Status;
 	STATSTG          Stat;
-	LARGE_INTEGER    Tranferred, WriteSize, TempSize, Offset;
+	LARGE_INTEGER    Offset;
 	ULONG            ReadSize, OutSize;
 	PBYTE            Buffer, RawBuffer, OutBuffer;
 	BOOL             TempDecode;
@@ -907,10 +904,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 NTSTATUS NTAPI KrkrDumper::ProcessPNG(IStream* Stream, LPCWSTR OutFileName, XP3Index& it)
 {
 	NTSTATUS         Status;
-	STATSTG          Stat;
 	NtFileDisk       File;
-	LARGE_INTEGER    Tranferred, WriteSize, TempSize;
-	ULONG            ReadSize;
 
 	if (GlobalData::GetGlobalData()->GetPngFlag() == PNG_SYS)
 	{

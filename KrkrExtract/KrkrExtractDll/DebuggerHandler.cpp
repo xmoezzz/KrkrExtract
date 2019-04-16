@@ -195,7 +195,6 @@ NTSTATUS FASTCALL DumpXP3ArchiveIndex(LPCWSTR lpFileName, NtFileDisk& file)
 	ULONG                   Count;
 	KRKR2_XP3_HEADER        XP3Header;
 	KRKR2_XP3_DATA_HEADER   DataHeader;
-	PBYTE                   Indexdata;
 	LARGE_INTEGER           BeginOffset, Offset;
 	CHAR                    M2ChunkInfo[8];
 	WCHAR                   IndexFileName[MAX_PATH];
@@ -447,7 +446,7 @@ NTSTATUS FASTCALL ParseCommand(LPCWSTR lpCmd)
 	tTJSBinaryStream*     BStream;
 	STATSTG               Stat;
 	NtFileDisk            Writer;
-	LARGE_INTEGER         Tranferred, WriteSize, TempSize, Offset;
+	LARGE_INTEGER         Tranferred, WriteSize, TempSize;
 	ULONG                 ReadSize;
 	PBYTE                 Buffer;
 	ULONG                 Size;

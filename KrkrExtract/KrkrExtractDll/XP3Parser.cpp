@@ -58,8 +58,6 @@ BOOL WINAPI DetectCompressedChunk(PBYTE pDecompress, ULONG Size)
 	GlobalData*    Handle;
 	ULONG          PtrOffset;
 	BOOL           FirstTraveled, NextTraveled, IsFirstChunk;
-	BOOL           NotAdd;
-	WCHAR          ZeroEnd;
 	ULARGE_INTEGER IndexLength;
 
 	if (GlobalData::GetGlobalData()->DebugOn)
@@ -589,7 +587,6 @@ ULONG WINAPI FindChunkMagicFirst(PBYTE pDecompress, ULONG Size)
 {
 	GlobalData*      Handle;
 	ULONG            PtrOffset;
-	ULONG64          FileChunkSize;
 	ULARGE_INTEGER   ChunkSize;
 	ULONG            PackType;
 	
@@ -675,7 +672,7 @@ BOOL WINAPI InitIndex_NekoVol0(PBYTE pDecompress, ULONG Size)
 
 BOOL WINAPI IsCompatXP3(PBYTE Data, ULONG Size, DWORD* pMagic)
 {
-	DWORD                     ChunkMagic, NextChunkMagic, ThirdChunkMagic;
+	DWORD                     ChunkMagic;
 	ULONG                     iPos;
 	BOOL                      FirstVisited, IsNekoVol0;
 	ULARGE_INTEGER            ChunkSize;

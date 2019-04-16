@@ -85,14 +85,14 @@ DWORD* M2CopyArray(BYTE* pOri, DWORD count, int type)
 	case 0xe:
 	{
 		WORD* p = (WORD*)pOri;
-		for (int i = 0; i<count; i++)
+		for (DWORD i = 0; i<count; i++)
 			pArray[i] = p[i];
 	}
 	break;
 	case 0xf:
 	{
 		DWORD temp;
-		for (int i = 0; i<count; i++)
+		for (DWORD i = 0; i<count; i++)
 		{
 			temp = *(WORD*)pOri;
 			pOri += 2;
@@ -120,7 +120,7 @@ DWORD* M2CopyArray(BYTE* p)
 TreeNode* M2MakeBranchTable(BYTE* pOri, DWORD count, int type)
 {
 	TreeNode* pTable = new TreeNode[count];
-	for (int i = 0; i<count; i++)
+	for (DWORD i = 0; i<count; i++)
 	{
 		pTable[i].nBranch = 0;
 	}
@@ -128,7 +128,7 @@ TreeNode* M2MakeBranchTable(BYTE* pOri, DWORD count, int type)
 	DWORD val;
 	int size = type - 12;
 	BYTE* p = pOri;
-	for (int i = 0; i<count; i++)
+	for (DWORD i = 0; i<count; i++)
 	{
 		val = M2GetInt(p, type);
 		pTable[val].pSub.push_back(i);
@@ -151,7 +151,7 @@ void M2TraverseTree(int depth, int node)
 		tName[depth] = tBranches[node].pSub[i] - tTree[node];
 		if (tName[depth] != 0)
 			M2TraverseTree(depth + 1, tBranches[node].pSub[i]);
-		else if (tTree[node] <= tMaxId)
+		else if (tTree[node] <= (DWORD)tMaxId)
 		{
 			tNames[tTree[node]] = new char[depth + 1];
 			strncpy(tNames[tTree[node]], tName, depth);

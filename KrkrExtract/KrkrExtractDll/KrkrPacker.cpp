@@ -335,7 +335,6 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 	NtFileDisk              File;
 	KRKR2_XP3_HEADER        XP3Header;
 	KRKR2_XP3_DATA_HEADER   DataHeader;
-	PBYTE                   Indexdata;
 	LARGE_INTEGER           BeginOffset;
 	ULONG                   OldHash, NewHash;
 	IStream*                Stream;
@@ -542,7 +541,6 @@ VOID WINAPI KrkrPacker::InternalReset()
 NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack, LPCWSTR OutName)
 {
 	NTSTATUS                Status;
-	BOOL                    Result;
 	NtFileDisk              File, FileXP3;
 	GlobalData*             Handle;
 	PBYTE                   pbIndex;
@@ -819,7 +817,6 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LPCWSTR OutName)
 {
 	NTSTATUS                Status;
-	BOOL                    Result;
 	NtFileDisk              File, FileXP3;
 	GlobalData*             Handle;
 	PBYTE                   pbIndex;
@@ -1171,7 +1168,6 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 {
 	NTSTATUS                Status;
-	BOOL                    Result;
 	NtFileDisk              File, FileXP3;
 	GlobalData*             Handle;
 	PBYTE                   pbIndex;
@@ -1507,7 +1503,6 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 {
 	NTSTATUS                Status;
 	GlobalData*             Handle;
-	BOOL                    Result;
 	NtFileDisk              File, FileXP3;
 	PBYTE                   pbIndex;
 	ULONG                   BufferSize, CompressedSize;
@@ -1858,7 +1853,6 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 {
 	NTSTATUS                Status;
 	GlobalData*             Handle;
-	BOOL                    Result;
 	NtFileDisk              File, FileXP3;
 	PBYTE                   pbIndex;
 	ULONG                   BufferSize, CompressedSize;
@@ -2266,7 +2260,6 @@ _DWORD *__thiscall sub_427500(void *this)
 NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LPCWSTR OutName)
 {
 	NTSTATUS                Status;
-	BOOL                    Result;
 	GlobalData*             Handle;
 	NtFileDisk              FileXP3;
 	PBYTE                   pbIndex;
@@ -2672,7 +2665,6 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LPCWSTR OutName)
 {
 	NTSTATUS                Status;
-	BOOL                    Result;
 	GlobalData*             Handle;
 	NtFileDisk              FileXP3;
 	PBYTE                   pbIndex;
@@ -3041,7 +3033,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	NtFileDisk                   FileXP3;
 	GlobalData*                  Handle;
 	PBYTE                        pbIndex;
-	ULONG                        BufferSize, CompressedSize, BlockSize, BlockCompressedSize;
+	ULONG                        BufferSize, CompressedSize, BlockSize;
 	PVOID                        lpBuffer, lpCompressBuffer;
 	PBYTE                        lpBlock, lpBlockCompressed;
 	LARGE_INTEGER                Size, Offset, BytesTransfered, ChunkSize;
@@ -3424,10 +3416,9 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 {
 	NTSTATUS                     Status;
 	GlobalData*                  Handle;
-	BOOL                         Result;
 	NtFileDisk                   File, FileXP3;
 	PBYTE                        pbIndex;
-	ULONG                        BufferSize, CompressedSize, BlockSize, BlockCompressedSize;
+	ULONG                        BufferSize, CompressedSize, BlockSize;
 	PVOID                        lpBuffer, lpCompressBuffer;
 	PBYTE                        lpBlock, lpBlockCompressed;
 	LARGE_INTEGER                Size, Offset, BytesTransfered, ChunkSize;

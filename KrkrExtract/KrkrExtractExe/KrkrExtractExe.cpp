@@ -139,6 +139,8 @@ int WINAPI wWinMain(
 		return 0;
 	}
 
+	StubCreateProcessInternalW = (FuncCreateProcessInternalW)EATLookupRoutineByHashPNoFix(GetKernel32Handle(), KERNEL32_CreateProcessInternalW);
+
 	CreateResult = CreateProcessInternalWithDll(Argv[0]);
 	if (!CreateResult)
 	{
