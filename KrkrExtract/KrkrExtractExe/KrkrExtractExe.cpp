@@ -131,9 +131,9 @@ int WINAPI wWinMain(
 	RtlZeroMemory(&si, sizeof(si));
 	RtlZeroMemory(&pi, sizeof(pi));
 	si.cb = sizeof(si);
-
-	Argv = CommandLineToArgvW(lpCmdLine, &Argc);
-	if (Argv == NULL || Argc < 1)
+	
+	Argv = CommandLineToArgvW(Nt_CurrentPeb()->ProcessParameters->CommandLine.Buffer, &Argc);
+	if (Argv == NULL || Argc < 2)
 	{
 		LocalFree(Argv);
 		return 0;
@@ -141,7 +141,7 @@ int WINAPI wWinMain(
 
 	StubCreateProcessInternalW = (FuncCreateProcessInternalW)EATLookupRoutineByHashPNoFix(GetKernel32Handle(), KERNEL32_CreateProcessInternalW);
 
-	CreateResult = CreateProcessInternalWithDll(Argv[0]);
+	CreateResult = CreateProcessInternalWithDll(Argv[1]);
 	if (!CreateResult)
 	{
 		MessageBoxW(NULL, L"Couldn't Launch KrkrExtract", L"KrkrExtract", MB_OK | MB_ICONERROR);

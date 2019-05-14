@@ -91,7 +91,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 #define szWindowClassName   L"XP3ExtractMainClass"
 
 //A.B.C.D : 0 <= X <= 255
-#define _XP3ExtractVersion_ L"Ver 4.0.1.1"
+#define _XP3ExtractVersion_ L"Ver 4.0.1.1-rc1"
 
 
 class MemEntry
