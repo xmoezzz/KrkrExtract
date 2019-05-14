@@ -4,6 +4,17 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 ## Build
 * vs2017
 * Win10 SDK (10.0.17763.0)
+* Only `Release` build is supported
+
+## Improvement & New feature
+* PRs are welcomed. Since I'm very busy with my work, I almostly have no time to develop this project.
+* KrkrExtract will NEVER support custom kirikiri version (if it's not widely used)
+* Make sure execute binaries are not being protected
+
+## Bug report
+* screenshot (stack trace, ...)
+* BUT please strip game information from your screenshots
+
 
 ## The Next Generation of KrkrExtract
 [KrkrzExtract Website](https://github.com/xmoeproject/KrkrzExtract)
@@ -31,9 +42,6 @@ If krkrExtract is not able to process some files corrently, you should try seper
 ## More English docs?
 I'm trying to do this.  
 Since I almostly have no time on open source project, I'm not sure when can I upload more docs about my tools.
-
-## Bug report
-Since your can get pdb symbol from here, I think it is more easy to debug this project.
  
 
 ## Any differences between krkr2 and krkrz?
