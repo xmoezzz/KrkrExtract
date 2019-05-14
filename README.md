@@ -9,7 +9,7 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 ## Improvement & New feature
 * PRs are welcomed. Since I'm very busy with my work, I almostly have no time to develop this project.
 * KrkrExtract will NEVER support custom kirikiri version (if it's not widely used)
-* Make sure execute binaries are not being protected
+* Make sure executable binaries are not being protected
 
 ## Bug report
 * screenshot (stack trace, ...)
