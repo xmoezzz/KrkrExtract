@@ -5,7 +5,6 @@
 #include "tp_stub.h"
 #include <string>
 #include <vector>
-#include "CompilerSet.h"
 
 #pragma comment(lib, "jsoncpp.lib")
 #pragma comment(lib, "detours.lib")
@@ -24,7 +23,7 @@ PVOID GetTVPCreateStreamCall()
 
 	Kareseka = GetKareseka();
 
-	for(BOOL Condition = FALSE; Condition != TRUE; Condition = TRUE)
+	LOOP_ONCE
 	{
 		CallTVPCreateStreamCall = NULL;
 
@@ -296,10 +295,6 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 	NTSTATUS              Status;
 	ULONG                 FileSize;
 	PBYTE                 FileBuffer;
-	PBYTE                 TempBuffer;
-	ULONG                 TempSize;
-	PBYTE                 TextBuffer;
-	ULONG                 TextSize;
 	ULONG64               Hash;
 	std::wstring          FileName, FileNameText;
 	StreamHolderXP3*      Holder;
@@ -307,76 +302,12 @@ IStream* KaresekaHook::CreateLocalStream(LPCWSTR lpFileName)
 
 	FileName = GetKrkrFileName(lpFileName);
 	
-	for (BOOL Condition = FALSE; Condition != TRUE; Condition = TRUE)
+	LOOP_ONCE
 	{
 		StreamAdapter = nullptr;
-
 		FileNameToLower(FileName);
-		auto TextIndex = TextList.find(FileName);
-		auto CompIndex = JITList.find(FileName);
 
-		LOOP_ONCE
-		{
-			if (TextIndex == TextList.end() && CompIndex == JITList.end())
-			{
-				Status = QueryFile(lpFileName, &FileName[0], FileBuffer, FileSize, Hash);
-			}
-			else if (TextIndex != TextList.end())
-			{
-				TempBuffer = NULL;
-				TempSize = 0;
-				Status = CompilePsbFull(FileName, TempBuffer, TempSize, QueryFileAPI);
-				if (!NT_SUCCESS(Status))
-				{
-					if (TempBuffer)
-						HeapFree(GetProcessHeap(), 0, TempBuffer);
-
-					break;
-				}
-
-				TextBuffer = NULL;
-				TextSize   = 0;
-				FileNameText = FileName + L".txt";
-				Status = QueryFile(FileNameText.c_str(), &FileNameText[0], TextBuffer, TextSize, Hash);
-				if (NT_FAILED(Status) || !TextBuffer || !TextSize)
-				{
-					if (TempBuffer)
-						HeapFree(GetProcessHeap(), 0, TempBuffer);
-
-					break;
-				}
-
-				Status = CompilePsbText(TempBuffer, TempSize, TextBuffer, TextSize, FileBuffer, FileSize);
-				if (Status != 0)
-				{
-					if (TempBuffer)
-						HeapFree(GetProcessHeap(), 0, TempBuffer);
-
-					if (TextBuffer)
-						HeapFree(GetProcessHeap(), 0, TextBuffer);
-
-					if (FileBuffer)
-						HeapFree(GetProcessHeap(), 0, FileBuffer);
-
-					FileBuffer = NULL;
-					FileSize   = 0;
-
-					Status = STATUS_UNSUCCESSFUL;
-				}
-			}
-			else if (CompIndex != JITList.end())
-			{
-				Status = CompilePsbFull(FileName, FileBuffer, FileSize, QueryFileAPI);
-				if (NT_FAILED(Status))
-				{
-					if (FileBuffer)
-						HeapFree(GetProcessHeap(), 0, FileBuffer);
-
-					FileBuffer = NULL;
-					FileSize = 0;
-				}
-			}
-		}
+		Status = QueryFile(lpFileName, &FileName[0], FileBuffer, FileSize, Hash);
 
 		if (!NT_SUCCESS(Status) || !FileBuffer || !FileSize)
 			break;
@@ -396,7 +327,7 @@ tTJSBinaryStream* __fastcall HookTVPCreateStream(const ttstr & _name, tjs_uint32
 
 	Kareseka = GetKareseka();
 
-	for (BOOL Condition = FALSE; Condition != TRUE; Condition = TRUE)
+	LOOP_ONCE
 	{
 		Stream  = NULL;
 		IStream = NULL;
