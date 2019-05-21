@@ -1,6 +1,14 @@
 # KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)  
 
+## 中文说明
+* 我平时很忙，本工程开源并且可以编译，遇到问题应该先自己解决，然后提交PR。
+* wiki还在建设中，不知道什么时候能完成。
+* 受保护的程序一律不支持，支持就是打开潘多拉魔盒，你得保证各类bypass不冲突。
+* krkr2打包请直接使用UI上的封包功能
+* krkrz打包请直接使用Universal Patch功能
+* 转发本工具请附上本README
+
 ## Build
 * vs2017
 * Win10 SDK (10.0.17763.0)
