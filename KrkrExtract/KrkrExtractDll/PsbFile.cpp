@@ -1,214 +1,261 @@
 #include "PsbFile.h"
 
-PsbValue::PsbValue(class PsbJsonExporter& _Psb, PsbType _Type, PBYTE& Buff) :
-	Psb(_Psb),
-	Type(_Type)
-{
+
+psb_value_t::
+psb_value_t(const psb_t&    psb,
+	type_t          type,
+	unsigned char*& p)
+	: psb(psb),
+	type(type)
+{}
+
+psb_value_t::
+psb_value_t(const psb_t&    psb,
+	unsigned char*& p)
+	: psb(psb)
+{}
+
+psb_value_t::
+~psb_value_t(void) {
 }
 
-PsbValue::PsbValue(class PsbJsonExporter& _Psb, PBYTE& Buff) : 
-	Psb(_Psb)
-{
+psb_value_t::type_t
+psb_value_t::
+get_type(void) const {
+	return type;
 }
 
-PsbType PsbValue::GetNodeType()
+/***************************************************************************
+* psb_null_t
+*/
+psb_null_t::
+psb_null_t(const psb_t&    psb,
+	unsigned char*& p, psb_value_t::type_t type)
+	: psb_value_t(psb, type, p)
 {
-	return Type;
+	buff = p;
 }
 
-
-PsbValue::~PsbValue()
+/***************************************************************************
+* psb_boolean_t
+*/
+psb_boolean_t::
+psb_boolean_t(const psb_t&    psb,
+	unsigned char*& p, psb_value_t::type_t type)
+	: psb_value_t(psb, type, p)
 {
-}
-
-PsbNull::PsbNull(class PsbJsonExporter&  _Psb, PBYTE& Buff, PsbType _Type) : 
-	PsbValue(_Psb, _Type, Buff)
-{
-	Buffer = Buff;
-}
-
-
-PsbBool::PsbBool(class PsbJsonExporter&  _Psb, PBYTE& Buff, PsbType _Type) : 
-	PsbValue(_Psb, _Type, Buff)
-{
-	switch (_Type)
+	if (type == psb_value_t::TYPE_FALSE)
 	{
-	case TYPE_FALSE:
-		Value = FALSE;
-		break;
-
-	default:
-	case TYPE_TRUE:
-		Value = TRUE;
-		break;
+		value = false;
+	}
+	else
+	{
+		value = true;
 	}
 
-	Buffer = Buff;
+	buff = p;
+}
+bool
+psb_boolean_t::
+get_boolean()
+{
+	return value;
+}
+/***************************************************************************
+* psb_resource_t
+*/
+psb_resource_t::
+psb_resource_t(const psb_t&    psb,
+	unsigned char*& p,
+	psb_value_t::type_t type) :
+	psb_value_t(psb, type, p), chunk_index(-1)
+{
+	chunk_index = psb.get_chunk_index(p);
+	chunk_buff = psb.get_chunk(p);
+	chunk_len = psb.get_chunk_length(p);
+}
+uint32_t
+psb_resource_t::
+get_index()
+{
+	return chunk_index;
+}
+unsigned char *
+psb_resource_t::
+get_buff()
+{
+	return chunk_buff;
+}
+uint32_t
+psb_resource_t::
+get_length()
+{
+	return chunk_len;
+}
+/***************************************************************************
+* psb_number_t
+*/
+psb_number_t::
+psb_number_t(const psb_t&    psb,
+	unsigned char*& p,
+	psb_value_t::type_t type)
+	: psb_value_t(psb, type, p)
+{
+	buff = p;
+	psb.get_number(p, value, number_type);
+}
+
+int64_t
+psb_number_t::
+get_integer() const
+{
+	return value.i;
 }
 
 
-BOOLEAN PsbBool::GetBoolean()
+float
+psb_number_t::
+get_float() const
 {
-	return Value;
+	return value.f;
 }
 
-PsbResource::PsbResource(class PsbJsonExporter&  _Psb, PBYTE& Buff, PsbType _Type) :
-	PsbValue(_Psb, _Type, Buff), 
-	ChunkIndex(-1)
+double
+psb_number_t::
+get_double() const
 {
-	ChunkIndex  = Psb.GetChunkIndex(Buff);
-	ChunkBuffer = Psb.GetChunk(Buff);
-	ChunkLength = Psb.GetChunkLength(Buff);
+	return value.d;
 }
 
-ULONG PsbResource::GetIndex()
+bool
+psb_number_t::
+is_number_type(psb_value_t *value)
 {
-	return ChunkIndex;
-}
-
-PBYTE PsbResource::GetBuffer()
-{
-	return ChunkBuffer;
-}
-
-ULONG PsbResource::GetLength()
-{
-	return ChunkLength;
-}
-
-
-PsbNumber::PsbNumber(class PsbJsonExporter& _Psb, PBYTE& Buff, PsbType _Type) :
-	PsbValue(_Psb, _Type, Buff)
-{
-	Buffer = Buff;
-	_Psb.GetNumber(Buff, Value, NumberType);
-}
-
-INT64 PsbNumber::GetInteger()
-{
-	return Value.IntegerValue;
-}
-
-float PsbNumber::GetFloat()
-{
-	return Value.FloatValue;
-}
-
-double PsbNumber::GetDouble()
-{
-	return Value.DoubleValue;
-}
-
-BOOLEAN PsbNumber::IsNumberNode(PsbValue *_Value)
-{
-	switch (_Value->GetNodeType())
-	{
-	case TYPE_NUMBER_N0:
-	case TYPE_NUMBER_N1:
-	case TYPE_NUMBER_N2:
-	case TYPE_NUMBER_N3:
-	case TYPE_NUMBER_N4:
-		return TRUE;
-
-	default:
-		return FALSE;
+	if (value->get_type() == psb_value_t::TYPE_NUMBER_N0 || value->get_type() == psb_value_t::TYPE_NUMBER_N1 ||
+		value->get_type() == psb_value_t::TYPE_NUMBER_N2 || value->get_type() == psb_value_t::TYPE_NUMBER_N3 ||
+		value->get_type() == psb_value_t::TYPE_NUMBER_N4) {
+		return true;
 	}
+	return false;
 }
 
-
-PsbArray::PsbArray(class PsbJsonExporter& _Psb, PBYTE& Buff, PsbType _Type) :
-	PsbValue(_Psb, _Type, Buff),
-	DataLength(0)
+/***************************************************************************
+* psb_array_t
+*/
+psb_array_t::
+psb_array_t(const psb_t&    psb,
+	unsigned char*& p, psb_value_t::type_t type)
+	: psb_value_t(psb, type, p),
+	data_length(0)
 {
-	ULONG n = *Buff++ - 0xC;
+	uint32_t n = *p++ - 0xC;
 
-	DataLength += 1;
-	ULONG Value = 0;
+	data_length += sizeof(unsigned char);
+	uint32_t v = 0;
 
-	for (ULONG i = 0; i < n; i++)
-	{
-		Value |= *Buff++ << (i * 8);
-		DataLength++;
+
+	for (uint32_t i = 0; i < n; i++) {
+		v |= *p++ << (i * 8);
+		data_length += sizeof(unsigned char);
 	}
 
-	EntryCount  = Value;
-	EntryLength = *Buff++ - 0xC;
-	DataLength += 1;
-	Buffer      = Buff;
+	entry_count = v;
+	entry_length = *p++ - 0xC;
+	data_length += sizeof(unsigned char);
+	buff = p;
 
-	DataLength += (EntryCount * EntryLength);
-	Buff += EntryCount * EntryLength;
+	data_length += (entry_count * entry_length);
+	p += entry_count * entry_length;
 }
 
-ULONG PsbArray::Size()
-{
-	return EntryCount;
+uint32_t
+psb_array_t::
+size(void) const {
+	return entry_count;
 }
 
-ULONG PsbArray::Get(ULONG Index)
-{
-	ULONG Value = 0;
+uint32_t
+psb_array_t::
+get(uint32_t index) const {
+	uint32_t v = 0;
 
-	auto p = Buffer + Index * EntryLength;
+	unsigned char* p = buff + index * entry_length;
 
-	for (ULONG i = 0; i < EntryLength; i++)
-		Value |= *p++ << (i * 8);
+	for (uint32_t i = 0; i < entry_length; i++) {
+		v |= *p++ << (i * 8);
+	}
 
-	return Value;
+	return v;
 }
 
-
-PsbString::PsbString(PsbJsonExporter& _Psb, PBYTE& Buff) : 
-	PsbValue(_Psb, TYPE_STRING_N1, Buff),
-	Buffer(--Buff)
+/***************************************************************************
+* psb_string_t
+*/
+psb_string_t::
+psb_string_t(const psb_t&    psb,
+	unsigned char*& p)
+	: psb_value_t(psb, TYPE_STRING_N1, p),
+	buff(--p)
 {
+
 }
 
-ULONG PsbString::GetIndex()
-{
-	return Psb.GetStringIndex(Buffer);
+uint32_t
+psb_string_t::
+get_index() const {
+	return psb.get_string_index(buff);
 }
 
-string PsbString::GetString()
-{
-	return Psb.GetString(Buffer);
+string
+psb_string_t::
+get_string() const {
+	return psb.get_string(buff);
 }
 
-PsbObject::PsbObject(PsbJsonExporter& _Psb, PBYTE& Buff) : 
-	PsbValue(_Psb, TYPE_OBJECTS, Buff),
-	Buffer(Buff)
+/***************************************************************************
+* psb_objects_t
+*/
+psb_objects_t::
+psb_objects_t(const psb_t&    psb,
+	unsigned char*& p)
+	: psb_value_t(psb, TYPE_OBJECTS, p),
+	buff(p)
 {
-	Names   = new PsbArray(_Psb, Buff, (PsbType)Buff[0]);
-	Offsets = new PsbArray(_Psb, Buff, (PsbType)Buff[0]);
+	names = new psb_array_t(psb, buff, (psb_value_t::type_t)buff[0]);
+	offsets = new psb_array_t(psb, buff, (psb_value_t::type_t)buff[0]);
 }
 
-PsbObject::~PsbObject()
-{
-	delete Offsets;
-	delete Names;
+psb_objects_t::
+~psb_objects_t(void) {
+	delete offsets;
+	delete names;
 }
 
-ULONG PsbObject::Size()
-{
-	return Names->Size();
+uint32_t
+psb_objects_t::
+size(void) const {
+	return names->size();
 }
 
-string PsbObject::GetName(ULONG Index)
-{
-	return Psb.GetName(Names->Get(Index));
+string
+psb_objects_t::
+get_name(uint32_t index) const {
+	return psb.get_name(names->get(index));
 }
 
-PBYTE PsbObject::GetData(ULONG Index)
-{
-	return Buffer + Offsets->Get(Index);
+unsigned char*
+psb_objects_t::
+get_data(uint32_t index) const {
+	return buff + offsets->get(index);
 }
 
-PBYTE PsbObject::GetData(const string& Name)
-{
-	for (ULONG i = 0; i < Names->Size(); i++)
-	{
-		if (GetName(i) == Name) 
-			return GetData(i);
+unsigned char*
+psb_objects_t::
+get_data(const string& name) const {
+	for (uint32_t i = 0; i < names->size(); i++) {
+		if (get_name(i) == name) {
+			return get_data(i);
+		}
 	}
 
 	return NULL;
@@ -216,266 +263,278 @@ PBYTE PsbObject::GetData(const string& Name)
 
 
 
-PsbCollection::PsbCollection(PsbJsonExporter& _Psb, PBYTE& Buff) : 
-	PsbValue(_Psb, TYPE_COLLECTION, Buff)
+/***************************************************************************
+* psb_collection_t
+*/
+psb_collection_t::
+psb_collection_t(const psb_t&    psb,
+	unsigned char*& p)
+	: psb_value_t(psb, TYPE_COLLECTION, p)
 {
-	Offsets = new PsbArray(_Psb, Buff, (PsbType)Buff[0]);
-	Buffer = Buff;
+	offsets = new psb_array_t(psb, p, (psb_value_t::type_t)p[0]);
+	buff = p;
 }
 
-PsbCollection::~PsbCollection() 
-{
-	delete Offsets;
+psb_collection_t::
+~psb_collection_t(void) {
+	delete offsets;
 }
 
-ULONG PsbCollection::Size()
-{
-	return Offsets->Size();
+uint32_t
+psb_collection_t::
+size(void) const {
+	return offsets->size();
 }
 
-PBYTE PsbCollection::Get(ULONG Index)
-{
-	return Buffer + Offsets->Get(Index);
+unsigned char*
+psb_collection_t::
+get(uint32_t index) const {
+	return buff + offsets->get(index);
 }
 
+/***************************************************************************
+* psb_t
+*/
+psb_t::
+psb_t(unsigned char* buff) {
+	this->buff = buff;
+	hdr = (PSBHDR*)buff;
 
-PsbJsonExporter::PsbJsonExporter(PBYTE Buff) :
-	Buffer(Buff)
-{
-	Header = (PSBHDR*)Buffer;
-	auto p = Buffer + Header->OffsetNames;
+	unsigned char* p = this->buff + hdr->offset_names;
 
-	Str1 = new PsbArray(*this, p, (PsbType)p[0]);
-	Str2 = new PsbArray(*this, p, (PsbType)p[0]);
-	Str3 = new PsbArray(*this, p, (PsbType)p[0]);
+	str1 = new psb_array_t(*this, p, (psb_value_t::type_t)p[0]);
+	str2 = new psb_array_t(*this, p, (psb_value_t::type_t)p[0]);
+	str3 = new psb_array_t(*this, p, (psb_value_t::type_t)p[0]);
 
-	p = Buff + Header->OffsetStrings;
-	Strings = new PsbArray(*this, p, (PsbType)p[0]);
+	p = buff + hdr->offset_strings;
+	strings = new psb_array_t(*this, p, (psb_value_t::type_t)p[0]);
 
-	StringsData = (char*)(Buffer + Header->OffsetStringsData);
+	strings_data = (char*)(buff + hdr->offset_strings_data);
 
-	p = Buffer + Header->OffsetChunkOffsets;
-	ChunkOffsets = new PsbArray(*this, p, (PsbType)p[0]);
+	p = buff + hdr->offset_chunk_offsets;
+	chunk_offsets = new psb_array_t(*this, p, (psb_value_t::type_t)p[0]);
 
-	p = Buffer+ Header->OffsetChunkLengths;
-	ChunkLengths = new PsbArray(*this, p, (PsbType)p[0]);
+	p = buff + hdr->offset_chunk_lengths;
+	chunk_lengths = new psb_array_t(*this, p, (psb_value_t::type_t)p[0]);
 
-	ChunkData = Buffer + Header->OffsetChunkData;
+	chunk_data = buff + hdr->offset_chunk_data;
 
-	p = Buff + Header->OffsetEntries;
-	Unpack(Objects, p);
+	p = buff + hdr->offset_entries;
+	unpack(objects, p);
 
-	ExpireSuffixList = NULL;
+	expire_suffix_list = NULL;
 
-	if (Objects)
-	{
-		Objects->Unpack(ExpireSuffixList, "expire_suffix_list");
-		if (ExpireSuffixList)
-			Extension = GetString(ExpireSuffixList->Get(0));
+	if (objects) {
+		objects->unpack(expire_suffix_list, "expire_suffix_list");
+
+		if (expire_suffix_list) {
+			// Hrm ... ever more than one?
+			extension = get_string(expire_suffix_list->get(0));
+		}
 	}
 }
 
-PsbJsonExporter::~PsbJsonExporter() 
-{
-	if (ExpireSuffixList) delete ExpireSuffixList;
-	if (Objects)          delete Objects;
-	if (ChunkLengths)     delete ChunkLengths;
-	if (ChunkOffsets)     delete ChunkOffsets;
-	if (Strings)          delete Strings;
-	if (Str3)             delete Str3;
-	if (Str2)             delete Str2;
-	if (Str1)             delete Str1;
-
-	ExpireSuffixList = NULL;
-	Objects          = NULL;
-	ChunkLengths     = NULL;
-	ChunkOffsets     = NULL;
-	Str1             = NULL;
-	Str2             = NULL;
-	Str3             = NULL;
-	Strings          = NULL;
+psb_t::
+~psb_t(void) {
+	delete expire_suffix_list;
+	delete objects;
+	delete chunk_lengths;
+	delete chunk_offsets;
+	delete strings;
+	delete str3;
+	delete str2;
+	delete str1;
 }
 
-string PsbJsonExporter::GetName(ULONG Index)
-{
-	string   accum;
-	uint32_t a = Str3->Get(Index);
-	uint32_t b = Str2->Get(a);
+string
+psb_t::
+get_name(uint32_t index) const {
+	string accum;
+	uint32_t a = str3->get(index);
+	uint32_t b = str2->get(a);
 
-	LOOP_FOREVER
-	{
-		uint32_t c = Str2->Get(b);
-		uint32_t d = Str1->Get(c);
+	while (true) {
+		uint32_t c = str2->get(b);
+		uint32_t d = str1->get(c);
 		uint32_t e = b - d;
 
 		b = c;
+
 		accum = (char)e + accum;
 
-		if (!b) break;
-	};
+		if (!b) {
+			break;
+		}
+	}
 	return accum;
 }
 
-BOOL PsbJsonExporter::GetNumber(PBYTE Buff, PsbNumber::PsbNumberValue &Value, PsbNumber::PsbNumberType &NumberType)
-{
-	static const DWORD TYPE_TO_KIND[] =
-	{
+bool
+psb_t::
+get_number(unsigned char* p, psb_number_t::psb_number_value_t &value, psb_number_t::psb_number_type_t &number_type) const {
+	static const uint32_t TYPE_TO_KIND[] = {
 		0, 1, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 10, 11, 12
 	};
 
-	BYTE    Type = *Buff++;
-	INT64   ParseValue;
+	bool parse_ok = true;
+	unsigned char  type = *p++;
+	uint32_t  kind = TYPE_TO_KIND[type];
+	int64_t v = 0;
 
-	switch (TYPE_TO_KIND[Type])
-	{
+	switch (kind) {
 	case 1:
-		Value.IntegerValue = 0;
+		v = 0;
 		break;
 
 	case 2:
-		Value.IntegerValue = 1;
+		v = 1;
 		break;
 
 	case 3:
 	case 4:
 	{
-		ULONG n = Type - 4;
+		uint32_t n = type - 4;
 
-		ParseValue = 0;
-		for (ULONG i = 0; i < n; i++) 
-			ParseValue |= static_cast<INT64>(*Buff++) << (i * 8);
-
-		INT64 mask = (INT64)1 << ((n * 8) - 1);
-		if (ParseValue & mask) 
-		{
-			for (int i = n * 8; i < sizeof(ParseValue) * 8; i++)
-				ParseValue |= (int64_t)1 << i;
+		for (uint32_t i = 0; i < n; i++) {
+			v |= *p++ << (i * 8);
 		}
 
-		Value.IntegerValue = ParseValue;
-		NumberType = PsbNumber::PsbNumberType::INTEGER;
+		int64_t mask = (int64_t)1 << ((n * 8) - 1);
+		if (v & mask) {
+			for (int i = n * 8; i < sizeof(v) * 8; i++) {
+				v |= (int64_t)1 << i;
+			}
+		}
+
+		value.i = v;
+
+		number_type = psb_number_t::INTEGER;
 	}
 	break;
-
 	case 9:
-		if (Type == 0x1E) 
-		{
-			Value.FloatValue = *(float*)Buff;
-			NumberType = PsbNumber::PsbNumberType::FLOAT;
+		if (type == 0x1E) {
+			value.f = *(float*)p;
+			number_type = psb_number_t::FLOAT;
 		}
-		else if (Type == 0x1D) 
-		{
-			Value.FloatValue = 0.0f;
-			NumberType = PsbNumber::PsbNumberType::FLOAT;
+		if (type == 0x1D) {
+			value.f = 0;
+			number_type = psb_number_t::FLOAT;
 		}
 		break;
 
 	case 10:
-		if (Type == 0x1F) 
-		{
-			Value.DoubleValue = *(double*)Buff;
-			NumberType = PsbNumber::PsbNumberType::DOUBLE;
-			Buff += 8;
+		if (type == 0x1F) {
+			value.d = *(double*)p;
+			number_type = psb_number_t::DOUBLE;
+			p += 8;
 		}
 		break;
 
 	default:
-		return FALSE;
+		parse_ok = false;
+		break;
 	}
 
-	return TRUE;
+	return parse_ok;
 }
 
-string PsbJsonExporter::GetString(PBYTE p) 
-{
-	ULONG n = *p++ - 0x14;
-	ULONG v = 0;
+string
+psb_t::
+get_string(unsigned char* p) const {
+	uint32_t n = *p++ - 0x14;
+	uint32_t v = 0;
 
-	for (ULONG i = 0; i < n; i++)
+	for (uint32_t i = 0; i < n; i++) {
 		v |= *p++ << (i * 8);
+	}
 
-	return StringsData + Strings->Get(v);
+	return strings_data + strings->get(v);
 }
 
-ULONG PsbJsonExporter::GetStringIndex(PBYTE p)
-{
-	ULONG n = *p++ - 0x14;
-	ULONG v = 0;
+uint32_t
+psb_t::
+get_string_index(unsigned char* p) const {
+	uint32_t n = *p++ - 0x14;
+	uint32_t v = 0;
 
-	for (ULONG i = 0; i < n; i++) 
+	for (uint32_t i = 0; i < n; i++) {
 		v |= *p++ << (i * 8);
+	}
 
 	return v;
 }
 
-PsbObject* PsbJsonExporter::GetObject()
-{
-	return Objects;
+const psb_objects_t*
+psb_t::
+get_objects(void) const {
+	return objects;
 }
 
-PBYTE PsbJsonExporter::GetChunk(PBYTE p)
-{
-	return ChunkData + ChunkOffsets->Get(GetChunkIndex(p));
+unsigned char*
+psb_t::
+get_chunk(unsigned char* p) const {
+	return chunk_data + chunk_offsets->get(get_chunk_index(p));
 }
 
-ULONG PsbJsonExporter::GetChunkLength(PBYTE p)
-{
-	return ChunkLengths->Get(GetChunkIndex(p));
+uint32_t
+psb_t::
+get_chunk_length(unsigned char* p) const {
+	return chunk_lengths->get(get_chunk_index(p));
 }
 
-PsbValue* PsbJsonExporter::Unpack(PBYTE& p)
-{
-	BYTE Type = *p++;
+psb_value_t*
+psb_t::
+unpack(unsigned char*& p) const {
+	unsigned char type = *p++;
 
-	switch (Type)
-	{
-	case TYPE_NULL:
-		return new PsbNull(*this, p, (PsbType)Type);
-	case TYPE_FALSE:
-	case TYPE_TRUE:
-		return new PsbBool(*this, p, (PsbType)Type);
+	switch (type) {
+	case psb_value_t::TYPE_NULL:
+		return new psb_null_t(*this, p, (psb_value_t::type_t)type);
+	case psb_value_t::TYPE_FALSE:
+	case psb_value_t::TYPE_TRUE:
+		return new psb_boolean_t(*this, p, (psb_value_t::type_t)type);
 
-	case TYPE_NUMBER_N0:
-	case TYPE_NUMBER_N1:
-	case TYPE_NUMBER_N2:
-	case TYPE_NUMBER_N3:
-	case TYPE_NUMBER_N4:
-	case TYPE_NUMBER_N5:
-	case TYPE_NUMBER_N6:
-	case TYPE_NUMBER_N7:
-	case TYPE_NUMBER_N8:
-	case TYPE_FLOAT:
-	case TYPE_FLOAT0:
-	case TYPE_DOUBLE:
-		return new PsbNumber(*this, --p, (PsbType)Type);
+	case psb_value_t::TYPE_NUMBER_N0:
+	case psb_value_t::TYPE_NUMBER_N1:
+	case psb_value_t::TYPE_NUMBER_N2:
+	case psb_value_t::TYPE_NUMBER_N3:
+	case psb_value_t::TYPE_NUMBER_N4:
+	case psb_value_t::TYPE_NUMBER_N5:
+	case psb_value_t::TYPE_NUMBER_N6:
+	case psb_value_t::TYPE_NUMBER_N7:
+	case psb_value_t::TYPE_NUMBER_N8:
+	case psb_value_t::TYPE_FLOAT:
+	case psb_value_t::TYPE_FLOAT0:
+	case psb_value_t::TYPE_DOUBLE:
+		return new psb_number_t(*this, --p, (psb_value_t::type_t)type);
 
-	case TYPE_ARRAY_N1:
-	case TYPE_ARRAY_N2:
-	case TYPE_ARRAY_N3:
-	case TYPE_ARRAY_N4:
-	case TYPE_ARRAY_N5:
-	case TYPE_ARRAY_N6:
-	case TYPE_ARRAY_N7:
-	case TYPE_ARRAY_N8:
-		return new PsbArray(*this, --p, (PsbType)Type);
+	case psb_value_t::TYPE_ARRAY_N1:
+	case psb_value_t::TYPE_ARRAY_N2:
+	case psb_value_t::TYPE_ARRAY_N3:
+	case psb_value_t::TYPE_ARRAY_N4:
+	case psb_value_t::TYPE_ARRAY_N5:
+	case psb_value_t::TYPE_ARRAY_N6:
+	case psb_value_t::TYPE_ARRAY_N7:
+	case psb_value_t::TYPE_ARRAY_N8:
+		return new psb_array_t(*this, --p, (psb_value_t::type_t)type);
 
-	case TYPE_COLLECTION:
-		return new PsbCollection(*this, p);
+	case psb_value_t::TYPE_COLLECTION:
+		return new psb_collection_t(*this, p);
 
-	case TYPE_OBJECTS:
-		return new PsbObject(*this, p);
+	case psb_value_t::TYPE_OBJECTS:
+		return new psb_objects_t(*this, p);
 
-	case TYPE_RESOURCE_N1:
-	case TYPE_RESOURCE_N2:
-	case TYPE_RESOURCE_N3:
-	case TYPE_RESOURCE_N4:
-		return new PsbResource(*this, --p, TYPE_RESOURCE_N1);
+	case psb_value_t::TYPE_RESOURCE_N1:
+	case psb_value_t::TYPE_RESOURCE_N2:
+	case psb_value_t::TYPE_RESOURCE_N3:
+	case psb_value_t::TYPE_RESOURCE_N4:
+		return new psb_resource_t(*this, --p, psb_value_t::TYPE_RESOURCE_N1);
 
-	case TYPE_STRING_N1:
-	case TYPE_STRING_N2:
-	case TYPE_STRING_N3:
-	case TYPE_STRING_N4:
-		return new PsbString(*this, p);
+	case psb_value_t::TYPE_STRING_N1:
+	case psb_value_t::TYPE_STRING_N2:
+	case psb_value_t::TYPE_STRING_N3:
+	case psb_value_t::TYPE_STRING_N4:
+		return new psb_string_t(*this, p);
 
 	default:
 		p--;
@@ -485,13 +544,16 @@ PsbValue* PsbJsonExporter::Unpack(PBYTE& p)
 	return NULL;
 }
 
-ULONG PsbJsonExporter::GetChunkIndex(PBYTE Buff)
-{
-	ULONG n = *Buff++ - 0x18;
-	ULONG Value = 0;
+uint32_t
+psb_t::
+get_chunk_index(unsigned char* p) const {
+	uint32_t n = *p++ - 0x18;
+	uint32_t v = 0;
 
-	for (ULONG i = 0; i < n; i++)
-		Value |= *Buff++ << (i * 8);
+	for (uint32_t i = 0; i < n; i++) {
+		v |= *p++ << (i * 8);
+	}
 
-	return Value;
+	return v;
 }
+

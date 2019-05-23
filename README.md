@@ -9,6 +9,15 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 * krkrz打包请直接使用Universal Patch功能
 * 转发本工具请附上本README
 
+## New Universal Patch
+* Using KrkrExtract to automatically generate `KrkrExtract.db`
+* Copy `KrkrExtract.db` to your game dir
+* `Universal Patch` will read info from `KrkrExtract.db` firstly
+* now, `Universal Patch` is able to override top level script!  
+![override sample](up.png)
+
+
+
 ## Build
 * vs2017
 * Win10 SDK (10.0.17763.0)

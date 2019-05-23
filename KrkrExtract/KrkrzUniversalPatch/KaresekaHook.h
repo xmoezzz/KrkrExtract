@@ -43,8 +43,6 @@ public:
 private:
 	BOOL                   Inited;
 	BOOL                   FileSystemInited;
-	std::set<std::wstring> JITList;
-	std::set<std::wstring> TextList;
 };
 
 KaresekaHook* __fastcall GetKareseka();

@@ -12,11 +12,14 @@
 
 BOOL GlobalData::WindowIsInited = FALSE;
 
+PVOID GetTVPCreateStreamCall();
+
 NTSTATUS NTAPI InitExporter(iTVPFunctionExporter *exporter)
 {
 	BOOL                  Result;
 	ULONG64               Crc;
 	PVOID                 EncodedExporter;
+	PVOID                 CreateStreamAddress;
 	PBYTE                 PointRva;
 	PBYTE                 ExecuteHandle;
 	NtFileDisk            File;
@@ -25,10 +28,17 @@ NTSTATUS NTAPI InitExporter(iTVPFunctionExporter *exporter)
 
 	LOOP_ONCE
 	{
+		Result = TVPInitImportStub(exporter);
+		if (!Result)
+			break;
+
 		ExecuteHandle = (PBYTE)GetModuleHandleW(NULL);
 		PointRva      = (PBYTE)exporter - (ULONG_PTR)ExecuteHandle;
 		Crc = GenerationCRC64(0, (LPCBYTE)&PointRva, sizeof(PVOID));
 		EncodedExporter = Nt_EncodePointer(PointRva, LoDword(Crc));
+		CreateStreamAddress = (PBYTE)GetTVPCreateStreamCall() - (ULONG_PTR)ExecuteHandle;
+		CreateStreamAddress = Nt_EncodePointer(CreateStreamAddress, HiDword(Crc));
+
 
 		//lookup Image Entries to make sure CurrentFile is 
 
@@ -37,13 +47,10 @@ NTSTATUS NTAPI InitExporter(iTVPFunctionExporter *exporter)
 		{
 			File.Write(&Crc, sizeof(Crc));
 			File.Write(&EncodedExporter, sizeof(EncodedExporter));
+			File.Write(&CreateStreamAddress, sizeof(CreateStreamAddress));
 			
 			File.Close();
 		}
-
-		Result = TVPInitImportStub(exporter);
-		if (!Result)
-			break;
 
 		GlobalData::GetGlobalData()->InitedByModule = InitedByDllModule;
 	}
@@ -1970,19 +1977,15 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		UINT nFileNum = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
 		//Folder or File
-		if (nFileNum >= 1)
+		if (nFileNum == 1)
 		{
 			InvalidateRect(hWnd, NULL, TRUE);
 			RtlZeroMemory(GlobalData::GetGlobalData()->DragFileName, MAX_PATH * 2);
 			DragQueryFileW(hDrop, 0, GlobalData::GetGlobalData()->DragFileName, MAX_PATH);
-			DragFinish(hDrop);
+			
 
 			ULONG FileAttr = GetFileAttributesW(GlobalData::GetGlobalData()->DragFileName);
-			if (FileAttr == INVALID_FILE_ATTRIBUTES)
-			{
-				DragFinish(hDrop);
-			}
-			else
+			if (FileAttr != INVALID_FILE_ATTRIBUTES)
 			{
 				if (FileAttr & FILE_ATTRIBUTE_DIRECTORY)
 				{
@@ -2016,15 +2019,14 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						GlobalData::GetGlobalData()->WorkerThread = StartDumper(GlobalData::GetGlobalData()->DragFileName);
 					
 				}
-				DragFinish(hDrop);
 			}
 		}
-		else
+		else if(nFileNum > 1)
 		{
 			MessageBoxW(hWnd, L"Please Drop one file on this window", L"XP3Extract", MB_OK);
-			DragFinish(hDrop);
 		}
 	}
+	DragFinish((HDROP)wParam);
 	break;
 
 	case WM_DESTROY:

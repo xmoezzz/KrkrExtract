@@ -3,6 +3,7 @@
 #include "tp_stub.h"
 #include "my.h"
 #include "KrkrHeaders.h"
+#include <atomic>
 
 #define WM_UUPAK_OK (WM_USER + 1919)
 
@@ -91,7 +92,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 #define szWindowClassName   L"XP3ExtractMainClass"
 
 //A.B.C.D : 0 <= X <= 255
-#define _XP3ExtractVersion_ L"Ver 4.0.1.1-rc2"
+#define _XP3ExtractVersion_ L"Ver 4.0.1.2"
 
 
 class MemEntry
@@ -146,7 +147,7 @@ public:
 	HMODULE                         hHostModule;
 	ULONG                           ModuleType;
 	BOOL                            HasConsole;
-	BOOL                            isRunning;
+	std::atomic<BOOL>               isRunning;
 	BOOL                            DebugOn;
 	BOOL                            IsAllPackReaded;
 	static BOOL                     WindowIsInited;

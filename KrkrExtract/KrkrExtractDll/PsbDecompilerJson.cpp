@@ -20,266 +20,221 @@ using std::map;
 #define LZ4_MAGIC 0x184D2204
 #endif
 
-VOID TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbCollection *Offsets, string EntryName, Json::Value &Root);
 
-VOID TraversalObjectTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbObject *Objects, string ObjectName, Json::Value &Root)
-{
-	PsbValue *Value = NULL;
 
-	for (ULONG i = 0; i < Objects->Size(); i++)
-	{
-		auto EntryName = Objects->GetName(i);
-		auto EntryBuff = Objects->GetData(i);
+void
+traversal_object_tree(psb_t& psb,
+	const psb_objects_t *objects, string object_name, Json::Value &root);
 
-		_Psb.Unpack(Value, EntryBuff);
-		if (Value == NULL)
-			continue;
+void
+traversal_offsets_tree(psb_t& psb,
+	const psb_collection_t *offsets, string entry_name, Json::Value &root) {
+	psb_value_t *value = NULL;
 
-		switch (Value->GetNodeType())
-		{
-			case TYPE_COLLECTION:
-			{
-				Json::Value Node(Json::arrayValue);
-				TraversalOffsetsTree(_Psb, ResNode, (PsbCollection*)Value, EntryName, Node);
-				Root[EntryName] = Node;
+	for (uint32_t i = 0; i < offsets->size(); i++) {
+		unsigned char* entry_buff = offsets->get(i);
+		psb.unpack(value, entry_buff);
+
+
+		if (value != NULL) {
+			//=======================================================
+			if (value->get_type() == psb_value_t::TYPE_COLLECTION) {
+
+				Json::Value node(Json::arrayValue);
+				traversal_offsets_tree(psb, (const psb_collection_t *)value, entry_name, node);
+				root.append(node);
+
 			}
-			break;
+			//=======================================================
+			if (value->get_type() == psb_value_t::TYPE_OBJECTS) {
 
-
-			case TYPE_OBJECTS:
-			{
-				Json::Value Node(Json::objectValue);
-				TraversalObjectTree(_Psb, ResNode, (PsbObject *)Value, EntryName, Node);
-				Root[EntryName] = Node;
+				Json::Value node(Json::objectValue);
+				traversal_object_tree(psb, (const psb_objects_t *)value, entry_name, node);
+				root.append(node);
 			}
-			break;
 
-			case TYPE_TRUE:
-			case TYPE_FALSE:
-			{
+			if (value->get_type() == psb_value_t::TYPE_TRUE || value->get_type() == psb_value_t::TYPE_FALSE) {
 
-				Json::Value Node(Json::booleanValue);
-				PsbBool* BoolValue = (PsbBool*)Value;
-				Node = BoolValue->GetBoolean();
-				Root[EntryName] = Node;
+				Json::Value node(Json::booleanValue);
+				psb_boolean_t *psb_boolean = (psb_boolean_t*)value;
+				node = psb_boolean->get_boolean();
+				root.append(node);
 			}
-			break;
 
-			case TYPE_STRING_N1:
-			{
-				Json::Value Node(Json::stringValue);
-				PsbString* StringValue = (PsbString*)Value;
-				Node = StringValue->GetString();
-				Root[EntryName] = Node;
+			//=======================================================
+			if (value->get_type() == psb_value_t::TYPE_STRING_N1) {
+
+				Json::Value node(Json::stringValue);
+				psb_string_t *psb_string = (psb_string_t*)value;
+				node = psb_string->get_string();
+				root.append(node);
 			}
-			break;
+			//=======================================================
+			if (value->get_type() == psb_value_t::TYPE_NUMBER_N0 || value->get_type() == psb_value_t::TYPE_NUMBER_N1 ||
+				value->get_type() == psb_value_t::TYPE_NUMBER_N2 || value->get_type() == psb_value_t::TYPE_NUMBER_N3 ||
+				value->get_type() == psb_value_t::TYPE_NUMBER_N4) {
 
-			case TYPE_NUMBER_N0:
-			case TYPE_NUMBER_N1:
-			case TYPE_NUMBER_N2:
-			case TYPE_NUMBER_N3:
-			case TYPE_NUMBER_N4:
-			{
-				Json::Value Node(Json::intValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetInteger();
-				Root[EntryName] = Node;
+				Json::Value node(Json::intValue);
+				psb_number_t *number = (psb_number_t*)value;
+				node = number->get_integer();
+				root.append(node);
 			}
-			break;
 
-			case TYPE_FLOAT0:
-			case TYPE_FLOAT:
-			{
 
-				Json::Value Node(Json::realValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetFloat();
-				Root[EntryName] = Node;
+			if (value->get_type() == psb_value_t::TYPE_FLOAT0 || value->get_type() == psb_value_t::TYPE_FLOAT || value->get_type() == psb_value_t::TYPE_DOUBLE) {
+
+				Json::Value node(Json::realValue);
+
+				psb_number_t *number = (psb_number_t*)value;
+				if (value->get_type() == psb_value_t::TYPE_FLOAT || value->get_type() == psb_value_t::TYPE_FLOAT0) {
+					node = number->get_float();
+				}
+				if (value->get_type() == psb_value_t::TYPE_DOUBLE) {
+					node = number->get_double();
+				}
+
+				root.append(node);
 			}
-			break;
 
-			case TYPE_DOUBLE:
-			{
-				Json::Value Node(Json::realValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetDouble();
-				Root[EntryName] = Node;
+			if (value->get_type() == psb_value_t::TYPE_NUMBER_N5 || value->get_type() == psb_value_t::TYPE_NUMBER_N6 ||
+				value->get_type() == psb_value_t::TYPE_NUMBER_N7 || value->get_type() == psb_value_t::TYPE_NUMBER_N8) {
+
+				Json::Value node(Json::intValue);
+				psb_number_t *number = (psb_number_t*)value;
+				node = number->get_integer();
+				root.append(node);
 			}
-			break;
 
-		case TYPE_NULL:
-		{
-			Json::Value Node(Json::nullValue);
-			Root[EntryName] = Node;
+			if (value->get_type() == psb_value_t::TYPE_NULL) {
+				Json::Value node(Json::nullValue);
+				root.append(node);
+			}
+			if (value->get_type() == psb_value_t::TYPE_RESOURCE_N1 || value->get_type() == psb_value_t::TYPE_RESOURCE_N2 ||
+				value->get_type() == psb_value_t::TYPE_RESOURCE_N3 || value->get_type() == psb_value_t::TYPE_RESOURCE_N4) {
+				psb_resource_t *resource = (psb_resource_t *)value;
+				Json::Value node(Json::stringValue);
+				char temp[32];
+				_itoa_s(resource->get_index(), temp, 10);
+				node = "#resource#" + (string)temp;
+				root.append(node);
+			}
 		}
-		break;
 
-		case TYPE_NUMBER_N5:
-		case TYPE_NUMBER_N6:
-		case TYPE_NUMBER_N7:
-		case TYPE_NUMBER_N8:
-		{
-			Json::Value Node(Json::intValue);
-			PsbNumber *Number = (PsbNumber*)Value;
-			Node = Number->GetInteger();
-			Root[EntryName] = Node;
-		}
-		break;
-
-
-		case TYPE_RESOURCE_N1:
-		case TYPE_RESOURCE_N2:
-		case TYPE_RESOURCE_N3:
-		case TYPE_RESOURCE_N4:
-		{
-			CHAR IndexName[32];
-			PsbResource* Resource = (PsbResource*)Value;
-
-			Json::Value Node(Json::stringValue);
-			
-			wsprintfA(IndexName, "%d", Resource->GetIndex());
-			ResNode[Resource->GetIndex()] = EntryName;
-			Node = "__CompilerBinary__(" + (string)IndexName + ", '" + EntryName + "')";
-			Root[EntryName] = Node;
-		}
-		break;
-
-		default:
-			throw std::exception("PsbJson::TraversalObjectTree : unknown node type");
-			break;
+		else {
+			printf("invalid_type:%s,%02X\n", entry_name.c_str(), entry_buff[0]);
 		}
 	}
 }
+void
+traversal_object_tree(psb_t& psb,
+	const psb_objects_t *objects, string object_name, Json::Value &root) {
+	psb_value_t *value = NULL;
+	for (uint32_t i = 0; i < objects->size(); i++) {
+		string entry_name = objects->get_name(i);
+		unsigned char* entry_buff = objects->get_data(i);
 
-VOID TraversalOffsetsTree(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, PsbCollection *Offsets, string EntryName, Json::Value &Root) 
-{
-	PsbValue *Value = NULL;
+		psb.unpack(value, entry_buff);
 
-	for (ULONG i = 0; i < Offsets->Size(); i++) 
-	{
-		auto EntryBuff = Offsets->Get(i);
-		_Psb.Unpack(Value, EntryBuff);
+		if (value != NULL) {
+			//=======================================================
 
-		if (Value == NULL)
-			continue;
+			if (value->get_type() == psb_value_t::TYPE_COLLECTION) {
 
-		switch (Value->GetNodeType())
-		{
-			case TYPE_COLLECTION:
-			{
-				Json::Value Node(Json::arrayValue);
-				TraversalOffsetsTree(_Psb, ResNode, (PsbCollection*)Value, EntryName, Node);
-				Root.append(Node);
+				Json::Value node(Json::arrayValue);
+				traversal_offsets_tree(psb, (const psb_collection_t *)value, entry_name, node);
+				root[entry_name] = node;
 			}
-			break;
+			//=======================================================
 
-			case TYPE_OBJECTS:
-			{
-				Json::Value Node(Json::objectValue);
-				TraversalObjectTree(_Psb, ResNode, (PsbObject*)Value, EntryName, Node);
-				Root.append(Node);
+			if (value->get_type() == psb_value_t::TYPE_OBJECTS) {
+
+				Json::Value node(Json::objectValue);
+				traversal_object_tree(psb, (const psb_objects_t *)value, entry_name, node);
+				root[entry_name] = node;
 			}
-			break;
 
-			case TYPE_TRUE:
-			case TYPE_FALSE:
-			{
-				Json::Value Node(Json::booleanValue);
-				PsbBool* BoolValue = (PsbBool*)Value;
-				Node = BoolValue->GetBoolean();
-				Root.append(Node);
+			if (value->get_type() == psb_value_t::TYPE_TRUE || value->get_type() == psb_value_t::TYPE_FALSE) {
+
+				Json::Value node(Json::booleanValue);
+				psb_boolean_t *psb_boolean = (psb_boolean_t*)value;
+				node = psb_boolean->get_boolean();
+				root[entry_name] = node;
 			}
-			break;
 
-			case TYPE_STRING_N1:
-			{
-				Json::Value Node(Json::stringValue);
-				PsbString* StringValue = (PsbString*)Value;
-				Node = StringValue->GetString();
-				Root.append(Node);
+			//=======================================================
+
+			if (value->get_type() == psb_value_t::TYPE_STRING_N1) {
+
+				Json::Value node(Json::stringValue);
+				psb_string_t *psb_string = (psb_string_t*)value;
+				node = psb_string->get_string();
+				root[entry_name] = node;
 			}
-			break;
+			//=======================================================
+			if (value->get_type() == psb_value_t::TYPE_NUMBER_N0 || value->get_type() == psb_value_t::TYPE_NUMBER_N1 ||
+				value->get_type() == psb_value_t::TYPE_NUMBER_N2 || value->get_type() == psb_value_t::TYPE_NUMBER_N3 ||
+				value->get_type() == psb_value_t::TYPE_NUMBER_N4) {
 
-			case TYPE_NUMBER_N0:
-			case TYPE_NUMBER_N1:
-			case TYPE_NUMBER_N2:
-			case TYPE_NUMBER_N3:
-			case TYPE_NUMBER_N4:
-			{
-				Json::Value Node(Json::intValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetInteger();
-				Root.append(Node);
+				Json::Value node(Json::intValue);
+				psb_number_t *number = (psb_number_t*)value;
+				node = number->get_integer();
+				root[entry_name] = node;
 			}
-			break;
 
-			case TYPE_FLOAT0:
-			case TYPE_FLOAT:
-			{
-				Json::Value Node(Json::realValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetFloat();
-				Root.append(Node);
+			if (value->get_type() == psb_value_t::TYPE_FLOAT0 || value->get_type() == psb_value_t::TYPE_FLOAT || value->get_type() == psb_value_t::TYPE_DOUBLE) {
+
+				Json::Value node(Json::realValue);
+
+				psb_number_t *number = (psb_number_t*)value;
+				if (value->get_type() == psb_value_t::TYPE_FLOAT || value->get_type() == psb_value_t::TYPE_FLOAT0) {
+					node = number->get_float();
+				}
+				if (value->get_type() == psb_value_t::TYPE_DOUBLE) {
+					node = number->get_double();
+				}
+				root[entry_name] = node;
 			}
-			break;
 
-			case TYPE_DOUBLE:
-			{
-				Json::Value Node(Json::realValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetDouble();
-				Root.append(Node);
+			if (value->get_type() == psb_value_t::TYPE_NUMBER_N5 || value->get_type() == psb_value_t::TYPE_NUMBER_N6 ||
+				value->get_type() == psb_value_t::TYPE_NUMBER_N7 || value->get_type() == psb_value_t::TYPE_NUMBER_N8) {
+
+				Json::Value node(Json::intValue);
+				psb_number_t *number = (psb_number_t*)value;
+				node = number->get_integer();
+				root[entry_name] = node;
 			}
-			break;
 
-			case TYPE_NULL:
-			{
-				Json::Value Node(Json::nullValue);
-				Root.append(Node);
+			//=======================================================
+			if (value->get_type() == psb_value_t::TYPE_NULL) {
+				Json::Value node(Json::nullValue);
+				root[entry_name] = node;
 			}
-			break;
 
-			case TYPE_NUMBER_N5:
-			case TYPE_NUMBER_N6:
-			case TYPE_NUMBER_N7:
-			case TYPE_NUMBER_N8:
-			{
-				Json::Value Node(Json::intValue);
-				PsbNumber* Number = (PsbNumber*)Value;
-				Node = Number->GetInteger();
-				Root.append(Node);
+			if (value->get_type() == psb_value_t::TYPE_RESOURCE_N1 || value->get_type() == psb_value_t::TYPE_RESOURCE_N2 ||
+				value->get_type() == psb_value_t::TYPE_RESOURCE_N3 || value->get_type() == psb_value_t::TYPE_RESOURCE_N4) {
+				psb_resource_t *resource = (psb_resource_t *)value;
+
+				Json::Value node(Json::stringValue);
+				char temp[32];
+				_itoa_s(resource->get_index(), temp, 10);
+				node = "#resource#" + (string)temp;
+				root[entry_name] = node;
 			}
-			break;
-
-			case TYPE_RESOURCE_N1:
-			case TYPE_RESOURCE_N2:
-			case TYPE_RESOURCE_N3:
-			case TYPE_RESOURCE_N4:
-			{
-				CHAR IndexName[32];
-				PsbResource* Resource = (PsbResource*)Value;
-
-				Json::Value Node(Json::stringValue);
-
-				wsprintfA(IndexName, "%d", Resource->GetIndex());
-				ResNode[Resource->GetIndex()] = EntryName;
-				Node = "__CompilerBinary__(" + (string)IndexName + ", '" + EntryName + "')";
-
-				Root.append(Node);
-			}
-				break;
-
-			default:
-				throw std::exception("PsbJson::TraversalOffsetsTree : unknown node type");
-				break;
+		}
+		else {
+			printf("invalid_type:%s:%02X\n", entry_name.c_str(), entry_buff[0]);
 		}
 	}
 }
 
 
-VOID ExportResource(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, LPCWSTR FileName, LPCWSTR DirName)
+
+
+void export_res(psb_t &psb, LPCWSTR FileName, LPCWSTR DirName)
 {
 	NTSTATUS Status;
+
+	Json::Value res(Json::arrayValue);
 
 	std::wstring ResDirName = FileName;
 	ResDirName += L"\\";
@@ -289,29 +244,42 @@ VOID ExportResource(PsbJsonExporter& _Psb, map<ULONG, string>& ResNode, LPCWSTR 
 	if (GetFileAttributesW(ResDirName.c_str()) == 0xFFFFFFFF)
 		SHCreateDirectory(NULL, ResDirName.c_str());
 
-
-	for (ULONG i = 0; i < _Psb.ChunkOffsets->Size(); i++)
+	for (uint32_t i = 0; i < psb.chunk_offsets->size(); i++)
 	{
-		WCHAR BinaryName[MAX_PATH];
 		WCHAR OutputName[MAX_PATH];
+		CHAR  Utf8Name[MAX_PATH * 2];
 
-		RtlZeroMemory(BinaryName, sizeof(BinaryName));
-		MultiByteToWideChar(CP_UTF8, 0, ResNode[i].c_str(), ResNode[i].length(), BinaryName, countof(BinaryName) - 1);
+		uint32_t offset = psb.chunk_offsets->get(i);
+		uint32_t length = psb.chunk_lengths->get(i);
 
-		ULONG Offset = _Psb.ChunkOffsets->Get(i);
-		ULONG Length = _Psb.ChunkLengths->Get(i);
-
-		wsprintfW(OutputName, L"%s\\%s", ResDirName.c_str(), BinaryName);
+		wsprintfW(OutputName, L"%s\\%d.bin", ResDirName, i);
 
 		NtFileDisk File;
 		Status = File.Create(OutputName);
 		if (NT_FAILED(Status))
 			continue;
 
-		File.Write((PVOID)(_Psb.ChunkData + Offset), Length);
+		File.Write((PVOID)(psb.chunk_data + offset), length);
 		File.Close();
+
+		WideCharToMultiByte(CP_UTF8, 0, OutputName, lstrlenW(OutputName), Utf8Name, countof(Utf8Name) - 1, NULL, NULL);
+		res[i] = Utf8Name;
 	}
 
+	NtFileDisk File;
+	WCHAR      OutputName[MAX_PATH];
+	wsprintfW(OutputName, L"%s\\%s.res.json", DirName, FileName);
+	
+	if (psb.chunk_offsets->size() != 0)
+	{
+		Status = File.Create(OutputName);
+		if (NT_FAILED(Status))
+			return;
+
+		auto&& resJson = res.toStyledString();
+		File.Write((PBYTE)resJson.c_str(), resJson.length());
+		File.Close();
+	}
 }
 
 
@@ -331,10 +299,10 @@ NTSTATUS NTAPI FindEmoteKeyByMark(PULONG PrivateKey)
 		hModule = GetModuleHandleW(L"emotedriver.dll");
 
 		if (!hModule)
-			hModule = LoadLibraryW(L"emotedriver.dll");
+			hModule = (HMODULE)Nt_LoadLibrary(L"emotedriver.dll");
 
 		if (!hModule)
-			hModule = LoadLibraryW(L"plugin\\emotedriver.dll");
+			hModule = (HMODULE)Nt_LoadLibrary(L"plugin\\emotedriver.dll");
 
 		if (!hModule)
 			break;
@@ -396,10 +364,10 @@ NTSTATUS NTAPI FindEmoteKeyByParse(PULONG PrivateKey)
 		hModule = GetModuleHandleW(L"emotedriver.dll");
 
 		if (!hModule)
-			hModule = LoadLibraryW(L"emotedriver.dll");
+			hModule = (HMODULE)Nt_LoadLibrary(L"emotedriver.dll");
 
 		if (!hModule)
-			hModule = LoadLibraryW(L"plugin\\emotedriver.dll");
+			hModule = (HMODULE)Nt_LoadLibrary(L"plugin\\emotedriver.dll");
 
 		if (!hModule)
 			return STATUS_NO_SUCH_FILE;
@@ -631,7 +599,6 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 	Json::Value        Root;
 	NtFileDisk         File;
 	std::wstring       JsonFileName;
-	map<ULONG, string> ResNode;
 	ULONG              Length;
 	PBYTE              Buffer;
 	LARGE_INTEGER      Offset;
@@ -653,11 +620,6 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 		return STATUS_NO_MEMORY;
 
 	PsbStream->Read(Buffer, Length, NULL);
-
-	
-	Status = File.Create(JsonFileName.c_str());
-	if (NT_FAILED(Status))
-		return Status;
 
 	if (Length > 8)
 	{
@@ -733,15 +695,28 @@ NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR F
 		}
 	}
 
-	PsbJsonExporter Psb(Buffer);
-	auto Objects = Psb.GetObject();
-	TraversalObjectTree(Psb, ResNode, Objects, "", Root);
+	psb_t Psb(Buffer);
+	auto Objects = Psb.get_objects();
+	try 
+	{
+		traversal_object_tree(Psb, Objects, "", Root);
+	}
+	catch (...) 
+	{
+		HeapFree(GetProcessHeap(), 0, Buffer);
+		PrintConsoleW(L"failed to decode json : %s\n", JsonFileName.c_str());
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	Status = File.Create(JsonFileName.c_str());
+	if (NT_FAILED(Status))
+		return Status;
 
 	string Output = Root.toStyledString();
 	File.Write((PVOID)Output.c_str(), Output.length());
 	File.Close();
 
-	ExportResource(Psb, ResNode, FileName, BasePath);
+	export_res(Psb, FileName, BasePath);
 	HeapFree(GetProcessHeap(), 0, Buffer);
 	return Status;
 }

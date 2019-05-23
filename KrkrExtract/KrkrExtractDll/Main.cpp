@@ -209,6 +209,9 @@ PVOID WINAPI HookLoadLibraryW(LPCWSTR lpFileName)
 	Result = StubLoadLibraryW(lpFileName);
 
 	//some smc will check self, just ingore.
+	if (Result == NULL)
+		return Result;
+
 	if (LookupImportTable(Result, "KERNEL32.dll", "FlushInstructionCache") != IMAGE_INVALID_VA)
 		return (HMODULE)Result;
 

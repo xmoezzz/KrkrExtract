@@ -377,7 +377,7 @@ VOID NTAPI KrkrDumper::AddPath(LPWSTR FileName)
 VOID NTAPI KrkrDumper::SetFile(LPCWSTR lpFile)
 {
 	RtlZeroMemory(FileName, countof(FileName) * sizeof(WCHAR));
-	lstrcpyW(FileName, lpFile);
+	if (lpFile) lstrcpyW(FileName, lpFile);
 }
 
 

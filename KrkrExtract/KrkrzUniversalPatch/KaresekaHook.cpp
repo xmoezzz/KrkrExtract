@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#pragma comment(lib, "jsoncpp.lib")
-#pragma comment(lib, "detours.lib")
 #pragma comment(lib, "Shlwapi.lib")
 
 using std::wstring;
@@ -527,18 +525,66 @@ EXTERN_C MY_DLL_EXPORT VOID NTAPI XmoeLinker()
 {
 }
 
-static BYTE Utf8Bom[3] = { 0xEF, 0xBB, 0xBF };
+template<class PtrType> PtrType Nt_DecodePointer(PtrType Pointer, ULONG_PTR Cookie)
+{
+	return (PtrType)PtrXor(_rotl((ULONG_PTR)Pointer, Cookie & 0x1F), Cookie);
+}
 
 BOOL KaresekaHook::Init(HMODULE hModule)
 {
 	NTSTATUS                  Status;
 	PVOID                     ExeModule, FsModule;
-	PBYTE                     Buffer;
-	ULONG                     Size;
-	ULONG64                   Hash;
+	NtFileDisk                File;
+	BOOL                      FromDb;
+	ULONG64                   Crc;
+	PVOID                     Importer;
+	PVOID                     CreateStreamAddress;
+	
 
 	m_SelfModule = hModule;
 	ExeModule    = GetModuleHandleW(NULL);
+	FromDb       = FALSE;
+	Importer     = NULL;
+	
+	LOOP_ONCE
+	{
+		if (GetFileAttributesW(L"KrkrExtract.db") == 0xFFFFFFFF)
+			break;
+
+		Status = File.Open(L"KrkrExtract.db");
+		if (NT_FAILED(Status))
+			break;
+		
+		Status = File.Read(&Crc, sizeof(Crc));
+		if (NT_FAILED(Status))
+			break;
+
+		Status = File.Read(&Importer, sizeof(Importer));
+		if (NT_FAILED(Status))
+			break;
+
+		Status = File.Read(&CreateStreamAddress, sizeof(CreateStreamAddress));
+		if (NT_FAILED(Status))
+			break;
+
+		Importer = Nt_DecodePointer(Importer, LoDword(Crc));
+		Importer = (ULONG_PTR)ExeModule + (PBYTE)Importer;
+
+		CreateStreamAddress = Nt_DecodePointer(CreateStreamAddress, HiDword(Crc));
+		CreateStreamAddress = (ULONG_PTR)ExeModule + (PBYTE)CreateStreamAddress;
+
+		if (IsBadReadPtr(Importer, 4))
+			break;
+
+		if (IsBadCodePtr((FARPROC)CreateStreamAddress))
+			break;
+		
+
+		File.Close();
+		FromDb = TRUE;
+		
+		PrintConsoleW(L"loading from db...\n");
+	}
 
 
 	Mp::PATCH_MEMORY_DATA f[] =
@@ -547,9 +593,26 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 		Mp::FunctionJumpVa(MultiByteToWideChar, HookMultiByteToWideChar, &OldMultiByteToWideChar)
 	};
 
+	if (FromDb)
+	{
+		TVPInitImportStub((iTVPFunctionExporter*)Importer);
+		this->TVPFunctionExporter = (iTVPFunctionExporter*)Importer;
+		this->StubTVPCreateStream = (FuncCreateStream)CreateStreamAddress;
+	}
+
+	Mp::PATCH_MEMORY_DATA dbf[] =
+	{
+		Mp::FunctionJumpVa(StubTVPCreateStream, HookTVPCreateStream,     &StubTVPCreateStream),
+		Mp::FunctionJumpVa(MultiByteToWideChar,           HookMultiByteToWideChar, &OldMultiByteToWideChar)
+	};
+
 	LOOP_ONCE
 	{
-		Status = Mp::PatchMemory(f, countof(f));
+		if (FromDb == FALSE)
+			Status = Mp::PatchMemory(f, countof(f));
+		else
+			Status = Mp::PatchMemory(dbf, countof(dbf));
+
 		if (NT_FAILED(Status))
 		{
 			MessageBoxW(NULL, L"Couldn't patch memory!", L"KrkrUniversalPatch", MB_OK | MB_ICONERROR);
@@ -576,110 +639,6 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 			break;
 		}
 		FileSystemInited = TRUE;
-	}
-
-	auto FileNameToLowerUtf8 = [](LPCSTR FileName)->std::string
-	{
-		std::string Result;
-
-		for (INT i = 0; i < lstrlenA(FileName); i++)
-		{
-			if (FileName[i] <= 'Z' && FileName[i] >= 'A')
-				Result += tolower(FileName[i]);
-			else
-				Result += FileName[i];
-		}
-		return Result;
-	};
-
-
-	auto GetLines = [](std::vector<std::string>& ReadPool, PBYTE Buffer, ULONG Size)->BOOL
-	{
-		std::string ReadLine;
-		ULONG       iPos = 0;
-		ReadLine.clear();
-
-		while(true)
-		{
-			if (iPos >= Size)
-			break;
-
-			if (Buffer[iPos] == '\r')
-			{
-				if (!memcmp(ReadLine.c_str(), Utf8Bom, 3))
-					ReadLine = &ReadLine[3];
-
-				ReadPool.push_back(ReadLine);
-				ReadLine.clear();
-				iPos++;
-
-				if (Buffer[iPos] == '\n')
-					iPos++;
-			}
-
-			if (Buffer[iPos] == '\n')
-			{
-				if (!memcmp(ReadLine.c_str(), Utf8Bom, 3))
-					ReadLine = &ReadLine[3];
-
-				ReadPool.push_back(ReadLine);
-				ReadLine.clear();
-				iPos++;
-			}
-
-			ReadLine += Buffer[iPos];
-			iPos++;
-		}
-
-			if (ReadLine.length())
-			{
-				if (!memcmp(ReadLine.c_str(), Utf8Bom, 3))
-					ReadLine = &ReadLine[3];
-
-				ReadPool.push_back(ReadLine);
-			}
-
-		return TRUE;
-	};
-
-	JITList.clear();
-	Buffer = NULL;
-	Size = 0;
-
-	if (NT_SUCCESS(QueryFile(L"compiler_jit.ini", L"_compiler_jit.ini", Buffer, Size, Hash)))
-	{
-		std::vector<std::string> ReadPool;
-
-		GetLines(ReadPool, Buffer, Size);
-		for (auto& Item : ReadPool)
-		{
-			WCHAR FileName[MAX_PATH];
-			RtlZeroMemory(FileName, sizeof(FileName));
-
-			Item = FileNameToLowerUtf8(Item.c_str());
-			MultiByteToWideChar(CP_UTF8, 0, Item.c_str(), Item.length(), FileName, countof(FileName));
-
-			JITList.insert(FileName);
-		}
-		HeapFree(GetProcessHeap(), 0, Buffer);
-	}
-
-	if (NT_SUCCESS(QueryFile(L"compiler_text.ini", L"_compiler_text.ini", Buffer, Size, Hash)))
-	{
-		std::vector<std::string> ReadPool;
-
-		GetLines(ReadPool, Buffer, Size);
-		for (auto& Item : ReadPool)
-		{
-			WCHAR FileName[MAX_PATH];
-			RtlZeroMemory(FileName, sizeof(FileName));
-
-			Item = FileNameToLowerUtf8(Item.c_str());
-			MultiByteToWideChar(CP_UTF8, 0, Item.c_str(), Item.length(), FileName, countof(FileName));
-
-			TextList.insert(FileName);
-		}
-		HeapFree(GetProcessHeap(), 0, Buffer);
 	}
 
 	return NT_SUCCESS(Status);

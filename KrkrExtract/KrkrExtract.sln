@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrExtractDll", "KrkrExtractDll\KrkrExtractDll.vcxproj", "{E9360CFF-5BB0-406C-9273-BBC6AF644E89}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B0493974-0D01-4557-A98A-AD16D0C60651} = {B0493974-0D01-4557-A98A-AD16D0C60651}
+		{874DAFBC-E177-449E-9BC4-550987A5569A} = {874DAFBC-E177-449E-9BC4-550987A5569A}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrExtractExe", "KrkrExtractExe\KrkrExtractExe.vcxproj", "{79E5C2BD-8DEC-4292-B9FA-BE080F0D56E1}"
