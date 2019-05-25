@@ -1,0 +1,15 @@
+﻿  my.cpp
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1128): warning C4101: 'Base': unreferenced local variable
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1129): warning C4101: 'Size': unreferenced local variable
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1128): warning C4101: 'End': unreferenced local variable
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1133): warning C4101: 'Directory': unreferenced local variable
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1128): warning C4101: 'EndOfImage': unreferenced local variable
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(4112): warning C4101: 'Status': unreferenced local variable
+c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1375): warning C4101: 'Status': unreferenced local variable
+  c:\projects\git\krkrextract\krkrextract\nativelib\my.cpp(1470): note: see reference to function template instantiation 'NTSTATUS WalkImportTableT<LookupImportTable::<lambda_2403424581badb537015085d23a21ad4>,int>(PVOID,CallbackRoutine,CallbackContext)' being compiled
+          with
+          [
+              CallbackRoutine=LookupImportTable::<lambda_2403424581badb537015085d23a21ad4>,
+              CallbackContext=int
+          ]
+  NativeLib.vcxproj -> C:\projects\git\KrkrExtract\KrkrExtract\Release\NativeLib.lib

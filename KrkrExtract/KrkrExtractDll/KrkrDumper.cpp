@@ -380,6 +380,8 @@ VOID NTAPI KrkrDumper::SetFile(LPCWSTR lpFile)
 	if (lpFile) lstrcpyW(FileName, lpFile);
 }
 
+#include "json\json.h"
+#include "PbdDecode.h"
 
 NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& file)
 {
@@ -393,6 +395,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 
 
 	Handle = GlobalData::GetGlobalData();
+
 
 	Count = 0;
 	BeginOffset.QuadPart = 0;
@@ -922,6 +925,27 @@ NTSTATUS NTAPI KrkrDumper::ProcessPNG(IStream* Stream, LPCWSTR OutFileName, XP3I
 
 
 
+NTSTATUS NTAPI KrkrDumper::ProcessPBD(IStream* Stream, LPCWSTR OutFileName, XP3Index& it)
+{
+	NTSTATUS     Status;
+	WCHAR        FileName[MAX_PATH];
+
+	RtlZeroMemory(FileName, sizeof(FileName));
+	lstrcpyW(FileName, OutFileName);
+	lstrcatW(FileName, L".json");
+
+	if (GlobalData::GetGlobalData()->GetPbdFlag() == PBD_JSON)
+	{
+		SavePbd(GetPackageName(wstring(OutFileName)).c_str(), FileName);
+	}
+	else if (GlobalData::GetGlobalData()->GetPngFlag() == PBD_RAW)
+	{
+		Status = ProcessFile(Stream, OutFileName, it);
+	}
+	return Status;
+}
+
+
 NTSTATUS NTAPI KrkrDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFileName, XP3Index& it)
 {
 	NTSTATUS     Status;
@@ -1054,6 +1078,10 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 		else if (ExtName == L"TLG")
 		{
 			Status = ProcessTLG(Stream, OutFilePathFull.c_str(), it);
+		}
+		else if (ExtName == L"PBD")
+		{
+			Status = ProcessPBD(Stream, OutFilePathFull.c_str(), it);
 		}
 		else if (ExtName == L"PSB" ||
 				 ExtName == L"SCN" ||

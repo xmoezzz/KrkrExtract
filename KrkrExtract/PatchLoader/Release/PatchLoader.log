@@ -1,7 +1,0 @@
-﻿  PatchLoader.cpp
-c:\projects\git\krkrextract\krkrextract\patchloader\patchloader.cpp(134): warning C4101: 'Length': unreferenced local variable
-  Generating code
-  All 49 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  PatchLoader.vcxproj -> C:\projects\git\KrkrExtract\KrkrExtract\Release\PatchLoader.exe
-          1 file(s) copied.

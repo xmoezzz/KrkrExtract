@@ -52,6 +52,13 @@ enum AMV_DECODE_INFO
 	AMV_RAW
 };
 
+
+enum PBD_DECODE_INFO
+{
+	PBD_RAW,
+	PBD_JSON
+};
+
 enum TLG_DECODE_INFO
 {
 	TLG_RAW,
@@ -92,7 +99,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 #define szWindowClassName   L"XP3ExtractMainClass"
 
 //A.B.C.D : 0 <= X <= 255
-#define _XP3ExtractVersion_ L"Ver 4.0.1.2"
+#define _XP3ExtractVersion_ L"Ver 4.0.1.3"
 
 
 class MemEntry
@@ -171,6 +178,7 @@ private:
 	ULONG                           PsbFlag;
 	ULONG                           TjsFlag;
 	ULONG                           AmvFlag;
+	ULONG                           PbdFlag;
 
 	WCHAR                           Folder   [MAX_PATH];
 	WCHAR                           GuessPack[MAX_PATH];
@@ -195,6 +203,9 @@ public:
 
 	ULONG     SetAmvFlag(ULONG Flag);
 	ULONG     GetAmvFlag();
+
+	ULONG     SetPbdFlag(ULONG Flag);
+	ULONG     GetPbdFlag();
 
 	ULONG     SetTjsFlag(ULONG Flag);
 	ULONG     GetTjsFlag();

@@ -144,6 +144,9 @@
     <ClCompile Include="DebuggerHandler.cpp">
       <Filter>源文件\Core</Filter>
     </ClCompile>
+    <ClCompile Include="PbdDecode.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -276,6 +279,9 @@
       <Filter>头文件\Core</Filter>
     </ClInclude>
     <ClInclude Include="SectionProtector.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="PbdDecode.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
   </ItemGroup>

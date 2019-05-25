@@ -97,6 +97,7 @@ GlobalData::GlobalData() :
 	PsbFlag(PSB_RAW),
 	TjsFlag(TJS2_RAW),
 	AmvFlag(AMV_RAW),
+	PbdFlag(PBD_RAW),
 	//hImageModule(nullptr),
 	InitedByModule(InitedByDllModule),
 	hSelfModule(nullptr), //At DllMain
@@ -217,6 +218,18 @@ ULONG GlobalData::SetAmvFlag(ULONG Flag)
 ULONG GlobalData::GetAmvFlag()
 {
 	return this->AmvFlag;
+}
+
+ULONG GlobalData::SetPbdFlag(ULONG Flag)
+{
+	ULONG OldFlag = PbdFlag;
+	PbdFlag = Flag;
+	return OldFlag;
+}
+
+ULONG GlobalData::GetPbdFlag()
+{
+	return this->PbdFlag;
 }
 
 ULONG GlobalData::SetTjsFlag(ULONG Flag)
@@ -455,6 +468,7 @@ HRESULT WINAPI HookV2Link(iTVPFunctionExporter *exporter)
 		InitLayer();
 		Handle->FakePngWorkerInited = TRUE;
 	}
+
 	return Handle->StubV2Link(exporter);
 }
 
@@ -660,6 +674,13 @@ VOID WINAPI GlobalData::EnableAll(HWND hWnd)
 	HWND hAMVPng = GetItemX(IDC_AMV_PNG);
 	HWND hAMVMng = GetItemX(IDC_AMV_MNG);
 
+	HWND hPbdRaw  = GetItemX(IDC_RADIO_PBD_RAW);
+	HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
+
+
+	EnableX(hPbdRaw);
+	EnableX(hPbdJson);
+
 	EnableX(hAMVJpg);
 	EnableX(hAMVPng);
 	EnableX(hAMVMng);
@@ -756,6 +777,12 @@ VOID NTAPI GlobalData::DisableAll(HWND hWnd)
 	HWND hAMVJpg = GetItemX(IDC_AMV_FRAME);
 	HWND hAMVPng = GetItemX(IDC_AMV_PNG);
 	HWND hAMVMng = GetItemX(IDC_AMV_MNG);
+
+	HWND hPbdRaw = GetItemX(IDC_RADIO_PBD_RAW);
+	HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
+
+	DisableX(hPbdJson);
+	DisableX(hPbdRaw);
 
 	DisableX(hAMVJpg);
 	DisableX(hAMVPng);
@@ -891,6 +918,12 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		HWND hProcess = GetItemX(IDC_PROGRESS1);
 		HWND hDbg = GetItemX(IDC_BUTTON_DEBUGGER);
 
+		HWND hPbdRaw = GetItemX(IDC_RADIO_PBD_RAW);
+		HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
+
+		EnableX(hPbdRaw);
+		EnableX(hPbdJson);
+
 		EnableX(hIcon);
 		EnableX(hProtect);
 
@@ -962,6 +995,11 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		Button_SetCheck(hAmvJPG, BST_UNCHECKED);
 		Button_SetCheck(hAmvMNG, BST_UNCHECKED);
 		GlobalData::GetGlobalData()->SetAmvFlag(AMV_RAW);
+
+		Button_SetCheck(hPbdRaw,  BST_CHECKED);
+		Button_SetCheck(hPbdJson, BST_UNCHECKED);
+		GlobalData::GetGlobalData()->SetPbdFlag(PBD_RAW);
+		
 
 		HWND hUButton = GetItemX(IDC_BUTTON_UUPCK);
 		if (GlobalData::GetGlobalData()->IsAllPackReaded)
@@ -1628,6 +1666,46 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
+
+		case IDC_RADIO_PBD_RAW:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				HWND hPbdRaw = GetItemX(IDC_RADIO_PBD_RAW);
+				BOOL Result;
+				Result = SendMessageW(hPbdRaw, BM_GETCHECK, 0, 0);
+				if (Result == TRUE)
+				{
+					GlobalData::GetGlobalData()->SetPbdFlag(PBD_RAW);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
+
+		case IDC_RADIO_PBD_JSON:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
+				BOOL Result;
+				Result = SendMessageW(hPbdJson, BM_GETCHECK, 0, 0);
+				if (Result == TRUE)
+				{
+					GlobalData::GetGlobalData()->SetPbdFlag(PBD_JSON);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
 
 		//tjs2 raw
 		case IDC_TJS2_RAW:
