@@ -9,6 +9,13 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 * krkrz打包请直接使用Universal Patch功能
 * 转发本工具请附上本README
 
+
+## Universal Dumper!!
+* Only valid for `krkrz` target
+* Just click `!!Dump!!` and wait
+* warning!! : may extremely slow on low performance platform
+* warning!! : may run out of memory on low performance platform
+
 ## New Universal Patch
 * Using KrkrExtract to automatically generate `KrkrExtract.db`
 * Copy `KrkrExtract.db` to your game dir

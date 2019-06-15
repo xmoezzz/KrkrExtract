@@ -1,5 +1,5 @@
 #include <my.h>
-
+#include "resource.h"
 
 typedef
 BOOL
@@ -92,6 +92,18 @@ VMeCreateProcess(
 	return TRUE;
 }
 
+BOOL NTAPI CreateProcessInternalWithDll(LPCWSTR ProcessName)
+{
+	STARTUPINFOW        si;
+	PROCESS_INFORMATION pi;
+
+	RtlZeroMemory(&si, sizeof(si));
+	RtlZeroMemory(&pi, sizeof(pi));
+	si.cb = sizeof(si);
+
+	return VMeCreateProcess(NULL, ProcessName, NULL, L"KrkrExtract.dll", NULL, NULL, FALSE, NULL, NULL, NULL, &si, &pi, NULL);
+}
+
 
 BOOL CheckDll()
 {
@@ -102,16 +114,78 @@ BOOL CheckDll()
 }
 
 
-BOOL FASTCALL CreateProcessInternalWithDll(LPCWSTR ProcessName)
+LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	STARTUPINFOW        si;
-	PROCESS_INFORMATION pi;
+	switch (msg)
+	{
+	case WM_INITDIALOG:
+	{
+		HICON hIcon;
 
-	RtlZeroMemory(&si, sizeof(si));
-	RtlZeroMemory(&pi, sizeof(pi));
-	si.cb = sizeof(si);
+		hIcon = (HICON)LoadImageW(GetModuleHandleW(NULL),
+			MAKEINTRESOURCE(IDI_ICON1),
+			IMAGE_ICON,
+			GetSystemMetrics(SM_CXSMICON),
+			GetSystemMetrics(SM_CYSMICON),
+			0);
 
-	return VMeCreateProcess(NULL, ProcessName, NULL, L"KrkrExtract.dll", NULL, NULL, FALSE, NULL, NULL, NULL, &si, &pi, NULL);
+		if (hIcon)
+		{
+			SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+		}
+	}
+	break;
+
+	case WM_SYSCOMMAND:
+	{
+		switch (wParam)
+		{
+		case SC_CLOSE:
+			ExitProcess(0);
+			break;
+		}
+	}
+	break;
+
+	default:
+		break;
+	}
+	return 0;
+}
+
+
+int CreateMainWindow()
+{
+	HWND MainWindow;
+	MSG  msg;
+
+	MainWindow = CreateDialogParamW(
+		GetModuleHandleW(NULL),
+		MAKEINTRESOURCEW(IDD_DIALOG_MAIN),
+		NULL,
+		(DLGPROC)DlgProc,
+		WM_INITDIALOG);
+
+	if (!MainWindow)
+		return -1;
+
+	DragAcceptFiles(MainWindow, TRUE);
+	ShowWindow(MainWindow, SW_SHOW);
+	UpdateWindow(MainWindow);
+
+	while (GetMessageW(&msg, NULL, NULL, NULL))
+	{
+		if (!IsDialogMessageW(MainWindow, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+		}
+		else
+		{
+			SendMessageW(MainWindow, msg.message, msg.wParam, msg.lParam);
+		}
+	}
+	return 0;
 }
 
 
@@ -136,7 +210,7 @@ int WINAPI wWinMain(
 	if (Argv == NULL || Argc < 2)
 	{
 		LocalFree(Argv);
-		return 0;
+		return CreateMainWindow();
 	}
 
 	StubCreateProcessInternalW = (FuncCreateProcessInternalW)EATLookupRoutineByHashPNoFix(GetKernel32Handle(), KERNEL32_CreateProcessInternalW);

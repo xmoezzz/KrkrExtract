@@ -33,5 +33,8 @@
     <Image Include="KrkrExtractExe.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="small.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -3,8 +3,11 @@
 #include "my.h"
 #include "ml.h"
 #include "KrkrHeaders.h"
+#include "KrkrUniversalDumper.h"
+#include "KrkrDumperBase.h"
+#include <unordered_set>
 
-class KrkrUniversalDumper
+class KrkrUniversalDumper : public KrkrDumperBase
 {
 
 public:
@@ -18,15 +21,9 @@ public:
 
 private:
 	VOID NTAPI AddPath(LPWSTR lpPath);
-
 	NTSTATUS WINAPI DumpFile();
 
-	NTSTATUS NTAPI ProcessFile(IStream* Stream, LPCWSTR OutFileName);
-	NTSTATUS NTAPI ProcessPNG(IStream* Stream, LPCWSTR OutFileName);
-	NTSTATUS NTAPI ProcessTLG(IStream* Stream, LPCWSTR OutFileName);
-	NTSTATUS NTAPI ProcessTEXT(IStream* Stream, LPCWSTR OutFileName);
-	NTSTATUS NTAPI ProcessPSB(IStream* Stream, LPCWSTR OutFileName, wstring& ExtName);
-
+	std::unordered_set<wstring> FileList;
 };
 
 HANDLE NTAPI StartUniversalDumper();

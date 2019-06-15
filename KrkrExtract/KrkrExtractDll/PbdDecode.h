@@ -292,7 +292,7 @@ public:
 				break;
 			case tvtReal:
 				var.type = tvtReal;
-				var.integer = val->AsReal();
+				var.real = val->AsReal();
 				break;
 			}
 		}

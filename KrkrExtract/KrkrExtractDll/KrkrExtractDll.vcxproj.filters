@@ -147,6 +147,12 @@
     <ClCompile Include="PbdDecode.cpp">
       <Filter>源文件\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Export.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrDumperBase.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -282,6 +288,9 @@
       <Filter>头文件\Core</Filter>
     </ClInclude>
     <ClInclude Include="PbdDecode.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrDumperBase.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
   </ItemGroup>

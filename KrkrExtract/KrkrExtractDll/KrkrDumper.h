@@ -8,9 +8,10 @@
 #include "TLGDecoder.h"
 #include "PNGWorker.h"
 #include <Shlwapi.h> 
+#include "KrkrDumperBase.h"
 
 
-class KrkrDumper
+class KrkrDumper : public KrkrDumperBase
 {
 
 public:
@@ -36,13 +37,5 @@ private:
 	NTSTATUS WINAPI ParseXP3iFile(PWCHAR lpFileName);
 	NTSTATUS WINAPI ProcessXP3Archive(LPCWSTR FileName, NtFileDisk& file);
 	NTSTATUS WINAPI DumpFile();
-
-
-	NTSTATUS NTAPI ProcessFile(IStream* Stream, LPCWSTR OutFileName, XP3Index& it);
-	NTSTATUS NTAPI ProcessPNG(IStream* Stream, LPCWSTR OutFileName, XP3Index& it);
-	NTSTATUS NTAPI ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3Index& it);
-	NTSTATUS NTAPI ProcessTEXT(IStream* Stream, LPCWSTR OutFileName, XP3Index& it);
-	NTSTATUS NTAPI ProcessPBD(IStream* Stream, LPCWSTR OutFileName, XP3Index& it);
-	NTSTATUS NTAPI ProcessPSB(IStream* Stream, LPCWSTR OutFileName, XP3Index& it, wstring& ExtName);
 };
 

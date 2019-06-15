@@ -18,7 +18,7 @@ ForceInline wstring FASTCALL GetPackageName(wstring& FileName)
 	return FileName;
 }
 
-ForceInline wstring FASTCALL GetExtensionUpper(wstring& FileName)
+ForceInline wstring FASTCALL GetExtensionUpper(const wstring& FileName)
 {
 	auto Index = FileName.find_last_of(L'.');
 	if (Index != std::wstring::npos)

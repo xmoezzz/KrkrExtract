@@ -12,6 +12,9 @@
 #include "TLGDecoder.h"
 #include "tp_stub.h"
 #include <shlwapi.h>
+#include <tlhelp32.h>
+#include <unordered_set>
+#include <tuple>
 
 PVOID GetTVPCreateStreamCall();
 tTJSBinaryStream* FASTCALL CallTVPCreateStream(const ttstr& FilePath);
@@ -61,314 +64,208 @@ VOID NTAPI KrkrUniversalDumper::AddPath(LPWSTR FileName)
 	}
 }
 
-NTSTATUS NTAPI KrkrUniversalDumper::ProcessFile(IStream* Stream, LPCWSTR OutFileName)
+// @keenfuzz
+void DumpHex(const void* data, size_t size)
 {
-	NTSTATUS         Status;
-	STATSTG          Stat;
-	NtFileDisk       File;
-	LARGE_INTEGER    Tranferred, WriteSize, TempSize, Offset;
-	ULONG            ReadSize;
-
-	static BYTE Buffer[1024 * 64];
-
-	Offset.QuadPart = 0;
-	Stream->Seek(Offset, FILE_BEGIN, NULL);
-	Stream->Stat(&Stat, STATFLAG_DEFAULT);
-	Tranferred.QuadPart = 0;
-
-	Status = File.Create(OutFileName);
-	if (NT_FAILED(Status))
-	{
-		if (GlobalData::GetGlobalData()->DebugOn)
-			PrintConsoleW(L"Failed to write %s[%08x]\n", OutFileName, Status);
-
-		return Status;
-	}
-
-	while (Tranferred.QuadPart < (LONG64)Stat.cbSize.QuadPart)
-	{
-		Stream->Read(&Buffer, sizeof(Buffer), &ReadSize);
-		Tranferred.QuadPart += ReadSize;
-		TempSize.QuadPart = 0;
-		while (TempSize.QuadPart < ReadSize)
-		{
-			File.Write(Buffer, ReadSize, &WriteSize);
-			TempSize.QuadPart += WriteSize.QuadPart;
+	char ascii[17];
+	size_t i, j;
+	ascii[16] = '\0';
+	for (i = 0; i < size; ++i) {
+		PrintConsoleA("%02X ", ((unsigned char*)data)[i]);
+		if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
+			ascii[i % 16] = ((unsigned char*)data)[i];
 		}
-	}
-	File.Close();
-	return Status;
-}
-
-
-NTSTATUS NTAPI KrkrUniversalDumper::ProcessPSB(IStream* Stream, LPCWSTR OutFileName, wstring& ExtName)
-{
-	NTSTATUS    Status;
-	NtFileDisk  File;
-	STATSTG     Stat;
-	GlobalData* Handle;
-
-	Handle = GlobalData::GetGlobalData();
-	Stream->Stat(&Stat, STATFLAG_DEFAULT);
-
-	Status = STATUS_ABANDONED;
-	if (Handle->PsbFlagOn(PSB_RAW) ||
-		Handle->PsbFlagOn(PSB_ALL))
-	{
-		Status = ProcessFile(Stream, OutFileName);
-	}
-
-	if (Handle->PsbFlagOn(PSB_ALL) ||
-		Handle->PsbFlagOn(PSB_TEXT) ||
-		Handle->PsbFlagOn(PSB_DECOM) ||
-		Handle->PsbFlagOn(PSB_ANM))
-	{
-		Status = ExtractPsb(Stream, GlobalData::GetGlobalData()->PsbFlagOn(PSB_IMAGE) ||
-			GlobalData::GetGlobalData()->PsbFlagOn(PSB_ANM),
-			GlobalData::GetGlobalData()->PsbFlagOn(PSB_DECOM),
-			ExtName, OutFileName);
-
-		Status = Status >= 0 ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
-	}
-
-	if (Handle->PsbFlagOn(PSB_ALL) ||
-		Handle->PsbFlagOn(PSB_JSON)
-		)
-	{
-		wstring FileName = ReplaceFileNameExtension(GetPackageName(wstring(OutFileName)), L"");
-		wstring BaseName = GetFileBasePath(wstring(OutFileName));
-
-		PrintConsoleW(L"%s %s\n", FileName.c_str(), BaseName.c_str());
-
-		Status = DecompilePsbJson(Stream, BaseName.c_str(), FileName.c_str());
-	}
-
-	return Status;
-}
-
-NTSTATUS NTAPI KrkrUniversalDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName)
-{
-	NTSTATUS         Status;
-	STATSTG          Stat;
-	LARGE_INTEGER    Offset;
-	ULONG            ReadSize;
-	ULONG            OutSize;
-	PBYTE            Buffer, RawBuffer, OutBuffer;
-	BOOL             TempDecode;
-	NtFileDisk       File;
-	GlobalData*      Handle;
-
-	Handle = GlobalData::GetGlobalData();
-
-	Stream->Stat(&Stat, STATFLAG_DEFAULT);
-
-	Buffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Stat.cbSize.LowPart);
-	if (!Buffer)
-	{
-		MessageBoxW(Handle->MainWindow, L"Failed to Allocate memory for tlg Decoder", L"KrkrExtract", MB_OK);
-		return STATUS_UNSUCCESSFUL;
-	}
-
-	Status = STATUS_SUCCESS;
-	Stream->Read(Buffer, Stat.cbSize.LowPart, &ReadSize);
-	RawBuffer = Buffer;
-
-	switch (Handle->GetTlgFlag())
-	{
-	case TLG_RAW:
-		Offset.QuadPart = 0;
-		Stream->Seek(Offset, FILE_BEGIN, NULL);
-		HeapFree(GetProcessHeap(), 0, RawBuffer);
-		return ProcessFile(Stream, OutFileName);
-
-	case TLG_SYS:
-		if (GlobalData::GetGlobalData()->DebugOn)
-			PrintConsoleW(L"Using System Decode Mode[TLG]\n");
-
-		HeapFree(GetProcessHeap(), 0, RawBuffer);
-		SavePng(GetPackageName(wstring(OutFileName)).c_str(), FormatPathFull((wstring(OutFileName) + L".png").c_str()).c_str());
-		return Status;
-
-
-	case TLG_BUILDIN:
-	case TLG_PNG:
-	{
-
-		OutBuffer = NULL;
-		OutSize = 0;
-		TempDecode = TRUE;
-
-		if (RtlCompareMemory(Buffer, KRKR2_TLG0_MAGIC, 6) == 6)
-			Buffer += 0xF;
-
-		if (RtlCompareMemory(Buffer, KRKR2_TLG5_MAGIC, 6) == 6)
-		{
-			if (!DecodeTLG5(Buffer, Stat.cbSize.LowPart, (PVOID*)&OutBuffer, &OutSize))
-			{
-				TempDecode = FALSE;
-				OutSize = Stat.cbSize.LowPart;
-				OutBuffer = Buffer;
+		else {
+			ascii[i % 16] = '.';
+		}
+		if ((i + 1) % 8 == 0 || i + 1 == size) {
+			PrintConsoleA(" ");
+			if ((i + 1) % 16 == 0) {
+				PrintConsoleA("|  %s \n", ascii);
 			}
-		}
-		else if (RtlCompareMemory(Buffer, KRKR2_TLG6_MAGIC, 6) == 6)
-		{
-			if (!DecodeTLG6(Buffer, Stat.cbSize.LowPart, (PVOID*)&OutBuffer, &OutSize))
-			{
-				TempDecode = FALSE;
-				OutSize = Stat.cbSize.LowPart;
-				OutBuffer = Buffer;
-			}
-		}
-		else
-		{
-			TempDecode = FALSE;
-			OutSize = Stat.cbSize.LowPart;
-			OutBuffer = Buffer;
-		}
-
-		if (Handle->GetTlgFlag() == TLG_BUILDIN)
-		{
-			if (Handle->DebugOn)
-				PrintConsoleW(L"Decoding tlg image to bmp...\n");
-
-			if (!TempDecode)
-				Status = File.Create(OutFileName);
-			else
-				Status = File.Create((wstring(OutFileName) + L".bmp").c_str());
-
-			if (NT_FAILED(Status))
-			{
-				HeapFree(GetProcessHeap(), 0, RawBuffer);
-				if (TempDecode)
-					HeapFree(GetProcessHeap(), 0, OutBuffer);
-
-				TempDecode = NULL;
-				File.Close();
-				return STATUS_UNSUCCESSFUL;
-			}
-
-			File.Write(OutBuffer, OutSize);
-
-			HeapFree(GetProcessHeap(), 0, RawBuffer);
-			if (TempDecode)
-				HeapFree(GetProcessHeap(), 0, OutBuffer);
-		}
-		else if (Handle->GetTlgFlag() == TLG_PNG)
-		{
-			if (GlobalData::GetGlobalData()->DebugOn)
-				PrintConsoleW(L"Decoding tlg image to png file(Build-in)...\n");
-
-			if (TempDecode)
-			{
-				if (Bmp2PNG(OutBuffer, OutSize, (wstring(OutFileName) + L".png").c_str()) < 0)
-				{
-					Status = File.Create((wstring(OutFileName) + L".bmp").c_str());
-
-					if (NT_FAILED(Status))
-						return Status;
-
-					File.Write(OutBuffer, OutSize);
-					File.Close();
+			else if (i + 1 == size) {
+				ascii[(i + 1) % 16] = '\0';
+				if ((i + 1) % 16 <= 8) {
+					PrintConsoleA(" ");
 				}
-
-				HeapFree(GetProcessHeap(), 0, RawBuffer);
-				HeapFree(GetProcessHeap(), 0, OutBuffer);
-			}
-			else
-			{
-				HeapFree(GetProcessHeap(), 0, RawBuffer);
-				Offset.QuadPart = 0;
-				Stream->Seek(Offset, FILE_BEGIN, NULL);
-				return ProcessFile(Stream, OutFileName);
-			}
-		}
-		else if (Handle->GetTlgFlag() == TLG_JPG)
-		{
-			if (GlobalData::GetGlobalData()->DebugOn)
-				PrintConsoleW(L"Decoding tlg image to jpg file(Build-in)...\n");
-
-			if (TempDecode)
-			{
-				if (Bmp2JPG(OutBuffer, OutSize, (wstring(OutFileName) + L".jpg").c_str()) < 0)
-				{
-					Status = File.Create((wstring(OutFileName) + L".bmp").c_str());
-
-					if (NT_FAILED(Status))
-						return Status;
-
-					File.Write(OutBuffer, OutSize);
-					File.Close();
+				for (j = (i + 1) % 16; j < 16; ++j) {
+					PrintConsoleA("   ");
 				}
-
-				HeapFree(GetProcessHeap(), 0, RawBuffer);
-				HeapFree(GetProcessHeap(), 0, OutBuffer);
-			}
-			else
-			{
-				HeapFree(GetProcessHeap(), 0, RawBuffer);
-				Offset.QuadPart = 0;
-				Stream->Seek(Offset, FILE_BEGIN, NULL);
-				return ProcessFile(Stream, OutFileName);
+				PrintConsoleA("|  %s \n", ascii);
 			}
 		}
 	}
-	break;
-	}
-	return Status;
-}
-
-NTSTATUS NTAPI KrkrUniversalDumper::ProcessPNG(IStream* Stream, LPCWSTR OutFileName)
-{
-	NTSTATUS         Status;
-	NtFileDisk       File;
-
-	if (GlobalData::GetGlobalData()->GetPngFlag() == PNG_SYS)
-	{
-		if (GlobalData::GetGlobalData()->DebugOn)
-			PrintConsoleW(L"Using Build-in Decode Mode\n");
-
-		SavePng(GetPackageName(wstring(OutFileName)).c_str(), FormatPathFull(OutFileName).c_str());
-	}
-	else if (GlobalData::GetGlobalData()->GetPngFlag() == PNG_RAW)
-	{
-		Status = ProcessFile(Stream, OutFileName);
-	}
-	return Status;
 }
 
 
-
-NTSTATUS NTAPI KrkrUniversalDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFileName)
+VOID IdentifyFileName(PVOID Address, SIZE_T Size, std::unordered_set<wstring>& FileList)
 {
-	NTSTATUS     Status;
-	STATSTG      Stat;
-	ULONG        ReadSize;
-	PBYTE        OriBuffer;
-	WCHAR        FileName[MAX_PATH];
+	SIZE_T Length;
+	INT    Count;
+	BOOL   Found, Success;
+	PWSTR  Name;
 
-	Stream->Stat(&Stat, STATFLAG_DEFAULT);
-	RtlZeroMemory(FileName, countof(FileName) * sizeof(WCHAR));
-	lstrcpyW(FileName, OutFileName);
+
+	auto BasicValid = [](PWCHAR TestName, SIZE_T Length)
+	{
+		BOOL Found = FALSE;
+
+		auto isValid = [](unsigned int value)
+		{
+			const DWORD MaxChar = 0x10ffff;
+			const DWORD MinReserved = 0x00d800;
+			const DWORD MaxReserved = 0x00dfff;
+
+			return (value <= MaxChar) && ((value < MinReserved) || (value > MaxReserved));
+		};
+
+		for (SIZE_T i = 0; i < Length; i++)
+		{
+			if (TestName[i] == L'.')
+			{
+				Found = TRUE;
+			}
+			else if (TestName[i] == L'?' || TestName[i] == L'*' || TestName[i] == L':')
+			{
+				Found = FALSE;
+				break;
+			}
+			else if (isValid(TestName[i]) == FALSE)
+			{
+				Found = FALSE;
+				break;
+			}
+		}
+		return Found;
+	};
+
+	auto FinalValid = [](PWCHAR TestName)
+	{
+		wstring Test(TestName);
+		auto Index = Test.find_first_of(L'>');
+		if (Index == wstring::npos)
+			return TRUE;
+		auto sub = Test.substr(Index + 1);
+		auto Found = FALSE;
+		for (auto& ch : sub)
+		{
+			if (ch == L'.')
+			{
+				Found = TRUE;
+				break;
+			}
+		}
+		return Found;
+	};
+
+	if (Size <= 4)
+		return;
+
+	Success = FALSE;
 
 	LOOP_ONCE
 	{
-		Status = STATUS_SUCCESS;
-	OriBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, Stat.cbSize.LowPart);
-	if (!OriBuffer)
+		Name   = (PWCH)((PBYTE)Address);
+		Length = wcsnlen_s(Name, Size / 2);
+		if (Length < 5)
+			break;
+
+		if (BasicValid(Name, Length) && FinalValid(Name))
+		{
+			wstring FileName(Name, Length);
+			FileList.insert(FileName);
+			Success = TRUE;
+		}
+	}
+
+	if (Success == FALSE)
 	{
-		Status = STATUS_INSUFFICIENT_RESOURCES;
-		break;
+		LOOP_ONCE
+		{
+			Name   = (PWCH)((PBYTE)Address + 4);
+			Length = wcsnlen_s(Name, (Size - 4) / 2);
+			if (Length < 5)
+				break;
+
+			if (BasicValid(Name, Length) && FinalValid(Name))
+			{
+				wstring FileName(Name, Length);
+				FileList.insert(FileName);
+				Success = TRUE;
+			}
+		}
+	}
+}
+
+VOID LoadFiles(std::unordered_set<wstring>& FileList)
+{
+	DWORD              HeapCount;
+	HANDLE*            Heaps;
+	PROCESS_HEAP_ENTRY Entry;
+	
+
+	HeapCount = GetProcessHeaps(0, NULL);
+	if (HeapCount == 0)
+		return;
+
+	Heaps = (HANDLE*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, HeapCount * sizeof(HANDLE));
+	GetProcessHeaps(HeapCount, Heaps);
+
+	for (DWORD i = 0; i < HeapCount; i++)
+	{
+		HeapLock(Heaps[i]);
+		Entry.lpData = NULL;
+		while (HeapWalk(Heaps[i], &Entry))
+		{
+			SEH_TRY
+			{
+				IdentifyFileName((PVOID)Entry.lpData, Entry.cbData, FileList);
+			}
+			SEH_EXCEPT(EXCEPTION_EXECUTE_HANDLER)
+			{
+
+			}
+		}
+		HeapUnlock(Heaps[i]);
+	}
+}
+enum DumpType : SIZE_T
+{
+	DUMP_NONE   = 0,
+	DUMP_NORMAL = 1,
+	DUMP_KRKRZ  = 2
+};
+
+std::tuple<wstring, wstring, DumpType> FetchPackageName(const wstring& Name)
+{
+	auto FixName = [](wstring& FixedName)->wstring
+	{
+		auto Pos = FixedName.find_last_of(L'.');
+		if (Pos != wstring::npos)
+			return FixedName.substr(0, Pos);
+		return FixedName;
+	};
+
+	wstring PackageName = {};
+	auto pos = Name.find_first_of(L'>');
+	if (pos != wstring::npos)
+	{
+		PackageName = Name.substr(0, pos);
+		auto ExtName = GetExtensionUpper(PackageName);
+		if (ExtName == L"XP3" || ExtName == L"BIN")
+			return std::make_tuple(FixName(PackageName), Name.substr(pos + 1), DumpType::DUMP_NORMAL);
 	}
 
-	Stream->Read(OriBuffer, Stat.cbSize.LowPart, &ReadSize);
-
-	Status = STATUS_SUCCESS;
-	if (DecodeText(OriBuffer, Stat.cbSize.LowPart, FileName) != -1)
-		HeapFree(GetProcessHeap(), 0, OriBuffer);
-	else
-		Status = ProcessFile(Stream, FileName);
+	pos = Name.find_first_of(L'/');
+	if (pos != wstring::npos)
+	{
+		PackageName = Name.substr(0, pos);
+		auto ExtName = GetExtensionUpper(PackageName);
+		if (ExtName == L"XP3" || ExtName == L"BIN")
+			return std::make_tuple(FixName(PackageName), Name.substr(pos + 1), DumpType::DUMP_KRKRZ);
 	}
-	return Status;
+	
+	return std::make_tuple(wstring(L""), wstring(L""), DumpType::DUMP_NONE);
 }
 
 NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
@@ -376,7 +273,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 	NTSTATUS            Status;
 	wstring             FixFileName, ExtName, OutFilePathFull, OutFilePath;
 	WCHAR               CurDir[MAX_PATH];
-	ULONG_PTR           Index;
+	ULONG_PTR           Index, CurFile;
 	tTJSBinaryStream*   BStream;
 	IStream*            Stream;
 	STATSTG             Stat;
@@ -390,20 +287,41 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 	OutFilePath += CurDir;
 	OutFilePath += L"\\KrkrExtract_Output\\";
 
+	this->FileList.clear();
+	LoadFiles(this->FileList);
+
 	LOOP_ONCE
 	{
-		Status = STATUS_SUCCESS;
-		if (Handle->FileNameList.size() == 0)
+		CurFile = 0;
+		Status  = STATUS_SUCCESS;
+		if (FileList.size() == 0)
 		{
 			Handle->isRunning = FALSE;
 			break;
 		}
 
-		for (auto& FileName : Handle->FileNameList)
+		Handle->CountFile = FileList.size();
+
+		for (auto& FileName : FileList)
 		{
-			Index = FileName.find_last_of(L'\\');
+			auto NameInfo = FetchPackageName(FileName);
+			auto PackageName = std::get<0>(NameInfo);
+			auto FilePath    = std::get<1>(NameInfo);
+			auto Type        = std::get<2>(NameInfo);
+
+			Handle->SetCurFile(CurFile);
+
+			if (PackageName.length() == 0 || FilePath.length() == 0)
+			{
+				CurFile++;
+				continue;
+			}
+
+			Index = FilePath.find_last_of(L'\\');
 			if (Index != wstring::npos)
-				FixFileName = FileName.substr(Index + 1, wstring::npos);
+				FixFileName = FilePath.substr(Index + 1, wstring::npos);
+			else
+				FixFileName = FilePath;
 			Index = FixFileName.find_last_of(L'/');
 			if (Index != wstring::npos)
 				FixFileName = FixFileName.substr(Index + 1, wstring::npos);
@@ -419,7 +337,7 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 					ExtName = GetExtensionUpper(FixFileName);
 					if (Stream)
 					{
-						OutFilePathFull = OutFilePath + FixFileName;
+						OutFilePathFull = OutFilePath + PackageName + L"\\" + FixFileName;
 						AddPath(&OutFilePathFull[0]);
 					}
 
@@ -431,6 +349,10 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 					else if (ExtName == L"TLG")
 					{
 						Status = ProcessTLG(Stream, OutFilePathFull.c_str());
+					}
+					else if (ExtName == L"PBD")
+					{
+						Status = ProcessPBD(Stream, OutFilePathFull.c_str());
 					}
 					else if (ExtName == L"PSB" ||
 						ExtName == L"SCN" ||
@@ -515,16 +437,17 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 							Status = ProcessFile(Stream, OutFilePathFull.c_str());
 						}
 					}
-
 				}
 			}
 			catch (...)
 			{
 
 			}
+			CurFile++;
 		}
 
 	}
+	
 	Handle->Reset();
 	return Status;
 }

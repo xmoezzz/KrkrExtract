@@ -7,8 +7,11 @@
 #include "KrkrUniversalDumper.h"
 #include <Shlobj.h>
 #include <WindowsX.h>
+#include <dwmapi.h>
 #include "MultiThread.h"
 #include "DebuggerHandler.h"
+
+#pragma comment(lib, "Dwmapi.lib")
 
 BOOL GlobalData::WindowIsInited = FALSE;
 
@@ -580,7 +583,6 @@ VOID NTAPI GlobalData::Reset()
 	isRunning = FALSE;
 }
 
-//在每一次进行操作之前
 VOID NTAPI GlobalData::ForceReset()
 {
 	DWORD         ExitCode;
@@ -677,6 +679,12 @@ VOID WINAPI GlobalData::EnableAll(HWND hWnd)
 	HWND hPbdRaw  = GetItemX(IDC_RADIO_PBD_RAW);
 	HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
 
+	HWND hUdump   = GetItemX(IDC_BUTTON_UDUMP);
+
+	if (GlobalData::GetGlobalData()->ModuleType = ModuleVersion::Krkrz)
+		EnableX(hUdump);
+	else
+		DisableX(hUdump);
 
 	EnableX(hPbdRaw);
 	EnableX(hPbdJson);
@@ -781,6 +789,10 @@ VOID NTAPI GlobalData::DisableAll(HWND hWnd)
 	HWND hPbdRaw = GetItemX(IDC_RADIO_PBD_RAW);
 	HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
 
+	HWND hUdump = GetItemX(IDC_BUTTON_UDUMP);
+
+	DisableX(hUdump);
+
 	DisableX(hPbdJson);
 	DisableX(hPbdRaw);
 
@@ -863,6 +875,95 @@ VOID GlobalData::VirtualConsolePrint(PCWSTR Format, ...)
 		ListBox_AddString(VirtualConsole, Buffer);
 }
 
+HRESULT EnableBlurBehind(HWND hwnd)
+{
+   HRESULT hr = S_OK;
+   DWM_BLURBEHIND bb = {0};
+
+   bb.dwFlags = DWM_BB_ENABLE;
+   bb.fEnable = true;
+   bb.hRgnBlur = NULL;
+
+   hr = DwmEnableBlurBehindWindow(hwnd, &bb);
+   return hr;
+}
+
+
+typedef enum _WINDOWCOMPOSITIONATTRIB
+{
+	WCA_UNDEFINED = 0,
+	WCA_NCRENDERING_ENABLED = 1,
+	WCA_NCRENDERING_POLICY = 2,
+	WCA_TRANSITIONS_FORCEDISABLED = 3,
+	WCA_ALLOW_NCPAINT = 4,
+	WCA_CAPTION_BUTTON_BOUNDS = 5,
+	WCA_NONCLIENT_RTL_LAYOUT = 6,
+	WCA_FORCE_ICONIC_REPRESENTATION = 7,
+	WCA_EXTENDED_FRAME_BOUNDS = 8,
+	WCA_HAS_ICONIC_BITMAP = 9,
+	WCA_THEME_ATTRIBUTES = 10,
+	WCA_NCRENDERING_EXILED = 11,
+	WCA_NCADORNMENTINFO = 12,
+	WCA_EXCLUDED_FROM_LIVEPREVIEW = 13,
+	WCA_VIDEO_OVERLAY_ACTIVE = 14,
+	WCA_FORCE_ACTIVEWINDOW_APPEARANCE = 15,
+	WCA_DISALLOW_PEEK = 16,
+	WCA_CLOAK = 17,
+	WCA_CLOAKED = 18,
+	WCA_ACCENT_POLICY = 19,
+	WCA_FREEZE_REPRESENTATION = 20,
+	WCA_EVER_UNCLOAKED = 21,
+	WCA_VISUAL_OWNER = 22,
+	WCA_LAST = 23
+} WINDOWCOMPOSITIONATTRIB;
+
+typedef struct _WINDOWCOMPOSITIONATTRIBDATA
+{
+	WINDOWCOMPOSITIONATTRIB Attrib;
+	PVOID pvData;
+	SIZE_T cbData;
+} WINDOWCOMPOSITIONATTRIBDATA;
+
+typedef enum _ACCENT_STATE
+{
+	ACCENT_DISABLED = 0,
+	ACCENT_ENABLE_GRADIENT = 1,
+	ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
+	ACCENT_ENABLE_BLURBEHIND = 3,
+	ACCENT_ENABLE_ACRYLIC_BLURBEHIND = 4,
+	ACCENT_INVALID_STATE = 5
+} ACCENT_STATE;
+
+typedef struct _ACCENT_POLICY
+{
+	ACCENT_STATE AccentState;
+	DWORD AccentFlags;
+	DWORD GradientColor;
+	DWORD AnimationId;
+} ACCENT_POLICY;
+
+
+typedef BOOL(WINAPI* SetWindowCompositionAttributeAPI)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
+
+BOOL EnableBlurBehindWin10(HWND hwnd)
+{
+	HMODULE hUser = GetModuleHandleW(L"User32.dll");
+	if (hUser)
+	{
+		auto SetWindowCompositionAttribute = (SetWindowCompositionAttributeAPI)GetProcAddress(hUser, "SetWindowCompositionAttribute");
+		if (SetWindowCompositionAttribute)
+		{
+			ACCENT_POLICY accent = { ACCENT_ENABLE_ACRYLIC_BLURBEHIND, 0, 0, 0 };
+			WINDOWCOMPOSITIONATTRIBDATA data;
+			data.Attrib = WCA_ACCENT_POLICY;
+			data.pvData = &accent;
+			data.cbData = sizeof(accent);
+			return SetWindowCompositionAttribute(hwnd, &data);
+		}
+	}
+	return FALSE;
+}
+
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	int         wmId, wmEvent;
@@ -920,6 +1021,13 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		HWND hPbdRaw = GetItemX(IDC_RADIO_PBD_RAW);
 		HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
+
+		HWND hUdump = GetItemX(IDC_BUTTON_UDUMP);
+
+		if (GlobalData::GetGlobalData()->ModuleType = ModuleVersion::Krkrz)
+			EnableX(hUdump);
+		else
+			DisableX(hUdump);
 
 		EnableX(hPbdRaw);
 		EnableX(hPbdJson);
@@ -1120,6 +1228,18 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 			}
 			break;
+			}
+		}
+		break;
+
+
+		case IDC_BUTTON_UDUMP:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+				GlobalData::GetGlobalData()->WorkerThread = StartUniversalDumper();
+				break;
 			}
 		}
 		break;
