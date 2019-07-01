@@ -156,6 +156,42 @@ IStream* LoadFromResource(HMODULE Module, UINT nResID, LPCWSTR lpTyp, BOOL Injec
 }
 
 
+IStream* LoadFromResource2(HMODULE Module, UINT nResID, LPCWSTR lpTyp)
+{
+	WCHAR          ExeFileBaseName[MAX_PATH];
+
+	HRSRC hRsrc = ::FindResourceW(Module, MAKEINTRESOURCE(nResID), lpTyp);
+	if (hRsrc == NULL)
+		return NULL;
+
+	HGLOBAL hImgData = ::LoadResource(Module, hRsrc);
+	if (hImgData == NULL)
+	{
+		::FreeResource(hImgData);
+		return NULL;
+	}
+
+	LPVOID lpVoid = ::LockResource(hImgData);
+
+	LPSTREAM pStream = NULL;
+	DWORD dwSize = ::SizeofResource(Module, hRsrc);
+	HGLOBAL hNew = ::GlobalAlloc(GHND, dwSize);
+	LPBYTE lpByte = (LPBYTE)::GlobalLock(hNew);
+	RtlCopyMemory(lpByte, lpVoid, dwSize);
+
+	::GlobalUnlock(hNew);
+
+	if (FAILED(CreateStreamOnHGlobal(hNew, TRUE, &pStream)))
+	{
+		GlobalFree(hNew);
+		return NULL;
+	}
+	::FreeResource(hImgData);
+
+	return pStream;
+}
+
+
 //none thread base
 NTSTATUS NTAPI MakePatch()
 {

@@ -136,6 +136,23 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 
+	case WM_COMMAND:
+	{
+		DWORD WmId    = LOWORD(wParam);
+		DWORD WmEvent = HIWORD(wParam);
+
+		switch (WmId)
+		{
+		case ID_EXIT:
+			if (WmEvent == BN_CLICKED)
+				ExitProcess(0);
+			break;
+		default:
+			break;
+		}
+	}
+	break;
+
 	case WM_SYSCOMMAND:
 	{
 		switch (wParam)

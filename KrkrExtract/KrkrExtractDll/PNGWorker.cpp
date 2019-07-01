@@ -589,3 +589,7 @@ int Bmp2JPG(PBYTE Buffer, ULONG Size, const WCHAR *Path)
 	return 0;
 }
 
+int Image2JPG(PBYTE Buffer, ULONG Size, const WCHAR *Path)
+{
+	return Bmp2JPG(Buffer, Size, Path);
+}

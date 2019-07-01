@@ -1012,6 +1012,28 @@ Nt_CreateThread(
 );
 
 
+NTSTATUS
+Nt_CreateProcess(
+	HANDLE                  Token,
+	PCWSTR                  ApplicationName,
+	PWSTR                   DEF_VAL(CommandLine, NULL),
+	PCWSTR                  DEF_VAL(CurrentDirectory, NULL),
+	ULONG                   DEF_VAL(CreationFlags, 0),
+	LPSTARTUPINFOW          DEF_VAL(StartupInfo, NULL),
+	LPPROCESS_INFORMATION   DEF_VAL(ProcessInformation, NULL),
+	LPSECURITY_ATTRIBUTES   DEF_VAL(ProcessAttributes, NULL),
+	LPSECURITY_ATTRIBUTES   DEF_VAL(ThreadAttributes, NULL),
+	PVOID                   DEF_VAL(Environment, NULL)
+);
+
+
+ULONG
+Nt_WaitForSingleObjectEx(
+	IN HANDLE hHandle,
+	IN ULONG  Milliseconds,
+	IN BOOL   bAlertable
+);
+
 inline ULONG_PTR ReadFsPtr(ULONG_PTR Offset)
 {
 #if defined(_AMD64_)

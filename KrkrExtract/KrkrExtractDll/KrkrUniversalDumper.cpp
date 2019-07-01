@@ -354,6 +354,10 @@ NTSTATUS NTAPI KrkrUniversalDumper::DumpFile()
 					{
 						Status = ProcessPBD(Stream, OutFilePathFull.c_str());
 					}
+					else if (ExtName == L"AMV")
+					{
+						Status = ProcessAMV(Stream, OutFilePathFull.c_str());
+					}
 					else if (ExtName == L"PSB" ||
 						ExtName == L"SCN" ||
 						ExtName == L"MTN" ||

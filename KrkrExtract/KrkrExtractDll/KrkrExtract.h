@@ -48,7 +48,7 @@ enum AMV_DECODE_INFO
 {
 	AMV_JPG,
 	AMV_PNG,
-	AMV_MNG,
+	AMV_GIF,
 	AMV_RAW
 };
 
@@ -99,7 +99,7 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 #define szWindowClassName   L"XP3ExtractMainClass"
 
 //A.B.C.D : 0 <= X <= 255
-#define _XP3ExtractVersion_ L"Ver 4.0.1.4"
+#define _XP3ExtractVersion_ L"Ver 4.0.1.5"
 
 
 class MemEntry

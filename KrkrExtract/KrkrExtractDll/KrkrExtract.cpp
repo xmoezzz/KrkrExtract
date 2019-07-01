@@ -674,7 +674,8 @@ VOID WINAPI GlobalData::EnableAll(HWND hWnd)
 
 	HWND hAMVJpg = GetItemX(IDC_AMV_FRAME);
 	HWND hAMVPng = GetItemX(IDC_AMV_PNG);
-	HWND hAMVMng = GetItemX(IDC_AMV_MNG);
+	HWND hAMVMng = GetItemX(IDC_AMV_GIF);
+	HWND hAMVRaw = GetItemX(IDC_AMV_RAW);
 
 	HWND hPbdRaw  = GetItemX(IDC_RADIO_PBD_RAW);
 	HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
@@ -692,6 +693,7 @@ VOID WINAPI GlobalData::EnableAll(HWND hWnd)
 	EnableX(hAMVJpg);
 	EnableX(hAMVPng);
 	EnableX(hAMVMng);
+	EnableX(hAMVRaw);
 
 	EnableX(hTJS2Raw);
 	EnableX(hTJS2Decom);
@@ -784,7 +786,8 @@ VOID NTAPI GlobalData::DisableAll(HWND hWnd)
 
 	HWND hAMVJpg = GetItemX(IDC_AMV_FRAME);
 	HWND hAMVPng = GetItemX(IDC_AMV_PNG);
-	HWND hAMVMng = GetItemX(IDC_AMV_MNG);
+	HWND hAMVMng = GetItemX(IDC_AMV_GIF);
+	HWND hAMVRaw = GetItemX(IDC_AMV_RAW);
 
 	HWND hPbdRaw = GetItemX(IDC_RADIO_PBD_RAW);
 	HWND hPbdJson = GetItemX(IDC_RADIO_PBD_JSON);
@@ -799,6 +802,7 @@ VOID NTAPI GlobalData::DisableAll(HWND hWnd)
 	DisableX(hAMVJpg);
 	DisableX(hAMVPng);
 	DisableX(hAMVMng);
+	DisableX(hAMVRaw);
 
 	DisableX(hTJS2Raw);
 	DisableX(hTJS2Decom);
@@ -1004,7 +1008,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		HWND hAmvRaw = GetItemX(IDC_AMV_RAW);
 		HWND hAmvPNG = GetItemX(IDC_AMV_PNG);
 		HWND hAmvJPG = GetItemX(IDC_AMV_FRAME);
-		HWND hAmvMNG = GetItemX(IDC_AMV_MNG);
+		HWND hAmvMNG = GetItemX(IDC_AMV_GIF);
 
 		HWND hFolderEdit = GetItemX(IDC_PACK_EDIT_FOLDER);
 		HWND hOriPackEdit = GetItemX(IDC_PACK_EDIT_ORIPACK);
@@ -1243,6 +1247,95 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
+
+		//amv jpg
+		case IDC_AMV_FRAME:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				HWND hAmvJpg = GetItemX(IDC_AMV_FRAME);
+				BOOL Result;
+				Result = SendMessageW(hAmvJpg, BM_GETCHECK, 0, 0);
+				if (Result == TRUE)
+				{
+					GlobalData::GetGlobalData()->SetAmvFlag(AMV_JPG);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+
+		//amv png
+		case IDC_AMV_PNG:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				HWND hAmvPng = GetItemX(IDC_AMV_PNG);
+				BOOL Result;
+				Result = SendMessageW(hAmvPng, BM_GETCHECK, 0, 0);
+				if (Result == TRUE)
+				{
+					GlobalData::GetGlobalData()->SetAmvFlag(AMV_PNG);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+
+		//GIF
+		case IDC_AMV_GIF:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				HWND hAmvMng = GetItemX(IDC_AMV_GIF);
+				BOOL Result;
+				Result = SendMessageW(hAmvMng, BM_GETCHECK, 0, 0);
+				if (Result == TRUE)
+				{
+					GlobalData::GetGlobalData()->SetAmvFlag(AMV_GIF);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+
+
+		case IDC_AMV_RAW:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				HWND hAmvRaw = GetItemX(IDC_AMV_RAW);
+				BOOL Result;
+				Result = SendMessageW(hAmvRaw, BM_GETCHECK, 0, 0);
+				if (Result == TRUE)
+				{
+					GlobalData::GetGlobalData()->SetAmvFlag(AMV_RAW);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+
 
 		//PNG Raw
 		case IDC_PNG_RAW:
@@ -1806,6 +1899,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		}
+		break;
 
 		case IDC_RADIO_PBD_JSON:
 		{
@@ -1826,6 +1920,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		}
+		break;
 
 		//tjs2 raw
 		case IDC_TJS2_RAW:

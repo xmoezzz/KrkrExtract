@@ -661,30 +661,22 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 		}
 
 		AddPath(&OutFilePathFull[0]);
-		Stream = TVPCreateIStream(OutFileName, TJS_BS_READ);
-		if (Stream == NULL)
+		try
 		{
-			if (it.info.FileName.length() == 0 || it.info.FileName.find_first_of(L".") == std::wstring::npos)
-				OutFileName = it.yuzu.Name.c_str();
-			else
-				OutFileName = it.info.FileName.c_str();
-
-			BStream = NULL;
-			BStream = CallTVPCreateStream(OutFileName);
-
-			if (BStream == NULL)
+			Stream = TVPCreateIStream(OutFileName, TJS_BS_READ);
+			if (Stream == NULL)
 			{
-				if (GlobalData::GetGlobalData()->DebugOn)
-					PrintConsoleW(L"Failed to open %s\n", OutFileName.c_str());
+				if (it.info.FileName.length() == 0 || it.info.FileName.find_first_of(L".") == std::wstring::npos)
+					OutFileName = it.yuzu.Name.c_str();
+				else
+					OutFileName = it.info.FileName.c_str();
 
-				Status = STATUS_UNSUCCESSFUL;
-				continue;
-			}
-			else
-			{
-				Stream = ConvertBStreamToIStream(BStream);
+				//PrintConsoleW(L"%s\n", OutFileName.c_str());
+				auto xxooName = GetPackageName(wstring(OutFileName.c_str()));
+				BStream = NULL;
+				BStream = CallTVPCreateStream(ttstr(xxooName.c_str()));
 
-				if (!Stream)
+				if (BStream == NULL)
 				{
 					if (GlobalData::GetGlobalData()->DebugOn)
 						PrintConsoleW(L"Failed to open %s\n", OutFileName.c_str());
@@ -692,7 +684,25 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 					Status = STATUS_UNSUCCESSFUL;
 					continue;
 				}
+				else
+				{
+					Stream = ConvertBStreamToIStream(BStream);
+
+					if (!Stream)
+					{
+						if (GlobalData::GetGlobalData()->DebugOn)
+							PrintConsoleW(L"Failed to open %s\n", OutFileName.c_str());
+
+						Status = STATUS_UNSUCCESSFUL;
+						continue;
+					}
+				}
 			}
+		}
+		catch (...) 
+		{
+			PrintConsoleW(L"failed to extract %\n", GetPackageName(OutFilePathFull).c_str());
+			continue;
 		}
 
 		if (ExtName == L"PNG")
@@ -706,6 +716,10 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 		else if (ExtName == L"PBD")
 		{
 			Status = ProcessPBD(Stream, OutFilePathFull.c_str());
+		}
+		else if (ExtName == L"AMV")
+		{
+			Status = ProcessAMV(Stream, OutFilePathFull.c_str());
 		}
 		else if (ExtName == L"PSB" ||
 				 ExtName == L"SCN" ||

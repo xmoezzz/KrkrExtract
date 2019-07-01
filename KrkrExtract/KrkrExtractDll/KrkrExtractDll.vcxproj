@@ -128,12 +128,14 @@
     <ClCompile Include="Slide.cpp" />
     <ClCompile Include="TLGDecoder.cpp" />
     <ClCompile Include="tp_stub.cpp" />
+    <ClCompile Include="unzip.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="XP3Parser.cpp" />
     <ClCompile Include="xxhash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebuggerHandler.h" />
+    <ClInclude Include="gif.h" />
     <ClInclude Include="hook.h" />
     <ClInclude Include="KrkrDumperBase.h" />
     <ClInclude Include="md5.h" />
@@ -173,6 +175,7 @@
     <ClInclude Include="Slide.h" />
     <ClInclude Include="TLGDecoder.h" />
     <ClInclude Include="tp_stub.h" />
+    <ClInclude Include="unzip.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Worker.h" />
     <ClInclude Include="XP3Parser.h" />
@@ -184,6 +187,7 @@
     <ResourceCompile Include="KrkrExtractDll.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AlphaMovieDecode.zip" />
     <None Include="KrkrUniversalPatch.dll" />
     <None Include="PatchLoader.exe" />
   </ItemGroup>

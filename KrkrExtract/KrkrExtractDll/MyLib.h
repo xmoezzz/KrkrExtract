@@ -4,7 +4,7 @@
 #include "ml.h"
 
 
-ForceInline wstring FASTCALL GetPackageName(wstring& FileName)
+ForceInline wstring FASTCALL GetPackageName(wstring FileName)
 {
 	auto Index = FileName.find_last_of(L'\\');
 
@@ -107,6 +107,34 @@ ForceInline VOID WINAPI GenMD5Code(const WCHAR* FileName, wstring& OutHex)
 	MD5Context Context;
 	MD5Init(&Context);
 	MD5Update(&Context, (const BYTE*)FileName, wcslen(FileName) * 2);
+	MD5Final(OutBuffer, &Context);
+
+	WCHAR OutTemp[4];
+	RtlZeroMemory(OutTemp, sizeof(wchar_t) * 4);
+
+	int iPos = 0;
+	for (unsigned i = 0; i < 16; i++)
+	{
+		wsprintfW(OutTemp, L"%x", (OutBuffer[i] & 0xF0) >> 4);
+		OutHex += OutTemp;
+		RtlZeroMemory(OutTemp, sizeof(wchar_t) * 4);
+		wsprintfW(OutTemp, L"%x", OutBuffer[i] & 0x0F);
+		OutHex += OutTemp;
+		RtlZeroMemory(OutTemp, sizeof(wchar_t) * 4);
+	}
+}
+
+
+
+ForceInline VOID WINAPI GenMD5Code(const BYTE* Buffer, const DWORD Size, wstring& OutHex)
+{
+	unsigned char OutBuffer[16];
+
+	RtlZeroMemory(OutBuffer, sizeof(OutBuffer));
+
+	MD5Context Context;
+	MD5Init(&Context);
+	MD5Update(&Context, Buffer, Size);
 	MD5Final(OutBuffer, &Context);
 
 	WCHAR OutTemp[4];
