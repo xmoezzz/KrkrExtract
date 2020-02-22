@@ -1,190 +1,9 @@
 #include "DebuggerHandler.h"
 
-PVOID GetTVPCreateStreamCall_Debugger()
-{
-	PVOID CallIStreamStub, CallIStream, CallTVPCreateStreamCall;
-	ULONG OpSize, OpOffset;
-	WORD  WordOpcode;
+PVOID GetTVPCreateStreamCall();
+tTJSBinaryStream* FASTCALL CallTVPCreateStream(const ttstr& FilePath);
+IStream* FASTCALL ConvertBStreamToIStream(tTJSBinaryStream* BStream);
 
-	static char funcname[] = "IStream * ::TVPCreateIStream(const ttstr &,tjs_uint32)";
-
-	LOOP_ONCE
-	{
-		CallTVPCreateStreamCall = NULL;
-
-		CallIStreamStub = TVPGetImportFuncPtr(funcname);
-		if (!CallIStreamStub)
-			break;
-
-		CallIStream = NULL;
-		OpOffset = 0;
-
-		LOOP_FOREVER
-		{
-			if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0xCC)
-				break;
-
-			WordOpcode = *(PWORD)((ULONG_PTR)CallIStreamStub + OpOffset);
-			//mov edx,dword ptr [ebp+0xC]
-			if (WordOpcode == 0x558B)
-			{
-				OpOffset += 2;
-				if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0xC)
-				{
-					OpOffset++;
-					WordOpcode = *(PWORD)((ULONG_PTR)CallIStreamStub + OpOffset);
-					//mov edx,dword ptr [ebp+0x8]
-					if (WordOpcode == 0x4D8B)
-					{
-						OpOffset += 2;
-						if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0x8)
-						{
-							OpOffset++;
-							if (((PBYTE)CallIStreamStub + OpOffset)[0] == CALL)
-							{
-								CallIStream = (PVOID)GetCallDestination(((ULONG_PTR)CallIStreamStub + OpOffset));
-								OpOffset += 5;
-								break;
-							}
-						}
-					}
-				}
-			}
-			//the next opcode
-			OpSize = GetOpCodeSize32(((PBYTE)CallIStreamStub + OpOffset));
-			OpOffset += OpSize;
-		}
-
-		if (!CallIStream)
-			break;
-
-		OpOffset = 0;
-		LOOP_FOREVER
-		{
-			if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
-				break;
-
-		//find the first call
-		if (((PBYTE)CallIStream + OpOffset)[0] == CALL)
-		{
-			CallTVPCreateStreamCall = (PVOID)GetCallDestination(((ULONG_PTR)CallIStream + OpOffset));
-			OpOffset += 5;
-			break;
-		}
-
-		//the next opcode
-		OpSize = GetOpCodeSize32(((PBYTE)CallIStream + OpOffset));
-		OpOffset += OpSize;
-	}
-
-	LOOP_FOREVER
-	{
-		if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
-			break;
-
-		if (((PBYTE)CallIStream + OpOffset)[0] == CALL)
-		{
-			//push 0xC
-			//call HostAlloc
-			//add esp, 0x4
-			if (((PBYTE)CallIStream + OpOffset - 2)[0] == 0x6A &&
-				((PBYTE)CallIStream + OpOffset - 2)[1] == 0x0C)
-			{
-				GlobalData::GetGlobalData()->StubHostAlloc = (FuncHostAlloc)GetCallDestination(((ULONG_PTR)CallIStream + OpOffset));
-				OpOffset += 5;
-			}
-			break;
-		}
-
-		//the next opcode
-		OpSize = GetOpCodeSize32(((PBYTE)CallIStream + OpOffset));
-		OpOffset += OpSize;
-	}
-
-	LOOP_FOREVER
-	{
-		if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
-			break;
-
-	//mov eax, mem.offset
-	if (((PBYTE)CallIStream + OpOffset)[0] == 0xC7 &&
-		((PBYTE)CallIStream + OpOffset)[1] == 0x00)
-	{
-		OpOffset += 2;
-		GlobalData::GetGlobalData()->IStreamAdapterVtable = *(PULONG_PTR)((PBYTE)CallIStream + OpOffset);
-		OpOffset += 4;
-		break;
-	}
-
-	//the next opcode
-	OpSize = GetOpCodeSize32(((PBYTE)CallIStream + OpOffset));
-	OpOffset += OpSize;
-}
-	}
-
-
-		//Find virtual table offset
-		//IStreamAdapter
-
-	if (GlobalData::GetGlobalData()->StubHostAlloc && GlobalData::GetGlobalData()->IStreamAdapterVtable)
-	{
-		//PrintConsoleW(L"Analyze ok...\n");
-		return CallTVPCreateStreamCall;
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
-
-tTJSBinaryStream* FASTCALL CallTVPCreateStream_Debugger(const ttstr& FilePath)
-{
-	tTJSBinaryStream* Stream;
-	GlobalData*       Handle;
-
-	Handle = GlobalData::GetGlobalData();
-
-	if (Handle->StubTVPCreateStream == NULL)
-		Handle->StubTVPCreateStream = (FuncCreateStream)GetTVPCreateStreamCall_Debugger();
-
-	Stream = NULL;
-
-	if (Handle->StubTVPCreateStream == NULL)
-		return Stream;
-
-	return Handle->StubTVPCreateStream(FilePath, TJS_BS_READ);
-}
-
-IStream* FASTCALL ConvertBStreamToIStream_Debugger(tTJSBinaryStream* BStream)
-{
-	IStream*  Stream;
-	PVOID     CallHostAlloc;
-	ULONG_PTR IStreamAdapterVTableOffset;
-
-	CallHostAlloc = GlobalData::GetGlobalData()->StubHostAlloc;
-	IStreamAdapterVTableOffset = GlobalData::GetGlobalData()->IStreamAdapterVtable;
-	Stream = NULL;
-
-	INLINE_ASM
-	{
-		push 0xC;
-		call CallHostAlloc;
-		add  esp, 0x4;
-		test eax, eax;
-		jz   NO_CREATE_STREAM;
-		mov  esi, IStreamAdapterVTableOffset;
-		mov  dword ptr[eax], esi; //Vtable 
-		mov  esi, BStream;
-		mov  dword ptr[eax + 4], esi; //StreamHolder
-		mov  dword ptr[eax + 8], 1;   //ReferCount
-		mov  Stream, eax;
-
-	NO_CREATE_STREAM:
-	}
-
-	return Stream;
-}
 
 
 NTSTATUS FASTCALL DumpXP3ArchiveIndex(LPCWSTR lpFileName, NtFileDisk& file)
@@ -537,7 +356,7 @@ NTSTATUS FASTCALL ParseCommand(LPCWSTR lpCmd)
 		}
 
 		BStream = NULL;
-		BStream = CallTVPCreateStream_Debugger(Argv[1]);
+		BStream = CallTVPCreateStream(Argv[1]);
 		if (BStream == NULL)
 		{
 			PrintConsoleW(L"Couldn't read file : %s\n", Argv[1]);
@@ -545,7 +364,7 @@ NTSTATUS FASTCALL ParseCommand(LPCWSTR lpCmd)
 			break;
 		}
 
-		Stream = ConvertBStreamToIStream_Debugger(BStream);
+		Stream = ConvertBStreamToIStream(BStream);
 		if (!Stream)
 		{
 			PrintConsoleW(L"Couldn't create file : %s\n", Argv[1]);

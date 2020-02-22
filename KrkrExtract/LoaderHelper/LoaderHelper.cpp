@@ -1,5 +1,6 @@
 #include <my.h>
-#include "resource.h"
+
+#pragma comment(lib, "Shlwapi.lib")
 
 typedef
 BOOL
@@ -92,156 +93,68 @@ VMeCreateProcess(
 	return TRUE;
 }
 
-BOOL NTAPI CreateProcessInternalWithDll(LPCWSTR ProcessName)
+enum KrkrMode
+{
+	NORMAL = 0,
+	BASIC_LOCK = 1,
+	ADV_LOCK = 2,
+	HYPERVISOR = 3
+};
+
+#define KrkrModeVar L"KrkrMode"
+
+
+#pragma comment(linker, "/EXPORT:CreateProcessInternalWithDll=_CreateProcessInternalWithDll@8")
+EXTERN_C __declspec(dllexport)
+BOOL NTAPI CreateProcessInternalWithDll(LPCWSTR ProcessName, KrkrMode Mode)
 {
 	STARTUPINFOW        si;
 	PROCESS_INFORMATION pi;
+	WCHAR               CurrentPath[MAX_PATH];
+	WCHAR               Path[MAX_PATH];
+	DWORD               Length;
 
-	RtlZeroMemory(&si, sizeof(si));
-	RtlZeroMemory(&pi, sizeof(pi));
-	si.cb = sizeof(si);
-
-	return VMeCreateProcess(NULL, ProcessName, NULL, L"KrkrExtract.dll", NULL, NULL, FALSE, NULL, NULL, NULL, &si, &pi, NULL);
-}
-
-
-BOOL CheckDll()
-{
-	DWORD  Attribute;
-
-	Attribute = GetFileAttributesW(L"KrkrExtract.dll");
-	return Attribute != 0xFFFFFFFF;
-}
-
-
-LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (msg)
-	{
-	case WM_INITDIALOG:
-	{
-		HICON hIcon;
-
-		hIcon = (HICON)LoadImageW(GetModuleHandleW(NULL),
-			MAKEINTRESOURCE(IDI_ICON1),
-			IMAGE_ICON,
-			GetSystemMetrics(SM_CXSMICON),
-			GetSystemMetrics(SM_CYSMICON),
-			0);
-
-		if (hIcon)
-		{
-			SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-		}
-	}
-	break;
-
-	case WM_COMMAND:
-	{
-		DWORD WmId    = LOWORD(wParam);
-		DWORD WmEvent = HIWORD(wParam);
-
-		switch (WmId)
-		{
-		case ID_EXIT:
-			if (WmEvent == BN_CLICKED)
-				ExitProcess(0);
-			break;
-		default:
-			break;
-		}
-	}
-	break;
-
-	case WM_SYSCOMMAND:
-	{
-		switch (wParam)
-		{
-		case SC_CLOSE:
-			ExitProcess(0);
-			break;
-		}
-	}
-	break;
-
-	default:
-		break;
-	}
-	return 0;
-}
-
-
-int CreateMainWindow()
-{
-	HWND MainWindow;
-	MSG  msg;
-
-	MainWindow = CreateDialogParamW(
-		GetModuleHandleW(NULL),
-		MAKEINTRESOURCEW(IDD_DIALOG_MAIN),
-		NULL,
-		(DLGPROC)DlgProc,
-		WM_INITDIALOG);
-
-	if (!MainWindow)
-		return -1;
-
-	DragAcceptFiles(MainWindow, TRUE);
-	ShowWindow(MainWindow, SW_SHOW);
-	UpdateWindow(MainWindow);
-
-	while (GetMessageW(&msg, NULL, NULL, NULL))
-	{
-		if (!IsDialogMessageW(MainWindow, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessageW(&msg);
-		}
-		else
-		{
-			SendMessageW(MainWindow, msg.message, msg.wParam, msg.lParam);
-		}
-	}
-	return 0;
-}
-
-
-int WINAPI wWinMain(
-	HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPWSTR    lpCmdLine,
-	int       nShowCmd
-)
-{
-	PWSTR*              Argv;
-	INT                 Argc;
-	STARTUPINFOW        si;
-	PROCESS_INFORMATION pi;
-	BOOL                CreateResult;
-
-	RtlZeroMemory(&si, sizeof(si));
-	RtlZeroMemory(&pi, sizeof(pi));
-	si.cb = sizeof(si);
-	
-	Argv = CommandLineToArgvW(Nt_CurrentPeb()->ProcessParameters->CommandLine.Buffer, &Argc);
-	if (Argv == NULL || Argc < 2)
-	{
-		LocalFree(Argv);
-		return CreateMainWindow();
-	}
+	static WCHAR Postfix[] = L"\\KrkrExtract.dll";
 
 	StubCreateProcessInternalW = (FuncCreateProcessInternalW)EATLookupRoutineByHashPNoFix(GetKernel32Handle(), KERNEL32_CreateProcessInternalW);
 
-	CreateResult = CreateProcessInternalWithDll(Argv[1]);
-	if (!CreateResult)
+	RtlZeroMemory(&si, sizeof(si));
+	RtlZeroMemory(&pi, sizeof(pi));
+	si.cb = sizeof(si);
+
+	switch (Mode)
 	{
-		MessageBoxW(NULL, L"Couldn't Launch KrkrExtract", L"KrkrExtract", MB_OK | MB_ICONERROR);
+	case NORMAL:
+		SetEnvironmentVariableW(KrkrModeVar, L"NORMAL");
+		break;
+	case BASIC_LOCK:
+		SetEnvironmentVariableW(KrkrModeVar, L"BASIC_LOCK");
+		break;
+	case ADV_LOCK:
+		SetEnvironmentVariableW(KrkrModeVar, L"ADV_LOCK");
+		break;
+	case HYPERVISOR:
+		SetEnvironmentVariableW(KrkrModeVar, L"HYPERVISOR");
+		break;
+	default:
+		SetEnvironmentVariableW(KrkrModeVar, L"NORMAL");
+		break;
 	}
 
-	LocalFree(Argv);
-	return 0;
+	RtlZeroMemory(CurrentPath, sizeof(CurrentPath));
+	Length = GetCurrentDirectoryW(countof(CurrentPath), CurrentPath);
+
+	RtlZeroMemory(Path, sizeof(Path));
+	wnsprintfW(Path, countof(Path), L"%s%s", CurrentPath, Postfix);
+
+	return VMeCreateProcess(NULL, ProcessName, NULL, Path, NULL, NULL, FALSE, NULL, NULL, NULL, &si, &pi, NULL);
 }
 
 
 
+
+BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
+{
+    return TRUE;
+}
 

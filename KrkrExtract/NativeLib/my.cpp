@@ -5,6 +5,44 @@
 
 #pragma warning(disable : 4996)
 
+ULONG_PTR FASTCALL SizeOfProc32(PVOID Proc)
+{
+	ULONG_PTR   Length;
+	PBYTE       pOpcode;
+	ULONG_PTR   Result = 0;
+
+	do
+	{
+		Length = LdeGetOpCodeSize32(Proc, (PVOID *)&pOpcode);
+		Result += Length;
+		if ((Length == 1) && (*pOpcode == 0xC3))
+			break;
+
+		Proc = (PVOID)((ULONG_PTR)Proc + Length);
+	} while (Length);
+
+	return Result;
+}
+
+ULONG_PTR FASTCALL SizeOfProc64(PVOID Proc)
+{
+	ULONG_PTR   Length;
+	PBYTE       pOpcode;
+	ULONG_PTR   Result = 0;
+
+	do
+	{
+		Length = LdeGetOpCodeSize64(Proc, (PVOID *)&pOpcode);
+		Result += Length;
+		if ((Length == 1) && (*pOpcode == 0xC3))
+			break;
+
+		Proc = (PVOID)((ULONG_PTR)Proc + Length);
+	} while (Length);
+
+	return Result;
+}
+
 #define OP_X64_NONE           0x00
 #define OP_X64_MODRM          0x01
 #define OP_X64_DATA_I8        0x02
@@ -678,6 +716,8 @@ ULONG_PTR FASTCALL LdeGetOpCodeSize64(PVOID Code, PVOID *OpCodePtr)
 
 	return (ULONG_PTR)Ptr - (ULONG_PTR)Code;
 }
+
+
 
 
 #define OP_X86_NONE           0x000

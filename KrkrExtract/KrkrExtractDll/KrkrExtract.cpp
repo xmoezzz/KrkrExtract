@@ -10,6 +10,7 @@
 #include <dwmapi.h>
 #include "MultiThread.h"
 #include "DebuggerHandler.h"
+#include "SectionProtector.h"
 
 #pragma comment(lib, "Dwmapi.lib")
 
@@ -120,13 +121,13 @@ GlobalData::GlobalData() :
 	hHostModule = (HMODULE)GetModuleHandleW(NULL);
 	Inited = FALSE;
 
-	RtlZeroMemory(GuessPack,    countof(GuessPack)    * sizeof(WCHAR));
-	RtlZeroMemory(OutPack,      countof(OutPack)      * sizeof(WCHAR));
-	RtlZeroMemory(Folder,       countof(Folder)       * sizeof(WCHAR));
+	RtlZeroMemory(GuessPack, countof(GuessPack) * sizeof(WCHAR));
+	RtlZeroMemory(OutPack, countof(OutPack) * sizeof(WCHAR));
+	RtlZeroMemory(Folder, countof(Folder) * sizeof(WCHAR));
 	RtlZeroMemory(DragFileName, countof(DragFileName) * sizeof(WCHAR));
-	RtlZeroMemory(WinText,      countof(WinText)      * sizeof(WCHAR));
-	RtlZeroMemory(CurFileName,  countof(CurFileName)  * sizeof(WCHAR));
-	
+	RtlZeroMemory(WinText, countof(WinText) * sizeof(WCHAR));
+	RtlZeroMemory(CurFileName, countof(CurFileName) * sizeof(WCHAR));
+
 	StubGetProcAddress = NULL;
 	StubCreateProcessInternalW = NULL;
 	OriginalReturnAddress = NULL;
@@ -147,12 +148,17 @@ GlobalData::GlobalData() :
 
 	IsSpcialChunkEncrypted = FALSE;
 	SpecialChunkDecoder = NULL;
+
+	m_Taskbar = NULL;
 }
 
 
 GlobalData::~GlobalData()
 {
 	ExitKrkr();
+
+	if (m_Mode == KrkrMode::BASIC_LOCK || m_Mode == KrkrMode::ADV_LOCK)
+		DeleteCriticalSection(&m_LockdownLocker);
 }
 
 
@@ -398,6 +404,7 @@ NTSTATUS NTAPI GlobalData::InitWindow()
 	NTSTATUS       Status;
 	WCHAR          FullApplicationTitle[512];
 	MSG            msg;
+	HRESULT        hr;
 
 	RtlZeroMemory(FullApplicationTitle, countof(FullApplicationTitle) * sizeof(WCHAR));
 	RtlZeroMemory(WinText, countof(WinText) * sizeof(WCHAR));
@@ -429,6 +436,24 @@ NTSTATUS NTAPI GlobalData::InitWindow()
 		DragAcceptFiles(MainWindow, TRUE);
 		ShowWindow(MainWindow, SW_SHOW);
 		UpdateWindow(MainWindow);
+
+		hr = ::CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER,
+			IID_ITaskbarList3, reinterpret_cast<void**>(&m_Taskbar));
+
+		if (SUCCEEDED(hr))
+		{
+			hr = m_Taskbar->HrInit();
+			if (FAILED(hr))
+			{
+				m_Taskbar->Release();
+				m_Taskbar = nullptr;
+			}
+		}
+
+		if (FAILED(hr))
+		{
+			m_Taskbar = nullptr;
+		}
 
 		InterlockedExchange((PLONG)&GlobalData::WindowIsInited, TRUE);
 		VirtualConsolePrint(
@@ -548,6 +573,159 @@ NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 	return Status;
 }
 
+auto QueryImageInfo = [](ULONG_PTR Address, ULONG_PTR& ImageBase, ULONG_PTR& ImageSize)->BOOL
+{
+	//take care!! UAF
+	LDR_MODULE *Ldr, *FirstLdr;
+
+	ImageBase = (ULONG_PTR)-1;
+	ImageSize = 0;
+
+	Ldr = FIELD_BASE(Nt_CurrentPeb()->Ldr->InInitializationOrderModuleList.Flink, LDR_MODULE, InInitializationOrderLinks);
+	FirstLdr = Ldr;
+
+	do
+	{
+		Ldr = FIELD_BASE(Ldr->InInitializationOrderLinks.Flink, LDR_MODULE, InInitializationOrderLinks);
+		if (Ldr->BaseDllName.Buffer == NULL)
+			continue;
+
+		if ((ULONG_PTR)Ldr->DllBase <= Address && Address < (ULONG_PTR)Ldr->DllBase + Ldr->SizeOfImage)
+		{
+			ImageBase = (ULONG_PTR)Ldr->DllBase;
+			ImageSize = Ldr->SizeOfImage;
+			return TRUE;
+		}
+
+	} while (FirstLdr != Ldr);
+
+	return FALSE;
+};
+
+
+LONG NTAPI PageNoAccessHandler(EXCEPTION_POINTERS *ExceptionInfo)
+{
+	ULONG_PTR   BaseAddress, BaseImage, BaseImageSize;
+
+	GlobalData* Handle = GlobalData::GetGlobalData();
+
+	if (ExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_ACCESS_VIOLATION)
+	{
+		if (!QueryImageInfo((ULONG_PTR)ExceptionInfo->ExceptionRecord->ExceptionAddress, BaseImage, BaseImageSize))
+			return EXCEPTION_CONTINUE_SEARCH;
+
+		if (!Handle->BelongsToLockdownModule((PVOID)BaseAddress))
+			return EXCEPTION_CONTINUE_SEARCH;
+
+		switch (ExceptionInfo->ExceptionRecord->ExceptionInformation[0])
+		{
+		case 0: //read
+			
+			break;
+		case 1: //write
+			break;
+
+		case 8: //execute, re-rebase
+			
+			break;
+		default: //wtf??
+			return EXCEPTION_CONTINUE_SEARCH;
+		}
+		
+	}
+
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+
+BOOL GlobalData::BelongsToLockdownModule(PVOID BaseAddress)
+{
+	SectionProtector<PRTL_CRITICAL_SECTION> AutoLocker(&m_LockdownLocker);
+	
+	for (auto&& Module : m_LockedRanges)
+	{
+		if ((ULONG_PTR)BaseAddress >= (ULONG_PTR)Module.second.ModuleBase &&
+			(ULONG_PTR)BaseAddress < (ULONG_PTR)Module.second.ModuleBase + Module.second.ModuleSize)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+
+
+BOOL GlobalData::InitModuleLockdown()
+{
+	InitializeCriticalSection(&m_LockdownLocker);
+	//return AddVectoredExceptionHandler(TRUE, PageNoAccessHandler) != nullptr;
+	return TRUE;
+}
+
+BOOL GlobalData::AddToLockdownModule(PVOID BaseAddress, ULONG_PTR Size)
+{
+	SectionProtector<PRTL_CRITICAL_SECTION> AutoLocker(&m_LockdownLocker);
+
+	auto&& Module = m_LockedRanges.find(BaseAddress);
+	if (Module != m_LockedRanges.end())
+		return FALSE;
+
+	m_LockedRanges[BaseAddress] = PeModule(BaseAddress, Size);
+	return TRUE;
+}
+
+
+BOOL GlobalData::InfoLockdownModule(PVOID BaseAddress)
+{
+	ULONG_PTR ImageBase, ImageSize;
+
+	if (!QueryImageInfo((ULONG_PTR)BaseAddress, ImageBase, ImageSize))
+		return FALSE;
+
+	return AddToLockdownModule(BaseAddress, ImageSize);
+}
+
+
+//do this before any motification
+BOOL GlobalData::LockdownModule(PVOID BaseAddress)
+{
+	NTSTATUS  Status;
+	ULONG_PTR ImageBase, ImageSize;
+	PVOID     PageReadOnly, PageReadExecution;
+	ULONG     OldProtection;
+	
+	SectionProtector<PRTL_CRITICAL_SECTION> AutoLocker(&m_LockdownLocker);
+	
+
+	if (!QueryImageInfo((ULONG_PTR)BaseAddress, ImageBase, ImageSize))
+		return FALSE;
+
+	if (m_ShadowModuleForReadOnly.find(BaseAddress) != m_ShadowModuleForReadOnly.end())
+		return TRUE;
+
+	ImageSize = ROUND_UP(ImageSize, ImageSize);
+	PageReadOnly = nullptr;
+	PageReadExecution = nullptr;
+	Status = NtAllocateVirtualMemory(NtCurrentProcess(), &PageReadOnly, 0, &ImageSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	if (NT_FAILED(Status))
+		return FALSE;
+
+	Status = NtAllocateVirtualMemory(NtCurrentProcess(), &PageReadExecution, 0, &ImageSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if (NT_FAILED(Status))
+		return FALSE;
+
+	RtlCopyMemory(PageReadOnly,      BaseAddress, ImageSize);
+	RtlCopyMemory(PageReadExecution, BaseAddress, ImageSize);
+
+	Status = NtProtectVirtualMemory(NtCurrentProcess(), &BaseAddress, &ImageSize, PAGE_NOACCESS, &OldProtection);
+	if (NT_FAILED(Status))
+		return FALSE;
+
+	//TODO...
+	return AddToLockdownModule(BaseAddress, ImageSize);
+}
+
+
 VOID NTAPI GlobalData::SetCurFile(DWORD iPos)
 {
 	WCHAR         TextBuffer[MAX_PATH];
@@ -556,7 +734,7 @@ VOID NTAPI GlobalData::SetCurFile(DWORD iPos)
 
 	wsprintfW(TextBuffer, L"Processing : [%d / %d]", iPos, CountFile);
 	SetWindowTextW(MainWindow, TextBuffer);
-	SetProcess(MainWindow, (ULONG)(((float)iPos / (float)CountFile) * 100.0));
+	SetProcess(MainWindow, (ULONG)(((float)iPos / (float)CountFile) * 100.0), iPos, CountFile);
 }
 
 VOID NTAPI GlobalData::SetCount(DWORD Count)
@@ -579,7 +757,7 @@ VOID NTAPI GlobalData::Reset()
 
 	SetWindowTextW(MainWindow, FullApplicationTitle);
 	EnableAll(MainWindow);
-	SetProcess(MainWindow, 0);
+	SetProcess(MainWindow, 0, 0, 0);
 	isRunning = FALSE;
 }
 
@@ -616,7 +794,7 @@ VOID NTAPI GlobalData::ForceReset()
 
 	SetWindowTextW(MainWindow, FullApplicationTitle);
 	EnableAll(MainWindow);
-	SetProcess(MainWindow, 0);
+	SetProcess(MainWindow, 0, 0, 0);
 	isRunning = FALSE;
 }
 
@@ -853,10 +1031,24 @@ VOID WINAPI GlobalData::AdjustCP(HWND hWnd)
 {
 }
 
-VOID WINAPI GlobalData::SetProcess(HWND hWnd, ULONG Value)
+VOID WINAPI GlobalData::SetProcess(HWND hWnd, ULONG Value, ULONGLONG Current, ULONGLONG Total)
 {
 	HWND hProcess = GetItemX(IDC_PROGRESS1);
 	SendMessageW(hProcess, PBM_SETPOS, Value, 0);
+	
+	if (m_Taskbar)
+	{
+		if (Total != 0)
+		{
+			m_Taskbar->SetProgressState(MainWindow, TBPF_NORMAL);
+			m_Taskbar->SetProgressValue(MainWindow, Current, Total);
+		}
+		else
+		{
+			m_Taskbar->SetProgressValue(MainWindow, 0, 0);
+			m_Taskbar->SetProgressState(MainWindow, TBPF_NOPROGRESS);
+		}
+	}
 }
 
 VOID GlobalData::VirtualConsolePrint(PCWSTR Format, ...)

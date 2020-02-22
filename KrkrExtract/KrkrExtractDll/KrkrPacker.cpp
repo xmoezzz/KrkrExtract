@@ -590,7 +590,7 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 		WCHAR OutInfo[MAX_PATH];
 		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
-		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
+		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0), i, FileList.size());
 
 		ZeroMemory(pIndex, sizeof(*pIndex));
 		*(PDWORD)(pIndex->file.Magic) = CHUNK_MAGIC_FILE;
@@ -884,7 +884,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 		WCHAR OutInfo[MAX_PATH];
 		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
-		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
+		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0), i, FileList.size());
 
 		ZeroMemory(pIndex, sizeof(*pIndex));
 		*(PDWORD)(pIndex->file.Magic) = CHUNK_MAGIC_FILE;
@@ -1221,7 +1221,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 		WCHAR OutInfo[MAX_PATH];
 		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
-		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
+		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0), i, FileList.size());
 
 		ZeroMemory(pIndex, sizeof(*pIndex));
 		*(PDWORD)(pIndex->file.Magic) = CHUNK_MAGIC_FILE;
@@ -2367,7 +2367,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 			WCHAR OutInfo[MAX_PATH];
 			wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
-			Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
+			Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0), i, FileList.size());
 		}
 
 		ZeroMemory(pIndex, sizeof(*pIndex));
@@ -2731,7 +2731,7 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 			WCHAR OutInfo[MAX_PATH];
 			wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
-			Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
+			Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0), i, FileList.size());
 		}
 
 		ZeroMemory(pIndex, sizeof(*pIndex));
@@ -3099,7 +3099,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 		RtlZeroMemory(OutInfo, countof(OutInfo) * sizeof(WCHAR));
 		wsprintfW(OutInfo, PackingFormatString, i + 1, FileList.size());
 		SetWindowTextW(Handle->MainWindow, OutInfo);
-		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0));
+		Handle->SetProcess(Handle->MainWindow, (ULONG)(((float)(i + 1) / (float)FileList.size()) * 100.0), i, FileList.size());
 
 		ZeroMemory(pIndex, sizeof(*pIndex));
 		*(PDWORD)(pIndex->file.Magic) = CHUNK_MAGIC_FILE;

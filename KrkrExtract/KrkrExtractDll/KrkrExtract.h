@@ -4,6 +4,9 @@
 #include "my.h"
 #include "KrkrHeaders.h"
 #include <atomic>
+#include <unordered_map>
+#include <unordered_set>
+#include <Shobjidl.h>
 
 #define WM_UUPAK_OK (WM_USER + 1919)
 
@@ -99,8 +102,16 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 #define szWindowClassName   L"XP3ExtractMainClass"
 
 //A.B.C.D : 0 <= X <= 255
-#define _XP3ExtractVersion_ L"Ver 4.0.1.5"
+#define _XP3ExtractVersion_ L"Ver 4.0.1.6"
 
+
+enum KrkrMode
+{
+	NORMAL = 0,
+	BASIC_LOCK = 1,
+	ADV_LOCK = 2,
+	HYPERVISOR = 3
+};
 
 class MemEntry
 {
@@ -133,6 +144,46 @@ public:
 	{
 	}
 };
+
+
+struct PeModule
+{
+	PeModule()
+	{
+		RtlZeroMemory(this, sizeof(*this));
+	}
+
+	PeModule(PVOID Base, ULONG_PTR Size) :
+		ModuleBase(Base),
+		ModuleSize(Size)
+	{
+	}
+
+	PeModule& operator = (const PeModule& Other)
+	{
+		RtlCopyMemory(this, &Other, sizeof(*this));
+		return *this;
+	}
+
+	PVOID     ModuleBase;
+	ULONG_PTR ModuleSize;
+};
+
+
+
+#define THREAD_PRI_TAG TAG4('XM0E')
+
+struct THREAD_PRI_TEB_ACTIVE_FRAME : TEB_ACTIVE_FRAME
+{
+	ULONG_PTR Dr0;
+	ULONG_PTR Dr1;
+	ULONG_PTR Dr2;
+	ULONG_PTR Dr3;
+	ULONG_PTR Dr6;
+	ULONG_PTR Dr7;
+};
+
+
 
 class GlobalData
 {
@@ -170,6 +221,7 @@ public:
 	FuncCreateStream                    StubTVPCreateStream;
 	FuncHostAlloc                       StubHostAlloc;
 	ULONG_PTR						    IStreamAdapterVtable;
+	ULONG_PTR                           MemoryPageSize;
 
 private:
 	ULONG                           PngFlag;
@@ -227,6 +279,12 @@ public:
 
 	VOID      AddFileEntry(PCWSTR FileName, ULONG Length);
 	VOID      VirtualConsolePrint(PCWSTR Format, ...);
+	
+	BOOL      LockdownModule(PVOID BaseAddress);
+	BOOL      InfoLockdownModule(PVOID BaseAddress);
+	BOOL      InitModuleLockdown();
+	BOOL      BelongsToLockdownModule(PVOID BaseAddress);
+	BOOL      AddToLockdownModule(PVOID BaseAddress, ULONG_PTR Size);
 
 	NTSTATUS NTAPI InitWindow();
 	NTSTATUS NTAPI InitHook(LPCWSTR ModuleName, PVOID ImageBase);
@@ -235,7 +293,7 @@ public:
 	VOID NTAPI EnableAll(HWND hWnd);
 	VOID NTAPI DisableAll(HWND hWnd);
 	VOID NTAPI AdjustCP(HWND hWnd);
-	VOID NTAPI SetProcess(HWND hWnd, ULONG Value);
+	VOID NTAPI SetProcess(HWND hWnd, ULONG Value, ULONGLONG Current, ULONGLONG Total);
 	VOID NTAPI SetCount(DWORD Count);
 	VOID NTAPI SetCurFile(DWORD iPos);
 	VOID NTAPI ForceReset();
@@ -280,6 +338,13 @@ public:
 	
 	BOOL                        IsSpcialChunkEncrypted;
 	SpecialChunkDecoderFunc     SpecialChunkDecoder;
+
+	std::unordered_map<PVOID, PVOID> m_ShadowModuleForWriteExecution;
+	std::unordered_map<PVOID, PVOID> m_ShadowModuleForReadOnly;
+	std::unordered_map<PVOID, PeModule> m_LockedRanges;
+	std::atomic<KrkrMode>  m_Mode;
+	RTL_CRITICAL_SECTION   m_LockdownLocker;
+	ITaskbarList3*         m_Taskbar;
 };
 
 //Init once

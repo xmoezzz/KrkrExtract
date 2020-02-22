@@ -961,6 +961,8 @@ PtrType GetCallDestination(PtrType Buffer)
 
 ULONG_PTR FASTCALL LdeGetOpCodeSize32(PVOID Code, PVOID *OpCodePtr = NULL);
 ULONG_PTR FASTCALL LdeGetOpCodeSize64(PVOID Code, PVOID *OpCodePtr = NULL);
+ULONG_PTR FASTCALL SizeOfProc32(PVOID Proc);
+ULONG_PTR FASTCALL SizeOfProc64(PVOID Proc);
 
 ForceInline ULONG_PTR GetOpCodeSize32(PVOID Buffer)
 {

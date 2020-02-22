@@ -176,22 +176,27 @@ TVPXP3ArchiveExtractionFilterFunc WINAPI InitFakeFilter(PBOOL Result)
 }
 
 
-API_POINTER(LoadLibraryA) StubLoadLibraryA = NULL;
-API_POINTER(LoadLibraryW) StubLoadLibraryW = NULL;
 
 PVOID WINAPI HookLoadLibraryA(LPCSTR lpFileName)
 {
-	PVOID   Result;
-	PWSTR   UnicodeName;
-	ULONG   Length, OutLength;
+	PVOID       Result;
+	PWSTR       UnicodeName;
+	ULONG       Length, OutLength;
+	GlobalData* Handle;
 	
 	Length      = (lstrlenA(lpFileName) + 1) * 2;
 	UnicodeName = (PWSTR)AllocStack(Length);
+	Handle      = GlobalData::GetGlobalData();
 
 	RtlZeroMemory(UnicodeName, Length);
 	RtlMultiByteToUnicodeN(UnicodeName, Length, &OutLength, (PSTR)lpFileName, Length / 2 - 1);
 
-	Result = StubLoadLibraryW(UnicodeName);
+	Result = Nt_LoadLibrary(UnicodeName);
+	if (Result == NULL)
+		return Result;
+
+	if (Handle->m_Mode == KrkrMode::BASIC_LOCK)
+		Handle->InfoLockdownModule(Result);
 
 	//some smc will check self, just ingore.
 	if (LookupImportTable(Result, "KERNEL32.dll", "FlushInstructionCache") != IMAGE_INVALID_VA)
@@ -202,15 +207,20 @@ PVOID WINAPI HookLoadLibraryA(LPCSTR lpFileName)
 }
 
 
-PVOID WINAPI HookLoadLibraryW(LPCWSTR lpFileName)
+PVOID WINAPI HookLoadLibraryW(LPWSTR lpFileName)
 {
-	PVOID   Result;
+	PVOID       Result;
+	GlobalData* Handle;
 
-	Result = StubLoadLibraryW(lpFileName);
+	Handle = GlobalData::GetGlobalData();
+	Result = Nt_LoadLibrary(lpFileName);
 
 	//some smc will check self, just ingore.
 	if (Result == NULL)
 		return Result;
+
+	if (Handle->m_Mode == KrkrMode::BASIC_LOCK)
+		Handle->InfoLockdownModule(Result);
 
 	if (LookupImportTable(Result, "KERNEL32.dll", "FlushInstructionCache") != IMAGE_INVALID_VA)
 		return (HMODULE)Result;
@@ -422,173 +432,135 @@ PHANDLE                 phNewToken
 }
 
 
-/*
-(stub function)
-find the 2nd call:
-
-.text:00445ADE                 call    TJS__TJSAllocStringHeap
-.text:00445AE3                 push    [ebp+arg_8]
-.text:00445AE6                 mov     esi, eax
-.text:00445AE8                 push    ebx
-.text:00445AE9                 mov     ecx, esi
-.text:00445AEB                 call    TJS__tTJSVariantString__SetString (thiscall)
-
-stub:
-static void __stdcall TVP_Stub_c95bd66d95c153cdac41b5243e555f5f(tTJSString * _this, const tjs_char * str , int n)
+BOOL WINAPI HookIsDebuggerPresent()
 {
-::new (_this) tTJSString(str, n);
+	return TRUE;
 }
 
 
-*/
-
-
-/*
-V5.0:
-Hook tString constructor
-
-
-tTJSCriticalSection StringPushCS;
-
-//TJS::tTJSVariantString::SetString
-PVOID StubNewStringWithLength = NULL;
-
-Void NTAPI NewStringWithLength_Internal(PCWSTR String, ULONG Length)
+PTEB FASTCALL GetTebFromThreadHandle(HANDLE ThreadHandle)
 {
-	tTJSCriticalSectionHolder Holder(StringPushCS);
-	BOOL   FindDot;
+	NTSTATUS                 Status;
+	ULONG                    Length;
+	THREAD_BASIC_INFORMATION Tbi;
 
-	if (Length &&
-		String &&
-		Length <= MAX_PATH )
-		//&& IN_RANGE((ULONG_PTR)Nt_GetExeModuleHandle(), (ULONG_PTR)_ReturnAddress(), 0x200000))
+	if (ThreadHandle == NtCurrentThread())
+		return Nt_CurrentTeb();
+
+	if (GetCurrentProcessId() != GetProcessIdOfThread(ThreadHandle))
+		return nullptr;
+
+	RtlZeroMemory(&Tbi, sizeof(Tbi));
+	Status = NtQueryInformationThread(ThreadHandle, ThreadBasicInformation, &Tbi, sizeof(Tbi), &Length);
+	if (NT_FAILED(Status))
+		return nullptr;
+
+	return (PTEB)Tbi.TebBaseAddress;
+}
+
+
+PTEB_ACTIVE_FRAME FASTCALL RtlPushFrameThread(HANDLE ThreadHandle, TEB_ACTIVE_FRAME *Frame)
+{
+	PTEB              Teb;
+	PTEB_ACTIVE_FRAME Current;
+
+	Teb = GetTebFromThreadHandle(ThreadHandle);
+	if (Teb && Frame)
 	{
-		FindDot = FALSE;
-		for (ULONG i = 0; i < Length; i++)
-		{
-			if (String[i] == L'.')
-			{
-				FindDot = TRUE;
-				break;
-			}
-		}
-
-		PrintConsoleW(L"%s\n", String);
-
-		if (FindDot)
-			GlobalData::GetGlobalData()->FileNameList.push_back(std::wstring(String, Length));
+		Current          = Teb->ActiveFrame;
+		Frame->Previous  = Current;
+		Teb->ActiveFrame = Frame;
+		return Current;
 	}
+	
+	return nullptr;
 }
 
-
-
-ASM Void NewStringWithLength()
+TEB_ACTIVE_FRAME* FASTCALL RtlPopFrameThread(HANDLE ThreadHandle, TEB_ACTIVE_FRAME *Frame)
 {
-	INLINE_ASM
+	PTEB              Teb;
+	PTEB_ACTIVE_FRAME Current;
+
+	Teb     = GetTebFromThreadHandle(ThreadHandle);
+
+	if (Teb && Current)
 	{
-		push ebp;
-		mov  ebp, esp;
-
-		pushad;
-		pushfd;
-		push dword ptr [ebp + 0xC];
-		push dword ptr [ebp + 0x8];
-		call NewStringWithLength_Internal;
-		popfd;
-		popad;
-		
-		push dword ptr[ebp + 0xC];
-		push dword ptr[ebp + 0x8];
-		call StubNewStringWithLength;
-
-		pop ebp;
-		retn 8;
+		Current = Frame->Previous;
+		Teb->ActiveFrame = Current;
+		return Current;
 	}
+
+	return nullptr;
 }
 
 
-PVOID KrkrExporter = NULL;
-BOOL  InitHookPureAsm_Once = FALSE;
-Void NTAPI InitHookPureAsm_Internal(iTVPFunctionExporter* Exportor)
+PTEB_ACTIVE_FRAME FindThreadFrameThread(HANDLE ThreadHandle, ULONG_PTR Flags)
 {
-	PBYTE       TStringConstructorStub;
+	PTEB              Teb;
+	PTEB_ACTIVE_FRAME Frame;
+
+	Teb   = GetTebFromThreadHandle(ThreadHandle);
+	if (!Teb)
+		return nullptr;
+
+	Frame = Teb->ActiveFrame;
+	while (Frame != NULL && Frame->Flags != Flags)
+		Frame = Frame->Previous;
+
+	return Frame;
+}
+
+
+BOOL WINAPI HookSetThreadContext(HANDLE hThread, CONTEXT* lpContext)
+{
+	GlobalData*                  Handle;
+	PVOID                        ReturnAddress;
+	THREAD_PRI_TEB_ACTIVE_FRAME* Frame;
+
+	ReturnAddress = _ReturnAddress();
+	Handle        = GlobalData::GetGlobalData();
+	Frame         = (THREAD_PRI_TEB_ACTIVE_FRAME*)FindThreadFrameThread(hThread, THREAD_PRI_TAG);
+
+	if (lpContext && Frame)
+	{
+		lpContext->Dr0 = Frame->Dr0;
+		lpContext->Dr1 = Frame->Dr1;
+		lpContext->Dr2 = Frame->Dr2;
+		lpContext->Dr3 = Frame->Dr3;
+		lpContext->Dr6 = Frame->Dr6;
+		lpContext->Dr7 = Frame->Dr7;
+	}
+	
+	return NT_SUCCESS(NtSetContextThread(hThread, lpContext));
+}
+
+
+BOOL WINAPI HookGetThreadContext(HANDLE hThread, LPCONTEXT lpContext)
+{
+	NTSTATUS    Status;
 	GlobalData* Handle;
-	ULONG       iPos, OpSize, CallCount;
-	ULONG_PTR   AddressOfCallNewString;
+	PVOID       ReturnAddress;
 
-	Handle = GlobalData::GetGlobalData();
+	ReturnAddress = _ReturnAddress();
+	Handle        = GlobalData::GetGlobalData();
 
-	if (InitHookPureAsm_Once == FALSE)
+	NtGetContextThread(hThread, lpContext);
+	if (Handle->m_Mode == KrkrMode::BASIC_LOCK && Handle->BelongsToLockdownModule(ReturnAddress))
 	{
-		TVPInitImportStub(Exportor);
-
-		//show the window
-		Handle->InitHookNull();
-
-		//try to get file name
-
-		static char TStringConstructor[] = "tTJSString::tTJSString(const tjs_char *,int)";
-
-		LOOP_ONCE
+		if (lpContext)
 		{
-			TStringConstructorStub = (PBYTE)TVPGetImportFuncPtr(TStringConstructor);
-			if (!TStringConstructorStub)
-				break;
-
-			//Analyze internal proc offset then hook it, build a hash map to holder all string
-			iPos      = 0;
-			CallCount = 0;
-			AddressOfCallNewString = 0;
-			while (iPos < 0x200 && TStringConstructorStub[iPos] != 0xCC)
-			{
-				OpSize = GetOpCodeSize32(&TStringConstructorStub[iPos]);
-				if (TStringConstructorStub[iPos] == CALL)
-				{
-					CallCount++;
-					if (CallCount == 2)
-					{
-						AddressOfCallNewString = GetCallDestination((ULONG_PTR)TStringConstructorStub + iPos);
-						break;
-					}
-				}
-				iPos += OpSize;
-			}
-
-			if (!AddressOfCallNewString)
-				break;
-
-			Mp::PATCH_MEMORY_DATA StringPatch[] = 
-			{
-				Mp::FunctionJumpVa((PVOID)AddressOfCallNewString, NewStringWithLength, &StubNewStringWithLength)
-			};
-
-			Mp::PatchMemory(StringPatch, countof(StringPatch));
+			lpContext->Dr0 = 0;
+			lpContext->Dr1 = 0;
+			lpContext->Dr2 = 0;
+			lpContext->Dr3 = 0;
+			lpContext->Dr6 = 0;
+			lpContext->Dr7 = 0;
 		}
-
-		InterlockedExchange((LONG volatile *)&InitHookPureAsm_Once, TRUE);
 	}
+
+	return NT_SUCCESS(Status);
 }
 
-PVOID InitHookPureAsm_End = NULL;
-ASM Void InitHookPureAsm()
-{
-	INLINE_ASM
-	{
-		mov eax, KrkrExporter;
-
-		pushad;
-		pushfd;
-
-		push eax;
-		call InitHookPureAsm_Internal
-
-		popfd;
-		popad;
-		mov eax, KrkrExporter;
-	}
-}
-
-*/
 
 NTSTATUS WINAPI InitHook()
 {
@@ -596,10 +568,48 @@ NTSTATUS WINAPI InitHook()
 	BOOL                  Success;
 	PVOID                 Kernel32Handle, Target;
 	GlobalData*           Handle;
+	SYSTEM_INFO           SystemInfo;
+	WCHAR                 ModeString[0x200];
+	DWORD                 Size;
 
 	Handle = GlobalData::GetGlobalData();
 	Kernel32Handle = Nt_LoadLibrary(L"KERNEL32.dll");
 
+	GetSystemInfo(&SystemInfo);
+	Handle->MemoryPageSize = SystemInfo.dwPageSize;
+
+	RtlZeroMemory(ModeString, sizeof(ModeString));
+	Size = GetEnvironmentVariableW(L"KrkrMode", ModeString, countof(ModeString));
+
+	if (Size)
+	{
+		switch ((USHORT)ModeString[0])
+		{
+		case L'B':
+			Handle->m_Mode = KrkrMode::BASIC_LOCK;
+			PrintConsoleW(L"mode : basic lockdown mode\n");
+			break;
+
+		case L'A':
+			Handle->m_Mode = KrkrMode::ADV_LOCK;
+			PrintConsoleW(L"mode : advance lockdown mode\n");
+			break;
+
+		case L'H':
+			Handle->m_Mode = KrkrMode::ADV_LOCK;
+			PrintConsoleW(L"mode : hypervisor mode\n");
+			break;
+
+		default:
+			Handle->m_Mode = KrkrMode::NORMAL;
+			PrintConsoleW(L"mode : normal mode\n");
+			break;
+		}
+	}
+	else
+	{
+		Handle->m_Mode = KrkrMode::NORMAL;
+	}
 
 	PVOID hModule = GetModuleHandleW(NULL);
 	*(FARPROC *)&pfTVPGetFunctionExporter = (FARPROC)Nt_GetProcAddress(hModule, "TVPGetFunctionExporter");
@@ -624,12 +634,11 @@ NTSTATUS WINAPI InitHook()
 
 		if (!Success)
 		{
-			//Nt_DeleteFile(L"KrkrExtract.db");
 
 			Mp::PATCH_MEMORY_DATA f[] =
 			{
-				Mp::FunctionJumpVa(LoadLibraryA, HookLoadLibraryA, &StubLoadLibraryA),
-				Mp::FunctionJumpVa(LoadLibraryW, HookLoadLibraryW, &StubLoadLibraryW)
+				Mp::FunctionJumpVa(LoadLibraryA, HookLoadLibraryA),
+				Mp::FunctionJumpVa(LoadLibraryW, HookLoadLibraryW)
 			};
 
 			if (Handle->DebugOn)
@@ -640,10 +649,24 @@ NTSTATUS WINAPI InitHook()
 
 		Mp::PATCH_MEMORY_DATA CommonPatch[] =
 		{
-			Mp::FunctionJumpVa(CreateFileW, HookCreateFileW, &StubCreateFileW)
+			Mp::FunctionJumpVa(CreateFileW,       HookCreateFileW, &StubCreateFileW),
+			Mp::FunctionJumpVa(IsDebuggerPresent, HookIsDebuggerPresent)
+		};
+
+
+		Mp::PATCH_MEMORY_DATA InfoLockdown[] = 
+		{
+			Mp::FunctionJumpVa(SetThreadContext, HookSetThreadContext),
+			Mp::FunctionJumpVa(GetThreadContext, HookGetThreadContext)
 		};
 
 		Mp::PatchMemory(CommonPatch, countof(CommonPatch));
+
+		if (Handle->m_Mode == KrkrMode::BASIC_LOCK || Handle->m_Mode == KrkrMode::ADV_LOCK)
+		{
+			PrintConsoleW(L"Lockdown mode...\n");
+			Mp::PatchMemory(InfoLockdown, countof(InfoLockdown));
+		}
 	}
 
 	*(PVOID*)&Handle->StubCreateProcessInternalW = Nt_GetProcAddress(Kernel32Handle, "CreateProcessInternalW");
@@ -1208,10 +1231,11 @@ public:
 	// so don't change them!
 	enum Condition { Write = 1, Read /* or write! */ = 3 };
 
-	void Set(void* address, int len /* 1, 2, or 4 */, Condition when)
+	void SetLockdown(void* address, int len /* 1, 2, or 4 */, Condition when)
 	{
 		CONTEXT cxt;
 		HANDLE thisThread = GetCurrentThread();
+		THREAD_PRI_TEB_ACTIVE_FRAME* Frame;
 
 		switch (len)
 		{
@@ -1224,7 +1248,7 @@ public:
 		cxt.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 
 		// Read the register values
-		GetThreadContext(thisThread, &cxt);
+		NtGetContextThread(thisThread, &cxt);
 
 		// Find an available hardware register
 		for (m_index = 0; m_index < 4; ++m_index)
@@ -1241,13 +1265,108 @@ public:
 		case 3: cxt.Dr3 = (DWORD)address; break;
 		}
 
+		
+
+		SetBits(cxt.Dr7, 16 + (m_index * 4), 2, when);
+		SetBits(cxt.Dr7, 18 + (m_index * 4), 2, len);
+		SetBits(cxt.Dr7, m_index * 2, 1, 1);
+
+		Frame = (THREAD_PRI_TEB_ACTIVE_FRAME*)FindThreadFrameThread(thisThread, THREAD_PRI_TAG);
+		if (Frame)
+		{
+			Frame->Dr0 = cxt.Dr0;
+			Frame->Dr1 = cxt.Dr1;
+			Frame->Dr2 = cxt.Dr2;
+			Frame->Dr3 = cxt.Dr3;
+			Frame->Dr6 = cxt.Dr6;
+			Frame->Dr7 = cxt.Dr7;
+		}
+		else
+		{
+			Frame = (THREAD_PRI_TEB_ACTIVE_FRAME*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(THREAD_PRI_TEB_ACTIVE_FRAME));
+			if (Frame == nullptr)
+				return;
+
+			Frame->Flags   = THREAD_PRI_TAG;
+			Frame->Context = nullptr;
+
+			Frame->Dr0 = cxt.Dr0;
+			Frame->Dr1 = cxt.Dr1;
+			Frame->Dr2 = cxt.Dr2;
+			Frame->Dr3 = cxt.Dr3;
+			Frame->Dr6 = cxt.Dr6;
+			Frame->Dr7 = cxt.Dr7;
+
+			//uaf(race...), memory leak
+			RtlPushFrameThread(thisThread, Frame);
+		}
+		// Write out the new debug registers
+		NtSetContextThread(thisThread, &cxt);
+	}
+
+
+
+	void Set(void* address, int len /* 1, 2, or 4 */, Condition when)
+	{
+		CONTEXT cxt;
+		HANDLE thisThread = GetCurrentThread();
+
+		switch (len)
+		{
+		case 1: len = 0; break;
+		case 2: len = 1; break;
+		case 4: len = 3; break;
+		}
+
+		// The only registers we care about are the debug registers
+		cxt.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+
+		// Read the register values
+		NtGetContextThread(thisThread, &cxt);
+
+		// Find an available hardware register
+		for (m_index = 0; m_index < 4; ++m_index)
+		{
+			if ((cxt.Dr7 & (1 << (m_index * 2))) == 0)
+				break;
+		}
+
+		switch (m_index)
+		{
+		case 0: cxt.Dr0 = (DWORD)address; break;
+		case 1: cxt.Dr1 = (DWORD)address; break;
+		case 2: cxt.Dr2 = (DWORD)address; break;
+		case 3: cxt.Dr3 = (DWORD)address; break;
+		}
+
+
+
 		SetBits(cxt.Dr7, 16 + (m_index * 4), 2, when);
 		SetBits(cxt.Dr7, 18 + (m_index * 4), 2, len);
 		SetBits(cxt.Dr7, m_index * 2, 1, 1);
 
 		// Write out the new debug registers
-		SetThreadContext(thisThread, &cxt);
+		NtSetContextThread(thisThread, &cxt);
 	}
+
+	void ClearLockdown(PCONTEXT Context)
+	{
+		HANDLE thisThread = GetCurrentThread();
+		TEB_ACTIVE_FRAME* Frame;
+
+		SetBits(Context->Dr7, m_index * 2, 1, 0);
+		Context->Dr0 = 0;
+		Context->Dr1 = 0;
+		Context->Dr2 = 0;
+		Context->Dr3 = 0;
+		m_index = -1;
+
+		Frame = FindThreadFrameThread(thisThread, THREAD_PRI_TAG);
+		if (Frame)
+			RtlPopFrameThread(thisThread, Frame);
+	}
+
+
 	void Clear(PCONTEXT Context)
 	{
 		SetBits(Context->Dr7, m_index * 2, 1, 0);
@@ -1269,12 +1388,12 @@ public:
 			cxt.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 
 			// Read the register values
-			GetThreadContext(thisThread, &cxt);
+			NtGetContextThread(thisThread, &cxt);
 
 			SetBits(cxt.Dr7, m_index * 2, 1, 0);
 
 			// Write out the new debug registers
-			SetThreadContext(thisThread, &cxt);
+			NtSetContextThread(thisThread, &cxt);
 
 			m_index = -1;
 		}
@@ -1315,7 +1434,12 @@ LONG NTAPI FindPrivateProcHandler(PEXCEPTION_POINTERS pExceptionInfo)
 
 	if (BreakOnce == FALSE && pExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_SINGLE_STEP)
 	{
-		BreakPoint.Clear(pExceptionInfo->ContextRecord);
+		if (Handle->m_Mode == KrkrMode::BASIC_LOCK || Handle->m_Mode == KrkrMode::ADV_LOCK)
+			BreakPoint.ClearLockdown(pExceptionInfo->ContextRecord);
+		else
+			BreakPoint.Clear(pExceptionInfo->ContextRecord);
+
+
 		pExceptionInfo->ContextRecord->ContextFlags |= CONTEXT_DEBUG_REGISTERS | SET_DEBUG_REGISTER_FLAG;
 		
 		///get call proc
@@ -1428,7 +1552,11 @@ HookReadFile(
 			else
 				PrintConsoleW(L"Exception was added.\n");
 
-			BreakPoint.Set(lpBuffer, 1, HardwareBreakpoint::Condition::Write);
+			if (Handle->m_Mode == KrkrMode::BASIC_LOCK || Handle->m_Mode == KrkrMode::ADV_LOCK)
+				BreakPoint.SetLockdown(lpBuffer, 1, HardwareBreakpoint::Condition::Write);
+			else
+				BreakPoint.Set(lpBuffer, 1, HardwareBreakpoint::Condition::Write);
+
 			PrintConsoleW(L"set bp : ok\n");
 		}
 	}
@@ -1452,7 +1580,10 @@ VOID DetectCxdecAndInitEntry()
 	//AllocConsole();
 	Status = File.Open("data.xp3");
 	if (NT_FAILED(Status))
-		return; 
+	{
+		PrintConsoleW(L"[pre-detect]Couldn't open file data.xp3, status = %08x\n", Status);
+		return;
+	}
 
 	Count = 0;
 	BeginOffset.QuadPart = 0;
@@ -1480,7 +1611,6 @@ VOID DetectCxdecAndInitEntry()
 	PBYTE pCompress   = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)CompresseBufferSize);
 	PBYTE pDecompress = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (ULONG)DecompressBufferSize);
 	DataHeader.OriginalSize = XP3Header.IndexOffset;
-
 
 	BOOL Result = FALSE;
 	do
