@@ -29,11 +29,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fuzz", "fuzz", "{AF220B73-2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrkrExtract", "KrkrExtract\KrkrExtract.csproj", "{BE5B4141-7B11-4993-8E33-6B432E34CECF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoaderHelper", "LoaderHelper\LoaderHelper.vcxproj", "{C1073E4A-0389-457A-89C4-5319BA1B05A5}"
-	ProjectSection(ProjectDependencies) = postProject
-		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99} = {DAA25F59-2B60-422E-9AF6-BE56CF70DA99}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,16 +101,6 @@ Global
 		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|Win32.Build.0 = Release|Any CPU
 		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|x64.ActiveCfg = Release|Any CPU
 		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|x64.Build.0 = Release|Any CPU
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Debug|Win32.Build.0 = Debug|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Debug|x64.ActiveCfg = Debug|x64
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Debug|x64.Build.0 = Debug|x64
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|Any CPU.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|Win32.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|Win32.Build.0 = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|x64.ActiveCfg = Release|x64
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
