@@ -1,6 +1,0 @@
-c:\EmoteNet\EmoteNet\bin\Release\EmoteNet.exe.config
-c:\EmoteNet\EmoteNet\obj\Release\EmoteNet.csprojResolveAssemblyReference.cache
-c:\EmoteNet\EmoteNet\bin\Release\EmoteNet.exe
-c:\EmoteNet\EmoteNet\bin\Release\EmoteNet.pdb
-c:\EmoteNet\EmoteNet\obj\Release\EmoteNet.exe
-c:\EmoteNet\EmoteNet\obj\Release\EmoteNet.pdb

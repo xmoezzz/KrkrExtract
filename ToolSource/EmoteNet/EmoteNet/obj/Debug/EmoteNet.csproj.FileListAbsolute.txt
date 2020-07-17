@@ -1,1 +1,0 @@
-c:\EmoteNet\EmoteNet\bin\Debug\EmoteNet.exe.config
