@@ -3,6 +3,7 @@
 #include "MyHook.h"
 #include "KrkrExtend.h"
 #include "zlib.h"
+#include "MyLib.h"
 #include <WindowsX.h>
 
 /********************************************/
@@ -71,6 +72,9 @@ exe::TVPCreateIStream fastcall
 01355971                |.  83C4 04                    add esp,4
 */
 
+//只能在krkrz模式下工作，因为krkrz是使用msvc编译的
+//bcb将会被这个function分割成两段和一个call，比较脑残
+//而且fastcall的顺序是eax, edx
 PVOID GetTVPCreateStreamCall()
 {
 	PVOID CallIStreamStub, CallIStream, CallTVPCreateStreamCall;
@@ -321,7 +325,6 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 
 	Count = 0;
 	BeginOffset.QuadPart = 0;
-	Handle = GlobalData::GetGlobalData();
 	Status = file.Read(&XP3Header, sizeof(XP3Header));
 	RtlZeroMemory(M2ChunkInfo, sizeof(M2ChunkInfo));
 
@@ -333,18 +336,20 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 		return Status;
 	}
 
-	//Exe Built-in Package Support
 	if ((*(PUSHORT)XP3Header.Magic) == IMAGE_DOS_SIGNATURE)
 	{
-		Status = FindEmbededXp3OffsetSlow(FileName, &BeginOffset);
+		Status = FindEmbededXp3OffsetSlow(file, &BeginOffset);
 
 		if (NT_FAILED(Status))
 		{
 			if (Handle->DebugOn)
-				PrintConsoleW(L"No a Built-in Package\n");
+				PrintConsoleW(L"No an embeded Package %p\n", Status);
 
 			return Status;
 		}
+
+		if (Handle->DebugOn)
+			PrintConsoleW(L"Embeded Package %p\n", BeginOffset.LowPart);
 
 		file.Seek(BeginOffset, FILE_BEGIN);
 		file.Read(&XP3Header, sizeof(XP3Header));
@@ -461,10 +466,16 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 			switch (DetectCompressedChunk(pDecompress, DataHeader.OriginalSize.LowPart))
 			{
 			case TRUE:
+				if (GlobalData::GetGlobalData()->DebugOn)
+					PrintConsoleW(L"Index Normal/M2\n");
+
 				Result = InitIndexFileFirst(pDecompress, DataHeader.OriginalSize.LowPart);
 				break;
 
 			case FALSE:
+				if (GlobalData::GetGlobalData()->DebugOn)
+					PrintConsoleW(L"Index SenrenBanka\n");
+
 				Result = InitIndexFile_SenrenBanka(pDecompress, DataHeader.OriginalSize.LowPart, file);
 				break;
 			}
@@ -472,17 +483,21 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 			if (Result)
 			{
 				if (GlobalData::GetGlobalData()->DebugOn)
-					PrintConsoleW(L"Normal XP3 or M2 XP3\n");
+					PrintConsoleW(L"Normal XP3 or M2 XP3(ok)\n");
 				break;
 			}
 		}
 		else
 		{
+			CopyMemory(M2ChunkInfo, &Handle->M2ChunkMagic, 4);
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleA("Chunk : %s\n", M2ChunkInfo);
+
 			Result = InitIndex_NekoVol0(pDecompress, DataHeader.OriginalSize.LowPart);
 			if (Result)
 			{
 				if (GlobalData::GetGlobalData()->DebugOn)
-					PrintConsoleW(L"M2 XP3(since nekopara vol2)\n");
+					PrintConsoleW(L"M2 XP3(since nekopara vol0)\n");
 				break;
 			}
 		}
@@ -497,121 +512,65 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 }
 
 
-//Full Path Name
-void FormatPath(wstring& package, ttstr& out)
-{
-	out.Clear();
-	out = L"file://./";
-	for (unsigned int iPos = 0; iPos < package.length(); iPos++)
-	{
-		if (package[iPos] == L':')
-			continue;
 
-		if (package[iPos] == L'\\')
-			out += L'/';
-		else
-			out += package[iPos];
-	}
-	out += L'>';
-}
-
-wstring FormatPathFull(LPCWSTR path)
+wstring FASTCALL FormatPathFull(LPCWSTR Path)
 {
 	WCHAR  Buffer[MAX_PATH];
 
-	if (RtlCompareMemory(path, L"file:", 10) == 10)
+	if (RtlCompareMemory(Path, L"file:", 10) == 10)
+		return Path;
+
+	else if (Path[1] == L':' && (Path[0] <= L'Z' && Path[0] >= L'A' || Path[0] <= L'z' && Path[0] >= L'a'))
 	{
-		return path;
-	}
-	else if (path[1] == L':' && (path[0] <= L'Z' && path[0] >= L'A' || path[0] <= L'z' && path[0] >= L'a'))
-	{
-		wstring res(L"file://./");
-		res += path[0];
-		unsigned int i;
-		for (i = 2; path[i] != 0; ++i)
+		wstring Result(L"file://./");
+		Result += Path[0];
+		for (ULONG i = 2; Path[i] != 0; ++i)
 		{
-			if (path[i] == '\\')
-			{
-				res += '/';
-			}
+			if (Path[i] == L'\\')
+				Result += L'/';
 			else
-			{
-				res += path[i];
-			}
+				Result += Path[i];
 		}
-		return res;
+		return Result;
 	}
 	else
 	{
-		unsigned int i, flag = 0;
-		for (i = 0; path[i] != 0; ++i)
+		BOOL Flag = FALSE;
+		for (ULONG i = 0; Path[i] != 0; ++i)
 		{
-			if (path[i] == '/' || path[i] == '\\' || path[i] == '*')
+			if (Path[i] == '/' || Path[i] == '\\' || Path[i] == '*')
 			{
-				flag = 1;
+				Flag = TRUE;
 				break;
 			}
 		}
-		if (!flag)
+		if (!Flag)
 		{
 			RtlZeroMemory(Buffer, countof(Buffer) * sizeof(WCHAR));
 			Nt_GetCurrentDirectory(countof(Buffer), Buffer);
-			wstring res = FormatPathFull((wstring(Buffer) + L'/' + path).c_str());
-			return res;
+			FormatStringW(Buffer + StrLengthW(Buffer), L"/%s", Path);
+			auto&& Result = FormatPathFull(Buffer);
+			return Result;
 		}
 	}
 	return L"";
 }
 
 
-wstring GetPackageName(wstring& FileName)
+
+Void FASTCALL FormatM2PackName(wstring& PackageName, ttstr& OutName)
 {
-	wstring            temp(FileName);
-	wstring::size_type pos = temp.find_last_of(L'\\');
-
-	if (pos != wstring::npos)
-		temp = temp.substr(pos + 1, wstring::npos);
-
-	wstring            temp2(temp);
-	wstring::size_type pos2 = temp2.find_last_of(L'/');
-	if (pos2 != wstring::npos)
-		temp2 = temp2.substr(pos2 + 1, wstring::npos);
-	
-	return temp2;
+	OutName.Clear();
+	OutName = L"archive://./";
+	OutName += GetPackageName(PackageName).c_str();
+	OutName += L"/";
 }
 
-wstring GetPackageName(LPCWSTR FileName)
-{
-	return GetPackageName(wstring(FileName));
-}
 
-wstring GetExtensionUpperV2(wstring& FileName)
-{
-	wstring            OutName;
-	wstring::size_type pos = FileName.find_last_of(L'.');
-	if (pos != wstring::npos)
-		OutName = FileName.substr(pos, wstring::npos);
-
-	for (auto& Char : OutName)
-		Char = CHAR_UPPER(Char);
-	
-	return OutName;
-}
-
-Void FormatArc(wstring& package, ttstr& out)
-{
-	out.Clear();
-	out = L"archive://./";
-	out += GetPackageName(package).c_str();
-	out += L"/";
-}
-
-//#define DebugOutput
-
-VOID DecryptWorker(ULONG EncryptOffset, PBYTE pBuffer, ULONG BufferSize, ULONG Hash)
+Void DecryptWorker(ULONG64 EncryptOffset, PBYTE pBuffer, ULONG BufferSize, ULONG Hash)
 {
 	tTVPXP3ExtractionFilterInfo Info(0, pBuffer, BufferSize, Hash);
-	if (GlobalData::GetGlobalData()->pfGlobalXP3Filter != nullptr)
+	if (GlobalData::GetGlobalData()->pfGlobalXP3Filter != NULL)
 	{
 		GlobalData::GetGlobalData()->pfGlobalXP3Filter(&Info);
 	}
@@ -729,7 +688,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 			PrintConsoleW(L"Using System Decode Mode[TLG]\n");
 
 		FreeMemoryP(RawBuffer);
-		SavePng(GetPackageName(OutFileName).c_str(), FormatPathFull((wstring(OutFileName) + L".png").c_str()).c_str());
+		SavePng(GetPackageName(wstring(OutFileName)).c_str(), FormatPathFull((wstring(OutFileName) + L".png").c_str()).c_str());
 		return Status;
 
 
@@ -843,7 +802,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessPNG(IStream* Stream, LPCWSTR OutFileName, XP3I
 		if (GlobalData::GetGlobalData()->DebugOn)
 			PrintConsoleW(L"Using Build-in Decode Mode\n");
 
-		SavePng(GetPackageName(OutFileName).c_str(), FormatPathFull(OutFileName).c_str());
+		SavePng(GetPackageName(wstring(OutFileName)).c_str(), FormatPathFull(OutFileName).c_str());
 	}
 	else if (GlobalData::GetGlobalData()->GetPngFlag() == PNG_RAW)
 	{
@@ -890,22 +849,23 @@ NTSTATUS NTAPI KrkrDumper::ProcessTEXT(IStream* Stream, LPCWSTR OutFileName, XP3
 
 NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 {
-	NTSTATUS          Status;
-	GlobalData*       Handle;
-	ttstr             OutFileName;
-	wstring           OutFilePath, OutFilePathFull;
-	ULONG             Index, Pos;
-	wstring           ExtName, FixedPathName;
-	IStream*          Stream;
-	tTJSBinaryStream* BStream;
-	vector<wstring>   Failed;
-	WCHAR             CurDir[MAX_PATH];
+	NTSTATUS                               Status;
+	GlobalData*                            Handle;
+	ttstr                                  OutFileName;
+	wstring                                OutFilePath, OutFilePathFull;
+	ULONG                                  Index, Pos;
+	wstring                                ExtName, FixedPathName;
+	IStream*                               Stream;
+	tTJSBinaryStream*                      BStream;
+	vector<wstring>                        Failed;
+	WCHAR                                  CurDir[MAX_PATH];
 
 	RtlZeroMemory(CurDir, countof(CurDir) * sizeof(WCHAR));
 	Nt_GetCurrentDirectory(MAX_PATH, CurDir);
 
 	Handle = GlobalData::GetGlobalData();
 
+	
 	FixedPathName = GetPackageName(wstring(FileName));
 	Pos = FixedPathName.find_last_of(L'.');
 	if (Pos != wstring::npos)
@@ -928,7 +888,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 			if (GlobalData::GetGlobalData()->DebugOn)
 				PrintConsoleW(L"[M2]%s\n", OutFileName.c_str());
 
-			ExtName = GetExtensionUpperV2(it.yuzu.Name);
+			ExtName = GetExtensionUpper(it.yuzu.Name);
 			OutFilePathFull = OutFilePath + it.yuzu.Name;
 		}
 		else
@@ -938,7 +898,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 			if (GlobalData::GetGlobalData()->DebugOn)
 				PrintConsoleW(L"[Normal]%s\n", OutFileName.c_str());
 
-			ExtName = GetExtensionUpperV2(it.info.FileName);
+			ExtName = GetExtensionUpper(it.info.FileName);
 			OutFilePathFull = OutFilePath + it.info.FileName;
 		}
 
@@ -946,12 +906,11 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 		Stream = TVPCreateIStream(OutFileName, TJS_BS_READ);
 		if (Stream == NULL)
 		{
-			if (it.info.FileName.length() == 0 || it.info.FileName.find(L".", 0) == wstring::npos)
+			if (it.info.FileName.length() == 0 || it.info.FileName.find_first_of(L".") == std::wstring::npos)
 				OutFileName = it.yuzu.Name.c_str();
 			else
 				OutFileName = it.info.FileName.c_str();
 
-//Handware ex
 			BStream = NULL;
 			BStream = CallTVPCreateStream(OutFileName);
 
@@ -978,34 +937,34 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 			}
 		}
 
-		if (ExtName == L".PNG")
+		if (ExtName == L"PNG")
 		{
 			Status = ProcessPNG(Stream, OutFilePathFull.c_str(), it);
 		}
-		else if (ExtName == L".TLG")
+		else if (ExtName == L"TLG")
 		{
 			Status = ProcessTLG(Stream, OutFilePathFull.c_str(), it);
 		}
-		else if (ExtName == L".PSB" ||
-				 ExtName == L".SCN" ||
-				 ExtName == L".MTN" ||
-				 ExtName == L".PIMG")
+		else if (ExtName == L"PSB" ||
+				 ExtName == L"SCN" ||
+				 ExtName == L"MTN" ||
+				 ExtName == L"PIMG")
 		{
 			Status = ProcessPSB(Stream, OutFilePathFull.c_str(), it, ExtName);
 		}
 		else if (GlobalData::GetGlobalData()->GetTextFlag() == TEXT_DECODE &&
 			(
-			ExtName == L".KSD"   ||
-			ExtName == L".KDT"   ||
-			ExtName == L".TXT"   ||
-			ExtName == L".KS"    ||
-			ExtName == L".CSV"   ||
-			ExtName == L".PSB"   ||
-			ExtName == L".FUNC"  ||
-			ExtName == L".STAND" ||
-			ExtName == L".ASD"   ||
-			ExtName == L".INI"   ||
-			ExtName == L".TJS"))
+			ExtName == L"KSD"   ||
+			ExtName == L"KDT"   ||
+			ExtName == L"TXT"   ||
+			ExtName == L"KS"    ||
+			ExtName == L"CSV"   ||
+			ExtName == L"PSB"   ||
+			ExtName == L"FUNC"  ||
+			ExtName == L"STAND" ||
+			ExtName == L"ASD"   ||
+			ExtName == L"INI"   ||
+			ExtName == L"TJS"))
 		{
 			Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
 		}
@@ -1022,8 +981,8 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 
 	if (GlobalData::GetGlobalData()->DebugOn)
 	{
-		for (auto& iter : Failed)
-			PrintConsoleW(L"Failed to open : %s\n", iter.c_str());
+		for (auto& Item : Failed)
+			PrintConsoleW(L"Failed to open : %s\n", Item);
 	}
 	return Status;
 }
@@ -1048,14 +1007,13 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 
 	for (auto& it : Handle->ItemVector)
 	{
-		ULONG os = 0;
-		wstring outFilePath = CurPath;
-		outFilePath += L"\\outPath\\";
-		outFilePath += GetPackageName(wstring(FileName));
-		outFilePath += L"\\";
-		outFilePath += it.info.FileName.c_str();
-		AddPath(&outFilePath[0]);
-		File.Create(outFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		wstring OutputFilePath = CurPath;
+		OutputFilePath += L"\\KrkrExtract_Output\\";
+		OutputFilePath += GetPackageName(wstring(FileName));
+		OutputFilePath += L"\\";
+		OutputFilePath += it.info.FileName;
+		AddPath((LPWSTR)OutputFilePath.c_str());
+		File.Create(OutputFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 		if (it.info.EncryptedFlag & 7)
 		{
@@ -1093,7 +1051,6 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 	return Status;
 }
 
-//检查png!!
 NTSTATUS NTAPI KrkrDumper::DumpFile()
 {
 	NTSTATUS        Status;
@@ -1104,7 +1061,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFile()
 	Handle = GlobalData::GetGlobalData();
 
 	FormatPath(wstring(FileName), NormalPrefix);
-	FormatArc(wstring(FileName), M2Prefix);
+	FormatM2PackName(wstring(FileName), M2Prefix);
 
 	LOOP_ONCE
 	{
@@ -1141,11 +1098,11 @@ NTSTATUS NTAPI KrkrDumper::DoDump()
 
 /**************************************************/
 
-static KrkrDumper LocalKrkrDumper;
+static KrkrDumper* LocalKrkrDumper = NULL;
 
 DWORD WINAPI ExtractThread(LPVOID lParam)
 {
-	return LocalKrkrDumper.DoDump();
+	return LocalKrkrDumper->DoDump();
 }
 
 
@@ -1157,11 +1114,14 @@ HANDLE NTAPI StartDumper(LPCWSTR lpFileName)
 
 	Handle = GlobalData::GetGlobalData();
 
+	if (LocalKrkrDumper == NULL)
+		LocalKrkrDumper = new KrkrDumper;
+
 	LOOP_ONCE
 	{
-		LocalKrkrDumper.InternalReset();
-		LocalKrkrDumper.SetFile(lpFileName);
-		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper.hThread);
+		LocalKrkrDumper->InternalReset();
+		LocalKrkrDumper->SetFile(lpFileName);
+		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper->hThread);
 
 		if (NT_FAILED(Status))
 		{
@@ -1169,6 +1129,6 @@ HANDLE NTAPI StartDumper(LPCWSTR lpFileName)
 			break;
 		}
 	}
-	return LocalKrkrDumper.hThread;
+	return LocalKrkrDumper->hThread;
 }
 

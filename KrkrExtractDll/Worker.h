@@ -4,3 +4,6 @@
 
 HANDLE NTAPI StartPacker();
 HANDLE NTAPI StartDumper(LPCWSTR lpFileName);
+HANDLE NTAPI StartExtDumper();
+
+NTSTATUS NTAPI AddUnpackFile(LPCWSTR FileName);

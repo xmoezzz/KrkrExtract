@@ -66,9 +66,9 @@ XXH32        6.8 GB/s            6.0 GB/s
 
 #pragma once
 
-#if defined (__cplusplus)
-extern "C" {
-#endif
+//#if defined (__cplusplus)
+//extern "C" {
+//#endif
 
 
 	/*****************************
@@ -187,6 +187,6 @@ extern "C" {
 	*/
 
 
-#if defined (__cplusplus)
-}
-#endif
+//#if defined (__cplusplus)
+//}
+//#endif

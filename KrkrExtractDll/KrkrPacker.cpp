@@ -1,3 +1,5 @@
+#include "my.h"
+#include "ml.h"
 #include "KrkrPacker.h"
 #include "XP3Parser.h"
 #include "KrkrExtend.h"
@@ -6,16 +8,15 @@
 
 static WCHAR* PackingFormatString = L"Packing[%d/%d]";
 
-static KrkrPacker LocalKrkrPacker;
+static KrkrPacker* LocalKrkrPacker = NULL;
 
 wstring ToLowerString(LPCWSTR lpString)
 {
 	wstring Result;
 
 	for (LONG_PTR i = 0; i < StrLengthW(lpString); i++)
-	{
 		Result += (WCHAR)CHAR_LOWER(lpString[i]);
-	}
+	
 	return Result;
 }
 
@@ -24,7 +25,7 @@ KrkrPacker::KrkrPacker() :
 	KrkrPackType(PackInfo::UnknownPack),
 	M2Hash(0),
 	DecryptionKey(0),
-	pfProc(nullptr),
+	pfProc(NULL),
 	XP3EncryptionFlag(TRUE),
 	hThread((HANDLE)-1),
 	ThreadId(0),
@@ -136,7 +137,7 @@ NTSTATUS NTAPI KrkrPacker::GetSenrenBankaPackInfo(PBYTE IndexData, ULONG IndexSi
 		if (Handle->DebugOn)
 			PrintConsoleW(L"Failed to gather information(at Compressed block)\n");
 
-		MessageBoxW(NULL, L"Failed to decompress special chunk", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Failed to decompress special chunk", L"KrkrExtract", MB_OK);
 		return STATUS_DATA_ERROR;
 	}
 
@@ -172,7 +173,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 		wstring Info(L"Couldn't open : \n");
 		Info += lpFileName;
 		Info += L"\nFor Guessing XP3 Package Type!";
-		MessageBoxW(NULL, Info.c_str(), L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, Info.c_str(), L"KrkrExtract", MB_OK);
 		return Status;
 	}
 
@@ -183,11 +184,11 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 	//Exe Built-in Package Support
 	if ((*(PUSHORT)XP3Header.Magic) == IMAGE_DOS_SIGNATURE)
 	{
-		Status = FindEmbededXp3OffsetSlow(lpFileName, &BeginOffset);
+		Status = FindEmbededXp3OffsetSlow(File, &BeginOffset);
 
 		if (NT_FAILED(Status))
 		{
-			MessageBoxW(NULL, L"No a Built-in Package\n", L"KrkrExtract", MB_OK);
+			MessageBoxW(Handle->MainWindow, L"No a Built-in Package\n", L"KrkrExtract", MB_OK);
 			File.Close();
 			return Status;
 		}
@@ -202,7 +203,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 
 	if (RtlCompareMemory(StaticXP3V2Magic, XP3Header.Magic, sizeof(StaticXP3V2Magic)) != sizeof(StaticXP3V2Magic))
 	{
-		MessageBoxW(NULL, L"No a XP3 Package!", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"No a XP3 Package!", L"KrkrExtract", MB_OK);
 		File.Close();
 		return STATUS_INVALID_PARAMETER;
 	}
@@ -224,7 +225,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 		Status = File.Read((PBYTE)(&DataHeader), sizeof(DataHeader));
 		if (NT_FAILED(Status))
 		{
-			MessageBoxW(NULL, L"Couldn't Read Index Header", L"KrkrExtract", MB_OK);
+			MessageBoxW(Handle->MainWindow, L"Couldn't Read Index Header", L"KrkrExtract", MB_OK);
 			FreeMemoryP(pCompress);
 			FreeMemoryP(pDecompress);
 			File.Close();
@@ -303,7 +304,7 @@ NTSTATUS NTAPI KrkrPacker::DetactPackFormat(LPCWSTR lpFileName)
 			FreeMemoryP(pDecompress);
 			File.Close();
 
-			MessageBoxW(NULL, L"Unknown Pack Type", L"KrkrExtract", MB_OK | MB_ICONERROR);
+			MessageBoxW(Handle->MainWindow, L"Unknown Pack Type", L"KrkrExtract", MB_OK | MB_ICONERROR);
 			return STATUS_UNSUCCESSFUL;
 		}
 
@@ -362,7 +363,6 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, 0);
-	wstring                 WStrBasePath(lpBasePack);
 
 	FileList.clear();
 	IterFiles(lpBasePack);
@@ -372,7 +372,7 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(NULL, L"Couldn't open a handle for temporary output file.", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Couldn't open a handle for temporary output file.", L"KrkrExtract", MB_OK);
 		return Status;
 	}
 
@@ -418,8 +418,9 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 		pIndex->file.ChunkSize.QuadPart = (ULONG64)0xB0;
 		pIndex->time.ChunkSize.QuadPart = (ULONG64)0x08;
 
-		wstring FullName = wstring(lpBasePack) + L"\\";
-		FullName += FileList[i].c_str();
+		wstring FullName = lpBasePack;
+		FullName += L"\\";
+		FullName += FileList[i];
 
 		Status = File.Open(FullName.c_str());
 		if (NT_FAILED(Status))
@@ -452,8 +453,8 @@ NTSTATUS WINAPI KrkrPacker::DoNormalPack(LPCWSTR lpBasePack, LPCWSTR lpGuessPack
 
 		pIndex->segm.segm->Offset = Offset;
 
-		pIndex->info.FileName = FileList[i].c_str();
-		pIndex->info.FileNameLength = FileList[i].length();
+		pIndex->info.FileName = FileList[i];
+		pIndex->info.FileNameLength = FileList[i].size();
 
 		pIndex->adlr.Hash = adler32(1, (Bytef *)lpBuffer, BytesTransfered.LowPart);
 
@@ -639,7 +640,6 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, 0);
-	wstring                 WStrBasePath(lpBasePack);
 
 	FileList.clear();
 	IterFiles(lpBasePack);
@@ -658,7 +658,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	Status = FileXP3.Create(OutName);
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(NULL, L"Couldn't create a handle for output file.", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Couldn't create a handle for output file.", L"KrkrExtract", MB_OK);
 		return Status;
 	}
 
@@ -735,7 +735,7 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 		if (Stream == NULL)
 		{
 			if (Handle->DebugOn)
-				PrintConsoleW(L"Couldn't open %s\n", DummyName.c_str());
+				PrintConsoleW(L"Couldn't open %s\n", DummyName);
 
 			wstring InfoW(L"Couldn't open :\n");
 			InfoW += FileList[i];
@@ -950,7 +950,12 @@ NTSTATUS NTAPI KrkrPacker::DoNormalPackEx(LPCWSTR lpBasePack, LPCWSTR GuessPacka
 	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(Handle->MainWindow, (L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"" + Handle->CurrentTempFileName + L"\" to make the next package!!!").c_str(),
+		wstring OutputInfo;
+		OutputInfo =  L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"";
+		OutputInfo += Handle->CurrentTempFileName;
+		OutputInfo += L"\" to make the next package!!!";
+		MessageBoxW(Handle->MainWindow, 
+			OutputInfo.c_str(),
 			L"KrkrExtract (Important Infomation!!)", MB_OK);
 	}
 	else
@@ -976,7 +981,6 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, 0);
-	wstring                 WStrBasePath(lpBasePack);
 	WCHAR                   CurTempFileName[MAX_PATH];
 	ULONG64                 RandNum;
 
@@ -990,7 +994,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 	Status = FileXP3.Create(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(NULL, L"Couldn't open a handle for temporary output file.", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Couldn't open a handle for temporary output file.", L"KrkrExtract", MB_OK);
 		return Status;
 	}
 
@@ -1036,7 +1040,8 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 		pIndex->file.ChunkSize.QuadPart = (ULONG64)0xB0;
 		pIndex->time.ChunkSize.QuadPart = (ULONG64)0x08;
 
-		wstring FullName = wstring(lpBasePack) + L"\\";
+		wstring FullName = lpBasePack;
+		FullName += L"\\";
 		FullName += FileList[i];
 
 		Status = File.Open(FullName.c_str());
@@ -1071,7 +1076,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 		pIndex->segm.segm->Offset = Offset;
 
 		pIndex->info.FileName = FileList[i] + L".dummy";
-		pIndex->info.FileNameLength = (USHORT)(FileList[i].length() + StrLengthW(L".dummy"));
+		pIndex->info.FileNameLength = (USHORT)(FileList[i].size() + StrLengthW(L".dummy"));
 
 		pIndex->adlr.Hash = adler32(1, (Bytef *)lpBuffer, BytesTransfered.LowPart);
 
@@ -1144,7 +1149,7 @@ NTSTATUS NTAPI KrkrPacker::DoDummyNormalPackExFirst(LPCWSTR lpBasePack)
 	pbIndex = (PBYTE)lpCompressBuffer;
 	for (ULONG i = 0; i < FileList.size(); ++pIndex, i++)
 	{
-		DWORD n = sizeof(DWORD);
+		ULONG_PTR n = sizeof(DWORD);
 		CopyMemory(pbIndex, pIndex->file.Magic, n);
 		pbIndex += n;
 		n = 8;
@@ -1279,46 +1284,21 @@ NTSTATUS NTAPI KrkrPacker::IterFiles(LPCWSTR lpPath)
 	return Status;
 }
 
-wstring GetPackageNamePacker(wstring& FileName)
-{
-	wstring Temp;
-	wstring::size_type Pos = FileName.find_last_of(L'\\');
 
-	if (Pos != wstring::npos)
-		Temp = FileName.substr(Pos + 1, wstring::npos);
-	else
-		Temp = FileName;
-
-	Pos = Temp.find_last_of(L'/');
-	if (Pos != wstring::npos)
-		Temp = Temp.substr(Pos + 1, wstring::npos);
-	
-	return Temp;
-}
-
-void FormatPathNormal(wstring& package, ttstr& out)
+Void FormatPathNormal(wstring& PackageName, ttstr& out)
 {
 	out.Clear();
 	out = L"file://./";
-	for (unsigned int iPos = 0; iPos < package.length(); iPos++)
+	for (ULONG iPos = 0; iPos < PackageName.length(); iPos++)
 	{
-		if (package[iPos] == L':')
+		if (PackageName[iPos] == L':')
 			continue;
-		else if (package[iPos] == L'\\')
+		else if (PackageName[iPos] == L'\\')
 			out += L'/';
 		else
-			out += package[iPos];
+			out += PackageName[iPos];
 	}
 	out += L'>';
-}
-
-
-void FormatPathM2(wstring& package, ttstr& out)
-{
-	out.Clear();
-	out = L"archive://./";
-	out += GetPackageNamePacker(package).c_str();
-	out += L"/";
 }
 
 
@@ -1336,7 +1316,6 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
-	wstring                 WStrBasePath(lpBasePack);
 	WCHAR                   CurTempFileName[MAX_PATH];
 	ULONG64                 RandNum;
 
@@ -1350,7 +1329,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 	Status = FileXP3.Create(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(NULL, L"Couldn't create a handle for temporary output file.", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Couldn't create a handle for temporary output file.", L"KrkrExtract", MB_OK);
 		return Status;
 	}
 
@@ -1391,7 +1370,6 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 		if (Handle->MainWindow)
 		{
 			WCHAR OutInfo[MAX_PATH];
-			RtlZeroMemory(OutInfo, sizeof(OutInfo));
 			FormatStringW(OutInfo, PackingFormatString, i + 1, FileList.size());
 			SetWindowTextW(Handle->MainWindow, OutInfo);
 		}
@@ -1415,7 +1393,8 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 
 		pIndex->time.ChunkSize.QuadPart = (ULONG64)0x08;
 
-		wstring FullName = wstring(lpBasePack) + L"\\";
+		wstring FullName = lpBasePack;
+		FullName += L"\\";
 		FullName += FileList[i];
 
 		Status = File.Open(FullName.c_str());
@@ -1456,10 +1435,10 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst(LPCWSTR lpBasePack)
 
 		pIndex->segm.segm->Offset = Offset;
 
-		wstring DummyName, DummyLowerName, HashName;
+		wstring DummyName, HashName;
 		
 		DummyName = FileList[i] + L".dummy";
-		DummyLowerName = ToLowerString(DummyName.c_str());
+		auto&& DummyLowerName = ToLowerString(DummyName.c_str());
 
 		GenMD5Code(DummyLowerName.c_str(), HashName);
 		pIndex->info.FileName = HashName;
@@ -1688,7 +1667,6 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
-	wstring                 WStrBasePath(lpBasePack);
 	WCHAR                   CurTempFileName[MAX_PATH];
 	ULONG64                 RandNum;
 
@@ -1704,7 +1682,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(NULL, L"Couldn't create a handle for temporary output file.", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Couldn't create a handle for temporary output file.", L"KrkrExtract", MB_OK);
 		return Status;
 	}
 
@@ -1732,7 +1710,7 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 
 	if (FileList.size() == 0)
 	{
-		MessageBoxW(NULL, L"No File to be packed", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"No File to be packed", L"KrkrExtract", MB_OK);
 		FileXP3.Close();
 		FreeMemoryP(lpBuffer);
 		FreeMemoryP(lpCompressBuffer);
@@ -1770,7 +1748,8 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 		
 		pIndex->time.ChunkSize.QuadPart = (ULONG64)0x08;
 
-		wstring FullName = wstring(lpBasePack) + L"\\";
+		wstring FullName = lpBasePack;
+		FullName += L"\\";
 		FullName += FileList[i];
 		Status = File.Open(FullName.c_str());
 
@@ -1810,10 +1789,10 @@ NTSTATUS WINAPI KrkrPacker::DoM2DummyPackFirst_Version2(LPCWSTR lpBasePack)
 
 		pIndex->segm.segm->Offset = Offset;
 
-		wstring DummyName, DummyLowerName, HashName;
+		wstring DummyName, HashName;
 
 		DummyName = FileList[i] + L".dummy";
-		DummyLowerName = ToLowerString(DummyName.c_str());
+		auto&& DummyLowerName = ToLowerString(DummyName.c_str());
 
 		GenMD5Code(DummyLowerName.c_str(), HashName);
 		pIndex->info.FileName = HashName;
@@ -2056,7 +2035,6 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
-	wstring                 WStrBasePath(lpBasePack);
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -2169,7 +2147,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack(LPCWSTR lpBasePack, LPCWSTR GuessPackage, LP
 
 		pIndex->segm.segm->Offset = Offset;
 
-		wstring LowerName = ToLowerString(FileList[i].c_str());
+		auto LowerName = ToLowerString(FileList[i].c_str());
 		wstring HashName;
 
 		GenMD5Code(LowerName.c_str(), HashName);
@@ -2410,7 +2388,6 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 	KRKR2_XP3_DATA_HEADER   IndexHeader;
 	BYTE                    FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER        XP3Header(FirstMagic, (ULONG64)0);
-	wstring                 WStrBasePath(lpBasePack);
 
 	Handle = GlobalData::GetGlobalData();
 
@@ -2522,7 +2499,7 @@ HRESULT WINAPI KrkrPacker::DoM2Pack_Version2(LPCWSTR lpBasePack, LPCWSTR GuessPa
 
 		pIndex->segm.segm->Offset = Offset;
 
-		wstring LowerName = ToLowerString(FileList[i].c_str());
+		auto LowerName = ToLowerString(FileList[i].c_str());
 		wstring HashName;
 
 		GenMD5Code(LowerName.c_str(), HashName);
@@ -2766,7 +2743,6 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	KRKR2_XP3_DATA_HEADER        IndexHeader;
 	BYTE                         FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER             XP3Header(FirstMagic, (ULONG64)0);
-	wstring                      WStrBasePath(lpBasePack);
 	KRKRZ_M2_Senrenbanka_HEADER  SenrenBankaHeader;
 
 	FileList.clear();
@@ -2878,7 +2854,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 		
 		pIndex->segm.segm->Offset = Offset;
 
-		wstring LowerName = ToLowerString(FileList[i].c_str());
+		auto LowerName = ToLowerString(FileList[i].c_str());
 		wstring HashName;
 
 		GenMD5Code(LowerName.c_str(), SenrenBankaInfo.ProductName, HashName);
@@ -2966,7 +2942,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 		RtlCopyMemory((lpBlock + BlockSize), &M2Hash, 4);
 		BlockSize += 4;
 
-		USHORT NameLength = (USHORT)StrLengthW(FileList[i].c_str());
+		USHORT NameLength = (USHORT)FileList[i].length();
 		RtlCopyMemory((lpBlock + BlockSize), &NameLength, 2);
 		BlockSize += 2;
 		RtlCopyMemory((lpBlock + BlockSize), FileList[i].c_str(), (FileList[i].length() + 1) * 2);
@@ -3106,8 +3082,11 @@ NTSTATUS NTAPI KrkrPacker::DoM2Pack_SenrenBanka(LPCWSTR lpBasePack, LPCWSTR Gues
 	Status = Io::DeleteFileW(Handle->CurrentTempFileName.c_str());
 	if (NT_FAILED(Status))
 	{
+		wstring OutputInfo = L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"";
+		OutputInfo += Handle->CurrentTempFileName;
+		OutputInfo += L"\" to make the next package!!!";
 		MessageBoxW(Handle->MainWindow,
-			(L"Making Package : Successful!\nBut you must relaunch this game\nand delete \"" + Handle->CurrentTempFileName + L"\" to make the next package!!!").c_str(),
+			OutputInfo.c_str(),
 			L"KrkrExtract (Important Information!!)", MB_OK);
 	}
 	else
@@ -3134,7 +3113,6 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	KRKR2_XP3_DATA_HEADER        IndexHeader;
 	BYTE                         FirstMagic[11] = { 0x58, 0x50, 0x33, 0x0D, 0x0A, 0x20, 0x0A, 0x1A, 0x8B, 0x67, 0x01 };
 	KRKR2_XP3_HEADER             XP3Header(FirstMagic, (ULONG64)0);
-	wstring                      WStrBasePath(lpBasePack);
 	KRKRZ_M2_Senrenbanka_HEADER  SenrenBankaHeader;
 	WCHAR                        CurTempFileName[MAX_PATH];
 	ULONG64                      RandNum;
@@ -3152,7 +3130,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 
 	if (NT_FAILED(Status))
 	{
-		MessageBoxW(NULL, L"Couldn't create a handle for temporary output file.", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"Couldn't create a handle for temporary output file.", L"KrkrExtract", MB_OK);
 		return Status;
 	}
 	
@@ -3180,7 +3158,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 
 	if (FileList.size() == 0)
 	{
-		MessageBoxW(NULL, L"No File to be packed", L"KrkrExtract", MB_OK);
+		MessageBoxW(Handle->MainWindow, L"No File to be packed", L"KrkrExtract", MB_OK);
 		FileXP3.Close();
 		FreeMemoryP(lpBuffer);
 		FreeMemoryP(lpCompressBuffer);
@@ -3203,7 +3181,8 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 		pIndex->file.ChunkSize.QuadPart = (ULONG64)0xB0;
 		pIndex->time.ChunkSize.QuadPart = (ULONG64)0x08;
 
-		wstring FullName = wstring(lpBasePack) + L"\\";
+		wstring FullName = lpBasePack;
+		FullName += L"\\";
 		FullName += FileList[i];
 		Status = File.Open(FullName.c_str());
 
@@ -3243,10 +3222,10 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 
 		pIndex->segm.segm->Offset = Offset;
 
-		wstring DummyName, DummyLowerName, HashName;
+		wstring DummyName, HashName;
 
 		DummyName = FileList[i] + L".dummy";
-		DummyLowerName = ToLowerString(DummyName.c_str());
+		auto DummyLowerName = ToLowerString(DummyName.c_str());
 
 		GenMD5Code(DummyLowerName.c_str(), SenrenBankaInfo.ProductName, HashName);
 		pIndex->info.FileName = HashName;
@@ -3312,7 +3291,6 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 		lpBuffer = ReAllocateMemoryP(lpBuffer, BufferSize);
 	}
 
-	// generate index to lpCompressBuffer
 	lpBlock = (PBYTE)AllocateMemoryP(FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2));
 	lpBlockCompressed = (PBYTE)AllocateMemoryP(FileList.size() * sizeof(KRKRZ_XP3_INDEX_CHUNK_Yuzu2) * 2);
 
@@ -3321,7 +3299,7 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 	{
 		RtlCopyMemory((lpBlock + BlockSize), &M2SubChunkMagic, 4);
 		BlockSize += 4;
-		ChunkSize.QuadPart = sizeof(DWORD) + sizeof(USHORT) + (StrLengthW(FileList[i].c_str()) + StrLengthW(L".dummy") + 1) * 2;
+		ChunkSize.QuadPart = sizeof(DWORD) + sizeof(USHORT) + (FileList[i].length() + StrLengthW(L".dummy") + 1) * 2;
 		RtlCopyMemory((lpBlock + BlockSize), &(ChunkSize.QuadPart), 8);
 		BlockSize += 8;
 		RtlCopyMemory((lpBlock + BlockSize), &M2Hash, 4);
@@ -3330,8 +3308,8 @@ NTSTATUS NTAPI KrkrPacker::DoM2DummyPackFirst_SenrenBanka(LPCWSTR lpBasePack)
 		USHORT NameLength = (USHORT)(StrLengthW(FileList[i].c_str()) + StrLengthW(L".dummy"));
 		RtlCopyMemory((lpBlock + BlockSize), &NameLength, 2);
 		BlockSize += 2;
-		RtlCopyMemory((lpBlock + BlockSize), FileList[i].c_str(), FileList[i].length() * 2);
-		BlockSize += FileList[i].length() * 2;
+		RtlCopyMemory((lpBlock + BlockSize), FileList[i].c_str(), FileList[i].size() * 2);
+		BlockSize += FileList[i].size() * 2;
 		RtlCopyMemory((lpBlock + BlockSize), L".dummy", (StrLengthW(L".dummy") + 1) * 2);
 		BlockSize += (StrLengthW(L".dummy") + 1) * 2;
 	}
@@ -3485,37 +3463,37 @@ DWORD WINAPI PackerThread(PVOID lpParam)
 	Handle->GetOutputPack(OutPackName,  MAX_PATH);
 	Handle->GetFolder(BasePackName,     MAX_PATH);
 
-	Status = LocalKrkrPacker.DetactPackFormat(GuessPackName);
+	Status = LocalKrkrPacker->DetactPackFormat(GuessPackName);
 	if (NT_FAILED(Status))
 	{
-		LocalKrkrPacker.InternalReset();
+		LocalKrkrPacker->InternalReset();
 		return Status;
 	}
 
-	switch (LocalKrkrPacker.KrkrPackType)
+	switch (LocalKrkrPacker->KrkrPackType)
 	{
 	case PackInfo::NormalPack:
-		Status = LocalKrkrPacker.DoNormalPack(BasePackName, GuessPackName, OutPackName);
+		Status = LocalKrkrPacker->DoNormalPack(BasePackName, GuessPackName, OutPackName);
 		break;
 
 	case PackInfo::NormalPack_NoExporter:
-		Status = LocalKrkrPacker.DoNormalPackEx(BasePackName, GuessPackName, OutPackName);
+		Status = LocalKrkrPacker->DoNormalPackEx(BasePackName, GuessPackName, OutPackName);
 		break;
 
 	case PackInfo::KrkrZ:
-		Status = LocalKrkrPacker.DoM2Pack(BasePackName, GuessPackName, OutPackName);
+		Status = LocalKrkrPacker->DoM2Pack(BasePackName, GuessPackName, OutPackName);
 		break;
 
 	case PackInfo::KrkrZ_V2:
-		Status = LocalKrkrPacker.DoM2Pack_Version2(BasePackName, GuessPackName, OutPackName);
+		Status = LocalKrkrPacker->DoM2Pack_Version2(BasePackName, GuessPackName, OutPackName);
 		break;
 
 	case PackInfo::KrkrZ_SenrenBanka:
-		Status = LocalKrkrPacker.DoM2Pack_SenrenBanka(BasePackName, GuessPackName, OutPackName);
+		Status = LocalKrkrPacker->DoM2Pack_SenrenBanka(BasePackName, GuessPackName, OutPackName);
 		break;
 	}
 
-	LocalKrkrPacker.InternalReset();
+	LocalKrkrPacker->InternalReset();
 	return Status;
 }
 
@@ -3530,11 +3508,14 @@ HANDLE NTAPI StartPacker()
 	RtlZeroMemory(BasePack, countof(BasePack) * sizeof(WCHAR));
 	Handle->DisableAll(Handle->MainWindow);
 
-	LocalKrkrPacker.InternalReset();
+	if (LocalKrkrPacker == NULL)
+		LocalKrkrPacker = new KrkrPacker;
+
+	LocalKrkrPacker->InternalReset();
 	if (Handle->isRunning || Handle->WorkerThread != INVALID_HANDLE_VALUE)
 	{
-		MessageBoxW(NULL, L"Another task is under processing!", L"KrkrExtract", MB_OK);
-		LocalKrkrPacker.InternalReset();
+		MessageBoxW(Handle->MainWindow, L"Another task is under processing!", L"KrkrExtract", MB_OK);
+		LocalKrkrPacker->InternalReset();
 		return INVALID_HANDLE_VALUE;
 	}
 
@@ -3544,7 +3525,7 @@ HANDLE NTAPI StartPacker()
 
 	Handle->GetFolder(BasePack, countof(BasePack));
 
-	LocalKrkrPacker.Init();
+	LocalKrkrPacker->Init();
 	
 
 	ULONG Attr = GetFileAttributesW(BasePack);
@@ -3552,18 +3533,18 @@ HANDLE NTAPI StartPacker()
 	{
 		MessageBoxW(Handle->MainWindow, L"Couldn't regard the target path as a directory", L"KrkrExtract", MB_OK);
 		GlobalData::GetGlobalData()->isRunning = FALSE;
-		LocalKrkrPacker.InternalReset();
+		LocalKrkrPacker->InternalReset();
 		return INVALID_HANDLE_VALUE;
 	}
 
-	Status = Nt_CreateThread(PackerThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrPacker.hThread);
+	Status = Nt_CreateThread(PackerThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrPacker->hThread);
 	if (NT_FAILED(Status))
 	{
 		MessageBoxW(Handle->MainWindow, L"Cannot launch packer thread", L"KrkrExtract", MB_OK);
 		GlobalData::GetGlobalData()->isRunning = FALSE;
-		LocalKrkrPacker.InternalReset();
+		LocalKrkrPacker->InternalReset();
 		return INVALID_HANDLE_VALUE;
 	}
-	return LocalKrkrPacker.hThread;
+	return LocalKrkrPacker->hThread;
 }
 

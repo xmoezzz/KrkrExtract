@@ -1,5 +1,5 @@
 #include "FakePNG.h"
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 
 
 static BOOL Inited = FALSE;
@@ -27,13 +27,22 @@ Void WINAPI InitLayer()
 }
 
 
-Void WINAPI SavePng(LPCWSTR filename, LPCWSTR path)
+Void WINAPI SavePng(LPCWSTR FileName, LPCWSTR Path)
 {
-	const wstring ConstU = L"tmpLayer.saveLayerImagePng(\"";
-	wstring str, fname = filename;
-	str = L"tmpLayer.loadImages(\"" + fname + L"\");";
-	TVPExecuteScript(ttstr(str.c_str()));
+	wstring Code;
+
+	static WCHAR ShellCode[] = L"tmpLayer.saveLayerImagePng(\"";
+
+	Code =  L"tmpLayer.loadImages(\"";
+	Code += FileName;
+	Code += L"\");";
+
+	TVPExecuteScript(ttstr(Code.c_str()));
 	TVPExecuteScript(ttstr(L"tmpLayer.setSizeToImageSize();"));
-	str = ConstU + wstring(path) + L"\");";
-	TVPExecuteScript(ttstr(str.c_str()));
+
+	Code =  ShellCode;
+	Code += Path;
+	Code += L"\");";
+
+	TVPExecuteScript(ttstr(Code.c_str()));
 }

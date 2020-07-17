@@ -1,13 +1,10 @@
 #pragma once
 
 #include "my.h"
-#include <string>
 #include "tp_stub.h"
-#include <vector>
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 #include "XP3Parser.h"
 #include "FakePNG.h"
-#include "GlobalInit.h"
 #include "TLGDecoder.h"
 #include "PNGWorker.h"
 #include <Shlwapi.h> 

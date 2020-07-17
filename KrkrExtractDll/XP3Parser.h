@@ -5,7 +5,7 @@
 namespace PackInfo{ enum { KrkrZ, KrkrZ_V2, KrkrZ_SenrenBanka, NormalPack, NormalPack_NoExporter, UnknownPack/*Error Type*/ }; };
 
 
-NTSTATUS NTAPI FindEmbededXp3OffsetSlow(LPCWSTR FileName, PLARGE_INTEGER Offset);
+NTSTATUS FindEmbededXp3OffsetSlow(NtFileDisk &file, PLARGE_INTEGER Offset);
 
 BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size);
 BOOL WINAPI DetectCompressedChunk(PBYTE pDecompress, ULONG Size);

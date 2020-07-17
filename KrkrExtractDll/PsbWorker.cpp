@@ -1,16 +1,14 @@
 #include "zlib.h"
-#include <vector>
-#include <string>
 #include "tp_stub.h"
-#include "WinFile.h"
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 #include <Psapi.h>
 #include "lz4.h"
 #include "lz4frame.h"
 #include "my.h"
+#include "ml.h"
 
 
-void WINAPI OutputInfo(const WCHAR* Info)
+Void FASTCALL OutputInfo(const WCHAR* Info)
 {
 	if (GlobalData::GetGlobalData()->DebugOn)
 		PrintConsoleW(Info);
@@ -18,7 +16,6 @@ void WINAPI OutputInfo(const WCHAR* Info)
 
 #pragma comment(lib, "psapi.lib")
 
-typedef __int64 tjs_int64;
 #define LZ4_MAGIC 0x184D2204
 
 
@@ -26,7 +23,7 @@ typedef __int64 tjs_int64;
 
 typedef struct PSB_HEADER_V2
 {
-	DWORD HeaderMagic;
+	DWORD  HeaderMagic;
 	USHORT Version;
 	USHORT Flag;
 	LPBYTE pHeader;
@@ -48,11 +45,16 @@ typedef struct PsbTextureMetaData
 	ULONG       OffsetX;
 	ULONG       OffsetY;
 	ULONG       BPP;
-	string      TexType;
+	CHAR        TexType[20];
 	ULONG       FullWidth;
 	ULONG       FullHeight;
 	ULONG       DataOffset;
 	ULONG       DataSize;
+
+	PsbTextureMetaData()
+	{
+		RtlZeroMemory(TexType, sizeof(TexType));
+	}
 }PsbTextureMetaData, *pPsbTextureMetaData;
 
 
@@ -72,14 +74,14 @@ static unsigned char *getDataFromMDF(const unsigned char *buff, unsigned long &s
 {
 	if (size <= 10 || *(PDWORD)buff == TAG3("mdf")) return NULL;
 
-	unsigned long uncompsize = *(unsigned long*)&buff[4];
-	unsigned char *uncomp = new unsigned char[uncompsize];
-	if (Z_OK != uncompress(uncomp, &uncompsize, buff + 8, size - 8))
+	ULONG Uncompsize = *(unsigned long*)&buff[4];
+	PBYTE uncomp = (PBYTE)AllocateMemoryP(Uncompsize);
+	if (Z_OK != uncompress(uncomp, &Uncompsize, buff + 8, size - 8))
 	{
-		delete[] uncomp;
+		FreeMemoryP(uncomp);
 		return NULL;
 	}
-	size = uncompsize;
+	size = Uncompsize;
 	return uncomp;
 }
 
@@ -112,7 +114,7 @@ static unsigned char *getDataFromLz4(const unsigned char *buff, unsigned long &s
 
 	pos = srcSize;
 	dstPos = 0;
-	uncompr_data = new unsigned char[LODWORD(frameInfo.contentSize)];
+	uncompr_data = (PBYTE)AllocateMemoryP(LODWORD(frameInfo.contentSize));
 
 	do
 	{
@@ -123,7 +125,7 @@ static unsigned char *getDataFromLz4(const unsigned char *buff, unsigned long &s
 
 		if (LZ4F_isError(err))
 		{
-			delete[] uncompr_data;
+			FreeMemoryP(uncompr_data);
 			return nullptr;
 		}
 
@@ -749,7 +751,7 @@ public:
 
 	~PSBObject()
 	{
-		delete[]Data;
+		FreeMemoryP(Data);
 	}
 
 private:
@@ -776,6 +778,7 @@ private:
 		}
 	}
 };
+
 
 class PSBNode
 {
@@ -836,7 +839,7 @@ public:
 		PsbArray arr1(code); code += arr1.nBytes;
 		PsbArray arr2(code); code += arr2.nBytes;
 		PsbArray arr3(code); code += arr3.nBytes;
-
+		
 		vector<char> reverse_name;
 		ULONG c1 = arr2[arr3[idx]];
 		while (c1)
@@ -867,7 +870,11 @@ public:
 	PSBFile() : Object(nullptr) {}
 
 	~PSBFile() {
-		if (Object) delete Object;
+		if (Object)
+		{
+			Object->~PSBObject();
+			FreeMemoryP(Object);
+		}
 	}
 
 	PSBObject* DetachObject()
@@ -894,7 +901,7 @@ public:
 				
 				if (uncomp)
 				{
-					delete[]buff;
+					FreeMemoryP(buff);
 					buff = uncomp;
 				}
 			}
@@ -902,9 +909,13 @@ public:
 			if (size < 64 || RtlCompareMemory(buff, "PSB", 4) == 4)
 				return false;
 			if (Object)
-				delete Object;
+			{
+				Object->~PSBObject();
+				FreeMemoryP(Object);
+			}
 
-			Object = new PSBObject(buff, size, Status);
+			Object = (PSBObject*)AllocateMemoryP(sizeof(PSBObject));
+			new(Object) PSBObject(buff, size, Status);
 			return NT_SUCCESS(Status) ? true : false;
 		}
 		return false;
@@ -920,10 +931,10 @@ public:
 
 class PSBDumper
 {
-	string  lastDictName; // for bitmap dump
-	wstring PsbImgPath;
-	string  BuildScript;
-	ULONG   m_GlobalRetryCount;
+	string             lastDictName; // for bitmap dump
+	wstring            PsbImgPath;
+	string             BuildScript;
+	ULONG              m_GlobalRetryCount;
 
 	template <typename PixT>
 	static void DecompressRLE(LPBYTE dst, LPCBYTE data, ULONG datalen)
@@ -954,11 +965,11 @@ class PSBDumper
 
 public:
 
-	PSBDumper(LPWSTR _path)
+	PSBDumper(LPWSTR Path)
 	{
-		const wstring tmp = _path;
-		ULONG_PTR     pos = tmp.find_first_of(L".");
-		PsbImgPath        = tmp.substr(0, pos);
+		PsbImgPath = Path;
+		auto Index = PsbImgPath.find_last_of(L".");
+		PsbImgPath = PsbImgPath.substr(0, Index);
 	}
 
 	void quoteString(LPCSTR str)
@@ -972,33 +983,19 @@ public:
 			while ((ch = *p++))
 			{
 				if (ch == '"')
-				{
 					BuildScript += "\\\"";
-				}
 				else if (ch == '\\')
-				{
 					BuildScript += "\\\\";
-				}
 				else if (ch == 0x08)
-				{
 					BuildScript += "\\b";
-				}
 				else if (ch == 0x0c)
-				{
 					BuildScript += "\\f";
-				}
 				else if (ch == 0x0a)
-				{
 					BuildScript += "\\n";
-				}
 				else if (ch == 0x0d)
-				{
 					BuildScript += "\\r";
-				}
 				else if (ch == 0x09)
-				{
 					BuildScript += "\\t";
-				}
 				else if ((UCHAR)ch < 0x20)
 				{
 					CHAR buf[256];
@@ -1006,9 +1003,7 @@ public:
 					BuildScript += buf;
 				}
 				else
-				{
 					BuildScript += (char)ch;
-				}
 			}
 			BuildScript += '"';
 		}
@@ -1054,15 +1049,11 @@ public:
 			string name = node.ProbeDictName(arr1[i]);
 			bitmapInfo[name] = PSBNode(node.Object, node.pCode + 1 + arr2[i] + arr1.nBytes + arr2.nBytes);
 			if (name == "width" || name == "height" || name == "pixel")
-			{
 				++foundBitmap;
-			}
 		}
 
 		if (foundBitmap <= 0)
-		{
 			return false;
-		}
 
 		ULONG width = bitmapInfo.find("truncated_width") == bitmapInfo.end() ?
 			(ULONG)bitmapInfo["width"].AsInt() : (ULONG)bitmapInfo["truncated_width"].AsInt();
@@ -1098,15 +1089,12 @@ public:
 		bool allocBitmap = false;
 		if (it != bitmapInfo.end() && !StrCompareA(it->second.AsString(), "RL"))
 		{
-			unsigned char *uncomp = new unsigned char[pixelbytes * width * height];
+			unsigned char *uncomp = (PBYTE)AllocateMemoryP(pixelbytes * width * height);
 			if (pixelbytes == 1)
-			{
 				DecompressRLE<unsigned char>(uncomp, pixeldata, pixdatasize);
-			}
 			else
-			{
 				DecompressRLE<unsigned long>(uncomp, pixeldata, pixdatasize);
-			}
+			
 			pixeldata = uncomp;
 			allocBitmap = true;
 			bitmapInfo.erase(bitmapInfo.find("compress"));
@@ -1116,7 +1104,7 @@ public:
 		//
 		WriteBmp(lastDictName, width, height, pixeldata, pal, pixelbytes);
 
-		if (allocBitmap) delete[] pixeldata;
+		if (allocBitmap) FreeMemoryP((PVOID)pixeldata);
 
 		BuildScript += "(const) %[\r\n";
 		string indentstr2 = indentstr + INDENT;
@@ -1147,7 +1135,8 @@ public:
 
 		MultiByteToWideChar(CP_UTF8, 0, FileName.c_str(), FileName.length(), WideFileName, MAX_PATH);
 
-		FilePath = PsbImgPath + L"\\" + wstring(WideFileName);
+		FilePath =  PsbImgPath + L"\\";
+		FilePath += WideFileName;
 
 		File.Create(FilePath.c_str());
 		File.Write(Buffer, Size);
@@ -1169,12 +1158,15 @@ public:
 
 		MultiByteToWideChar(CP_UTF8, 0, FileName.c_str(), FileName.length(), WideFileName, MAX_PATH);
 
-		FilePath = PsbImgPath + L"\\" + wstring(WideFileName) + L".bmp";
+		FilePath =  PsbImgPath + L"\\";
+		FilePath += WideFileName;
+		FilePath += L".bmp";
+
 		File.Create(FilePath.c_str());
 
-		unsigned int uidata = 0x4d42;
+		USHORT uidata = 0x4d42;
 		File.Write(&uidata, 2);  /* bfType */
-		uidata = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + bmppitch * height + (pixelbytes == 1 ? 1024 : 0);
+		uidata = (USHORT)(sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + bmppitch * height + (pixelbytes == 1 ? 1024 : 0));
 		File.Write(&uidata, 4);  /* bfSize */
 		uidata = 0;
 		File.Write(&uidata, 2);  /* bfReserved1 */
@@ -1223,7 +1215,7 @@ public:
 
 	void SaveEmoteImage(string& FileName, PBYTE Stream, const PsbTextureMetaData& meta)
 	{
-		auto pixels = (PBYTE)HeapAlloc(GetProcessHeap(), 0, meta.Width * meta.Height * 4);
+		auto pixels = (PBYTE)AllocateMemoryP(meta.Width * meta.Height * 4);
 
 		if (!pixels)
 		{
@@ -1234,12 +1226,12 @@ public:
 		if (GlobalData::GetGlobalData()->DebugOn)
 			PrintConsoleW(L"Emote size : %d x %d\n", meta.Width, meta.Height);
 
-		if ("RGBA8" == meta.TexType)
+		if (!StrCompareA("RGBA8", meta.TexType))
 		{
 			ReadRgba8(Stream, meta, pixels);
 			WriteBmp(FileName, meta.Width, meta.Height, pixels, NULL, 4);
 		}
-		else if ("RGBA4444" == meta.TexType)
+		else if (!StrCompareA("RGBA4444", meta.TexType))
 		{
 			ReadRgba4444(Stream, meta, pixels);
 			WriteBmp(FileName, meta.Width, meta.Height, pixels, NULL, 4);
@@ -1250,10 +1242,10 @@ public:
 		}
 
 		if (pixels)
-			HeapFree(GetProcessHeap(), 0, pixels);
+			FreeMemoryP(pixels);
 	}
 
-	USHORT ToUInt16(LPBYTE value, int index)
+	USHORT ToUInt16(LPBYTE value, ULONG index)
 	{
 		return (USHORT)(value[index] | value[index + 1] << 8);
 	}
@@ -1263,7 +1255,7 @@ public:
 		int dst_stride = meta.Width * 4;
 		int src_stride = meta.FullWidth * 2;
 		int dst = 0;
-		auto row = new byte[src_stride];
+		auto row = (PBYTE)AllocateMemoryP(src_stride);
 
 		for (ULONG i = 0; i < meta.Height; ++i)
 		{
@@ -1279,7 +1271,7 @@ public:
 				output[dst++] = (byte)((p & 0xF000u) * 0xFFu / 0xF000u);
 			}
 		}
-		delete[] row;
+		FreeMemory(row);
 	}
 
 	void ReadRgba8(LPBYTE input, const PsbTextureMetaData meta, LPBYTE output)
@@ -1355,7 +1347,8 @@ public:
 
 		case PsbValueFloat:
 			memset(NumStr, 0, sizeof(NumStr));
-			gcvt(node.AsDouble(), 60, NumStr);
+			
+			_gcvt(node.AsDouble(), 60, NumStr);
 			
 			if (NumStr[lstrlenA(NumStr) - 1] == '.')
 				lstrcatA(NumStr, "0");
@@ -1395,9 +1388,7 @@ public:
 
 			auto it = EmoteInfo.find("source");
 			if (it == EmoteInfo.end())
-			{
 				return false;
-			}
 			else
 			{
 				const PSBNode& sourceNode = it->second;
@@ -1450,8 +1441,8 @@ public:
 					ULONG height = (ULONG)EmoteChunkInfo["height"].AsInt();
 					ULONG truncated_width = (ULONG)EmoteChunkInfo["truncated_width"].AsInt();
 					ULONG truncated_height = (ULONG)EmoteChunkInfo["truncated_height"].AsInt();
-					string TextureType = EmoteChunkInfo["type"].AsString();
-					const unsigned char *pixeldata = EmoteChunkInfo["pixel"].AsBinary(pixdatasize, Index);
+					PCSTR TextureType = EmoteChunkInfo["type"].AsString();
+					LPCBYTE pixeldata = EmoteChunkInfo["pixel"].AsBinary(pixdatasize, Index);
 
 					PsbTextureMetaData info;
 					info.BPP = 32;
@@ -1459,8 +1450,9 @@ public:
 					info.FullHeight = height;
 					info.Width = truncated_width;
 					info.Height = truncated_height;
-					info.TexType = TextureType;
 					info.DataSize = pixdatasize;
+
+					StrCopyA(info.TexType, TextureType);
 
 					SaveEmoteImage(FileName, (LPBYTE)pixeldata, info);
 				}
@@ -1470,7 +1462,7 @@ public:
 	}
 
 
-	void dumpPimg(const PSBNode& node)
+	Void dumpPimg(const PSBNode& node)
 	{
 		PsbArray arr1(node.pCode + 1);
 		PsbArray arr2(node.pCode + 1 + arr1.nBytes);
@@ -1497,7 +1489,7 @@ public:
 
 	void start(const PSBNode &node, const wstring& FileName)
 	{
-		wstring FileExtension = GetExtensionName(FileName);
+		auto&& FileExtension = GetExtensionName(FileName);
 
 		dump(node);
 
@@ -1507,7 +1499,7 @@ public:
 			//Decompile Script
 			NtFileDisk    File;
 
-			wstring ScriptFile = PsbImgPath + L".psb.tjs";
+			wstring ScriptFile = PsbImgPath + L".tjs";
 			File.Create(ScriptFile.c_str());
 			File.Write((PVOID)BuildScript.c_str(), BuildScript.length());
 			File.Close();
@@ -1518,17 +1510,10 @@ public:
 			GlobalData::GetGlobalData()->PsbFlagOn(PSB_IMAGE))
 		{
 			//Dump Binary File: Emote, RL/Bitmap, Other
-			if (!lstrcmpiW(FileExtension.c_str(), L"PIMG"))
-			{
+			if (!StrICompareW(FileExtension.c_str(), L"PIMG", StrCmp_ToUpper))
 				dumpPimg(node);
-			}
-			else
-			{
-				if (!dumpEmote(node))
-				{
-					dumpAllFile(node);
-				}
-			}
+			else if (!dumpEmote(node))
+				dumpAllFile(node);
 		}
 
 		if (GlobalData::GetGlobalData()->PsbFlagOn(PSB_ALL) ||
@@ -1892,7 +1877,7 @@ public:
 	}
 
 
-	void dumpAllFile(const PSBNode& node)
+	Void dumpAllFile(const PSBNode& node)
 	{
 		switch (node.GetType())
 		{
@@ -1987,15 +1972,12 @@ public:
 		bool allocBitmap = false;
 		if (it != bitmapInfo.end() && !strcmp(it->second.AsString(), "RL"))
 		{
-			unsigned char *uncomp = new unsigned char[pixelbytes * width * height];
+			unsigned char *uncomp = (PBYTE)AllocateMemoryP(pixelbytes * width * height);
 			if (pixelbytes == 1)
-			{
 				DecompressRLE<unsigned char>(uncomp, pixeldata, pixdatasize);
-			}
 			else
-			{
 				DecompressRLE<unsigned long>(uncomp, pixeldata, pixdatasize);
-			}
+			
 			pixeldata = uncomp;
 			allocBitmap = true;
 			bitmapInfo.erase(bitmapInfo.find("compress"));
@@ -2005,7 +1987,7 @@ public:
 		//
 		WriteBmp(lastDictName, width, height, pixeldata, pal, pixelbytes);
 
-		if (allocBitmap) delete[] pixeldata;
+		if (allocBitmap) FreeMemoryP((PVOID)pixeldata);
 
 
 		for (it = bitmapInfo.begin(); it != bitmapInfo.end(); ++it)
@@ -2016,12 +1998,19 @@ public:
 
 	wstring GetExtensionName(const wstring& Name)
 	{
-		ULONG_PTR Pos = Name.find_first_of(L'.');
+		auto Index = Name.find_last_of(L'.');
 
-		if (Pos == wstring::npos)
-			return NULL;
+		if (Index == wstring::npos)
+			return nullptr;
 		else
-			return Name.substr(Pos + 1, wstring::npos);
+		{
+			wstring Result;
+			for (auto& EachChar : Name.substr(Index + 1))
+			{
+				Result += CHAR_UPPER(EachChar);
+			}
+			return Result;
+		}
 	}
 };
 
@@ -2038,7 +2027,7 @@ int WINAPI ExtractPsb(IStream* InFile, BOOL Image, BOOL Script, const wstring& E
 	STATSTG t;
 	InFile->Stat(&t, STATFLAG_DEFAULT);
 	ULONG nRead;
-	unsigned char *buf = new unsigned char[t.cbSize.LowPart];
+	unsigned char *buf = (PBYTE)AllocateMemoryP(t.cbSize.LowPart);
 	InFile->Read(buf, t.cbSize.LowPart, &nRead);
 
 	PSBFile psbf;
@@ -2046,7 +2035,7 @@ int WINAPI ExtractPsb(IStream* InFile, BOOL Image, BOOL Script, const wstring& E
 	{
 		//SafeDumper
 		OutputInfo(L"Invalid Psb file\n");
-		if (buf) delete[] buf;
+		if (buf) FreeMemory(buf);
 
 		return -2;
 	}

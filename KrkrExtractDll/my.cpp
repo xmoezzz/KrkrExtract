@@ -3459,6 +3459,35 @@ PWSTR StrFindCharW(PCWChar lpString, WChar CharMatch)
 }
 
 
+PWSTR StrFindLastCharW(PCWChar lpString, WChar CharMatch)
+{
+	WChar ch;
+	ULONG_PTR iPos, CurPos;
+	ULONG_PTR Length = StrLengthW(lpString);
+
+	if (lpString == NULL)
+		return NULL;
+
+	if (CharMatch == 0)
+		return (PWSTR)lpString + Length;
+
+	iPos = 0;
+	CurPos = 0;
+
+	do
+	{
+		ch = lpString[iPos];
+		if (ch == CharMatch)
+			CurPos = iPos;
+
+		iPos++;
+
+	} while (ch);
+
+	return CurPos ? (PWSTR)lpString + CurPos : NULL;
+}
+
+
 PWSTR PeekLineW(PVoid pBuffer, PVoid pEndOfBuffer, PVoid pOutBuffer, PSizeT pcbOutBuffer)
 {
 	WChar  ch;
@@ -4862,7 +4891,8 @@ ULONG_PTR PrintConsoleA(PCSTR Format, ...)
 	HANDLE      StdHandle;
 
 	va_start(Args, Format);
-	Length = _vsnprintf(Buffer, countof(Buffer) - 1, Format, Args);
+	//Length = _vsnprintf(Buffer, countof(Buffer) - 1, Format, Args);
+	Length = FormatStringvA(Buffer, Format, Args);
 	if (Length == -1)
 		return Length;
 
@@ -4903,8 +4933,8 @@ ULONG_PTR PrintConsole(PCWSTR Format, ...)
 	HANDLE      StdOutput;
 
 	va_start(Args, Format);
-	Length = _vsnwprintf(Buffer, countof(Buffer) - 1, Format, Args);
-	//Length = FormatStringvW(Buffer, Format, Args);
+	//Length = _vsnwprintf(Buffer, countof(Buffer) - 1, Format, Args);
+	Length = FormatStringvW(Buffer, Format, Args);
 	if (Length == -1)
 		return Length;
 

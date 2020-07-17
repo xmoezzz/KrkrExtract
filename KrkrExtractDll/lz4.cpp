@@ -1223,7 +1223,7 @@ FORCE_INLINE int LZ4_decompress_generic(
 			{
 				/* match can be copied as a single segment from external dictionary */
 				match = dictEnd - (lowPrefix - match);
-				memmove(op, match, length); op += length;
+				RtlMoveMemory(op, (PVOID)match, length); op += length;
 			}
 			else
 			{

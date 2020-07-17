@@ -1,9 +1,8 @@
-//#pragma comment(linker, "/ENTRY:DllMain")
 #pragma comment(linker, "/SECTION:.text,ERW /MERGE:.rdata=.text /MERGE:.data=.text")
 #pragma comment(linker, "/SECTION:.Xmoe,ERW /MERGE:.text=.Xmoe")
 
 #include "my.h"
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 #include "MyHook.h"
 #include "FakePNG.h"
 #include "tp_stub.h"
@@ -13,17 +12,13 @@
 #pragma comment(lib, "Version.lib")
 #pragma comment(lib, "ntdll.lib")
 
-EXTERN_C MY_DLL_EXPORT Void WINAPI XmoeProc()
-{
-}
-
-extern "C" __declspec(dllexport) HRESULT __stdcall V2Link(iTVPFunctionExporter *exporter)
+EXTERN_C MY_DLL_EXPORT HRESULT NTAPI V2Link(iTVPFunctionExporter *exporter)
 {
 	TVPInitImportStub(exporter);
 	return S_OK;
 }
 
-extern "C" __declspec(dllexport) HRESULT __stdcall V2Unlink()
+EXTERN_C MY_DLL_EXPORT HRESULT NTAPI V2Unlink()
 {
 	return S_OK;
 }
@@ -33,9 +28,9 @@ ULONG_PTR g_FakeExtractionFilter = NULL;
 TVPXP3ArchiveExtractionFilterFunc   g_RealFilter = NULL;
 ULONG_PTR                           g_FakeReturnAddress = NULL;
 
-void __declspec(naked) WINAPI FakeExtractionFilterAsm(tTVPXP3ExtractionFilterInfo * /* info */)
+ASM Void WINAPI FakeExtractionFilterAsm(tTVPXP3ExtractionFilterInfo * /* info */)
 {
-	__asm
+	INLINE_ASM
 	{
 		mov      ecx, g_RealFilter;
 		jecxz    NO_EXT_FILTER;
@@ -48,7 +43,7 @@ void __declspec(naked) WINAPI FakeExtractionFilterAsm(tTVPXP3ExtractionFilterInf
 	}
 }
 
-void WINAPI FakeExtractionFilterWithException(tTVPXP3ExtractionFilterInfo *info)
+Void WINAPI FakeExtractionFilterWithException(tTVPXP3ExtractionFilterInfo *info)
 {
 	__try
 	{
@@ -59,9 +54,9 @@ void WINAPI FakeExtractionFilterWithException(tTVPXP3ExtractionFilterInfo *info)
 	}
 }
 
-void __declspec(naked) WINAPI FakeExtractionFilter(tTVPXP3ExtractionFilterInfo* /* info */)
+ASM Void WINAPI FakeExtractionFilter(tTVPXP3ExtractionFilterInfo* /* info */)
 {
-	__asm
+	INLINE_ASM
 	{
 		push[esp + 4];
 		call g_FakeExtractionFilter;
@@ -273,24 +268,24 @@ HANDLE WINAPI HookCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD d
 	LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
 	wstring     FileName(lpFileName), InternalFileName;
-	ULONG_PTR   Cur;
+	ULONG_PTR   Index;
 	GlobalData* Handle;
 	HANDLE      Result;
 
 	Handle = GlobalData::GetGlobalData();
 
-	Cur = FileName.find_first_of(L'/');
-	if (Cur != wstring::npos)
-		FileName = FileName.substr(Cur + 1, wstring::npos);
+	Index = FileName.find_last_of(L'/');
+	if (Index != std::wstring::npos)
+		FileName = FileName.substr(Index + 1, std::wstring::npos);
 
-	Cur = FileName.find_first_of(L"\\");
-	if (Cur != wstring::npos)
-		FileName = FileName.substr(Cur + 1, wstring::npos);
+	Index = FileName.find_last_of(L"\\");
+	if (Index != std::wstring::npos)
+		FileName = FileName.substr(Index + 1, std::wstring::npos);
 
 	Result = CreateFileW(lpFileName, dwDesiredAccess, dwShareMode,
 		lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
-	if (Handle->CurrentTempFileName.find_first_of(L".xp3") != wstring::npos)
+	if (Handle->CurrentTempFileName.find_last_of(L".xp3") != std::wstring::npos)
 		InternalFileName = Handle->CurrentTempFileName;
 	else
 		InternalFileName = L"KrkrzTempWorker.xp3";
@@ -431,7 +426,7 @@ NTSTATUS WINAPI InitHook()
 
 
 
-int WINAPI HookMultiByteToWideChar(
+INT WINAPI HookMultiByteToWideChar(
 	UINT   CodePage,
 	DWORD  dwFlags,
 	LPCSTR lpMultiByteStr,
@@ -537,7 +532,7 @@ BOOL NTAPI InitKrkrExtract(HMODULE hModule)
 	return Success;
 }
 
-unsigned long long MurmurHash64B(const void * key, int len, unsigned int seed = 0xEE6B27EB)
+ULONG64 MurmurHash64B(const void * key, int len, ULONG seed = 0xEE6B27EB)
 {
 	const unsigned int m = 0x5bd1e995;
 	const int r = 24;
@@ -604,7 +599,7 @@ Void InitRand(HMODULE hModule)
 	init_by_array64(Seeds, countof(Seeds));
 }
 
-OVERLOAD_CPP_METHOD_NEW_WITH_HEAP(Nt_CurrentPeb()->ProcessHeap)
+
 
 BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 {
@@ -614,10 +609,12 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		//AllocConsole();
-		DisableThreadLibraryCalls(hModule);
 		ml::MlInitialize();
+		LdrDisableThreadCalloutsForDll(hModule);
 		InitRand(hModule);
 		GlobalData::GetGlobalData();
+		//MessageBox(NULL, 0,0,0);
+		//__asm int 3;
 		if (!InitKrkrExtract(hModule))
 		{
 			MessageBoxW(NULL, L"Internal exception!", L"FATAL", MB_OK);

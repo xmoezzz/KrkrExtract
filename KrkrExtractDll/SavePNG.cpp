@@ -88,7 +88,7 @@ public:
 			if (s == Z_STREAM_END) {
 				unsigned long cnt = zs.total_out;
 				resize(cnt + 4);
-				memcpy((void*)&data[4], &out[0], cnt);
+				RtlCopyMemory((void*)&data[4], &out[0], cnt);
 				size = cnt + 4;
 			}
 		}

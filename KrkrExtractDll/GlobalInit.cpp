@@ -1,8 +1,9 @@
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 #include "resource.h"
 #include "MyHook.h"
 #include "FakePNG.h"
 #include "Worker.h"
+#include "KrkrUniversalPatch.h"
 #include <Shlobj.h>
 #include <WindowsX.h>
 
@@ -34,6 +35,7 @@ HRESULT WINAPI InitExporterByExeModule(iTVPFunctionExporter *Exporter)
 
 		if (GlobalData::GetGlobalData()->DebugOn)
 			PrintConsoleW(L"[exporter:exe]%p\n", Exporter);
+		
 
 		Status = InitExporter(Exporter);
 		if (NT_FAILED(Status))
@@ -248,6 +250,7 @@ Void GlobalData::GetOutputPack(LPWSTR Name, ULONG BufferMaxLength)
 BOOL GlobalData::FindCodeSlow(PCChar Start, ULONG Size, PCChar Pattern, ULONG PatternLen)
 {
 	return KMP(Start, Size, Pattern, PatternLen) ? TRUE : FALSE;
+	return TRUE;
 }
 
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -355,6 +358,46 @@ NTSTATUS NTAPI GlobalData::InitHookNull()
 }
 
 
+NTSTATUS FASTCALL ValidateShellCode(LPCWSTR ModuleName, PVOID ImageBase)
+{
+	PLDR_MODULE   XcodeLdr;
+
+	static CHAR SearchName[] = "void ::TVPSetXP3ArchiveExtractionFilter(tTVPXP3ArchiveExtractionFilter)";
+
+	auto GetModuleLdr = [&]()->PLDR_MODULE
+	{
+		LPCWSTR ModuleNameP = ModuleName;
+		ModuleNameP = StrFindLastCharW(ModuleNameP, L'\\');
+		if (ModuleNameP != NULL)
+			ModuleName = ModuleNameP + 1;
+
+		LDR_MODULE *Ldr, *FirstLdr;
+
+		Ldr = FIELD_BASE(Nt_CurrentPeb()->Ldr->InInitializationOrderModuleList.Flink, LDR_MODULE, InInitializationOrderLinks);
+		FirstLdr = Ldr;
+
+		do
+		{
+			Ldr = FIELD_BASE(Ldr->InInitializationOrderLinks.Flink, LDR_MODULE, InInitializationOrderLinks);
+			if (Ldr->DllBase == NULL)
+				continue;
+
+			if (Ldr->DllBase == ImageBase)
+				return Ldr;
+
+		} while (FirstLdr != Ldr);
+
+		return NULL;
+	};
+
+	XcodeLdr = GetModuleLdr();
+	
+	if (!XcodeLdr)
+		return STATUS_NO_SUCH_FILE;
+	
+	return KMP(XcodeLdr->DllBase, XcodeLdr->SizeOfImage, SearchName, StrLengthA(SearchName)) ? STATUS_UNSUCCESSFUL : STATUS_SUCCESS;
+}
+
 NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 {
 	NTSTATUS    Status;
@@ -381,6 +424,12 @@ NTSTATUS NTAPI GlobalData::InitHook(LPCWSTR ModuleName, PVOID ImageBase)
 		
 		if (Extension != TAG4W('.dll') && Extension != TAG4W('.tpm'))
 			break;
+
+		if (Nt_GetProcAddress(ImageBase, "FlushInstructionCache"))
+			break;
+
+		//if (NT_FAILED(ValidateShellCode(ModuleName, ImageBase)))
+		//	break;
 
 		pV2Link = Nt_GetProcAddress(ImageBase, "V2Link");
 		if (pV2Link == NULL)
@@ -512,11 +561,14 @@ Void WINAPI GlobalData::EnableAll(HWND hWnd)
 	HWND hOutPackSel = GetItemX(IDC_PACK_BUTTON_OUTPACK);
 
 	HWND hDoPack = GetItemX(IDC_PACK_BUTTON_MAKE);
+	HWND hDoUPatch = GetItemX(IDC_PACK_BUTTON_UMAKE);
 	HWND hProcess = GetItemX(IDC_PROGRESS1);
 	HWND hDbg = GetItemX(IDC_BUTTON_DEBUGGER);
 
 	EnableX(hPNGRaw);
 	EnableX(hPNGSys);
+
+	EnableX(hDoUPatch);
 
 	EnableX(hPSBRaw);
 	EnableX(hPSBDecom);
@@ -573,11 +625,14 @@ Void NTAPI GlobalData::DisableAll(HWND hWnd)
 	HWND hOutPackSel = GetItemX(IDC_PACK_BUTTON_OUTPACK);
 
 	HWND hDoPack = GetItemX(IDC_PACK_BUTTON_MAKE);
+	HWND hDoUPatch = GetItemX(IDC_PACK_BUTTON_UMAKE);
 	HWND hProcess = GetItemX(IDC_PROGRESS1);
 	HWND hDbg = GetItemX(IDC_BUTTON_DEBUGGER);
 
 	DisableX(hPNGRaw);
-	DisableX(hPNGSys);
+	DisableX(hPNGSys); 
+
+	DisableX(hDoUPatch);
 
 	DisableX(hPSBRaw);
 	DisableX(hPSBDecom);
@@ -954,11 +1009,14 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		HWND hOutPackSel = GetItemX(IDC_PACK_BUTTON_OUTPACK);
 
 		HWND hDoPack = GetItemX(IDC_PACK_BUTTON_MAKE);
+		HWND hDoUPatch = GetItemX(IDC_PACK_BUTTON_UMAKE);
 		HWND hProcess = GetItemX(IDC_PROGRESS1);
 		HWND hDbg = GetItemX(IDC_BUTTON_DEBUGGER);
 
 		EnableX(hPNGRaw);
 		EnableX(hPNGSys);
+
+		EnableX(hDoUPatch);
 
 		EnableX(hPSBRaw);
 		EnableX(hPSBDecom);
@@ -1015,7 +1073,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		NtFileDisk File;
 
 		RtlZeroMemory(DataName, countof(DataName) * sizeof(WCHAR));
-		GetCurrentDirectoryW(MAX_PATH, DataName);
+		Nt_GetCurrentDirectory(MAX_PATH, DataName);
 		lstrcatW(DataName, L"\\data.xp3");
 		if (NT_SUCCESS(File.Open(DataName)))
 		{
@@ -1052,7 +1110,8 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case EN_CHANGE:
 			{
 				HWND hFolderEdit = GetItemX(IDC_PACK_EDIT_FOLDER);
-				WCHAR lpString[1024] = { 0 };
+				WCHAR lpString[1024];
+				RtlZeroMemory(lpString, sizeof(lpString));
 				GetWindowTextW(hFolderEdit, lpString, 1024);
 				GlobalData::GetGlobalData()->SetFolder(lpString);
 			}
@@ -1070,7 +1129,8 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case EN_CHANGE:
 			{
 				HWND hOriPack = GetItemX(IDC_PACK_EDIT_ORIPACK);
-				WCHAR lpString[1024] = { 0 };
+				WCHAR lpString[1024];
+				RtlZeroMemory(lpString, sizeof(lpString));
 				GetWindowTextW(hOriPack, lpString, 1024);
 				GlobalData::GetGlobalData()->SetGuessPack(lpString);
 			}
@@ -1088,7 +1148,8 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case EN_CHANGE:
 			{
 				HWND hOutPack = GetItemX(IDC_PACK_EDIT_OUTPACK);
-				WCHAR lpString[1024] = { 0 };
+				WCHAR lpString[1024];
+				RtlZeroMemory(lpString, sizeof(lpString));
 				GetWindowTextW(hOutPack, lpString, 1024);
 				GlobalData::GetGlobalData()->SetOutputPack(lpString);
 			}
@@ -1153,7 +1214,9 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				Result = SendMessageW(hPSBRaw, BM_GETCHECK, 0, 0);
 				if (Result == FALSE)
 				{
-					BOOL SubResult[5] = { FALSE };
+					BOOL SubResult[5];
+
+					RtlZeroMemory(SubResult, sizeof(SubResult));
 					HWND hPSBDecom = GetItemX(IDC_PSB_SCRIPT);
 					HWND hPSBText = GetItemX(IDC_PSB_TEXT);
 					HWND hPSBImage = GetItemX(IDC_PSB_IMAGE);
@@ -1209,7 +1272,9 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				Result = SendMessageW(hPSBDecom, BM_GETCHECK, 0, 0);
 				if (Result == FALSE)
 				{
-					BOOL SubResult[5] = { FALSE };
+					BOOL SubResult[5];
+
+					RtlZeroMemory(SubResult, sizeof(SubResult));
 					HWND hPSBRaw = GetItemX(IDC_PSB_RAW);
 					HWND hPSBText = GetItemX(IDC_PSB_TEXT);
 					HWND hPSBImage = GetItemX(IDC_PSB_IMAGE);
@@ -1263,7 +1328,9 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				Result = SendMessageW(hPSBImage, BM_GETCHECK, 0, 0);
 				if (Result == FALSE)
 				{
-					BOOL SubResult[5] = { FALSE };
+					BOOL SubResult[5];
+
+					RtlZeroMemory(SubResult, sizeof(SubResult));
 					HWND hPSBRaw = GetItemX(IDC_PSB_RAW);
 					HWND hPSBText = GetItemX(IDC_PSB_TEXT);
 					HWND hPSBDecom = GetItemX(IDC_PSB_SCRIPT);
@@ -1316,7 +1383,9 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				Result = SendMessageW(hPSBText, BM_GETCHECK, 0, 0);
 				if (Result == FALSE)
 				{
-					BOOL SubResult[5] = { FALSE };
+					BOOL SubResult[5];
+
+					RtlZeroMemory(SubResult, sizeof(SubResult));
 					HWND hPSBRaw = GetItemX(IDC_PSB_RAW);
 					HWND hPSBImage = GetItemX(IDC_PSB_IMAGE);
 					HWND hPSBDecom = GetItemX(IDC_PSB_SCRIPT);
@@ -1370,7 +1439,9 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				Result = SendMessageW(hPSBAnm, BM_GETCHECK, 0, 0);
 				if (Result == FALSE)
 				{
-					BOOL SubResult[5] = { FALSE };
+					BOOL SubResult[5];
+
+					RtlZeroMemory(SubResult, sizeof(SubResult));
 					HWND hPSBRaw = GetItemX(IDC_PSB_RAW);
 					HWND hPSBImage = GetItemX(IDC_PSB_IMAGE);
 					HWND hPSBDecom = GetItemX(IDC_PSB_SCRIPT);
@@ -1594,7 +1665,9 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				HWND hFolderSel = GetItemX(IDC_PACK_BUTTON_FOLDER);
 
 				WCHAR lpString[MAX_PATH];
-				BROWSEINFOW FolderInfo = { 0 };
+				BROWSEINFOW FolderInfo;
+
+				RtlZeroMemory(&FolderInfo, sizeof(BROWSEINFOW));
 				FolderInfo.hwndOwner = hWnd;
 				FolderInfo.lpszTitle = L"Select a folder to pack";
 				FolderInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI | BIF_UAHINT | BIF_NONEWFOLDERBUTTON;
@@ -1624,16 +1697,23 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				HWND hOriPackSel = GetItemX(IDC_PACK_BUTTON_ORIPACK);
 
-				WCHAR lpString[MAX_PATH] = { 0 };
-				WCHAR CurDir[MAX_PATH] = { 0 };
-				OPENFILENAMEW OpenInfo = { { sizeof(OPENFILENAMEW) } };
+				WCHAR lpString[MAX_PATH];
+				WCHAR CurDir[MAX_PATH];
+
+				RtlZeroMemory(lpString, sizeof(lpString));
+				RtlZeroMemory(CurDir, sizeof(CurDir));
+
+				OPENFILENAMEW OpenInfo;
+
+				RtlZeroMemory(&OpenInfo, sizeof(OPENFILENAMEW));
+				OpenInfo.lStructSize = sizeof(OPENFILENAMEW);
 				OpenInfo.hwndOwner = hWnd;
 				OpenInfo.lpstrFilter = L"XP3 File\0*.xp3";
 				OpenInfo.lpstrFile = lpString;
 				OpenInfo.nMaxFile = sizeof(lpString) / 2;
 				OpenInfo.lpstrTitle = L"Select an original xp3 file";
 
-				GetCurrentDirectoryW(MAX_PATH, CurDir);
+				Nt_GetCurrentDirectory(MAX_PATH, CurDir);
 				OpenInfo.lpstrInitialDir = CurDir;
 				OpenInfo.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
 				BOOL Result = GetOpenFileNameW(&OpenInfo);
@@ -1660,16 +1740,23 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				HWND hOutPackSel = GetItemX(IDC_PACK_BUTTON_OUTPACK);
 
-				WCHAR lpString[MAX_PATH] = { 0 };
-				WCHAR CurDir[MAX_PATH] = { 0 };
-				OPENFILENAMEW OpenInfo = { { sizeof(OPENFILENAMEW) } };
+				WCHAR lpString[MAX_PATH];
+				WCHAR CurDir[MAX_PATH];
+
+				RtlZeroMemory(lpString, sizeof(lpString));
+				RtlZeroMemory(CurDir, sizeof(CurDir));
+
+				OPENFILENAMEW OpenInfo;
+
+				RtlZeroMemory(&OpenInfo, sizeof(OPENFILENAMEW));
+				OpenInfo.lStructSize = sizeof(OPENFILENAMEW);
 				OpenInfo.hwndOwner = hWnd;
 				OpenInfo.lpstrFilter = L"XP3 File\0*.xp3";
 				OpenInfo.lpstrFile = lpString;
 				OpenInfo.nMaxFile = sizeof(lpString) / 2;
 				OpenInfo.lpstrTitle = L"Output xp3 file";
 
-				GetCurrentDirectoryW(MAX_PATH, CurDir);
+				Nt_GetCurrentDirectory(MAX_PATH, CurDir);
 				OpenInfo.lpstrInitialDir = CurDir;
 				OpenInfo.Flags = OFN_EXPLORER;
 				BOOL Result = GetOpenFileNameW(&OpenInfo);
@@ -1694,6 +1781,22 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				HWND hDoPack = GetItemX(IDC_BUTTON4);
 				GlobalData::GetGlobalData()->WorkerThread = StartPacker();
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+
+		//Make Universal Patch
+		case IDC_PACK_BUTTON_UMAKE:
+		{
+			switch (wmEvent)
+			{
+			case BN_CLICKED:
+			{
+				MakePatch();
 			}
 			break;
 			default:
@@ -1751,14 +1854,14 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		UINT nFileNum = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
 		//Folder or File
-		if (nFileNum == 1)
+		if (nFileNum >= 1)
 		{
 			InvalidateRect(hWnd, NULL, TRUE);
 			RtlZeroMemory(GlobalData::GetGlobalData()->DragFileName, MAX_PATH * 2);
 			DragQueryFileW(hDrop, 0, GlobalData::GetGlobalData()->DragFileName, MAX_PATH);
 			DragFinish(hDrop);
 
-			ULONG FileAttr = GetFileAttributesW(GlobalData::GetGlobalData()->DragFileName);
+			ULONG FileAttr = Nt_GetFileAttributes(GlobalData::GetGlobalData()->DragFileName);
 			if (FileAttr == INVALID_FILE_ATTRIBUTES)
 			{
 				DragFinish(hDrop);

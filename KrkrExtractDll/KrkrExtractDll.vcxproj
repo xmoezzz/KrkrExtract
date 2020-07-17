@@ -25,7 +25,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -70,7 +70,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;KRKREXTRACTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Strict</FloatingPointModel>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
@@ -88,10 +88,8 @@
     <ClCompile Include="adler32.cpp" />
     <ClCompile Include="compress.cpp" />
     <ClCompile Include="crc32.cpp" />
-    <ClCompile Include="CRC64.cpp" />
     <ClCompile Include="deflate.cpp" />
     <ClCompile Include="FakePNG.cpp" />
-    <ClCompile Include="GenMD5Code.cpp" />
     <ClCompile Include="GlobalInit.cpp" />
     <ClCompile Include="ImageWorkerNcb.cpp" />
     <ClCompile Include="inffast.cpp" />
@@ -99,15 +97,16 @@
     <ClCompile Include="inftrees.cpp" />
     <ClCompile Include="KrkrExtract.cpp" />
     <ClCompile Include="KrkrTextDecode.cpp" />
+    <ClCompile Include="KrkrUniversalPatch.cpp" />
     <ClCompile Include="lz4.cpp" />
     <ClCompile Include="lz4frame.cpp" />
     <ClCompile Include="lz4hc.cpp" />
-    <ClCompile Include="md5.cpp" />
     <ClCompile Include="mt19937-64.cpp" />
     <ClCompile Include="my.cpp" />
     <ClCompile Include="MyHook.cpp" />
     <ClCompile Include="KrkrPacker.cpp" />
     <ClCompile Include="KrkrDumper.cpp" />
+    <ClCompile Include="PEFile.cpp" />
     <ClCompile Include="PNGWorker.cpp" />
     <ClCompile Include="PsbWorker.cpp" />
     <ClCompile Include="SavePNG.cpp" />
@@ -119,16 +118,14 @@
     <ClCompile Include="uncompr.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="XP3Parser.cpp" />
-    <ClCompile Include="xxhash.c" />
+    <ClCompile Include="xxhash.cpp" />
     <ClCompile Include="zutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Adler32Stream.h" />
-    <ClInclude Include="CRC64.h" />
     <ClInclude Include="deflate.h" />
     <ClInclude Include="FakePNG.h" />
-    <ClInclude Include="GenMD5Code.h" />
-    <ClInclude Include="GlobalInit.h" />
+    <ClInclude Include="KrkrExtract.h" />
     <ClInclude Include="gzguts.h" />
     <ClInclude Include="ImageWokerNcb.h" />
     <ClInclude Include="inffast.h" />
@@ -136,19 +133,22 @@
     <ClInclude Include="inftrees.h" />
     <ClInclude Include="KrkrExtend.h" />
     <ClInclude Include="KrkrHeaders.h" />
+    <ClInclude Include="KrkrUniversalPatch.h" />
     <ClInclude Include="lz4.h" />
     <ClInclude Include="lz4frame.h" />
     <ClInclude Include="lz4frame_static.h" />
     <ClInclude Include="lz4hc.h" />
-    <ClInclude Include="md5.h" />
+    <ClInclude Include="ml.h" />
     <ClInclude Include="mt64.h" />
     <ClInclude Include="my.h" />
     <ClInclude Include="MyHook.h" />
+    <ClInclude Include="MyLib.h" />
     <ClInclude Include="ncbind.h" />
     <ClInclude Include="ncb_foreach.h" />
     <ClInclude Include="ncb_invoke.h" />
     <ClInclude Include="KrkrPacker.h" />
     <ClInclude Include="KrkrDumper.h" />
+    <ClInclude Include="PEFile.h" />
     <ClInclude Include="PNGWorker.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SaveExCompress.h" />

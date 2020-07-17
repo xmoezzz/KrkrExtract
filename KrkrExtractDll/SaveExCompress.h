@@ -4,7 +4,9 @@
 #include "tp_stub.h"
 #include "utils.h"
 
-#include <vector>
+//#include <vector>
+#include "my.h"
+#include "ml.h"
 
 typedef bool ProgressFunc(int percent, void *userdata);
 
@@ -17,7 +19,7 @@ protected:
 	void         *progressData;
 
 	typedef unsigned char BYTE;
-	typedef std::vector<BYTE> DATA;
+	typedef vector<BYTE> DATA;
 	DATA data;
 	ULONG cur; 
 	ULONG size;   

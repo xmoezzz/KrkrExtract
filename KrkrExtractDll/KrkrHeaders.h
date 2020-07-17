@@ -1,9 +1,7 @@
 #pragma once
 
 #include "my.h"
-#include <string>
-
-using std::wstring;
+#include "ml.h"
 
 #pragma pack(1)
 typedef struct PACK_FILE_INFO
@@ -82,11 +80,11 @@ typedef struct KRKR2_XP3_HEADER
 
 typedef struct KRKRZ_XP3_INDEX_CHUNK_Yuzu
 {
-	CHAR          Magic[4]; //Yuzu,etc...
-	LARGE_INTEGER ChunkSize;
-	ULONG         Hash;
-	USHORT        Len;
-	wstring       Name;
+	CHAR                   Magic[4]; //Yuzu,etc...
+	LARGE_INTEGER          ChunkSize;
+	ULONG                  Hash;
+	USHORT                 Len;
+	wstring                Name;
 
 	KRKRZ_XP3_INDEX_CHUNK_Yuzu() : Hash(0){}
 } KRKRZ_XP3_INDEX_CHUNK_Yuzu;
@@ -104,13 +102,13 @@ typedef struct KRKRZ_XP3_INDEX_CHUNK_Yuzu2
 
 typedef struct KRKR2_XP3_INDEX_CHUNK_INFO2
 {
-	CHAR            Magic[4];     // 'info'
-	LARGE_INTEGER   ChunkSize;
-	ULONG           EncryptedFlag;
-	LARGE_INTEGER   OriginalSize;
-	LARGE_INTEGER   ArchiveSize;
-	USHORT          FileNameLength;
-	wstring         FileName;
+	CHAR                   Magic[4];     // 'info'
+	LARGE_INTEGER          ChunkSize;
+	ULONG                  EncryptedFlag;
+	LARGE_INTEGER          OriginalSize;
+	LARGE_INTEGER          ArchiveSize;
+	USHORT                 FileNameLength;
+	wstring                FileName;
 } KRKR2_XP3_INDEX_CHUNK_INFO2;
 
 typedef struct KRKR2_XP3_INDEX_CHUNK_SEGM_DATA

@@ -2,17 +2,11 @@
 
 #include "my.h"
 #include "tp_stub.h"
-#include <string>
-#include <vector>
 #include <Shlobj.h>
-#include "CRC64.h"
-#include "GenMD5Code.h"
+#include "MyLib.h"
 #include "zlib.h"
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 #include "resource.h"
-
-using std::wstring;
-using std::vector;
 
 
 #ifndef MagicLength
@@ -57,22 +51,21 @@ public:
 
 	Void NTAPI DecryptWorker(ULONG EncryptOffset, PBYTE pBuffer, ULONG BufferSize,  ULONG Hash);
 
-//private:
-	ULONG                          KrkrPackType;
-	vector<wstring>                FileList;
-	ULONG                          M2Hash;
-	BYTE                           DecryptionKey;
-	tTVPXP3ArchiveExtractionFilter pfProc;
-	BOOL                           XP3EncryptionFlag;
-	vector<XP3Index>               M2ChunkList;
-	vector<SMyXP3IndexM2>          PackChunkList;
-	BOOL                           InfoNameZeroEnd;
-	BOOL                           M2NameZeroEnd;
-	KRKRZ_M2_Senrenbanka_HEADER    SenrenBankaInfo;
-	DWORD                          M2SubChunkMagic;
+	ULONG                             KrkrPackType;
+	vector<wstring>                   FileList;
+	ULONG                             M2Hash;
+	BYTE                              DecryptionKey;
+	tTVPXP3ArchiveExtractionFilter    pfProc;
+	BOOL                              XP3EncryptionFlag;
+	vector<XP3Index>                  M2ChunkList;
+	vector<SMyXP3IndexM2>             PackChunkList;
+	BOOL                              InfoNameZeroEnd;
+	BOOL                              M2NameZeroEnd;
+	KRKRZ_M2_Senrenbanka_HEADER       SenrenBankaInfo;
+	DWORD                             M2SubChunkMagic;
 
-	HANDLE                         hThread;
-	DWORD                          ThreadId;
+	HANDLE                            hThread;
+	DWORD                             ThreadId;
 };
 
 

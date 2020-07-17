@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrExtractDll", "KrkrExtra
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrExtractExe", "KrkrExtractExe\KrkrExtractExe.vcxproj", "{79E5C2BD-8DEC-4292-B9FA-BE080F0D56E1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrzUniversalPatch", "KrkrzUniversalPatch\KrkrzUniversalPatch.vcxproj", "{B0493974-0D01-4557-A98A-AD16D0C60651}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{79E5C2BD-8DEC-4292-B9FA-BE080F0D56E1}.Debug|Win32.Build.0 = Debug|Win32
 		{79E5C2BD-8DEC-4292-B9FA-BE080F0D56E1}.Release|Win32.ActiveCfg = Release|Win32
 		{79E5C2BD-8DEC-4292-B9FA-BE080F0D56E1}.Release|Win32.Build.0 = Release|Win32
+		{B0493974-0D01-4557-A98A-AD16D0C60651}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B0493974-0D01-4557-A98A-AD16D0C60651}.Debug|Win32.Build.0 = Debug|Win32
+		{B0493974-0D01-4557-A98A-AD16D0C60651}.Release|Win32.ActiveCfg = Release|Win32
+		{B0493974-0D01-4557-A98A-AD16D0C60651}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,29 +1,14 @@
 #include "KrkrExtend.h"
 #include "zlib.h"
 #include "my.h"
-#include "GlobalInit.h"
+#include "KrkrExtract.h"
 
-/*
-Check if the given unsigned char * is a valid utf-8 sequence.
 
-Return value :
-If the string is valid utf-8, 0 is returned.
-Else the position, starting from 1, is returned.
-
-Valid utf-8 sequences look like this :
-0xxxxxxx
-110xxxxx 10xxxxxx
-1110xxxx 10xxxxxx 10xxxxxx
-11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-*/
-
-ULONG_PTR IsUtf8String(PBYTE str, ULONG_PTR len)
+ForceInline ULONG_PTR FASTCALL IsUtf8String(PBYTE str, ULONG_PTR len)
 {
 	ULONG_PTR i = 0;
 	ULONG_PTR continuation_bytes = 0;
-
+	
 	while (i < len)
 	{
 		if (str[i] <= 0x7F)

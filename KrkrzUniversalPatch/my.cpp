@@ -10981,11 +10981,11 @@ memcpy(dest, src, size); \
 #endif  // CPP_DEFINDED
 
 #define RTL_CONSTANT_STRING(s) \
-					{ \
+						{ \
     sizeof( s ) - sizeof( (s)[0] ), \
     sizeof( s ) / sizeof(_RTL_CONSTANT_STRING_type_check(s)), \
     _RTL_CONSTANT_STRING_remove_const_macro(s) \
-					}
+						}
 
 #if 0
 
@@ -11118,7 +11118,7 @@ memcpy(dest, src, size); \
         (p)->ObjectName = n;                                \
         (p)->SecurityDescriptor = s;                        \
         (p)->SecurityQualityOfService = NULL;               \
-					    }
+						    }
 #endif
 
 
@@ -13481,25 +13481,25 @@ memcpy(dest, src, size); \
     (ph)->DataLength    = (USHORT) (l - sizeof(PORT_MESSAGE));    \
     (ph)->Type            = (USHORT) (t);                            \
     (ph)->VirtualRangesOffset = 0;                                \
-					}
+						}
 
 #define InitializeMessageData(msag, view, command, dataaddr, datalen) {        \
     InitializeMessageHeader(&((msag)->Header), 256, LPC_NEW_MESSAGE)        \
     (msag)->Command        = command;                                            \
     (msag)->DataLength  = datalen;                                            \
     if ((datalen) < 224)                                                    \
-					    {                                                                        \
+						    {                                                                        \
         CopyMemory((PVOID)(msag)->MessageText,                                    \
                (PVOID)(dataaddr),                                            \
                (ULONG)(datalen));                                            \
-					    }                                                                        \
+						    }                                                                        \
     else                                                                    \
-					    {                                                                        \
+						    {                                                                        \
     CopyMemory((PVOID)(view)->ViewBase,                                        \
                (PVOID)(dataaddr),                                            \
                (ULONG)(datalen));                                            \
-					    }                                                                        \
-					}
+						    }                                                                        \
+						}
 
 #endif  // InitializePortHeader
 
@@ -23728,18 +23728,18 @@ memcpy(dest, src, size); \
 #else // !USE_NT_VER
 
 #define getargsA(pargc, pargv) \
-					            { \
+						            { \
                 Char **__envp__;int __dowildcard = 0;__my_startupinfo _my_startupinfo;\
                 *(pargc) = 0; \
                 __getmainargs((int *)(pargc), (pargv), (&__envp__), __dowildcard, &_my_startupinfo); \
-					            }
+						            }
 
 #define getargsW(pargc, pargv) \
-					            { \
+						            { \
                 WChar **__envp__;int __dowildcard = 0;__my_startupinfo _my_startupinfo; \
                 *(pargc) = 0; \
                 __wgetmainargs((int *)(pargc), (pargv), (&__envp__), __dowildcard, &_my_startupinfo); \
-					            }
+						            }
 
 #endif  // USE_NT_VER
 
@@ -27673,7 +27673,7 @@ memcpy(dest, src, size); \
 #define DEFINE_FUNCTION_CLASS(call_convention)\
     template<typename R, typename... ARGS> \
     class Function<R call_convention(ARGS...)> \
-					    { \
+						    { \
     public: \
         typedef Function<R call_convention(ARGS...)> SELF_TYPE; \
         typedef R RET_TYPE; \
@@ -27681,7 +27681,7 @@ memcpy(dest, src, size); \
         typedef R (FUNCTION_TYPE)(ARGS...); \
 \
         class Invoker \
-					        { \
+						        { \
             ULONG_PTR RefCount; \
         public: \
             Invoker() : RefCount(1) {} \
@@ -27689,73 +27689,73 @@ memcpy(dest, src, size); \
             virtual R Invoke(ARGS...) = 0; \
 \
             void AddRef() \
-					            { \
+						            { \
                 ++this->RefCount; \
-					            } \
+						            } \
 \
             void Release() \
-					            { \
+						            { \
                 if (--this->RefCount == 0) \
                     delete this; \
-					            } \
+						            } \
 \
-					        }; \
+						        }; \
 \
         template<typename F> \
         class FunctionInvoker : public Invoker \
-					        { \
+						        { \
         protected: \
             F func; \
 \
         public: \
             FunctionInvoker(const F& function) : func(function) \
-					            { \
-					            } \
+						            { \
+						            } \
 \
             R Invoke(ARGS... args) \
-					            { \
+						            { \
                 return func(args...); \
-					            } \
-					        }; \
+						            } \
+						        }; \
 \
         Invoker *invoker; \
 \
         NoInline Function(const SELF_TYPE &func) \
-					        { \
+						        { \
             this->invoker = func.invoker; \
             this->invoker->AddRef(); \
-					        } \
+						        } \
 \
         template<typename F> \
         NoInline Function(const F &func) \
-					        { \
+						        { \
             this->invoker = new FunctionInvoker<F>(func); \
-					        } \
+						        } \
 \
         template<typename F> \
         SELF_TYPE& operator=(const F &func) \
-					        { \
+						        { \
             this->~Function(); \
             this->invoker = new FunctionInvoker<F>(func); \
             return *this; \
-					        } \
+						        } \
 \
         NoInline ~Function() \
-					        { \
+						        { \
             if (invoker != nullptr) \
                 invoker->Release(); \
-					        } \
+						        } \
 \
         R operator()(ARGS... args) \
-					        { \
+						        { \
             return this->invoker->Invoke(args...); \
-					        } \
-					    }
+						        } \
+						    }
 
 #define DEFINE_FUNCTION_POINTER_CLASS(call_convention)\
     template<typename R, typename... ARGS> \
     class Function<R (call_convention*)(ARGS...)> \
-					    { \
+						    { \
     public: \
         typedef Function<R call_convention(ARGS...)> SELF_TYPE; \
         typedef R RET_TYPE; \
@@ -27763,7 +27763,7 @@ memcpy(dest, src, size); \
         typedef R (FUNCTION_TYPE)(ARGS...); \
 \
         class Invoker \
-					        { \
+						        { \
             ULONG_PTR RefCount; \
         public: \
             Invoker() : RefCount(1) {} \
@@ -27771,73 +27771,73 @@ memcpy(dest, src, size); \
             virtual R Invoke(ARGS...) = 0; \
 \
             void AddRef() \
-					            { \
+						            { \
                 ++this->RefCount; \
-					            } \
+						            } \
 \
             void Release() \
-					            { \
+						            { \
                 if (--this->RefCount == 0) \
                     delete this; \
-					            } \
+						            } \
 \
-					        }; \
+						        }; \
 \
         template<typename F> \
         class FunctionInvoker : public Invoker \
-					        { \
+						        { \
         protected: \
             F func; \
 \
         public: \
             FunctionInvoker(const F& function) : func(function) \
-					            { \
-					            } \
+						            { \
+						            } \
 \
             R Invoke(ARGS... args) \
-					            { \
+						            { \
                 return func(args...); \
-					            } \
-					        }; \
+						            } \
+						        }; \
 \
         Invoker *invoker; \
 \
         NoInline Function(const SELF_TYPE &func) \
-					        { \
+						        { \
             this->invoker = func.invoker; \
             this->invoker->AddRef(); \
-					        } \
+						        } \
 \
         template<typename F> \
         NoInline Function(const F &func) \
-					        { \
+						        { \
             this->invoker = new FunctionInvoker<F>(func); \
-					        } \
+						        } \
 \
         template<typename F> \
         SELF_TYPE& operator=(const F &func) \
-					        { \
+						        { \
             this->~Function(); \
             this->invoker = new FunctionInvoker<F>(func); \
             return *this; \
-					        } \
+						        } \
 \
         NoInline ~Function() \
-					        { \
+						        { \
             if (invoker != nullptr) \
                 invoker->Release(); \
-					        } \
+						        } \
 \
         R operator()(ARGS... args) \
-					        { \
+						        { \
             return this->invoker->Invoke(args...); \
-					        } \
-					    };
+						        } \
+						    };
 
 #define DEFINE_CLASS_METHOD_CLASS(...) \
     template<typename CLASS, typename R, typename... ARGS> \
     class Function<R(__VA_ARGS__ CLASS::*)(const CLASS&, ARGS...)> \
-					    { \
+						    { \
     public: \
         typedef Function<R __VA_ARGS__(const CLASS&, ARGS...)> SELF_TYPE; \
         typedef R RET_TYPE; \
@@ -27845,7 +27845,7 @@ memcpy(dest, src, size); \
         typedef R (FUNCTION_TYPE)(const CLASS&, ARGS...); \
 \
         class Invoker \
-					        { \
+						        { \
             ULONG_PTR RefCount; \
         public: \
             Invoker() : RefCount(1) {} \
@@ -27853,74 +27853,74 @@ memcpy(dest, src, size); \
             virtual R Invoke(const CLASS&, ARGS...) = 0; \
 \
             void AddRef() \
-					            { \
+						            { \
                 ++this->RefCount; \
-					            } \
+						            } \
 \
             void Release() \
-					            { \
+						            { \
                 if (--this->RefCount == 0) \
                     delete this; \
-					            } \
+						            } \
 \
-					        }; \
+						        }; \
 \
         template<typename F> \
         class FunctionInvoker : public Invoker \
-					        { \
+						        { \
         protected: \
             F func; \
 \
         public: \
             FunctionInvoker(const F& function) : func(function) \
-					            { \
-					            } \
+						            { \
+						            } \
 \
             R Invoke(const CLASS& thiz, ARGS... args) \
-					            { \
+						            { \
                 return func(thiz, args...); \
-					            } \
-					        }; \
+						            } \
+						        }; \
 \
         Invoker *invoker; \
 \
         NoInline Function(const SELF_TYPE &func) \
-					        { \
+						        { \
             this->invoker = func.invoker; \
             this->invoker->AddRef(); \
-					        } \
+						        } \
 \
         template<typename F> \
         NoInline Function(const F &func) \
-					        { \
+						        { \
             this->invoker = new FunctionInvoker<F>(func); \
-					        } \
+						        } \
 \
         template<typename F> \
         SELF_TYPE& operator=(const F &func) \
-					        { \
+						        { \
             this->~Function(); \
             this->invoker = new FunctionInvoker<F>(func); \
             return *this; \
-					        } \
+						        } \
 \
         NoInline ~Function() \
-					        { \
+						        { \
             if (invoker != nullptr) \
                 invoker->Release(); \
-					        } \
+						        } \
 \
         R operator()(const CLASS& thiz, ARGS... args) \
-					        { \
+						        { \
             return this->invoker->Invoke(thiz, args...); \
-					        } \
-					    };
+						        } \
+						    };
 
 
 #define DEFINE_LAMBDA_CLASS(...) \
     template<typename CLASS, typename R, typename... ARGS> \
     class Function<R(__VA_ARGS__ CLASS::*)(ARGS...) const> \
-					    { \
+						    { \
     public: \
         typedef Function<R __VA_ARGS__(ARGS...)> SELF_TYPE; \
         typedef R RET_TYPE; \
@@ -27928,7 +27928,7 @@ memcpy(dest, src, size); \
         typedef R (FUNCTION_TYPE)(ARGS...); \
 \
         class Invoker \
-					        { \
+						        { \
             ULONG_PTR RefCount; \
         public: \
             Invoker() : RefCount(1) {} \
@@ -27936,68 +27936,68 @@ memcpy(dest, src, size); \
             virtual R Invoke(ARGS...) = 0; \
 \
             void AddRef() \
-					            { \
+						            { \
                 ++this->RefCount; \
-					            } \
+						            } \
 \
             void Release() \
-					            { \
+						            { \
                 if (--this->RefCount == 0) \
                     delete this; \
-					            } \
+						            } \
 \
-					        }; \
+						        }; \
 \
         template<typename F> \
         class FunctionInvoker : public Invoker \
-					        { \
+						        { \
         protected: \
             F func; \
 \
         public: \
             FunctionInvoker(const F& function) : func(function) \
-					            { \
-					            } \
+						            { \
+						            } \
 \
             R Invoke(ARGS... args) \
-					            { \
+						            { \
                 return func(args...); \
-					            } \
-					        }; \
+						            } \
+						        }; \
 \
         Invoker *invoker; \
 \
         NoInline Function(const SELF_TYPE &func) \
-					        { \
+						        { \
             this->invoker = func.invoker; \
             this->invoker->AddRef(); \
-					        } \
+						        } \
 \
         template<typename F> \
         NoInline Function(const F &func) \
-					        { \
+						        { \
             this->invoker = new FunctionInvoker<F>(func); \
-					        } \
+						        } \
 \
         template<typename F> \
         SELF_TYPE& operator=(const F &func) \
-					        { \
+						        { \
             this->~Function(); \
             this->invoker = new FunctionInvoker<F>(func); \
             return *this; \
-					        } \
+						        } \
 \
         NoInline ~Function() \
-					        { \
+						        { \
             if (invoker != nullptr) \
                 invoker->Release(); \
-					        } \
+						        } \
 \
         R operator()(ARGS... args) \
-					        { \
+						        { \
             return this->invoker->Invoke(args...); \
-					        } \
-					    };
+						        } \
+						    };
 
 
 #if ML_X86
@@ -30145,8 +30145,8 @@ memcpy(dest, src, size); \
 	typedef String::StringArray StringArray;
 	typedef String::ByteArray ByteArray;
 
-	#define CONVERSION_BUFFER_LENGTH 128
-	#define MATRIX_CONVERSION_BUFFER_LENGTH 256;
+#define CONVERSION_BUFFER_LENGTH 128
+#define MATRIX_CONVERSION_BUFFER_LENGTH 256;
 
 
 	inline unsigned int MurmurHash32(const void * key, int len, unsigned int seed = 0xEE6B27EB)
@@ -30407,7 +30407,7 @@ memcpy(dest, src, size); \
 
 	/// Returns an iterator pointing to the first element in the range [first, last) that is not less than value.
 	template <class TRandomAccessIterator, class T> ForceInline
-	TRandomAccessIterator LowerBound(TRandomAccessIterator first, TRandomAccessIterator last, const T& value)
+		TRandomAccessIterator LowerBound(TRandomAccessIterator first, TRandomAccessIterator last, const T& value)
 	{
 		unsigned count = last - first;
 
@@ -30430,7 +30430,7 @@ memcpy(dest, src, size); \
 
 	/// Returns an iterator pointing to the first element in the range [first, last) that is greater than value.
 	template <class TRandomAccessIterator, class T> ForceInline
-	TRandomAccessIterator UpperBound(TRandomAccessIterator first, TRandomAccessIterator last, const T& value)
+		TRandomAccessIterator UpperBound(TRandomAccessIterator first, TRandomAccessIterator last, const T& value)
 	{
 		unsigned count = last - first;
 
@@ -30881,7 +30881,7 @@ memcpy(dest, src, size); \
 				nextPos = pos + replaceWith.length_;
 			}
 		}
-		
+
 		/// Replace a substring.
 		void Replace(unsigned pos, unsigned length, const NarrowString& replaceWith)
 		{
@@ -31729,7 +31729,7 @@ memcpy(dest, src, size); \
 	};
 
 
-	#define QUICKSORT_THRESHOLD 16
+#define QUICKSORT_THRESHOLD 16
 
 	/// Perform insertion sort on an array.
 	template <class T> inline void InsertionSort(RandomAccessIterator<T> begin, RandomAccessIterator<T> end)
@@ -32625,7 +32625,7 @@ memcpy(dest, src, size); \
 #define HASHER_END };
 #define HASHER(type, argtype) \
     template<> class Hasher<type> \
-										    { \
+												    { \
     public: \
         static HASH_VALUE Hash(HashTableT* thiz, argtype Key)
 
@@ -32677,360 +32677,360 @@ memcpy(dest, src, size); \
 		}
 		HASHER_END
 
-											public:
-												NoInline HashTableT()
-												{
-													this->Entries = nullptr;
-													this->CalcTable = nullptr;
-													this->TableUsedSize = 0;
-													this->TableSize = 0;
-
-													this->GrowthFactor = 1.3;
-												}
-
-												NoInline ~HashTableT()
-												{
-													SafeDeleteT(this->CalcTable);
-													SafeDeleteArrayT(this->Entries);
-												}
-
-												NoInline NTSTATUS Initialize()
-												{
-													HashTableEntry *Entry;
-
-													ml::MlInitialize();
-													this->CalcTable = new ULONG[this->CalcTableSize];
-													if (this->CalcTable == nullptr)
-														return STATUS_NO_MEMORY;
-
-													ULONG Seed = 0x00100001;
-
-													for (int index1 = 0; index1 != 0x100; index1++)
-													{
-														for (int index2 = index1, i = 5; i != 0; index2 += 0x100, --i)
+													public:
+														NoInline HashTableT()
 														{
-															ULONG temp1, temp2;
+															this->Entries = nullptr;
+															this->CalcTable = nullptr;
+															this->TableUsedSize = 0;
+															this->TableSize = 0;
 
-															Seed = (Seed * 125 + 3) % 0x2AAAAB;
-															temp1 = (Seed & 0xFFFF) << 16;
-															Seed = (Seed * 125 + 3) % 0x2AAAAB;
-															temp2 = (Seed & 0xFFFF);
-															this->CalcTable[index2] = temp1 | temp2;
+															this->GrowthFactor = 1.3;
 														}
-													}
 
-													return STATUS_SUCCESS;
-												}
-
-												ULONG_PTR Count()
-												{
-													return this->TableUsedSize;
-												}
-
-												ULONG_PTR Size()
-												{
-													return this->TableSize;
-												}
-
-												NoInline HASH_VALUE HashString(PCSTR Ansi, ULONG_PTR Length = -1)
-												{
-													PSTR Local;
-
-													if (Length == -1)
-														Length = StrLengthA(Ansi);
-
-													//Local = (PSTR)AllocStack(Length);
-													//CopyMemory(Local, Ansi, Length);
-													//StringUpperA(Local, Length);
-													Local = (PSTR)Ansi;
-
-													return HashData(Local, Length);
-												}
-
-												NoInline HASH_VALUE HashString(PCWSTR Unicode, ULONG_PTR Length = -1)
-												{
-													PWSTR Local;
-
-													if (Length == -1)
-														Length = StrLengthW(Unicode);
-
-													Length *= sizeof(Unicode[0]);
-
-													//Local = (PWSTR)AllocStack(Length);
-													//CopyMemory(Local, Unicode, Length);
-													//StringUpperW(Local, Length / sizeof(Unicode[0]));
-													Local = (PWSTR)Unicode;
-
-													return HashData(Local, Length);
-												}
-
-												ForceInline VOID Update(ULONG b, ULONG& v1, ULONG& v2, ULONG t)
-												{
-													v1 = this->CalcTable[(t << 8) + b] ^ (v1 + v2);
-													v2 = b + v1 + v2 + (v2 << 5) + 3;
-												}
-
-												NoInline HASH_VALUE HashData(PVOID Bytes, ULONG_PTR Length)
-												{
-													ULONG       Seed1, Seed2, Seed3, b;
-													PBYTE       Data;
-													HASH_VALUE  Hash;
-
-													Data = (PBYTE)Bytes;
-
-													Hash.Index = 0x7FED7FED;
-													Hash.Key.LowPart = 0x7FED7FED;
-													Hash.Key.HighPart = 0x7FED7FED;
-
-													Seed1 = 0xEEEEEEEE;
-													Seed2 = 0xEEEEEEEE;
-													Seed3 = 0xEEEEEEEE;
-													for (; Length; Length--)
-													{
-														b = *Data++;
-
-														Update(b, Hash.Index, Seed1, 0);
-														Update(b, Hash.Key.LowPart, Seed2, 1);
-														Update(b, Hash.Key.HighPart, Seed3, 2);
-													}
-
-													return Hash;
-												}
-
-												template<typename KEY_TYPE>
-												NoInline VALUE_REF Add(const KEY_TYPE& Key, CONST_VALUE_REF Value)
-												{
-													return AddElement(Hasher<KEY_TYPE>::Hash(this, Key), Value).Element;
-												}
-
-												NoInline VALUE_REF Add(PVOID Key, ULONG_PTR Length, CONST_VALUE_REF Value)
-												{
-													return AddElement(HashData(Key, Length), Value).Element;
-												}
-
-												template<typename KEY_TYPE>
-												NoInline PVALUE Get(const KEY_TYPE& Key)
-												{
-													return LookupElement(Hasher<KEY_TYPE>::Hash(this, Key));
-												}
-
-												NoInline PVALUE Get(PVOID Key, ULONG_PTR Length)
-												{
-													return LookupElement(HashString(Key, Length));
-												}
-
-												template<class STRING_TYPE>
-												NoInline BOOL Contains(STRING_TYPE StringKey)
-												{
-													return Get(StringKey) != nullptr;
-												}
-
-												NoInline BOOL Contains(PVOID Bytes, ULONG_PTR Length)
-												{
-													return Get(Bytes, Length) != nullptr;
-												}
-
-												template<class STRING_TYPE>
-												NoInline VOID Remove(STRING_TYPE StringKey)
-												{
-													RemoveElement(HashString(StringKey));
-												}
-
-												NoInline VOID Remove(PVOID Bytes, ULONG_PTR Length)
-												{
-													RemoveElement(HashData(Bytes, Length));
-												}
-
-											protected:
-												NoInline NTSTATUS IncreaseCapacity()
-												{
-													if (this->TableSize * 3 / 4 > this->TableUsedSize)
-														return STATUS_SUCCESS;
-
-													ULONG_PTR NewSize, OldSize;
-													HashTableEntry *NewEntries, *OldEntries, *Entry;
-
-													NewSize = GetTableSize(this->TableSize == 0 ? INITIAL_TABLE_SIZE : (ULONG_PTR)(this->TableSize * this->GrowthFactor));
-													NewEntries = new HashTableEntry[NewSize];
-													if (NewEntries == nullptr)
-														return STATUS_NO_MEMORY;
-
-													OldEntries = this->Entries;
-													OldSize = this->TableSize;
-
-													this->Entries = NewEntries;
-													this->TableSize = NewSize;
-													this->TableUsedSize = 0;
-
-													if (OldEntries == nullptr)
-														return STATUS_SUCCESS;
-
-													FOR_EACH(Entry, OldEntries, OldSize)
-													{
-														if (Entry->Hash.Valid())
-															AddElement(Entry->Hash, Entry->Element);
-													}
-
-													delete[] OldEntries;
-
-													return STATUS_SUCCESS;
-												}
-
-												NoInline HASH_TABLE_ITEM& AddElement(const HASH_VALUE& Hash, CONST_VALUE_REF Element)
-												{
-													IncreaseCapacity();
-
-													auto Entry = LookupEntry(Hash, TRUE);
-
-													Entry->Hash = Hash;
-													Entry->Element = Element;
-													++this->TableUsedSize;
-
-													return *Entry;
-												}
-
-												NoInline VOID RemoveElement(const HASH_VALUE& Hash)
-												{
-													auto Entry = LookupEntry(Hash, FALSE);
-
-													if (Entry == nullptr)
-														return;
-
-													Entry->Hash.Reset();
-													Entry->Element.~TYPE();
-													--this->TableUsedSize;
-												}
-
-												NoInline PVALUE LookupElement(const HASH_VALUE& Hash)
-												{
-													auto Entry = this->LookupEntry(Hash, FALSE);
-													return Entry == nullptr ? nullptr : &Entry->Element;
-												}
-
-												NoInline HashTableEntry* LookupEntry(const HASH_VALUE& Hash, BOOL Empty)
-												{
-													ULONG_PTR       Index, InitialIndex;
-													HashTableEntry* Entry;
-
-													if (this->TableSize == 0)
-														return nullptr;
-
-													InitialIndex = Hash.Index % this->TableSize;
-													Index = InitialIndex;
-													Entry = &this->Entries[InitialIndex];
-
-													if (Empty == FALSE)
-													{
-														do
+														NoInline ~HashTableT()
 														{
-															if (Entry->Hash == Hash)
-																return Entry;
+															SafeDeleteT(this->CalcTable);
+															SafeDeleteArrayT(this->Entries);
+														}
 
-															if (Entry->Hash.Valid() == FALSE)
+														NoInline NTSTATUS Initialize()
+														{
+															HashTableEntry *Entry;
+
+															ml::MlInitialize();
+															this->CalcTable = new ULONG[this->CalcTableSize];
+															if (this->CalcTable == nullptr)
+																return STATUS_NO_MEMORY;
+
+															ULONG Seed = 0x00100001;
+
+															for (int index1 = 0; index1 != 0x100; index1++)
+															{
+																for (int index2 = index1, i = 5; i != 0; index2 += 0x100, --i)
+																{
+																	ULONG temp1, temp2;
+
+																	Seed = (Seed * 125 + 3) % 0x2AAAAB;
+																	temp1 = (Seed & 0xFFFF) << 16;
+																	Seed = (Seed * 125 + 3) % 0x2AAAAB;
+																	temp2 = (Seed & 0xFFFF);
+																	this->CalcTable[index2] = temp1 | temp2;
+																}
+															}
+
+															return STATUS_SUCCESS;
+														}
+
+														ULONG_PTR Count()
+														{
+															return this->TableUsedSize;
+														}
+
+														ULONG_PTR Size()
+														{
+															return this->TableSize;
+														}
+
+														NoInline HASH_VALUE HashString(PCSTR Ansi, ULONG_PTR Length = -1)
+														{
+															PSTR Local;
+
+															if (Length == -1)
+																Length = StrLengthA(Ansi);
+
+															//Local = (PSTR)AllocStack(Length);
+															//CopyMemory(Local, Ansi, Length);
+															//StringUpperA(Local, Length);
+															Local = (PSTR)Ansi;
+
+															return HashData(Local, Length);
+														}
+
+														NoInline HASH_VALUE HashString(PCWSTR Unicode, ULONG_PTR Length = -1)
+														{
+															PWSTR Local;
+
+															if (Length == -1)
+																Length = StrLengthW(Unicode);
+
+															Length *= sizeof(Unicode[0]);
+
+															//Local = (PWSTR)AllocStack(Length);
+															//CopyMemory(Local, Unicode, Length);
+															//StringUpperW(Local, Length / sizeof(Unicode[0]));
+															Local = (PWSTR)Unicode;
+
+															return HashData(Local, Length);
+														}
+
+														ForceInline VOID Update(ULONG b, ULONG& v1, ULONG& v2, ULONG t)
+														{
+															v1 = this->CalcTable[(t << 8) + b] ^ (v1 + v2);
+															v2 = b + v1 + v2 + (v2 << 5) + 3;
+														}
+
+														NoInline HASH_VALUE HashData(PVOID Bytes, ULONG_PTR Length)
+														{
+															ULONG       Seed1, Seed2, Seed3, b;
+															PBYTE       Data;
+															HASH_VALUE  Hash;
+
+															Data = (PBYTE)Bytes;
+
+															Hash.Index = 0x7FED7FED;
+															Hash.Key.LowPart = 0x7FED7FED;
+															Hash.Key.HighPart = 0x7FED7FED;
+
+															Seed1 = 0xEEEEEEEE;
+															Seed2 = 0xEEEEEEEE;
+															Seed3 = 0xEEEEEEEE;
+															for (; Length; Length--)
+															{
+																b = *Data++;
+
+																Update(b, Hash.Index, Seed1, 0);
+																Update(b, Hash.Key.LowPart, Seed2, 1);
+																Update(b, Hash.Key.HighPart, Seed3, 2);
+															}
+
+															return Hash;
+														}
+
+														template<typename KEY_TYPE>
+														NoInline VALUE_REF Add(const KEY_TYPE& Key, CONST_VALUE_REF Value)
+														{
+															return AddElement(Hasher<KEY_TYPE>::Hash(this, Key), Value).Element;
+														}
+
+														NoInline VALUE_REF Add(PVOID Key, ULONG_PTR Length, CONST_VALUE_REF Value)
+														{
+															return AddElement(HashData(Key, Length), Value).Element;
+														}
+
+														template<typename KEY_TYPE>
+														NoInline PVALUE Get(const KEY_TYPE& Key)
+														{
+															return LookupElement(Hasher<KEY_TYPE>::Hash(this, Key));
+														}
+
+														NoInline PVALUE Get(PVOID Key, ULONG_PTR Length)
+														{
+															return LookupElement(HashString(Key, Length));
+														}
+
+														template<class STRING_TYPE>
+														NoInline BOOL Contains(STRING_TYPE StringKey)
+														{
+															return Get(StringKey) != nullptr;
+														}
+
+														NoInline BOOL Contains(PVOID Bytes, ULONG_PTR Length)
+														{
+															return Get(Bytes, Length) != nullptr;
+														}
+
+														template<class STRING_TYPE>
+														NoInline VOID Remove(STRING_TYPE StringKey)
+														{
+															RemoveElement(HashString(StringKey));
+														}
+
+														NoInline VOID Remove(PVOID Bytes, ULONG_PTR Length)
+														{
+															RemoveElement(HashData(Bytes, Length));
+														}
+
+													protected:
+														NoInline NTSTATUS IncreaseCapacity()
+														{
+															if (this->TableSize * 3 / 4 > this->TableUsedSize)
+																return STATUS_SUCCESS;
+
+															ULONG_PTR NewSize, OldSize;
+															HashTableEntry *NewEntries, *OldEntries, *Entry;
+
+															NewSize = GetTableSize(this->TableSize == 0 ? INITIAL_TABLE_SIZE : (ULONG_PTR)(this->TableSize * this->GrowthFactor));
+															NewEntries = new HashTableEntry[NewSize];
+															if (NewEntries == nullptr)
+																return STATUS_NO_MEMORY;
+
+															OldEntries = this->Entries;
+															OldSize = this->TableSize;
+
+															this->Entries = NewEntries;
+															this->TableSize = NewSize;
+															this->TableUsedSize = 0;
+
+															if (OldEntries == nullptr)
+																return STATUS_SUCCESS;
+
+															FOR_EACH(Entry, OldEntries, OldSize)
+															{
+																if (Entry->Hash.Valid())
+																	AddElement(Entry->Hash, Entry->Element);
+															}
+
+															delete[] OldEntries;
+
+															return STATUS_SUCCESS;
+														}
+
+														NoInline HASH_TABLE_ITEM& AddElement(const HASH_VALUE& Hash, CONST_VALUE_REF Element)
+														{
+															IncreaseCapacity();
+
+															auto Entry = LookupEntry(Hash, TRUE);
+
+															Entry->Hash = Hash;
+															Entry->Element = Element;
+															++this->TableUsedSize;
+
+															return *Entry;
+														}
+
+														NoInline VOID RemoveElement(const HASH_VALUE& Hash)
+														{
+															auto Entry = LookupEntry(Hash, FALSE);
+
+															if (Entry == nullptr)
+																return;
+
+															Entry->Hash.Reset();
+															Entry->Element.~TYPE();
+															--this->TableUsedSize;
+														}
+
+														NoInline PVALUE LookupElement(const HASH_VALUE& Hash)
+														{
+															auto Entry = this->LookupEntry(Hash, FALSE);
+															return Entry == nullptr ? nullptr : &Entry->Element;
+														}
+
+														NoInline HashTableEntry* LookupEntry(const HASH_VALUE& Hash, BOOL Empty)
+														{
+															ULONG_PTR       Index, InitialIndex;
+															HashTableEntry* Entry;
+
+															if (this->TableSize == 0)
 																return nullptr;
 
-															++Index;
-															++Entry;
-															Index = Index == this->TableSize ? 0 : Index;
-															Entry = Index == 0 ? this->Entries : Entry;
+															InitialIndex = Hash.Index % this->TableSize;
+															Index = InitialIndex;
+															Entry = &this->Entries[InitialIndex];
 
-														} while (Index != InitialIndex);
-													}
-													else
-													{
-														do
+															if (Empty == FALSE)
+															{
+																do
+																{
+																	if (Entry->Hash == Hash)
+																		return Entry;
+
+																	if (Entry->Hash.Valid() == FALSE)
+																		return nullptr;
+
+																	++Index;
+																	++Entry;
+																	Index = Index == this->TableSize ? 0 : Index;
+																	Entry = Index == 0 ? this->Entries : Entry;
+
+																} while (Index != InitialIndex);
+															}
+															else
+															{
+																do
+																{
+																	if (Entry->Hash == Hash)
+																		return Entry;
+
+																	if (Entry->Hash.Valid() == FALSE)
+																		return Entry;
+
+																	++Index;
+																	++Entry;
+																	Index = Index == this->TableSize ? 0 : Index;
+																	Entry = Index == 0 ? this->Entries : Entry;
+
+																} while (Index != InitialIndex);
+															}
+
+															return nullptr;
+														}
+
+														BOOL MillerRabin(ULONG64 n, ULONG_PTR k)
 														{
-															if (Entry->Hash == Hash)
-																return Entry;
+															if (n == k)
+																return TRUE;
 
-															if (Entry->Hash.Valid() == FALSE)
-																return Entry;
+															if (n == 2 || n == 3)
+																return TRUE;
 
-															++Index;
-															++Entry;
-															Index = Index == this->TableSize ? 0 : Index;
-															Entry = Index == 0 ? this->Entries : Entry;
+															if (n <= 1 || !(n & 1))
+																return FALSE;
 
-														} while (Index != InitialIndex);
-													}
+															ULONG64 s, d, b, e, x;
 
-													return nullptr;
-												}
+															// Factor n-1 as d 2^s
+															for (s = 0, d = n - 1; !(d & 1); s++)
+																d >>= 1;
 
-												BOOL MillerRabin(ULONG64 n, ULONG_PTR k)
-												{
-													if (n == k)
-														return TRUE;
+															// x = k^d mod n using exponentiation by squaring
+															// The squaring overflows for n >= 2^32
+															for (x = 1, b = k % n, e = d; e; e >>= 1)
+															{
+																if (e & 1)
+																	x = (x * b) % n;
 
-													if (n == 2 || n == 3)
-														return TRUE;
+																b = (b * b) % n;
+															}
 
-													if (n <= 1 || !(n & 1))
-														return FALSE;
+															// Verify k^(d 2^[0¡­s-1]) mod n != 1
+															if (x == 1 || x == n - 1)
+																return TRUE;
 
-													ULONG64 s, d, b, e, x;
+															while (s-- > 1)
+															{
+																x = (x * x) % n;
+																if (x == 1)
+																	return FALSE;
 
-													// Factor n-1 as d 2^s
-													for (s = 0, d = n - 1; !(d & 1); s++)
-														d >>= 1;
+																if (x == n - 1)
+																	return TRUE;
+															}
 
-													// x = k^d mod n using exponentiation by squaring
-													// The squaring overflows for n >= 2^32
-													for (x = 1, b = k % n, e = d; e; e >>= 1)
-													{
-														if (e & 1)
-															x = (x * b) % n;
-
-														b = (b * b) % n;
-													}
-
-													// Verify k^(d 2^[0¡­s-1]) mod n != 1
-													if (x == 1 || x == n - 1)
-														return TRUE;
-
-													while (s-- > 1)
-													{
-														x = (x * x) % n;
-														if (x == 1)
 															return FALSE;
+														}
 
-														if (x == n - 1)
-															return TRUE;
-													}
+														BOOL IsPrime(ULONG_PTR n)
+														{
+															return (n > 73 &&
+																!(n % 2 && n % 3 && n % 5 && n % 7 &&
+																n % 11 && n % 13 && n % 17 && n % 19 && n % 23 && n % 29 &&
+																n % 31 && n % 37 && n % 41 && n % 43 && n % 47 && n % 53 &&
+																n % 59 && n % 61 && n % 67 && n % 71 && n % 73)
+																) ? FALSE :
+																MillerRabin(n, 2) && MillerRabin(n, 7) && MillerRabin(n, 61);
+														}
 
-													return FALSE;
-												}
+														ULONG_PTR GetTableSize(ULONG_PTR TableSize)
+														{
+															if ((TableSize & 1) == 0)
+																++TableSize;
 
-												BOOL IsPrime(ULONG_PTR n)
-												{
-													return (n > 73 &&
-														!(n % 2 && n % 3 && n % 5 && n % 7 &&
-														n % 11 && n % 13 && n % 17 && n % 19 && n % 23 && n % 29 &&
-														n % 31 && n % 37 && n % 41 && n % 43 && n % 47 && n % 53 &&
-														n % 59 && n % 61 && n % 67 && n % 71 && n % 73)
-														) ? FALSE :
-														MillerRabin(n, 2) && MillerRabin(n, 7) && MillerRabin(n, 61);
-												}
+															while (IsPrime(TableSize) == FALSE)
+																TableSize += 2;
 
-												ULONG_PTR GetTableSize(ULONG_PTR TableSize)
-												{
-													if ((TableSize & 1) == 0)
-														++TableSize;
+															return TableSize;
+														}
 
-													while (IsPrime(TableSize) == FALSE)
-														TableSize += 2;
+													protected:
+														HashTableEntry* Entries;
+														PULONG          CalcTable;
+														ULONG_PTR       TableSize;
+														ULONG_PTR       TableUsedSize;
+														DOUBLE          GrowthFactor;
 
-													return TableSize;
-												}
-
-											protected:
-												HashTableEntry* Entries;
-												PULONG          CalcTable;
-												ULONG_PTR       TableSize;
-												ULONG_PTR       TableUsedSize;
-												DOUBLE          GrowthFactor;
-
-												static const ULONG_PTR CalcTableSize = 0x500;
+														static const ULONG_PTR CalcTableSize = 0x500;
 		};
 
 #endif // _HASHTABLE_H_f92cdc12_70f0_4679_aa3d_d9e1a22117ed_
@@ -36635,9 +36635,9 @@ memcpy(dest, src, size); \
 
 #define DEFINE_PROPERTY_(_RetType, _Object, _Type, _Field) \
             READONLY_PROPERTY(_RetType, _Field) \
-										            { \
+												            { \
                 CALL_ACCESSOR(_Object, _Field); \
-										            }
+												            }
 
 #define DEFINE_PROPERTY(_Object, _Type, _Field) DEFINE_PROPERTY_(FIELD_TYPE(_Type, _Field)&, _Object, _Type, _Field)
 
@@ -36653,13 +36653,13 @@ memcpy(dest, src, size); \
 
 #define SET_ACCESSOR(_Type, _Field) \
             IF_EXIST(_Type::_Field) \
-										            { \
+												            { \
                 *(PVOID *)&Accessor_##_Field = PtrAdd((PVOID)0, FIELD_ACCESSOR(_Type, _Field)) \
-										            } \
+												            } \
             IF_NOT_EXIST(_Type::_Field) \
-										            { \
+												            { \
                 *(PVOID *)&Accessor_##_Field = PtrSub(IMAGE_INVALID_VA, 0x5432) \
-										            }
+												            }
 
 #define CALL_ACCESSOR(_Object, _Field) return this->Accessor_##_Field(_Object)
 

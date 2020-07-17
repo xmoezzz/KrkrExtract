@@ -54,7 +54,6 @@ email: m-mat @ math.sci.hiroshima-u.ac.jp (remove spaces)
 */
 
 
-#include <stdio.h>
 #include "mt64.h"
 
 #define NN 312

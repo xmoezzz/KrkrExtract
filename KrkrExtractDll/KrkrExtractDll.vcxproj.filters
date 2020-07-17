@@ -48,12 +48,6 @@
     <ClCompile Include="lz4frame.cpp">
       <Filter>源文件\Lib</Filter>
     </ClCompile>
-    <ClCompile Include="CRC64.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="md5.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
     <ClCompile Include="ImageWorkerNcb.cpp">
       <Filter>源文件\ImageDumper</Filter>
     </ClCompile>
@@ -65,9 +59,6 @@
     </ClCompile>
     <ClCompile Include="savetlg5.cpp">
       <Filter>源文件\ImageDumper</Filter>
-    </ClCompile>
-    <ClCompile Include="xxhash.c">
-      <Filter>源文件\Lib</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
       <Filter>源文件\ImageDumper</Filter>
@@ -82,9 +73,6 @@
       <Filter>源文件\KrkrExtend</Filter>
     </ClCompile>
     <ClCompile Include="PNGWorker.cpp">
-      <Filter>源文件\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="GenMD5Code.cpp">
       <Filter>源文件\Lib</Filter>
     </ClCompile>
     <ClCompile Include="TLGDecoder.cpp">
@@ -153,6 +141,15 @@
     <ClCompile Include="inftrees.cpp">
       <Filter>源文件\Lib</Filter>
     </ClCompile>
+    <ClCompile Include="xxhash.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrUniversalPatch.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="PEFile.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -203,12 +200,6 @@
     <ClInclude Include="Slide.h">
       <Filter>头文件\ImageDumper</Filter>
     </ClInclude>
-    <ClInclude Include="md5.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="CRC64.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
     <ClInclude Include="ImageWokerNcb.h">
       <Filter>头文件\ImageDumper</Filter>
     </ClInclude>
@@ -230,13 +221,7 @@
     <ClInclude Include="KrkrHeaders.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
-    <ClInclude Include="GenMD5Code.h">
-      <Filter>头文件\Lib</Filter>
-    </ClInclude>
     <ClInclude Include="FakePNG.h">
-      <Filter>头文件\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobalInit.h">
       <Filter>头文件\Core</Filter>
     </ClInclude>
     <ClInclude Include="KrkrPacker.h">
@@ -276,6 +261,21 @@
       <Filter>头文件\Lib</Filter>
     </ClInclude>
     <ClInclude Include="inffast.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrExtract.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MyLib.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ml.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrUniversalPatch.h">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="PEFile.h">
       <Filter>头文件\Lib</Filter>
     </ClInclude>
   </ItemGroup>
