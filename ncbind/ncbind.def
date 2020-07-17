@@ -1,0 +1,4 @@
+; exports definition for gcc
+EXPORTS
+	V2Link=V2Link@4
+	V2Unlink=V2Unlink@0

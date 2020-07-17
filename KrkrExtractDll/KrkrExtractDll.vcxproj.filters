@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="KrkrExtractDll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tp_stub.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="XP3FilterModify.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="XP3Offset.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniLocale.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PackerInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PluginHook.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PluginHookPacker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Sha1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GenMD5Code.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalInit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HookLoadLibary.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrParser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CRC64.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DecryptionCode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FakePNG.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TLGDecoder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageEx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PNGDLib.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PNGWorker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrTextDecode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbWorker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Slide.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="savetlg5.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SavePNG.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageWorkerNcb.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4frame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4hc.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="xxhash.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Native.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tp_stub.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WinFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XP3FilterModify.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XP3Info.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XP3Offset.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniLocale.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PackerInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PluginHook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Sha1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GenMD5Code.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalInit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HookLoadLibary.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CMem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CRC64.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DecryptionCode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FakePNG.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TLGDecoder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PNGDLib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pngconf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pnglibconf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="png.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PNGWorker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TextPlugin.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="zconf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrTextDecode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbWorker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveExCompress.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ncbind.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ncb_invoke.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ncb_foreach.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Slide.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="savetlg5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SavePNG.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageWokerNcb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbCommon.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4frame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4frame_static.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4hc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="xxhash.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Native.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KrkrExtractDll.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

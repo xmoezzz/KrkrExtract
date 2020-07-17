@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testbind", "testbind.vcproj", "{1641DF2F-9D5F-4DDA-9599-5C6739B2BA32}"
+	ProjectSection(ProjectDependencies) = postProject
+		{797323D9-1601-4933-AF87-E7A4B7CCD07A} = {797323D9-1601-4933-AF87-E7A4B7CCD07A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ncbind", "ncbind.vcproj", "{797323D9-1601-4933-AF87-E7A4B7CCD07A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1641DF2F-9D5F-4DDA-9599-5C6739B2BA32}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1641DF2F-9D5F-4DDA-9599-5C6739B2BA32}.Debug|Win32.Build.0 = Debug|Win32
+		{1641DF2F-9D5F-4DDA-9599-5C6739B2BA32}.Release|Win32.ActiveCfg = Release|Win32
+		{1641DF2F-9D5F-4DDA-9599-5C6739B2BA32}.Release|Win32.Build.0 = Release|Win32
+		{797323D9-1601-4933-AF87-E7A4B7CCD07A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{797323D9-1601-4933-AF87-E7A4B7CCD07A}.Debug|Win32.Build.0 = Debug|Win32
+		{797323D9-1601-4933-AF87-E7A4B7CCD07A}.Release|Win32.ActiveCfg = Release|Win32
+		{797323D9-1601-4933-AF87-E7A4B7CCD07A}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

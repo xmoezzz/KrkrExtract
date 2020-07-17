@@ -1,0 +1,131 @@
+/**
+ * 擬似コードによるマニュアル
+ */
+
+/**
+ * ウインドウ拡張
+ */
+class Window {
+
+	/**
+	 * TLG5/PNG 形式での画像の保存の開始
+	 * @param layer 保存対象レイヤ
+	 * @param filename ファイル名（拡張子が.pngの時のみPNG形式保存，それ以外はTLG5）
+	 * @param tags タグ情報
+	 * @return ハンドラ
+	 */
+	function startSaveLayerImage(layer, filename, tags);
+
+	/**
+	 * 画像保存キャンセル
+	 * @param handler ハンドラ
+	 */
+	function cancelSaveLayerImage(handler);
+
+	/**
+	 * 画像保存中止（中止した場合は終了イベントが来ません）
+	 * @param handler ハンドラ
+	 */
+	function stopSaveLayerImage(handler);
+
+	/**
+	 * 保存処理実行中イベント
+	 * @param handler ハンドラ
+	 * @param progress 進行度合い(%表記)
+	 * @param layer レイヤ
+	 * @param filename ファイル名
+	 */
+	function onSaveLayerImageProgress(handler, progress, layer, filename);
+
+	/**
+	 * 保存処理実行完了イベント
+	 * @param handler ハンドラ
+	 * @param canceled キャンセルされたら1
+	 * @param layer
+	 * @param filename ファイル名
+	 */
+	function onSaveLayerImageDone(handler, canceled, layer, filename);
+}
+
+/**
+ * レイヤ拡張
+ */
+class Layer {
+	/**
+	 * TLG5 形式での画像の保存。注意点:データの保存が終わるまで処理が帰りません。
+	 * @param filename ファイル名
+	 * @param tags タグ情報
+	 */
+	function saveLayerImageTlg5(filename, tags=void);
+
+	/**
+	 * PNG 形式での画像の保存。注意点:データの保存が終わるまで処理が帰りません。
+	 * @param filename ファイル名
+	 * @param tags タグ情報と圧縮レベル(comp_lv)を記述した辞書
+	 */
+	function saveLayerImagePng(filename, tags=void);
+
+	/**
+	 * PNG 形式画像をoctetで返す。注意点:データの保存が終わるまで処理が帰りません。
+	 * @param compression_level 圧縮率(省略時1)
+	 */
+	function saveLayerImagePngOctet(compression_level = 1);
+
+	/**
+	 * レイヤイメージをクロップ（上下左右の余白透明部分を切り取る）したときの
+	 * サイズを取得します。
+	 * @return %[ x, y, w, h] 形式の辞書，またはvoid（全部透明のとき）
+	 */
+	function getCropRect();
+
+	/**
+	 * レイヤイメージをクロップ（上下左右の完全透明部分(0x00000000)を切り取る）したときの
+	 * サイズを取得します。
+	 * @return %[ x, y, w, h] 形式の辞書，またはvoid（全部透明のとき）
+	 */
+	function getCropRectZero();
+	
+	/**
+	 * レイヤの差分領域を取得します。
+	 * @param base 差分元となるベース用の画像
+	 * @return %[ x, y, w, h ] 形式の辞書，またはvoid（完全に同じ画像のとき）
+	 *（baseはインスタンス自身と同じサイズでないと例外を投げます）
+	 */
+	function getDiffRect(base);
+
+	/**
+	 * レイヤのピクセル比較を行います。
+	 * @param base 差分元となるベース用の画像
+	 * @param samecol 同じ場合に塗りつぶす色(0xAARRGGBB)（voidまたは省略なら塗りつぶさない）
+	 * @param diffcol 違う場合に塗りつぶす色(0xAARRGGBB)（voidまたは省略なら塗りつぶさない）
+	 * @description（baseはインスタンス自身と同じサイズでないと例外を投げます）
+	 */
+	function getDiffPixel(base, samecol, diffcol);
+
+	/**
+	 * レイヤの淵の色を透明部分まで引き伸ばします（縮小時に偽色が出るのを防ぐ）
+	 * @param level 処理を行う回数。大きいほど引き伸ばし領域が増える
+	 * @param threshold アルファの閾値(1～255)これより低いピクセルへ引き伸ばす
+	 * @param fillColor 処理領域以外の塗りつぶし色(0xRRGGBB)
+	 */
+	function oozeColor(level, threshold=1, fillColor=0);
+
+	/**
+	 * レイヤの Blue CHANNEL を Alpha 領域に複製する
+	 * @param src コピー元レイヤ
+	 */
+	function copyBlueToAlpha(src);
+
+	/**
+	 * レイヤの指定領域がブランクデータかどうか確認します
+	 * @return ブランクデータなら true
+	 */
+	function isBlank(x, y, w, h);
+
+	/**
+	 * αが指定以下の部分を指定色で塗りつぶすする
+	 * @param threthold αの下限
+	 * @param fillColor 塗りつぶし色(0x00RRGGBB)
+	 */
+	function clearAlpha(threthold=0, fillColor=0);
+};
