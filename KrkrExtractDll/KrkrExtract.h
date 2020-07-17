@@ -3,7 +3,9 @@
 #include "tp_stub.h"
 #include "my.h"
 #include "KrkrHeaders.h"
+#include <shobjidl.h>
 
+#define WM_UUPAK_OK (WM_USER + 1919)
 
 enum INIT_TYPE
 {
@@ -32,7 +34,22 @@ enum PSB_DECODE_INFO
 	PSB_DECOM = 1UL << 2,
 	PSB_IMAGE = 1UL << 3,
 	PSB_ANM   = 1UL << 4,
+	PSB_JSON  = 1UL << 5,
 	PSB_ALL   = 0xFFFFFFFFUL
+};
+
+enum TJS2_DECODE_INFO
+{
+	TJS2_RAW,
+	TJS2_DECOM
+};
+
+enum AMV_DECODE_INFO
+{
+	AMV_JPG,
+	AMV_PNG,
+	AMV_MNG,
+	AMV_RAW
 };
 
 enum TLG_DECODE_INFO
@@ -40,15 +57,29 @@ enum TLG_DECODE_INFO
 	TLG_RAW,
 	TLG_BUILDIN,
 	TLG_SYS,
-	TLG_PNG
+	TLG_PNG,
+	TLG_JPG
 };
 
 enum ModuleVersion
 {
 	Krkr2,
 	Krkrz, //M2
-	Krkr3  //看了看svn上的进度和开坑时间，简直有生之年
+	Krkr3  
 };
+
+
+template<class PtrType> PtrType Nt_EncodePointer(PtrType Pointer, ULONG_PTR Cookie)
+{
+	return (PtrType)_rotr((ULONG_PTR)PtrXor(Pointer, Cookie), Cookie & 0x1F);
+}
+
+template<class PtrType> PtrType Nt_DecodePointer(PtrType Pointer, ULONG_PTR Cookie)
+{
+	return (PtrType)PtrXor(_rotl((ULONG_PTR)Pointer, Cookie & 0x1F), Cookie);
+}
+
+ULONG64 FASTCALL GenerationCRC64(ULONG64 crc, LPCBYTE s, ULONG_PTR l);
 
 typedef HRESULT(_stdcall *tV2Link)(iTVPFunctionExporter *);
 typedef void(__stdcall * XP3Filter)(tTVPXP3ArchiveExtractionFilter);
@@ -59,7 +90,40 @@ typedef PVOID (CDECL * FuncHostAlloc)(ULONG);
 
 #define szApplicationName   L"[X'moe]Welcome to KrkrExtract(version : %s, built on : %s)"
 #define szWindowClassName   L"XP3ExtractMainClass"
-#define _XP3ExtractVersion_ L"Ver 2.0.2.3"
+#define _XP3ExtractVersion_ L"Ver 4.0.0.5"
+
+
+class MemEntry
+{
+public:
+	MemEntry() : Buffer(NULL), Size(0), Hash(0){}
+
+	MemEntry& operator = (const MemEntry& Other)
+	{
+		Buffer = Other.Buffer;
+		Size   = Other.Size;
+		Hash   = Other.Hash;
+
+		return *this;
+	}
+
+	PVOID   Buffer;
+	ULONG   Size;
+	ULONG64 Hash;
+};
+
+class Xp3FileEntry
+{
+public:
+	HANDLE hFile;
+	BOOL   Status;
+
+	Xp3FileEntry() :
+		hFile(INVALID_HANDLE_VALUE),
+		Status(FALSE)
+	{
+	}
+};
 
 class GlobalData
 {
@@ -83,6 +147,10 @@ public:
 	BOOL                            HasConsole;
 	BOOL                            isRunning;
 	BOOL                            DebugOn;
+	BOOL                            IsAllPackReaded;
+
+	std::vector<std::wstring>              FileNameList;
+	std::map<std::wstring, Xp3FileEntry>   FileInitList;
 
 	API_POINTER(GetProcAddress)         StubGetProcAddress;
 	API_POINTER(CreateProcessInternalW) StubCreateProcessInternalW;
@@ -98,6 +166,8 @@ private:
 	ULONG                           TlgFlag;
 	ULONG                           TextFlag;
 	ULONG                           PsbFlag;
+	ULONG                           TjsFlag;
+	ULONG                           AmvFlag;
 
 	WCHAR                           Folder   [MAX_PATH];
 	WCHAR                           GuessPack[MAX_PATH];
@@ -106,6 +176,9 @@ private:
 public:
 	WCHAR                           SelfPath[MAX_PATH];
 	WCHAR                           DragFileName[MAX_PATH];
+
+	BOOL                            InheritIcon;
+	BOOL                            IsProtection;
 
 public:
 	ULONG     SetPngFlag(ULONG Flag);
@@ -116,6 +189,12 @@ public:
 
 	ULONG     SetTextFlag(ULONG Flag);
 	ULONG     GetTextFlag();
+
+	ULONG     SetAmvFlag(ULONG Flag);
+	ULONG     GetAmvFlag();
+
+	ULONG     SetTjsFlag(ULONG Flag);
+	ULONG     GetTjsFlag();
 
 	ULONG     AddPsbFlag(ULONG Flag);
 	ULONG     DeletePsbFlag(ULONG Flag);
@@ -131,6 +210,8 @@ public:
 	Void      GetOutputPack(LPWSTR Name, ULONG BufferMaxLength);
 
 	BOOL      FindCodeSlow(PCChar Start, ULONG Size, PCChar Pattern, ULONG PatternLen);
+
+	Void      AddFileEntry(PCWSTR FileName, ULONG Length);
 
 	NTSTATUS NTAPI InitWindow();
 	NTSTATUS NTAPI InitHook(LPCWSTR ModuleName, PVoid ImageBase);
@@ -175,6 +256,15 @@ public:
 	wstring                     CurrentTempFileName;
 	BOOL                        FakePngWorkerInited;
 	WCHAR                       CurFileName[MAX_PATH];
+	
+	std::map<ULONG64, MemEntry> SpecialChunkMap;
+	std::map<ULONG, MemEntry>   SpecialChunkMapBySize;
+
+
+	using SpecialChunkDecoderFunc = ULONG(CDECL*) (PBYTE, PBYTE, ULONG);
+	
+	BOOL                        IsSpcialChunkEncrypted;
+	SpecialChunkDecoderFunc     SpecialChunkDecoder;
 };
 
 //Init once

@@ -1,2 +1,2 @@
-# KrkrExtract ver 2.x
+# KrkrExtract ver 4.x beta
 

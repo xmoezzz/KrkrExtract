@@ -1,6 +1,6 @@
 #pragma once
 
-#include "my.h"
+#include <my.h>
 #include "tp_stub.h"
 #include "KrkrExtract.h"
 #include "XP3Parser.h"
@@ -8,7 +8,7 @@
 #include "TLGDecoder.h"
 #include "PNGWorker.h"
 #include <Shlwapi.h> 
-
+#include <shcore.h>
 
 class KrkrDumper
 {
@@ -17,9 +17,11 @@ public:
 	KrkrDumper();
 	~KrkrDumper();
 
-	HANDLE hThread;
-	WCHAR  FileName[MAX_PATH];
-
+	HANDLE         hThread;
+	BOOL           IsIndex;
+	WCHAR          FileName[MAX_PATH];
+	WCHAR          FileNameIndex[MAX_PATH];
+	ITaskbarList3* TaskList;
 
 	NTSTATUS NTAPI DoDump();
 	Void     NTAPI SetFile(LPCWSTR lpFile);
@@ -32,6 +34,7 @@ private:
 	NTSTATUS NTAPI DumpFileByRawFile();
 
 	NTSTATUS WINAPI ParseXP3File(PWCHAR lpFileName);
+	NTSTATUS WINAPI ParseXP3iFile(PWCHAR lpFileName);
 	NTSTATUS WINAPI ProcessXP3Archive(LPCWSTR FileName, NtFileDisk& file);
 	NTSTATUS WINAPI DumpFile();
 

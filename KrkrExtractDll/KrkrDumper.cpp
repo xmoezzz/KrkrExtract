@@ -1,21 +1,40 @@
 #include "KrkrDumper.h"
 #include "resource.h"
-#include "MyHook.h"
 #include "KrkrExtend.h"
 #include "zlib.h"
 #include "MyLib.h"
+#include "Tjs2Disasm.h"
 #include <WindowsX.h>
 
 /********************************************/
 
+
+NTSTATUS WINAPI DecompilePsbJson(IStream* PsbStream, LPCWSTR BasePath, LPCWSTR FileName);
+unsigned char *getDataFromLz4(const unsigned char *buff, unsigned long &size);
+unsigned char *getDataFromMDF(const unsigned char *buff, unsigned long &size);
+
+
+
 KrkrDumper::KrkrDumper()
 {
+	HRESULT hr;
+
+	IsIndex = FALSE;
 	hThread = INVALID_HANDLE_VALUE;
+	TaskList = NULL;
+	hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void **)&TaskList);
+	if (FAILED(hr))
+		hr = 0;
+
+	RtlZeroMemory(FileName, sizeof(FileName));
+	RtlZeroMemory(FileNameIndex, sizeof(FileNameIndex));
 }
 
 
 KrkrDumper::~KrkrDumper()
 {
+	if (TaskList)
+		TaskList->Release();
 }
 
 
@@ -203,7 +222,7 @@ PVOID GetTVPCreateStreamCall()
 
 	if (GlobalData::GetGlobalData()->StubHostAlloc && GlobalData::GetGlobalData()->IStreamAdapterVtable)
 	{
-		PrintConsoleW(L"Analyze ok...\n");
+		//PrintConsoleW(L"Analyze ok...\n");
 		return CallTVPCreateStreamCall;
 	}
 	else
@@ -278,6 +297,68 @@ NTSTATUS WINAPI KrkrDumper::ParseXP3File(PWCHAR lpFileName)
 	return Status;
 }
 
+NTSTATUS WINAPI KrkrDumper::ParseXP3iFile(PWCHAR lpFileName)
+{
+	NTSTATUS    Status;
+	NtFileDisk  File;
+	PBYTE       Buffer;
+	ULONG       Size, iPos, SavePos;
+	XP3Index    item;
+	GlobalData* Handle;
+
+	Handle = GlobalData::GetGlobalData();
+	Handle->IsM2Format = TRUE;
+
+	Status = File.Open(lpFileName);
+	if (NT_FAILED(Status))
+	{
+		PrintConsoleW(L"File.Open failed with status : %08x\n", Status);
+		return Status;
+	}
+
+	Size = File.GetSize32();
+	Buffer = (PBYTE)AllocateMemoryP(Size);
+	if (!Buffer)
+	{
+		PrintConsoleW(L"Memory allocation failed with status : %08x\n", Status);
+		File.Close();
+		return STATUS_NO_MEMORY;
+	}
+	File.Read(Buffer, Size);
+
+	iPos = 0;
+	while (iPos < Size)
+	{
+		iPos += 4;
+		ULONG64 ChunkSize = 0;
+		RtlCopyMemory(&ChunkSize, (Buffer + iPos), 8);
+		iPos += 8;
+		SavePos = iPos;
+		item.yuzu.ChunkSize.QuadPart = ChunkSize;
+		ULONG HashValue = 0;
+		RtlCopyMemory(&HashValue, (Buffer + iPos), 4);
+		iPos += 4;
+		item.yuzu.Hash = HashValue;
+		USHORT FileNameLen = 0;
+		RtlCopyMemory(&FileNameLen, (Buffer + iPos), 2);
+		iPos += 2;
+		wstring FileName((PCWSTR)(Buffer + iPos), FileNameLen);
+		item.yuzu.Name = FileName;
+		iPos = SavePos;
+		iPos += (ULONG)ChunkSize;
+		item.isM2Format = TRUE;
+		
+		if (!(FileName.length() > 3 && FileName[0] == L'$' && FileName[1] == L'$' && FileName[2] == L'$'))
+		{
+			Handle->ItemVector.push_back(item);
+			Handle->CountFile++;
+		}
+	}
+
+	FreeMemoryP(Buffer);
+	File.Close();
+	return STATUS_SUCCESS;
+}
 
 Void NTAPI KrkrDumper::AddPath(LPWSTR FileName)
 {
@@ -457,7 +538,7 @@ NTSTATUS NTAPI KrkrDumper::ProcessXP3Archive(LPCWSTR lpFileName, NtFileDisk& fil
 		if (IsCompatXP3(pDecompress, DataHeader.OriginalSize.LowPart, &Handle->M2ChunkMagic))
 		{
 			FindChunkMagicFirst(pDecompress, DataHeader.OriginalSize.LowPart);
-			
+
 			CopyMemory(M2ChunkInfo, &Handle->M2ChunkMagic, 4);
 			if (GlobalData::GetGlobalData()->DebugOn)
 				PrintConsoleA("Chunk : %s\n", M2ChunkInfo);
@@ -624,20 +705,22 @@ NTSTATUS NTAPI KrkrDumper::ProcessPSB(IStream* Stream, LPCWSTR OutFileName, XP3I
 	STATSTG     Stat;
 	PBYTE       Buffer;
 	ULONG       ReadSize;
+	GlobalData* Handle;
 
+	Handle = GlobalData::GetGlobalData();
 	Stream->Stat(&Stat, STATFLAG_DEFAULT);
 
 	Status = STATUS_ABANDONED;
-	if (GlobalData::GetGlobalData()->PsbFlagOn(PSB_RAW) ||
-		GlobalData::GetGlobalData()->PsbFlagOn(PSB_ALL))
+	if (Handle->PsbFlagOn(PSB_RAW) ||
+		Handle->PsbFlagOn(PSB_ALL))
 	{
-		return ProcessFile(Stream, OutFileName, it);
+		Status = ProcessFile(Stream, OutFileName, it);
 	}
 
-	if (GlobalData::GetGlobalData()->PsbFlagOn(PSB_ALL) ||
-		GlobalData::GetGlobalData()->PsbFlagOn(PSB_TEXT) ||
-		GlobalData::GetGlobalData()->PsbFlagOn(PSB_DECOM) ||
-		GlobalData::GetGlobalData()->PsbFlagOn(PSB_ANM))
+	if (Handle->PsbFlagOn(PSB_ALL) ||
+		Handle->PsbFlagOn(PSB_TEXT) ||
+		Handle->PsbFlagOn(PSB_DECOM) ||
+		Handle->PsbFlagOn(PSB_ANM))
 	{
 		Status = ExtractPsb(Stream, GlobalData::GetGlobalData()->PsbFlagOn(PSB_IMAGE) ||
 			GlobalData::GetGlobalData()->PsbFlagOn(PSB_ANM),
@@ -646,6 +729,19 @@ NTSTATUS NTAPI KrkrDumper::ProcessPSB(IStream* Stream, LPCWSTR OutFileName, XP3I
 
 		Status = Status >= 0 ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 	}
+
+	if (Handle->PsbFlagOn(PSB_ALL) ||
+		Handle->PsbFlagOn(PSB_JSON)
+		)
+	{
+		wstring FileName = ReplaceFileNameExtension(GetPackageName(wstring(OutFileName)), L"");
+		wstring BaseName = GetFileBasePath(wstring(OutFileName));
+
+		PrintConsoleW(L"%s %s\n", FileName.c_str(), BaseName.c_str());
+
+		Status = DecompilePsbJson(Stream, BaseName.c_str(), FileName.c_str());
+	}
+
 	return Status;
 }
 
@@ -783,6 +879,35 @@ NTSTATUS NTAPI KrkrDumper::ProcessTLG(IStream* Stream, LPCWSTR OutFileName, XP3I
 				return ProcessFile(Stream, OutFileName, it);
 			}
 		}
+		else if (Handle->GetTlgFlag() == TLG_JPG)
+		{
+			if (GlobalData::GetGlobalData()->DebugOn)
+				PrintConsoleW(L"Decoding tlg image to jpg file(Build-in)...\n");
+
+			if (TempDecode)
+			{
+				if (Bmp2JPG(OutBuffer, OutSize, (wstring(OutFileName) + L".jpg").c_str()) < 0)
+				{
+					Status = File.Create((wstring(OutFileName) + L".bmp").c_str());
+
+					if (NT_FAILED(Status))
+						return Status;
+
+					File.Write(OutBuffer, OutSize);
+					File.Close();
+				}
+
+				FreeMemoryP(RawBuffer);
+				FreeMemoryP(OutBuffer);
+			}
+			else
+			{
+				FreeMemoryP(RawBuffer);
+				Offset.QuadPart = 0;
+				Stream->Seek(Offset, FILE_BEGIN, NULL);
+				return ProcessFile(Stream, OutFileName, it);
+			}
+		}
 	}
 	break;
 	}
@@ -859,6 +984,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 	tTJSBinaryStream*                      BStream;
 	vector<wstring>                        Failed;
 	WCHAR                                  CurDir[MAX_PATH];
+	STATSTG                                Stat;
 
 	RtlZeroMemory(CurDir, countof(CurDir) * sizeof(WCHAR));
 	Nt_GetCurrentDirectory(MAX_PATH, CurDir);
@@ -880,6 +1006,8 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 	for (auto& it : Handle->ItemVector)
 	{
 		Handle->SetCurFile(Index);
+		if (TaskList)
+			TaskList->SetProgressValue(Handle->MainWindow, Index, Handle->ItemVector.size());
 
 		if (Handle->IsM2Format && it.isM2Format)
 		{
@@ -952,7 +1080,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 		{
 			Status = ProcessPSB(Stream, OutFilePathFull.c_str(), it, ExtName);
 		}
-		else if (GlobalData::GetGlobalData()->GetTextFlag() == TEXT_DECODE &&
+		else if (Handle->GetTextFlag() == TEXT_DECODE &&
 			(
 			ExtName == L"KSD"   ||
 			ExtName == L"KDT"   ||
@@ -966,11 +1094,80 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 			ExtName == L"INI"   ||
 			ExtName == L"TJS"))
 		{
-			Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
+			if (ExtName == L"TJS" && Handle->GetTjsFlag() == TJS2_DECOM)
+			{
+				BYTE           Buffer[8];
+				LARGE_INTEGER  Offset;
+				ULARGE_INTEGER NewOffset;
+				ULONG          Bytes;
+
+				static BYTE TjsMark[8] = { 0x54, 0x4A, 0x53, 0x32, 0x31, 0x30, 0x30, 0x00 };
+
+				Stream->Stat(&Stat, STATFLAG_DEFAULT);
+				if (Stat.cbSize.LowPart > 8)
+				{
+					Stream->Read(Buffer, 8, &Bytes);
+				}
+				Offset.QuadPart = 0;
+				Stream->Seek(Offset, FILE_BEGIN, &NewOffset);
+
+				if (Stat.cbSize.LowPart < 8)
+				{
+					Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
+				}
+				else
+				{
+					if (RtlCompareMemory(Buffer, TjsMark, 8) == 8)
+						Status = TjsDecompileStorage(Stream, OutFilePathFull);
+					else
+						Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
+				}
+			}
+			else
+			{
+				Status = ProcessTEXT(Stream, OutFilePathFull.c_str(), it);
+			}
+			
+		}
+		else if (ExtName == L"AMV")
+		{
+			Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
 		}
 		else
 		{
-			Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
+			if (ExtName == L"TJS" && Handle->GetTjsFlag() == TJS2_DECOM)
+			{
+				BYTE           Buffer[8];
+				LARGE_INTEGER  Offset;
+				ULARGE_INTEGER NewOffset;
+				ULONG          Bytes;
+
+				static BYTE TjsMark[8] = { 0x54, 0x4A, 0x53, 0x32, 0x31, 0x30, 0x30, 0x00 };
+
+				Stream->Stat(&Stat, STATFLAG_DEFAULT);
+				if (Stat.cbSize.LowPart > 8)
+				{
+					Stream->Read(Buffer, 8, &Bytes);
+				}
+				Offset.QuadPart = 0;
+				Stream->Seek(Offset, FILE_BEGIN, &NewOffset);
+
+				if (Stat.cbSize.LowPart < 8)
+				{
+					Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
+				}
+				else
+				{
+					if (RtlCompareMemory(Buffer, TjsMark, 8) == 8)
+						Status = TjsDecompileStorage(Stream, OutFilePathFull);
+					else
+						Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
+				}
+			}
+			else
+			{
+				Status = ProcessFile(Stream, OutFilePathFull.c_str(), it);
+			}
 		}
 
 		if (NT_FAILED(Status))
@@ -984,6 +1181,9 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByIStream(ttstr M2Prefix, ttstr NormalPrefix)
 		for (auto& Item : Failed)
 			PrintConsoleW(L"Failed to open : %s\n", Item);
 	}
+
+	if (TaskList)
+		TaskList->SetProgressValue(Handle->MainWindow, 0, 0);
 	return Status;
 }
 
@@ -993,7 +1193,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 	GlobalData*   Handle;
 	NtFileDisk    FakeWorker, File;
 	PBYTE         WriteBuffer, OutBuffer;
-	ULONG         OriSize, ArcSize;
+	ULONG         OriSize, ArcSize, Index;
 	WCHAR         CurPath[MAX_PATH];
 
 	Handle = GlobalData::GetGlobalData();
@@ -1005,6 +1205,7 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 	if (NT_FAILED(Status))
 		return Status;
 
+	Index = 1;
 	for (auto& it : Handle->ItemVector)
 	{
 		wstring OutputFilePath = CurPath;
@@ -1014,6 +1215,9 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 		OutputFilePath += it.info.FileName;
 		AddPath((LPWSTR)OutputFilePath.c_str());
 		File.Create(OutputFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		if (TaskList)
+			TaskList->SetProgressValue(Handle->MainWindow, Index, Handle->ItemVector.size());
 
 		if (it.info.EncryptedFlag & 7)
 		{
@@ -1047,6 +1251,10 @@ NTSTATUS NTAPI KrkrDumper::DumpFileByRawFile()
 		}
 		File.Close();
 	}
+
+	if (TaskList)
+		TaskList->SetProgressValue(Handle->MainWindow, 0, 0);
+
 	FakeWorker.Close();
 	return Status;
 }
@@ -1090,7 +1298,12 @@ NTSTATUS NTAPI KrkrDumper::DoDump()
 
 	Handle->isRunning = TRUE;
 	Handle->DisableAll(Handle->MainWindow);
-	Status = ParseXP3File(FileName);
+	
+	if (!IsIndex)
+		Status = ParseXP3File(FileName);
+	else
+		Status = ParseXP3iFile(FileNameIndex);
+
 	Status = DumpFile();
 	return Status;
 }
@@ -1102,6 +1315,7 @@ static KrkrDumper* LocalKrkrDumper = NULL;
 
 DWORD WINAPI ExtractThread(LPVOID lParam)
 {
+	CoInitialize(NULL);
 	return LocalKrkrDumper->DoDump();
 }
 
@@ -1121,6 +1335,7 @@ HANDLE NTAPI StartDumper(LPCWSTR lpFileName)
 	{
 		LocalKrkrDumper->InternalReset();
 		LocalKrkrDumper->SetFile(lpFileName);
+		LocalKrkrDumper->IsIndex = FALSE;
 		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper->hThread);
 
 		if (NT_FAILED(Status))
@@ -1132,3 +1347,43 @@ HANDLE NTAPI StartDumper(LPCWSTR lpFileName)
 	return LocalKrkrDumper->hThread;
 }
 
+
+HANDLE NTAPI StartMiniDumper(LPCWSTR lpFileName)
+{
+	NTSTATUS     Status;
+	GlobalData*  Handle;
+
+	Handle = GlobalData::GetGlobalData();
+
+	if (LocalKrkrDumper == NULL)
+		LocalKrkrDumper = new KrkrDumper;
+
+	LOOP_ONCE
+	{
+		LocalKrkrDumper->InternalReset();
+
+		auto GetFileNameP = [](PCWSTR Name)->std::wstring
+		{
+			std::wstring FileName(Name);
+			auto Index = FileName.find_last_of(L'.');
+			if (Index != std::wstring::npos)
+				return FileName.substr(0, Index);
+
+			return FileName;
+		};
+		
+		auto FileName = GetFileNameP(lpFileName) + L".xp3";
+		LocalKrkrDumper->SetFile(FileName.c_str());
+		RtlZeroMemory(LocalKrkrDumper->FileNameIndex, countof(LocalKrkrDumper->FileNameIndex) * sizeof(WCHAR));
+		StrCopyW(LocalKrkrDumper->FileNameIndex, lpFileName);
+		LocalKrkrDumper->IsIndex = TRUE;
+		Status = Nt_CreateThread(ExtractThread, NULL, FALSE, NtCurrentProcess(), &LocalKrkrDumper->hThread);
+		
+		if (NT_FAILED(Status))
+		{
+			MessageBoxW(NULL, L"Failed to Start Extraction Thread!", L"KrkrExtract", MB_OK);
+			break;
+		}
+	}
+	return LocalKrkrDumper->hThread;
+}

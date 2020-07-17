@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -14,12 +14,13 @@
     <ProjectGuid>{B0493974-0D01-4557-A98A-AD16D0C60651}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>KrkrzUniversalPatch</RootNamespace>
+    <WindowsTargetPlatformVersion>7.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -44,6 +45,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
+    <TargetName>KrkrUniversalPatch</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -60,26 +63,85 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;KRKRZUNIVERSALPATCH_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(TargetPath)" "$(SolutionDir)KrkrExtractDll\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BaseStream.h" />
+    <ClInclude Include="CompilerSet.h" />
+    <ClInclude Include="IStreamExXP3.h" />
     <ClInclude Include="KaresekaHook.h" />
-    <ClInclude Include="my.h" />
+    <ClInclude Include="MyHook.h" />
+    <ClInclude Include="PsbCompiler\cc_stream.h" />
+    <ClInclude Include="PsbCompiler\psb.hpp" />
+    <ClInclude Include="PsbCompiler\psb_cc.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_array.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_base.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_boolean.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_btree.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_collection.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_decimal.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_integer.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_null.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_object.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_resource.h" />
+    <ClInclude Include="PsbCompiler\psb_cc_string.h" />
+    <ClInclude Include="PsbCompiler\psb_compiler_center.h" />
+    <ClInclude Include="PsbCompiler\psb_link.h" />
+    <ClInclude Include="PsbCompiler\psb_link_resource.h" />
+    <ClInclude Include="PsbCompiler\ResourcePair.h" />
+    <ClInclude Include="PsbText.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="StreamHolderXP3.h" />
+    <ClInclude Include="TextPlugin.h" />
+    <ClInclude Include="Tool.h" />
+    <ClInclude Include="tp_stub.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="IStreamExXP3.cpp" />
+    <ClCompile Include="KaresekaHook.cpp" />
     <ClCompile Include="KrkrzUniversalPatch.cpp" />
-    <ClCompile Include="my.cpp" />
+    <ClCompile Include="MyHook.cpp" />
+    <ClCompile Include="PsbCompiler\cc_stream.cpp" />
+    <ClCompile Include="PsbCompiler\compiler.cpp" />
+    <ClCompile Include="PsbCompiler\psb.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_array.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_base.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_boolean.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_btree.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_collection.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_decimal.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_integer.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_null.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_object.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_resource.cpp" />
+    <ClCompile Include="PsbCompiler\psb_cc_string.cpp" />
+    <ClCompile Include="PsbCompiler\psb_compiler_center.cpp" />
+    <ClCompile Include="PsbCompiler\psb_link.cpp" />
+    <ClCompile Include="PsbCompiler\psb_link_resource.cpp" />
+    <ClCompile Include="PsbText.cpp" />
+    <ClCompile Include="StreamHolderXP3.cpp" />
+    <ClCompile Include="tp_stub.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KrkrzUniversalPatch.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

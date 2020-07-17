@@ -4,7 +4,7 @@
 #include <windows.h>
 //==============================================================================
 #define MAX_SECTION_COUNT		64
-#define SECTION_IMPORT			"XmoeAnzu"
+#define SECTION_IMPORT			".Xmoe\0\0\0"
 #define SECTION_RESERV			"@.reserv"
 //==============================================================================
 #pragma pack(1)

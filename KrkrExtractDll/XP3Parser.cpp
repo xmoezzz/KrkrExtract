@@ -72,6 +72,8 @@ BOOL WINAPI DetectCompressedChunk(PBYTE pDecompress, ULONG Size)
 	IsFirstChunk  = FALSE;
 	PtrOffset     = 0;
 
+	if (*(PDWORD)(pDecompress + PtrOffset) == TAG4('File'))
+		return TRUE;
 
 	if (*(PDWORD)(pDecompress + PtrOffset) == CHUNK_MAGIC_YUZU ||
 		*(PDWORD)(pDecompress + PtrOffset) == CHUNK_MAGIC_KRKRZ_M2 ||
@@ -462,22 +464,27 @@ BOOL WINAPI InitIndexFileFirst(PBYTE pDecompress, ULONG Size)
 }
 
 
+#include "ExtraDecoder.h"
+
 BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk& File)
 {
 	KRKRZ_COMPRESSED_INDEX  CompressedIndex;
 	PBYTE                   CompressedBuffer;
 	PBYTE                   IndexBuffer;
-	ULONG                   DecompSize, iPos;
+	ULONG                   DecompSize, iPos, DecodeSize;
 	DWORD                   Hash;
 	XP3Index                Item;
 	ULARGE_INTEGER          ChunkSize;
 	USHORT                  NameLength;
 	GlobalData*             Handle;
+	BOOL                    RawFailed;
 
 	Handle = GlobalData::GetGlobalData();
 
 	RtlCopyMemory(&CompressedIndex, pDecompress, sizeof(KRKRZ_COMPRESSED_INDEX));
 	File.Seek(CompressedIndex.Offset.LowPart, FILE_BEGIN);
+	//PrintConsoleW(L"offset : %08x, %08x - %08x\n", CompressedIndex.Offset.LowPart, CompressedIndex.DecompressedSize, CompressedIndex.CompressedSize);
+	//PrintConsoleW(L"cur fd offset : %08x\n", File.GetCurrentPos());
 
 	iPos = 0;
 	DecompSize       = CompressedIndex.DecompressedSize;
@@ -495,10 +502,52 @@ BOOL WINAPI InitIndexFile_SenrenBanka(PBYTE pDecompress, ULONG Size, NtFileDisk&
 
 	File.Read(CompressedBuffer, CompressedIndex.CompressedSize);
 
-
-	if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
-		(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+	RawFailed = FALSE;
+	if (!Handle->IsSpcialChunkEncrypted)
 	{
+		if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+			(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+		{
+			RawFailed = TRUE;
+		}
+	}
+	else 
+	{
+		if (Handle->SpecialChunkDecoder)
+		{
+			DecodeSize = 0x100;
+			if (DecodeSize < 0x100)
+				DecodeSize = CompressedIndex.CompressedSize;
+
+			Handle->SpecialChunkDecoder(CompressedBuffer, CompressedBuffer, DecodeSize);
+			DecompSize = CompressedIndex.DecompressedSize;
+			if ((DecompSize = uncompress((PBYTE)IndexBuffer, (PULONG)&DecompSize,
+				(PBYTE)CompressedBuffer, CompressedIndex.CompressedSize)) != Z_OK)
+			{
+				RawFailed = TRUE;
+			}
+		}
+		else
+		{
+			RawFailed = TRUE;
+		}
+	}
+
+#if 0
+	FILE* file = fopen("index.data","wb");
+	fwrite(IndexBuffer, 1, CompressedIndex.DecompressedSize, file);
+	fclose(file);
+
+	file = fopen("index_c.data", "wb");
+	fwrite(CompressedBuffer, 1, CompressedIndex.CompressedSize, file);
+	fclose(file);
+#endif
+
+	if (RawFailed)
+	{
+		if (IndexBuffer)      FreeMemoryP(IndexBuffer);
+		if (CompressedBuffer) FreeMemoryP(CompressedBuffer);
+
 		MessageBoxW(NULL, L"Failed to decompress special chunk", L"KrkrExtract", MB_OK);
 		return FALSE;
 	}
@@ -569,6 +618,7 @@ ULONG WINAPI FindChunkMagicFirst(PBYTE pDecompress, ULONG Size)
 		break;
 
 		default:
+			PrintConsole(L"Found krkrz\n");
 			Handle->M2ChunkMagic = *(PDWORD)(pDecompress + PtrOffset);
 			return PackInfo::KrkrZ;
 		break;

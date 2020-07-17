@@ -536,6 +536,7 @@ HRESULT STDMETHODCALLTYPE tTVPIStreamAdapter2::Clone(IStream **ppstm)
 
 static BOOL  g_InitGdiPlus = FALSE;
 static CLSID g_EncoderClsid;
+static CLSID g_EncoderClsidJPG;
 
 Void InitGdiPlus()
 {
@@ -543,6 +544,7 @@ Void InitGdiPlus()
 	ULONG_PTR gdiplusToken;
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	GetEncoderClsid(L"image/png", &g_EncoderClsid);
+	GetEncoderClsid(L"image/jpeg", &g_EncoderClsidJPG);
 }
 
 int Bmp2PNG(PBYTE Buffer, ULONG Size, const WCHAR *Path)
@@ -560,3 +562,30 @@ int Bmp2PNG(PBYTE Buffer, ULONG Size, const WCHAR *Path)
 	delete Stream;
 	return 0;
 }
+
+
+int Bmp2JPG(PBYTE Buffer, ULONG Size, const WCHAR *Path)
+{
+	if (!g_InitGdiPlus)
+		InitGdiPlus();
+
+	ULONG    Quality;
+	IStream* Stream;
+	Gdiplus::EncoderParameters JPGEncoderParameters;
+
+	Stream = new tTVPIStreamAdapter2(new tTVPMemoryStream(Buffer, Size));
+
+	JPGEncoderParameters.Count = 1;
+	JPGEncoderParameters.Parameter[0].Guid = Gdiplus::EncoderQuality;
+	JPGEncoderParameters.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
+	JPGEncoderParameters.Parameter[0].NumberOfValues = 1;
+	Quality = 100;
+	JPGEncoderParameters.Parameter[0].Value = &Quality;
+
+	Gdiplus::Image* Img = new Gdiplus::Image(Stream);
+	Gdiplus::Status GStatus = Img->Save(Path, &g_EncoderClsidJPG, &JPGEncoderParameters);
+	delete Img;
+	delete Stream;
+	return 0;
+}
+
