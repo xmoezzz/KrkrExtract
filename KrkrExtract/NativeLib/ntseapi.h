@@ -197,6 +197,15 @@ NtCreateTokenEx(
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
+NtOpenRegistryTransaction(
+	_Out_ PHANDLE Handle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_ POBJECT_ATTRIBUTES ObjectAttributes
+	);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
 NtOpenProcessToken(
     _In_ HANDLE ProcessHandle,
     _In_ ACCESS_MASK DesiredAccess,
@@ -454,6 +463,25 @@ NtSetCachedSigningLevel(
     _In_opt_ HANDLE TargetFile
     );
 
+//fix ?
+typedef struct _CACHED_SIGNING_LEVEL_INFORMATION{
+	DWORD Size;
+	UNICODE_STRING CatalogDirectory;
+} CACHED_SIGNING_LEVEL_INFORMATION, *PCACHED_SIGNING_LEVEL_INFORMATION;
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtSetCachedSigningLevel2(
+	_In_ ULONG Flags,
+	_In_ SE_SIGNING_LEVEL InputSigningLevel,
+	_In_reads_(SourceFileCount) PHANDLE SourceFiles,
+	_In_ ULONG SourceFileCount,
+	_In_opt_ HANDLE TargetFile,
+	_In_opt_ PCACHED_SIGNING_LEVEL_INFORMATION Information
+);
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -465,6 +493,14 @@ NtGetCachedSigningLevel(
     _Inout_opt_ PULONG ThumbprintSize,
     _Out_opt_ PULONG ThumbprintAlgorithm
     );
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtCompareSigningLevels(
+	_In_ SE_SIGNING_LEVEL SigningLevel,
+	_In_ SE_SIGNING_LEVEL SigningLevel2
+);
 
 #endif
 

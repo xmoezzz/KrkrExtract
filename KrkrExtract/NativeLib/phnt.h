@@ -50,13 +50,13 @@ extern "C" {
 
 #include <ntgdi.h>
 
+#include <ntioapi.h>
 #include <ntmmapi.h>
 #include <ntobapi.h>
 #include <ntpsapi.h>
 
 #include <cfg.h>
 #include <ntdbg.h>
-#include <ntioapi.h>
 #include <ntlpcapi.h>
 #include <ntpfapi.h>
 #include <ntpnpapi.h>

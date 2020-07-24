@@ -1247,7 +1247,7 @@ VOID
 NTAPI
 RtlInitAnsiString(
     _Out_ PANSI_STRING DestinationString,
-    _In_opt_ PSTR SourceString
+    _In_opt_ PCSTR SourceString
 );
 
 #if (NTDDI_VERSION >= NTDDI_WS03)
@@ -1366,12 +1366,43 @@ RtlInitEmptyUnicodeString(
     DestinationString->Length = 0;
 }
 
+
+typedef struct _RTL_BUFFER
+{
+	/* 0x000 */ PUCHAR                         Buffer;
+	/* 0x004 */ PUCHAR                         StaticBuffer;
+	/* 0x008 */ ULONG                          Size;
+	/* 0x00C */ ULONG                          StaticSize;
+	/* 0x010 */ ULONG                          ReservedForAllocatedSize;
+	/* 0x014 */ PVOID                          ReservedForIMalloc;
+
+} RTL_BUFFER, *PRTL_BUFFER;
+
+typedef struct _RTL_UNICODE_STRING_BUFFER
+{
+	/* 0x000 */ UNICODE_STRING                 String;
+	/* 0x008 */ RTL_BUFFER                     ByteBuffer;
+	/* 0x020 */ UCHAR                          MinimumStaticBufferForTerminalNul[2];
+
+} RTL_UNICODE_STRING_BUFFER, *PRTL_UNICODE_STRING_BUFFER;
+
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlNtPathNameToDosPathName(
+	IN      ULONG                       Flags,
+	IN OUT  PRTL_UNICODE_STRING_BUFFER  Path,
+	OUT     PULONG                      Disposition OPTIONAL,
+	OUT     PWSTR*                      FilePart OPTIONAL
+);
+
 NTSYSAPI
 VOID
 NTAPI
 RtlInitUnicodeString(
     _Out_ PUNICODE_STRING DestinationString,
-    _In_opt_ PWSTR SourceString
+    _In_opt_ PCWSTR SourceString
 );
 
 NTSYSAPI
@@ -1387,7 +1418,7 @@ BOOLEAN
 NTAPI
 RtlCreateUnicodeString(
     _Out_ PUNICODE_STRING DestinationString,
-    _In_ PWSTR SourceString
+    _In_ PCWSTR SourceString
     );
 
 NTSYSAPI
@@ -1407,6 +1438,8 @@ RtlFreeUnicodeString(
 
 #define RTL_DUPLICATE_UNICODE_STRING_NULL_TERMINATE (0x00000001)
 #define RTL_DUPLICATE_UNICODE_STRING_ALLOCATE_NULL_STRING (0x00000002)
+#define RTL_DUPSTR_ADD_NULL                                     RTL_DUPLICATE_UNICODE_STRING_NULL_TERMINATE
+#define RTL_DUPSTR_ALLOC_NULL                                   RTL_DUPLICATE_UNICODE_STRING_ALLOCATE_NULL_STRING
 
 NTSYSAPI
 NTSTATUS
@@ -1556,7 +1589,7 @@ NTSTATUS
 NTAPI
 RtlAppendUnicodeToString(
     _In_ PUNICODE_STRING Destination,
-    _In_opt_ PWSTR Source
+    _In_opt_ PCWSTR Source
     );
 
 NTSYSAPI
@@ -3394,9 +3427,9 @@ NTSYSAPI
 BOOLEAN
 NTAPI
 RtlDosPathNameToNtPathName_U(
-    _In_ PWSTR DosFileName,
+    _In_ PCWSTR DosFileName,
     _Out_ PUNICODE_STRING NtFileName,
-    _Out_opt_ PWSTR *FilePart,
+    _Out_opt_ PCWSTR *FilePart,
     _Out_opt_ PRTL_RELATIVE_NAME_U RelativeName
     );
 

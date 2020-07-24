@@ -616,7 +616,7 @@ BOOL KaresekaHook::Init(HMODULE hModule)
 		if (NT_FAILED(Status))
 		{
 			MessageBoxW(NULL, L"Couldn't patch memory!", L"KrkrUniversalPatch", MB_OK | MB_ICONERROR);
-			ExitProcess(0);
+			Ps::ExitProcess(0);
 		}
 
 		FsModule = Nt_LoadLibrary(L"KrkrFile.dll");

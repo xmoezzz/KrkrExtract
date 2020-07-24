@@ -1,0 +1,224 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E9360CFF-5BB0-406C-9273-BBC6AF644E89}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>KrkrExtract.Core</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>KrkrExtract.Core</TargetName>
+    <GenerateManifest>true</GenerateManifest>
+    <IncludePath>$(SolutionDir)KrkrExtract.Shared;$(SolutionDir)libpng;$(SolutionDir)jsoncpp_static;$(SolutionDir)NativeLib;$(SolutionDir)Protobuf.Lite;$(SolutionDir)capstone_static\include;$(SolutionDir)zlib;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;KRKREXTRACTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4005 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>$(TargetDir)NativeLib.lib;$(TargetDir)zlib.lib;$(TargetDir)libpng16.lib;$(TargetDir)Protobuf.Lite.lib;$(TargetDir)jsoncpp_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientCommandEmitted.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientPackerChecked.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskCloseWindow.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskDumpStart.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalDumperModeChecked.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalPatchMakeChecked.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerExitFromRemoteProcess.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerLogOutput.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerMessageBox.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerProgressBar.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskEndAndEnableUI.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
+    <ClCompile Include="AmvUnpacker.cpp" />
+    <ClCompile Include="argparse.cpp" />
+    <ClCompile Include="AsyncCommandExecutor.cpp" />
+    <ClCompile Include="ChunkReader.cpp" />
+    <ClCompile Include="CodeAna.cpp" />
+    <ClCompile Include="CommandParser.cpp" />
+    <ClCompile Include="CommandWcharToUt8.cpp" />
+    <ClCompile Include="DebuggerHandler.cpp" />
+    <ClCompile Include="DumpFile.cpp" />
+    <ClCompile Include="DumpIndex.cpp" />
+    <ClCompile Include="EmoteKey.cpp" />
+    <ClCompile Include="EptHook.cpp" />
+    <ClCompile Include="FileUnpacker.cpp" />
+    <ClCompile Include="Helper.cpp" />
+    <ClCompile Include="HookBypass.cpp" />
+    <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="ClientImpl.cpp" />
+    <ClCompile Include="KrkrHookBypass.cpp" />
+    <ClCompile Include="md5.cpp" />
+    <ClCompile Include="NativeHook.cpp" />
+    <ClCompile Include="NativeThread.cpp" />
+    <ClCompile Include="PbdDecode.cpp" />
+    <ClCompile Include="PbdUnpacker.cpp" />
+    <ClCompile Include="PngSystemDecoder.cpp" />
+    <ClCompile Include="PngUnpacker.cpp" />
+    <ClCompile Include="PsbCompression.cpp" />
+    <ClCompile Include="PsbUnpacker.cpp" />
+    <ClCompile Include="ServerStub.cpp" />
+    <ClCompile Include="sha1.cpp" />
+    <ClCompile Include="crc64.cpp" />
+    <ClCompile Include="HandleTable.cpp" />
+    <ClCompile Include="KrkrExtract.cpp" />
+    <ClCompile Include="ImageWorkerNcb.cpp" />
+    <ClCompile Include="Signal.cpp" />
+    <ClCompile Include="TaskAutoUnlocker.cpp" />
+    <ClCompile Include="TaskUniversalDumper.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="KrkrTextDecode.cpp" />
+    <ClCompile Include="KrkrUniversalPatch.cpp" />
+    <ClCompile Include="lz4.cpp" />
+    <ClCompile Include="lz4frame.cpp" />
+    <ClCompile Include="lz4hc.cpp" />
+    <ClCompile Include="mt19937-64.cpp" />
+    <ClCompile Include="KrkrPacker.cpp" />
+    <ClCompile Include="KrkrDumper.cpp" />
+    <ClCompile Include="PEFile.cpp" />
+    <ClCompile Include="ImageDecoder.cpp" />
+    <ClCompile Include="PsbDecompilerJson.cpp" />
+    <ClCompile Include="PsbFile.cpp" />
+    <ClCompile Include="PsbWorker.cpp" />
+    <ClCompile Include="SavePNG.cpp" />
+    <ClCompile Include="savetlg5.cpp" />
+    <ClCompile Include="Slide.cpp" />
+    <ClCompile Include="TextUnpacker.cpp" />
+    <ClCompile Include="TlgDecoder.cpp" />
+    <ClCompile Include="TlgUnpacker.cpp" />
+    <ClCompile Include="tp_stub.cpp" />
+    <ClCompile Include="unzip.cpp" />
+    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="Xp3FileNodeValidator.cpp" />
+    <ClCompile Include="Xp3M2ChunkNodeValidator.cpp" />
+    <ClCompile Include="Xp3M2CompressedChunkNodeValidator.cpp" />
+    <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV2.cpp" />
+    <ClCompile Include="XP3Parser.cpp" />
+    <ClCompile Include="Xp3PluginEnum.cpp" />
+    <ClCompile Include="xxhash.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="argparse.h" />
+    <ClInclude Include="AsyncCommandExecutor.h" />
+    <ClInclude Include="ChunkReader.h" />
+    <ClInclude Include="CoreTask.h" />
+    <ClInclude Include="CoTaskBase.h" />
+    <ClInclude Include="DebuggerHandler.h" />
+    <ClInclude Include="gif.h" />
+    <ClInclude Include="HardwareBreakpoint.h" />
+    <ClInclude Include="KrkrHook.h" />
+    <ClInclude Include="KrkrHookExporter.h" />
+    <ClInclude Include="magic_enum.hpp" />
+    <ClInclude Include="md5.h" />
+    <ClInclude Include="MemoryEntry.h" />
+    <ClInclude Include="NativeThread.h" />
+    <ClInclude Include="PsbDecompression.h" />
+    <ClInclude Include="PsbDecryption.h" />
+    <ClInclude Include="SafeMemory.h" />
+    <ClInclude Include="SectionProtector.h" />
+    <ClInclude Include="sha1.h" />
+    <ClInclude Include="Adler32Stream.h" />
+    <ClInclude Include="HandleTable.h" />
+    <ClInclude Include="KrkrExtract.h" />
+    <ClInclude Include="ImageWokerNcb.h" />
+    <ClInclude Include="Decoder.h" />
+    <ClInclude Include="KrkrHeaders.h" />
+    <ClInclude Include="lz4.h" />
+    <ClInclude Include="lz4frame.h" />
+    <ClInclude Include="lz4frame_static.h" />
+    <ClInclude Include="lz4hc.h" />
+    <ClInclude Include="ml.h" />
+    <ClInclude Include="mt64.h" />
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="ncbind.h" />
+    <ClInclude Include="ncb_foreach.h" />
+    <ClInclude Include="ncb_invoke.h" />
+    <ClInclude Include="PEFile.h" />
+    <ClInclude Include="PsbFile.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SaveExCompress.h" />
+    <ClInclude Include="SavePNG.h" />
+    <ClInclude Include="savetlg5.h" />
+    <ClInclude Include="Signals.h" />
+    <ClInclude Include="Slide.h" />
+    <ClInclude Include="StatusMatcher.h" />
+    <ClInclude Include="TaskAutoUnlocker.h" />
+    <ClInclude Include="tp_stub.h" />
+    <ClInclude Include="trie.h" />
+    <ClInclude Include="unzip.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="WellknownPlugin.h" />
+    <ClInclude Include="XP3Parser.h" />
+    <ClInclude Include="xxhash.h" />
+    <ClInclude Include="zconf.h" />
+    <ClInclude Include="zlib.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KrkrExtract.Core.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AlphaMovieDecode.zip" />
+    <None Include="KrkrUniversalPatch.dll" />
+    <None Include="PatchLoader.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="win.manifest" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

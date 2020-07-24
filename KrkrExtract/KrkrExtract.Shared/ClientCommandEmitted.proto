@@ -1,0 +1,7 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+message ClientCommandEmitted {
+    uint64 SequenceId = 1;
+    string Command = 2;
+}
+

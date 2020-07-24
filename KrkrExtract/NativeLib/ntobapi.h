@@ -101,6 +101,19 @@ NtQueryObject(
     _Out_opt_ PULONG ReturnLength
     );
 
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwQueryObject(
+	_In_opt_ HANDLE Handle,
+	_In_ OBJECT_INFORMATION_CLASS ObjectInformationClass,
+	_Out_writes_bytes_opt_(ObjectInformationLength) PVOID ObjectInformation,
+	_In_ ULONG ObjectInformationLength,
+	_Out_opt_ PULONG ReturnLength
+);
+
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -127,6 +140,23 @@ NtDuplicateObject(
     _In_ ULONG HandleAttributes,
     _In_ ULONG Options
     );
+
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwDuplicateObject(
+	_In_ HANDLE SourceProcessHandle,
+	_In_ HANDLE SourceHandle,
+	_In_opt_ HANDLE TargetProcessHandle,
+	_Out_opt_ PHANDLE TargetHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_ ULONG HandleAttributes,
+	_In_ ULONG Options
+);
+
+
 
 NTSYSCALLAPI
 NTSTATUS
@@ -212,6 +242,13 @@ NtClose(
     _In_ HANDLE Handle
     );
 
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwClose(
+	_In_ HANDLE Handle
+);
+
 #if (NTDDI_VERSION >= NTDDI_WIN10)
 NTSYSCALLAPI
 NTSTATUS
@@ -273,6 +310,23 @@ NtQueryDirectoryObject(
     _Inout_ PULONG Context,
     _Out_opt_ PULONG ReturnLength
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtQueryDirectoryFileEx(
+	_In_ HANDLE FileHandle,
+	_In_opt_ HANDLE Event,
+	_In_opt_ struct IO_APC_ROUTINE *ApcRoutine,
+	_In_opt_ PVOID ApcContext,
+	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
+	_Out_writes_bytes_(Length) PVOID FileInformation,
+	_In_ ULONG Length,
+	_In_ FILE_INFORMATION_CLASS FileInformationClass,
+	_In_ ULONG QueryFlags,
+	_In_opt_ PUNICODE_STRING FileName
+);
 
 // Private namespaces
 

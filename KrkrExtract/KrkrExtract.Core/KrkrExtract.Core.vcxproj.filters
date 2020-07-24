@@ -1,0 +1,514 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\ImageDumper">
+      <UniqueIdentifier>{fa7d8925-f11c-481f-9377-e93283a3985e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Lib">
+      <UniqueIdentifier>{dccaf4ea-c556-488f-93ff-1b8b0c8ec915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK">
+      <UniqueIdentifier>{6cc74f54-5ae4-4a1b-ad00-d8bbea3cbe6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{c7a07306-797c-405f-a069-a58a07fb1c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Debugger">
+      <UniqueIdentifier>{facce64b-3d48-4e0d-afa3-4526c49edb7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Plugin.Builtin">
+      <UniqueIdentifier>{1729e313-45c8-43e6-b4ce-3be76eddd38e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Plugin">
+      <UniqueIdentifier>{e2a916e6-a0f2-4e05-af50-7a6bb2360ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Xp3">
+      <UniqueIdentifier>{c55e949b-199c-416d-8600-ff3ed9edbf12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Hook">
+      <UniqueIdentifier>{82333526-4277-4409-b0ec-5bbc5ad6cfb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\WellKnownFiles">
+      <UniqueIdentifier>{c442a171-b5ca-4838-972d-6db2da5a64b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\WellKnownFiles\Psb">
+      <UniqueIdentifier>{e94ddb94-79aa-46b7-9e3e-0b2fe4dee2ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Lib">
+      <UniqueIdentifier>{d7cb0532-bb71-48d4-a99d-2fd32fea13ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImageDumper">
+      <UniqueIdentifier>{911f104e-4bde-49f2-89cd-ec30494620d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{7228215f-18eb-4e38-81c7-f0d09f44dc15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SDK">
+      <UniqueIdentifier>{e865394c-47c8-4383-9d3d-e3cae2b0e4ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Server">
+      <UniqueIdentifier>{61d6fd18-76f9-474b-b392-7c5cc715f144}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Plugin">
+      <UniqueIdentifier>{c287e6f1-c270-498e-9ce1-00eeebdc5f94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Decoder">
+      <UniqueIdentifier>{a9de3a82-d1e1-47e0-bc19-a3485566100b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Protobuf.Stub">
+      <UniqueIdentifier>{45ea2301-c1bb-4622-bd19-ba1981c18e87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Xp3">
+      <UniqueIdentifier>{417e585a-fe7f-4bd8-bba9-0334382355da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Debugger">
+      <UniqueIdentifier>{3ef0a2a3-13e0-4187-a5f0-013a22853a0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Hook">
+      <UniqueIdentifier>{95ab2043-daa3-47ce-9c18-434053b53442}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WellknownFiles">
+      <UniqueIdentifier>{0a0e85be-d5f3-4093-a80b-fdbba6e93298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WellknownFiles\Psb">
+      <UniqueIdentifier>{4f15f6ad-ea73-4c2c-95d1-fa78a6955d1e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lz4frame.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageWorkerNcb.cpp">
+      <Filter>Source Files\ImageDumper</Filter>
+    </ClCompile>
+    <ClCompile Include="SavePNG.cpp">
+      <Filter>Source Files\ImageDumper</Filter>
+    </ClCompile>
+    <ClCompile Include="savetlg5.cpp">
+      <Filter>Source Files\ImageDumper</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Source Files\ImageDumper</Filter>
+    </ClCompile>
+    <ClCompile Include="Slide.cpp">
+      <Filter>Source Files\ImageDumper</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrTextDecode.cpp">
+      <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbWorker.cpp">
+      <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="TLGDecoder.cpp">
+      <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrPacker.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrDumper.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="XP3Parser.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="tp_stub.cpp">
+      <Filter>Source Files\SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="mt19937-64.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4hc.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="xxhash.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrUniversalPatch.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="PEFile.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrExtract.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbFile.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbDecompilerJson.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="crc64.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="HandleTable.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="sha1.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerHandler.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="unzip.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="AmvUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="TextUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PbdUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="TlgUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PbdDecode.cpp">
+      <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="PngSystemDecoder.cpp">
+      <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageDecoder.cpp">
+      <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="PngUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbUnpacker.cpp">
+      <Filter>Source Files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeAna.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskUniversalDumper.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerStub.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeThread.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientImpl.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalPatchMakeChecked.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalDumperModeChecked.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskDumpStart.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskCloseWindow.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientPackerChecked.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientCommandEmitted.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskEndAndEnableUI.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerProgressBar.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerMessageBox.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerLogOutput.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerExitFromRemoteProcess.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc">
+      <Filter>Source Files\Protobuf.Stub</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncCommandExecutor.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskAutoUnlocker.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Xp3FileNodeValidator.cpp">
+      <Filter>Source Files\Xp3</Filter>
+    </ClCompile>
+    <ClCompile Include="Xp3M2ChunkNodeValidator.cpp">
+      <Filter>Source Files\Xp3</Filter>
+    </ClCompile>
+    <ClCompile Include="Xp3M2CompressedChunkNodeValidator.cpp">
+      <Filter>Source Files\Xp3</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkReader.cpp">
+      <Filter>Source Files\Xp3</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpIndex.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpFile.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandWcharToUt8.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandParser.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooks.cpp">
+      <Filter>Source Files\Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeHook.cpp">
+      <Filter>Source Files\Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="HookBypass.cpp">
+      <Filter>Source Files\Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrHookBypass.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="PsbCompression.cpp">
+      <Filter>Source Files\WellknownFiles\Psb</Filter>
+    </ClCompile>
+    <ClCompile Include="EmoteKey.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="argparse.cpp">
+      <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Xp3PluginEnum.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="EptHook.cpp">
+      <Filter>Source Files\Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV2.cpp">
+      <Filter>Source Files\Xp3</Filter>
+    </ClCompile>
+    <ClCompile Include="Signal.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ncbind.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="ncb_invoke.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="ncb_foreach.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveExCompress.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="SavePNG.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="savetlg5.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4frame_static.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4frame.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4hc.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="xxhash.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="zconf.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Slide.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageWokerNcb.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files\ImageDumper</Filter>
+    </ClInclude>
+    <ClInclude Include="tp_stub.h">
+      <Filter>Header Files\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrHeaders.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="XP3Parser.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Adler32Stream.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="mt64.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrExtract.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="PEFile.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbFile.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="HandleTable.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="sha1.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerHandler.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="unzip.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="gif.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="SafeMemory.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="WellknownPlugin.h">
+      <Filter>Header Files\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ml.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="magic_enum.hpp">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Decoder.h">
+      <Filter>Header Files\Plugin.Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionProtector.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreTask.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="HardwareBreakpoint.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Signals.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryEntry.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeThread.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncCommandExecutor.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskAutoUnlocker.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CoTaskBase.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkReader.h">
+      <Filter>Header Files\Xp3</Filter>
+    </ClInclude>
+    <ClInclude Include="trie.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="argparse.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrHookExporter.h">
+      <Filter>Header Files\Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="KrkrHook.h">
+      <Filter>Header Files\Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusMatcher.h">
+      <Filter>Header Files\Xp3</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbDecompression.h">
+      <Filter>Header Files\WellKnownFiles\Psb</Filter>
+    </ClInclude>
+    <ClInclude Include="PsbDecryption.h">
+      <Filter>Header Files\WellKnownFiles\Psb</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KrkrExtract.Core.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PatchLoader.exe" />
+    <None Include="KrkrUniversalPatch.dll" />
+    <None Include="AlphaMovieDecode.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="win.manifest" />
+  </ItemGroup>
+</Project>

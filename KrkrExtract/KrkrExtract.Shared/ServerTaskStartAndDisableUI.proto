@@ -1,0 +1,6 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+message ServerTaskStartAndDisableUI {
+	uint64 SequenceId = 1;
+}
+

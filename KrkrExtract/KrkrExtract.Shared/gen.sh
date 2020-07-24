@@ -1,0 +1,17 @@
+protoc --cpp_out=./ ./ServerCommandResultOutput.proto
+protoc --cpp_out=./ ./ServerExitFromRemoteProcess.proto
+protoc --cpp_out=./ ./ServerHandShakeFromRemote.proto
+protoc --cpp_out=./ ./ServerLogOutput.proto
+protoc --cpp_out=./ ./ServerMessageBox.proto
+protoc --cpp_out=./ ./ServerProgressBar.proto
+protoc --cpp_out=./ ./ServerTaskEndAndEnableUI.proto
+protoc --cpp_out=./ ./ServerTaskStartAndDisableUI.proto
+protoc --cpp_out=./ ./ServerUIHeartbeatPackage.proto
+protoc --cpp_out=./ ./ServerUIReady.proto
+protoc --cpp_out=./ ./ClientCancelTask.proto
+protoc --cpp_out=./ ./ClientCommandEmitted.proto
+protoc --cpp_out=./ ./ClientPackerChecked.proto
+protoc --cpp_out=./ ./ClientTaskCloseWindow.proto
+protoc --cpp_out=./ ./ClientTaskDumpStart.proto
+protoc --cpp_out=./ ./ClientUniversalDumperModeChecked.proto
+protoc --cpp_out=./ ./ClientUniversalPatchMakeChecked.proto

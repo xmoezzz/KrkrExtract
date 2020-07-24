@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{3855F2D2-58C3-4188-97E3-0D2B2815CC6C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>KrkrExtractRpcServerArm64</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)KrkrExtract.Shared;$(SolutionDir)Protobuf.Lite;$(SolutionDir)NativeLib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>__ARM64__</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>$(SolutionDir)$(Configuration)\Protobuf.Lite.Arm64.lib;$(SolutionDir)$(Configuration)\NativeLib.Arm64.lib;kernel32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\AlpcRev.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\Console.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\NativeThread.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\PrivateStub.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\RevThread.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\SectionProtector.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\ServerImpl.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientCommandEmitted.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientPackerChecked.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskCloseWindow.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskDumpStart.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalDumperModeChecked.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalPatchMakeChecked.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerExitFromRemoteProcess.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerLogOutput.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerMessageBox.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerProgressBar.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskEndAndEnableUI.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\Console.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\ExportedClient.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\IncomingMessage.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\Main.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\NativeThread.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\RevThread.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\ServerImpl.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
