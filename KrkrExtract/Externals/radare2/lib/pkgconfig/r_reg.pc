@@ -1,0 +1,10 @@
+prefix=D:/radare2-4.3.1/dest
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: r_reg
+Description: radare foundation libraries
+Version: 4.3.1
+Requires: r_util
+Libs: -L${libdir} -lr_reg
+Cflags:-I${includedir}/libr

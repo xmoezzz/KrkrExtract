@@ -1,6 +1,11 @@
 # KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)  
 
+### Beta Version Warning!!
+
+* download pre-release binaries from release page
+* DO NOT USE v5 now
+
 ## 中文说明
 * 我平时很忙，本工程开源并且可以编译，遇到问题应该先自己解决，然后提交PR。
 * wiki还在建设中，不知道什么时候能完成。
@@ -66,7 +71,7 @@ If krkrExtract is not able to process some files corrently, you should try seper
 ## More English docs?
 I'm trying to do this.  
 Since I almostly have no time on open source project, I'm not sure when can I upload more docs about my tools.
- 
+
 
 ## Any differences between krkr2 and krkrz?
 My answer is NO DIFFERECES.  

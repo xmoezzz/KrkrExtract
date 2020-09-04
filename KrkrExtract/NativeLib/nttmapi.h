@@ -273,6 +273,15 @@ NtRollbackEnlistment(
     _In_ HANDLE EnlistmentHandle,
     _In_opt_ PLARGE_INTEGER TmVirtualClock
     );
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtRollbackRegistryTransaction(
+	_In_ HANDLE Handle,
+	_In_ DWORD Flags
+);
+
 #endif
 
 #if (NTDDI_VERSION >= NTDDI_VISTA)
@@ -348,6 +357,17 @@ NtCreateResourceManager(
     _In_opt_ ULONG CreateOptions,
     _In_opt_ PUNICODE_STRING Description
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtCreateRegistryTransaction(
+	_Out_ PHANDLE RegistryHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_In_ DWORD Flags
+);
 #endif
 
 #if (NTDDI_VERSION >= NTDDI_VISTA)
@@ -410,6 +430,22 @@ NtSetInformationResourceManager(
     _In_reads_bytes_(ResourceManagerInformationLength) PVOID ResourceManagerInformation,
     _In_ ULONG ResourceManagerInformationLength
     );
+#endif
+
+
+#if (NTDDI_VERSION >= NTDDI_VISTA)
+
+typedef ULONG SYMBOLIC_LINK_ALL_INFORMATION_CLASS;
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtSetInformationSymbolicLink(
+	_In_ HANDLE LinkHandle,
+	_In_ SYMBOLIC_LINK_ALL_INFORMATION_CLASS LinkInformationClass,
+	_In_reads_bytes_(LinkInformationLength) PVOID LinkInformation,
+	_In_ ULONG LinkInformationLength
+);
 #endif
 
 #if (NTDDI_VERSION >= NTDDI_VISTA)

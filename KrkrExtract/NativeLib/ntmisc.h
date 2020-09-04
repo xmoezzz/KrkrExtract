@@ -46,6 +46,23 @@ NtTraceEvent(
     _In_ PVOID Fields
     );
 
+
+/*
+		None = 0,
+		String = 1,
+		ExpandString = 2,
+		Binary = 3,
+		Dword = 4,
+		DwordBigEndian = 5,
+		Link = 6,
+		MultiString = 7,
+		ResourceList = 8,
+		FullResourceDescriptor = 9,
+		ResourceRequirementsList = 10,
+		Qword = 11
+*/
+
+
 #if (NTDDI_VERSION >= NTDDI_VISTA)
 // private
 NTSYSCALLAPI
@@ -60,4 +77,20 @@ NtTraceControl(
     _Out_ PULONG ReturnLength
     );
 #endif
+
+
+typedef ULONG REGISTRY_VALUE_TYPE;
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtQueryLicenseValue(
+	_In_ PUNICODE_STRING Name,
+	_Out_ REGISTRY_VALUE_TYPE* Type,
+	_Out_writes_bytes_opt_(Length) PVOID Buffer,
+	_In_ ULONG Length,
+	_Out_ PULONG ReturnLength
+);
+
+
  

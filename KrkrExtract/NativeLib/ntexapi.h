@@ -589,6 +589,17 @@ NtOpenTimer(
     _In_ POBJECT_ATTRIBUTES ObjectAttributes
     );
 
+
+typedef struct _PROCESS_TIMES
+{
+	LARGE_INTEGER CreationTime;
+	LARGE_INTEGER ExitTime;
+	LARGE_INTEGER KernelTime;
+	LARGE_INTEGER UserTime;
+
+} PROCESS_TIMES, *PPROCESS_TIMES;
+
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1178,6 +1189,14 @@ NtQueryPerformanceCounter(
     _Out_ PLARGE_INTEGER PerformanceCounter,
     _Out_opt_ PLARGE_INTEGER PerformanceFrequency
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtQueryAuxiliaryCounterFrequency(
+	_Out_ PLARGE_INTEGER AuxiliaryCounterFrequency
+	);
 
 // LUIDs
 
@@ -3322,7 +3341,7 @@ typedef struct _SYSDBG_CONTROL_SPACE
     ULONG Processor;
 } SYSDBG_CONTROL_SPACE, *PSYSDBG_CONTROL_SPACE;
 
-enum _INTERFACE_TYPE;
+typedef enum _INTERFACE_TYPE;
 
 typedef struct _SYSDBG_IO_SPACE
 {

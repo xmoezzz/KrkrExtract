@@ -361,6 +361,21 @@ NtAllocateVirtualMemory(
     _In_ ULONG Protect
     );
 
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtAllocateVirtualMemoryEx(
+	_In_opt_ HANDLE Process,
+	_In_opt_ PVOID* BaseAddress,
+	_In_ SIZE_T* RegionSize,
+	_In_ ULONG AllocationType,
+	_In_ ULONG PageProtection,
+	_Inout_updates_opt_(ParameterCount) MEM_EXTENDED_PARAMETER* Parameters,
+	_In_ ULONG ParameterCount
+);
+
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -382,6 +397,16 @@ NtReadVirtualMemory(
     _Out_opt_ PSIZE_T NumberOfBytesRead
     );
 
+NTSTATUS
+NTAPI
+ZwReadVirtualMemory(
+	_In_ HANDLE ProcessHandle,
+	_In_opt_ PVOID BaseAddress,
+	_Out_writes_bytes_(BufferSize) PVOID Buffer,
+	_In_ SIZE_T BufferSize,
+	_Out_opt_ PSIZE_T NumberOfBytesRead
+);
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -396,6 +421,17 @@ NtWriteVirtualMemory(
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
+ZwWriteVirtualMemory(
+	_In_ HANDLE ProcessHandle,
+	_In_opt_ PVOID BaseAddress,
+	_In_reads_bytes_(BufferSize) PVOID Buffer,
+	_In_ SIZE_T BufferSize,
+	_Out_opt_ PSIZE_T NumberOfBytesWritten
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
 NtProtectVirtualMemory(
     _In_ HANDLE ProcessHandle,
     _Inout_ PVOID *BaseAddress,
@@ -403,6 +439,19 @@ NtProtectVirtualMemory(
     _In_ ULONG NewProtect,
     _Out_ PULONG OldProtect
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwProtectVirtualMemory(
+	_In_ HANDLE ProcessHandle,
+	_Inout_ PVOID *BaseAddress,
+	_Inout_ PSIZE_T RegionSize,
+	_In_ ULONG NewProtect,
+	_Out_ PULONG OldProtect
+);
+
 
 NTSYSCALLAPI
 NTSTATUS
@@ -495,6 +544,36 @@ NtCreateSection(
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
+ZwCreateSection(
+	_Out_ PHANDLE SectionHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_In_opt_ PLARGE_INTEGER MaximumSize,
+	_In_ ULONG SectionPageProtection,
+	_In_ ULONG AllocationAttributes,
+	_In_opt_ HANDLE FileHandle
+);
+
+#if (PHNT_VERSION >= PHNT_REDSTONE5)
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtCreateSectionEx(
+	_Out_ PHANDLE SectionHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_In_opt_ PLARGE_INTEGER MaximumSize,
+	_In_ ULONG SectionPageProtection,
+	_In_ ULONG AllocationAttributes,
+	_In_opt_ HANDLE FileHandle,
+	_In_ PMEM_EXTENDED_PARAMETER ExtendedParameters,
+	_In_ ULONG ExtendedParameterCount
+);
+#endif
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
 NtOpenSection(
     _Out_ PHANDLE SectionHandle,
     _In_ ACCESS_MASK DesiredAccess,
@@ -516,6 +595,24 @@ NtMapViewOfSection(
     _In_ ULONG AllocationType,
     _In_ ULONG Win32Protect
     );
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtMapViewOfSectionEx(
+	_In_ HANDLE SectionHandle,
+	_In_ HANDLE ProcessHandle,
+	_Inout_ _At_(*BaseAddress,
+		_Readable_bytes_(*ViewSize)
+		_Writable_bytes_(*ViewSize)
+		_Post_readable_byte_size_(*ViewSize)) PVOID *BaseAddress,
+	_Inout_opt_ PLARGE_INTEGER SectionOffset,
+	_Inout_ PSIZE_T ViewSize,
+	_In_ ULONG AllocationType,
+	_In_ ULONG Win32Protect,
+	_Inout_updates_opt_(ParameterCount) MEM_EXTENDED_PARAMETER* Parameters,
+	_In_ ULONG ParameterCount
+);
 
 NTSYSCALLAPI
 NTSTATUS
@@ -801,4 +898,79 @@ NTAPI
 NtFlushWriteBuffer(
     VOID
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtFlushVirtualMemory(
+	_In_ HANDLE ProcessHandle,
+	_Inout_ PVOID *BaseAddress,
+	_Inout_ PSIZE_T RegionSize,
+	_Out_ PIO_STATUS_BLOCK IoStatus
+);
  
+// Enclave support
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtCreateEnclave(
+	_In_ HANDLE ProcessHandle,
+	_Inout_ PVOID* BaseAddress,
+	_In_ ULONG_PTR ZeroBits,
+	_In_ SIZE_T Size,
+	_In_ SIZE_T InitialCommitment,
+	_In_ ULONG EnclaveType,
+	_In_reads_bytes_(EnclaveInformationLength) PVOID EnclaveInformation,
+	_In_ ULONG EnclaveInformationLength,
+	_Out_opt_ PULONG EnclaveError
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtLoadEnclaveData(
+	_In_ HANDLE ProcessHandle,
+	_In_ PVOID BaseAddress,
+	_In_reads_bytes_(BufferSize) PVOID Buffer,
+	_In_ SIZE_T BufferSize,
+	_In_ ULONG Protect,
+	_In_reads_bytes_(PageInformationLength) PVOID PageInformation,
+	_In_ ULONG PageInformationLength,
+	_Out_opt_ PSIZE_T NumberOfBytesWritten,
+	_Out_opt_ PULONG EnclaveError
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtInitializeEnclave(
+	_In_ HANDLE ProcessHandle,
+	_In_ PVOID BaseAddress,
+	_In_reads_bytes_(EnclaveInformationLength) PVOID EnclaveInformation,
+	_In_ ULONG EnclaveInformationLength,
+	_Out_opt_ PULONG EnclaveError
+);
+
+// rev
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtTerminateEnclave(
+	_In_ PVOID BaseAddress,
+	_In_ BOOLEAN WaitForThread
+);
+
+
+// rev
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtCallEnclave(
+	_In_ PENCLAVE_ROUTINE Routine,
+	_In_ PVOID Parameter,
+	_In_ BOOLEAN WaitForThread,
+	_Out_opt_ PVOID *ReturnValue
+);
+

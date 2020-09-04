@@ -119,6 +119,21 @@ typedef const UNICODE_STRING *PCUNICODE_STRING;
 
 #define RTL_CONSTANT_STRING(s) { sizeof(s) - sizeof((s)[0]), sizeof(s), s }
 
+typedef struct _LARGE_UNICODE_STRING
+{
+	ULONG Length;
+	ULONG MaximumLength : 31;
+	ULONG Ansi : 1;
+
+	union
+	{
+		PWSTR   UnicodeBuffer;
+		PSTR    AnsiBuffer;
+		ULONG64 Buffer;
+	};
+
+} LARGE_UNICODE_STRING, *PLARGE_UNICODE_STRING;
+
 // Balanced tree node
 
 #define RTL_BALANCED_NODE_RESERVED_PARENT_MASK 3

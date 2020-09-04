@@ -263,6 +263,20 @@ NtCreateKey(
     _Out_opt_ PULONG Disposition
     );
 
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwCreateKey(
+	_Out_ PHANDLE KeyHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_Reserved_ ULONG TitleIndex,
+	_In_opt_ PUNICODE_STRING Class,
+	_In_ ULONG CreateOptions,
+	_Out_opt_ PULONG Disposition
+);
+
 #if (NTDDI_VERSION >= NTDDI_VISTA)
 NTSYSCALLAPI
 NTSTATUS
@@ -287,6 +301,16 @@ NtOpenKey(
     _In_ ACCESS_MASK DesiredAccess,
     _In_ POBJECT_ATTRIBUTES ObjectAttributes
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwOpenKey(
+	_Out_ PHANDLE KeyHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_ POBJECT_ATTRIBUTES ObjectAttributes
+);
 
 #if (NTDDI_VERSION >= NTDDI_VISTA)
 NTSYSCALLAPI
@@ -335,6 +359,13 @@ NtDeleteKey(
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
+ZwDeleteKey(
+	_In_ HANDLE KeyHandle
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
 NtRenameKey(
     _In_ HANDLE KeyHandle,
     _In_ PUNICODE_STRING NewName
@@ -347,6 +378,15 @@ NtDeleteValueKey(
     _In_ HANDLE KeyHandle,
     _In_ PUNICODE_STRING ValueName
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwDeleteValueKey(
+	_In_ HANDLE KeyHandle,
+	_In_ PUNICODE_STRING ValueName
+);
 
 NTSYSCALLAPI
 NTSTATUS
@@ -381,6 +421,20 @@ NtQueryValueKey(
     _Out_ PULONG ResultLength
     );
 
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwQueryValueKey(
+	_In_ HANDLE KeyHandle,
+	_In_ PUNICODE_STRING ValueName,
+	_In_ KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+	_Out_writes_bytes_opt_(Length) PVOID KeyValueInformation,
+	_In_ ULONG Length,
+	_Out_ PULONG ResultLength
+);
+
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -392,6 +446,19 @@ NtSetValueKey(
     _In_reads_bytes_opt_(DataSize) PVOID Data,
     _In_ ULONG DataSize
     );
+
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+ZwSetValueKey(
+	_In_ HANDLE KeyHandle,
+	_In_ PUNICODE_STRING ValueName,
+	_In_opt_ ULONG TitleIndex,
+	_In_ ULONG Type,
+	_In_reads_bytes_opt_(DataSize) PVOID Data,
+	_In_ ULONG DataSize
+);
 
 NTSYSCALLAPI
 NTSTATUS

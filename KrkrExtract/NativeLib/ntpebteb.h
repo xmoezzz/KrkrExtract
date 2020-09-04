@@ -212,6 +212,43 @@ C_ASSERT(FIELD_OFFSET(PEB, SessionId) == 0x1D4);
 C_ASSERT(sizeof(PEB) == 0x470);
 #endif
 
+
+
+#ifndef _LDT_ENTRY_DEFINED
+#define _LDT_ENTRY_DEFINED
+
+typedef struct _LDT_ENTRY {
+	WORD    LimitLow;
+	WORD    BaseLow;
+	union {
+		struct {
+			BYTE    BaseMid;
+			BYTE    Flags1;     // Declare as bytes to avoid alignment
+			BYTE    Flags2;     // Problems.
+			BYTE    BaseHi;
+		} Bytes;
+		struct {
+			DWORD   BaseMid : 8;
+			DWORD   Type : 5;
+			DWORD   Dpl : 2;
+			DWORD   Pres : 1;
+			DWORD   LimitHi : 4;
+			DWORD   Sys : 1;
+			DWORD   Reserved_0 : 1;
+			DWORD   Default_Big : 1;
+			DWORD   Granularity : 1;
+			DWORD   BaseHi : 8;
+		} Bits;
+	} HighWord;
+} LDT_ENTRY, *PLDT_ENTRY;
+
+#endif
+
+typedef struct _DESCRIPTOR_TABLE_ENTRY {
+	ULONG Selector;
+	LDT_ENTRY Descriptor;
+} DESCRIPTOR_TABLE_ENTRY, *PDESCRIPTOR_TABLE_ENTRY;
+
 #define GDI_BATCH_BUFFER_SIZE 310
 
 typedef struct _GDI_TEB_BATCH
