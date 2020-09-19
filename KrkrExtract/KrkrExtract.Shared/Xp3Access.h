@@ -20,12 +20,13 @@ enum class PackInfo : ULONG
 
 enum class ChunkNodeKind : ULONG
 {
-	FILE_CHUNK_NODE       = 0,
-	M2_CHUNK_NODE         = 1,
-	M2_COMPRESSED_NODE    = 2,
-	M2_COMPRESSED_NODE_V2 = 3,
-	OTHER_NODE            = 80,
-	USER_CHUNK_NODE       = 100
+	FILE_CHUNK_NODE           = 0,
+	M2_CHUNK_NODE             = 1,
+	M2_COMPRESSED_NODE        = 2,
+	M2_COMPRESSED_NODE_V2     = 3,
+	FILE_CHUNK_NODE_PROTECTED = 4,
+	OTHER_NODE                = 80,
+	USER_CHUNK_NODE           = 100
 };
 
 class Xp3StatusNode

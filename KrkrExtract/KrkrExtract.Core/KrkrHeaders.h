@@ -58,7 +58,7 @@ typedef struct KRKRZ_XP3_INDEX_CHUNK_YUZU
 	LARGE_INTEGER          ChunkSize;
 	ULONG                  Hash;
 	USHORT                 FileNameLength;
-	WCHAR                  FileName[MAX_PATH];
+	WCHAR                  FileName[0x400];
 } KRKRZ_XP3_INDEX_CHUNK_YUZU;
 
 
@@ -70,7 +70,8 @@ typedef struct KRKR2_XP3_INDEX_CHUNK_INFO
 	LARGE_INTEGER          OriginalSize;
 	LARGE_INTEGER          ArchiveSize;
 	USHORT                 FileNameLength;
-	WCHAR                  FileName[MAX_PATH];
+	WCHAR                  FileName[0x400];
+
 } KRKR2_XP3_INDEX_CHUNK_INFO;
 
 
@@ -154,11 +155,13 @@ typedef struct
 	union
 	{
 		SMyXP3IndexNormal           krkr2;
-		KRKR2_XP3_INDEX_CHUNK_FILE  file;
-		KRKR2_XP3_INDEX_CHUNK_TIME  time;
-		KRKR2_XP3_INDEX_CHUNK_ADLR  adlr;
-		KRKR2_XP3_INDEX_CHUNK_SEGM  segm;
-		KRKR2_XP3_INDEX_CHUNK_INFO  info;
+		struct {
+			KRKR2_XP3_INDEX_CHUNK_FILE  file;
+			KRKR2_XP3_INDEX_CHUNK_TIME  time;
+			KRKR2_XP3_INDEX_CHUNK_ADLR  adlr;
+			KRKR2_XP3_INDEX_CHUNK_SEGM  segm;
+			KRKR2_XP3_INDEX_CHUNK_INFO  info;
+		};
 	};
 
 } SMyXP3IndexM2;

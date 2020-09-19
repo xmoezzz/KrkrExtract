@@ -164,7 +164,6 @@
             this.AmvRawRadioButton.TabStop = true;
             this.AmvRawRadioButton.Text = "Raw";
             this.AmvRawRadioButton.UseVisualStyleBackColor = true;
-            this.AmvRawRadioButton.CheckedChanged += new System.EventHandler(this.AmvRawRadioButton_CheckedChanged);
             // 
             // AmvGifRadioButton
             // 
@@ -176,7 +175,6 @@
             this.AmvGifRadioButton.TabStop = true;
             this.AmvGifRadioButton.Text = "GIF";
             this.AmvGifRadioButton.UseVisualStyleBackColor = true;
-            this.AmvGifRadioButton.CheckedChanged += new System.EventHandler(this.AmvGifRadioButton_CheckedChanged);
             // 
             // AmvPngRadioButton
             // 
@@ -188,7 +186,6 @@
             this.AmvPngRadioButton.TabStop = true;
             this.AmvPngRadioButton.Text = "PNG(Sequence)";
             this.AmvPngRadioButton.UseVisualStyleBackColor = true;
-            this.AmvPngRadioButton.CheckedChanged += new System.EventHandler(this.AmvPngRadioButton_CheckedChanged);
             // 
             // AmvJpgRadioButton
             // 
@@ -200,7 +197,6 @@
             this.AmvJpgRadioButton.TabStop = true;
             this.AmvJpgRadioButton.Text = "JPG(Sequence)";
             this.AmvJpgRadioButton.UseVisualStyleBackColor = true;
-            this.AmvJpgRadioButton.CheckedChanged += new System.EventHandler(this.AmvJpgRadioButton_CheckedChanged);
             // 
             // groupBox6
             // 
@@ -226,7 +222,6 @@
             this.TlgJpgRadioButton.TabStop = true;
             this.TlgJpgRadioButton.Text = "JPG";
             this.TlgJpgRadioButton.UseVisualStyleBackColor = true;
-            this.TlgJpgRadioButton.CheckedChanged += new System.EventHandler(this.TlgJpgRadioButton_CheckedChanged);
             // 
             // TlgPngRadioButton
             // 
@@ -238,7 +233,6 @@
             this.TlgPngRadioButton.TabStop = true;
             this.TlgPngRadioButton.Text = "PNG";
             this.TlgPngRadioButton.UseVisualStyleBackColor = true;
-            this.TlgPngRadioButton.CheckedChanged += new System.EventHandler(this.TlgPngRadioButton_CheckedChanged);
             // 
             // TlgSystemRadioButton
             // 
@@ -250,7 +244,6 @@
             this.TlgSystemRadioButton.TabStop = true;
             this.TlgSystemRadioButton.Text = "System(PNG)";
             this.TlgSystemRadioButton.UseVisualStyleBackColor = true;
-            this.TlgSystemRadioButton.CheckedChanged += new System.EventHandler(this.TlgSystemRadioButton_CheckedChanged);
             // 
             // TlgBuiltinRadioButton
             // 
@@ -262,7 +255,6 @@
             this.TlgBuiltinRadioButton.TabStop = true;
             this.TlgBuiltinRadioButton.Text = "Built-in Decoder";
             this.TlgBuiltinRadioButton.UseVisualStyleBackColor = true;
-            this.TlgBuiltinRadioButton.CheckedChanged += new System.EventHandler(this.TlgBuiltinRadioButton_CheckedChanged);
             // 
             // TlgRawRadioButton
             // 
@@ -274,7 +266,6 @@
             this.TlgRawRadioButton.TabStop = true;
             this.TlgRawRadioButton.Text = "Raw";
             this.TlgRawRadioButton.UseVisualStyleBackColor = true;
-            this.TlgRawRadioButton.CheckedChanged += new System.EventHandler(this.TlgRawRadioButton_CheckedChanged);
             // 
             // groupBox5
             // 
@@ -297,7 +288,6 @@
             this.PbdJsonRadioButton.TabStop = true;
             this.PbdJsonRadioButton.Text = "JSON";
             this.PbdJsonRadioButton.UseVisualStyleBackColor = true;
-            this.PbdJsonRadioButton.CheckedChanged += new System.EventHandler(this.PbdJsonRadioButton_CheckedChanged);
             // 
             // PbdRawRadioButton
             // 
@@ -309,7 +299,6 @@
             this.PbdRawRadioButton.TabStop = true;
             this.PbdRawRadioButton.Text = "Raw";
             this.PbdRawRadioButton.UseVisualStyleBackColor = true;
-            this.PbdRawRadioButton.CheckedChanged += new System.EventHandler(this.PbdRawRadioButton_CheckedChanged);
             // 
             // groupBox4
             // 
@@ -333,7 +322,6 @@
             this.Tjs2DisasmRadioButton.TabStop = true;
             this.Tjs2DisasmRadioButton.Text = "Disassemble";
             this.Tjs2DisasmRadioButton.UseVisualStyleBackColor = true;
-            this.Tjs2DisasmRadioButton.CheckedChanged += new System.EventHandler(this.Tjs2DisasmRadioButton_CheckedChanged);
             // 
             // Tjs2DecompileRadioButton
             // 
@@ -345,7 +333,6 @@
             this.Tjs2DecompileRadioButton.TabStop = true;
             this.Tjs2DecompileRadioButton.Text = "Decompile";
             this.Tjs2DecompileRadioButton.UseVisualStyleBackColor = true;
-            this.Tjs2DecompileRadioButton.CheckedChanged += new System.EventHandler(this.Tjs2DecompileRadioButton_CheckedChanged);
             // 
             // Tjs2RawRadioButton
             // 
@@ -357,7 +344,6 @@
             this.Tjs2RawRadioButton.TabStop = true;
             this.Tjs2RawRadioButton.Text = "Raw";
             this.Tjs2RawRadioButton.UseVisualStyleBackColor = true;
-            this.Tjs2RawRadioButton.CheckedChanged += new System.EventHandler(this.Tjs2RawRadioButton_CheckedChanged);
             // 
             // groupBox3
             // 
@@ -380,7 +366,6 @@
             this.TextDecompileRadioButton.TabStop = true;
             this.TextDecompileRadioButton.Text = "Decryption";
             this.TextDecompileRadioButton.UseVisualStyleBackColor = true;
-            this.TextDecompileRadioButton.CheckedChanged += new System.EventHandler(this.TextDecompileRadioButton_CheckedChanged);
             // 
             // TextRawRadioButton
             // 
@@ -392,7 +377,6 @@
             this.TextRawRadioButton.TabStop = true;
             this.TextRawRadioButton.Text = "Raw";
             this.TextRawRadioButton.UseVisualStyleBackColor = true;
-            this.TextRawRadioButton.CheckedChanged += new System.EventHandler(this.TextRawRadioButton_CheckedChanged);
             // 
             // groupBox2
             // 
@@ -419,7 +403,6 @@
             this.PsbFullCheckBox.TabIndex = 6;
             this.PsbFullCheckBox.Text = "Full Unpack";
             this.PsbFullCheckBox.UseVisualStyleBackColor = true;
-            this.PsbFullCheckBox.CheckedChanged += new System.EventHandler(this.PsbFullCheckBox_CheckedChanged);
             // 
             // PsbJsonCheckBox
             // 
@@ -430,7 +413,6 @@
             this.PsbJsonCheckBox.TabIndex = 5;
             this.PsbJsonCheckBox.Text = "JSON";
             this.PsbJsonCheckBox.UseVisualStyleBackColor = true;
-            this.PsbJsonCheckBox.CheckedChanged += new System.EventHandler(this.PsbJsonCheckBox_CheckedChanged);
             // 
             // PsbDumpTextCheckBox
             // 
@@ -441,7 +423,6 @@
             this.PsbDumpTextCheckBox.TabIndex = 4;
             this.PsbDumpTextCheckBox.Text = "Dump Text";
             this.PsbDumpTextCheckBox.UseVisualStyleBackColor = true;
-            this.PsbDumpTextCheckBox.CheckedChanged += new System.EventHandler(this.PsbDumpTextCheckBox_CheckedChanged);
             // 
             // PsbUnpackAnmCheckBox
             // 
@@ -452,7 +433,6 @@
             this.PsbUnpackAnmCheckBox.TabIndex = 3;
             this.PsbUnpackAnmCheckBox.Text = "Unpack Animation";
             this.PsbUnpackAnmCheckBox.UseVisualStyleBackColor = true;
-            this.PsbUnpackAnmCheckBox.CheckedChanged += new System.EventHandler(this.PsbUnpackAnmCheckBox_CheckedChanged);
             // 
             // PsbUnpackImageCheckBox
             // 
@@ -463,7 +443,6 @@
             this.PsbUnpackImageCheckBox.TabIndex = 2;
             this.PsbUnpackImageCheckBox.Text = "Unpack Image";
             this.PsbUnpackImageCheckBox.UseVisualStyleBackColor = true;
-            this.PsbUnpackImageCheckBox.CheckedChanged += new System.EventHandler(this.PsbUnpackImageCheckBox_CheckedChanged);
             // 
             // PsbDecompileCheckBox
             // 
@@ -474,7 +453,6 @@
             this.PsbDecompileCheckBox.TabIndex = 1;
             this.PsbDecompileCheckBox.Text = "Decompile Script";
             this.PsbDecompileCheckBox.UseVisualStyleBackColor = true;
-            this.PsbDecompileCheckBox.CheckedChanged += new System.EventHandler(this.PsbDecompileCheckBox_CheckedChanged);
             // 
             // PsbRawCheckBox
             // 
@@ -485,7 +463,6 @@
             this.PsbRawCheckBox.TabIndex = 0;
             this.PsbRawCheckBox.Text = "Raw";
             this.PsbRawCheckBox.UseVisualStyleBackColor = true;
-            this.PsbRawCheckBox.CheckedChanged += new System.EventHandler(this.PsbRawCheckBox_CheckedChanged);
             // 
             // groupBox1
             // 
@@ -508,7 +485,6 @@
             this.PngSystemDecodeRadioButton.TabStop = true;
             this.PngSystemDecodeRadioButton.Text = "System Decode";
             this.PngSystemDecodeRadioButton.UseVisualStyleBackColor = true;
-            this.PngSystemDecodeRadioButton.CheckedChanged += new System.EventHandler(this.PngSystemDecodeRadioButton_CheckedChanged);
             // 
             // PngRawRadioButton
             // 
@@ -520,7 +496,6 @@
             this.PngRawRadioButton.TabStop = true;
             this.PngRawRadioButton.Text = "Raw";
             this.PngRawRadioButton.UseVisualStyleBackColor = true;
-            this.PngRawRadioButton.CheckedChanged += new System.EventHandler(this.PngRawRadioButton_CheckedChanged);
             // 
             // PackerPage
             // 
@@ -609,7 +584,6 @@
             this.OutputArchiveTextBox.Name = "OutputArchiveTextBox";
             this.OutputArchiveTextBox.Size = new System.Drawing.Size(769, 38);
             this.OutputArchiveTextBox.TabIndex = 5;
-            this.OutputArchiveTextBox.TextChanged += new System.EventHandler(this.OutputArchiveTextBox_TextChanged);
             // 
             // label5
             // 
@@ -626,7 +600,6 @@
             this.OriginalArchiveTextBox.Name = "OriginalArchiveTextBox";
             this.OriginalArchiveTextBox.Size = new System.Drawing.Size(769, 38);
             this.OriginalArchiveTextBox.TabIndex = 3;
-            this.OriginalArchiveTextBox.TextChanged += new System.EventHandler(this.OriginalArchiveTextBox_TextChanged);
             // 
             // BaseFolderTextBox
             // 
@@ -634,7 +607,6 @@
             this.BaseFolderTextBox.Name = "BaseFolderTextBox";
             this.BaseFolderTextBox.Size = new System.Drawing.Size(769, 38);
             this.BaseFolderTextBox.TabIndex = 2;
-            this.BaseFolderTextBox.TextChanged += new System.EventHandler(this.BaseFolderTextBox_TextChanged);
             // 
             // label4
             // 
@@ -696,7 +668,6 @@
             this.UniversalPatchProtectionCheckBox.TabIndex = 1;
             this.UniversalPatchProtectionCheckBox.Text = "Protection";
             this.UniversalPatchProtectionCheckBox.UseVisualStyleBackColor = true;
-            this.UniversalPatchProtectionCheckBox.CheckedChanged += new System.EventHandler(this.UniversalPatchProtectionCheckBox_CheckedChanged);
             // 
             // UniversalPatchInheritICONCheckBox
             // 
@@ -707,7 +678,6 @@
             this.UniversalPatchInheritICONCheckBox.TabIndex = 0;
             this.UniversalPatchInheritICONCheckBox.Text = "Inherit ICON";
             this.UniversalPatchInheritICONCheckBox.UseVisualStyleBackColor = true;
-            this.UniversalPatchInheritICONCheckBox.CheckedChanged += new System.EventHandler(this.UniversalPatchInheritICONCheckBox_CheckedChanged);
             // 
             // tabPage1
             // 
@@ -847,6 +817,10 @@
             this.MaximizeBox = false;
             this.Name = "KrkrMain";
             this.Text = "KrkrMain";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.KrkrMain_FormClosed);
+            this.Load += new System.EventHandler(this.KrkrMain_Load);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.KrkrMain_DragDrop);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.KrkrMain_DragEnter);
             this.MainTabControl.ResumeLayout(false);
             this.UnpackerPage.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);

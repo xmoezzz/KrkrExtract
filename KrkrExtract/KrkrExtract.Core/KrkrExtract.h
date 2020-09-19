@@ -339,6 +339,19 @@ public:
 	PVOID NTAPI LoadLibraryWBypass(
 		PCWSTR LibFileName
 	);
+
+	BOOL NTAPI IsDBCSLeadByteBypass(
+		BYTE TestChar
+	);
+
+	VOID NTAPI UndocApiBypass1() {}
+	VOID NTAPI UndocApiBypass2() {}
+	VOID NTAPI UndocApiBypass3() {}
+	VOID NTAPI UndocApiBypass4() {}
+	VOID NTAPI UndocApiBypass5() {}
+	VOID NTAPI UndocApiBypass6() {}
+	VOID NTAPI UndocApiBypass7() {}
+	VOID NTAPI UndocApiBypass8() {}
 	
 
 	//
@@ -507,6 +520,7 @@ private:
 	NTSTATUS InitializePluginsPrivateWithCustom();
 	NTSTATUS InitializeCommandUtils();
 	NTSTATUS InitializePrivatePointersFromFile();
+	NTSTATUS InitializeDarkMode();
 	
 	NTSTATUS InitExporterPrivate(iTVPFunctionExporter *Exporter);
 	NTSTATUS InitializeTVPCreateStreamCallKrkrZ();

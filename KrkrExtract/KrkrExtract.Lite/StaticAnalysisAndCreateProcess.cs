@@ -6,6 +6,7 @@ using System.IO;
 using System.Windows.Forms;
 using WindowsPE;
 using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
 
 public class StaticAnalysisAndCreateProcess
 {
@@ -186,7 +187,7 @@ public class StaticAnalysisAndCreateProcess
 
         if (Handle.IsInvalid)
         {
-            MessageBox.Show("Failed to create process...", "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Failed to create process...\nCode :" + Marshal.GetLastWin32Error(), "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             Environment.Exit(-1);
         }
         Handle.Close();

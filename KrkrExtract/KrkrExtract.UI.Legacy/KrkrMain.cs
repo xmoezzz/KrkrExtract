@@ -11,31 +11,46 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using Microsoft.WindowsAPICodePack;
-using Microsoft.WindowsAPICodePack.Shell;
 
 namespace KrkrExtract.UI.Legacy
 {
     public partial class KrkrMain : Form
     {
-        private ConnectStatus m_ConnectionStatus;
-        private ConnectType m_ConnectionType;
-        private string m_CurrentTask;
-        private IntPtr m_RemoteProcess;
+        private ConnectStatus m_ConnectionStatus = ConnectStatus.Status_Not_Connect;
+        private ConnectType   m_ConnectionType   = ConnectType.Connect_native;
+        private bool          m_ConsoleIsAttached= false;
 
-        public KrkrMain(IntPtr RemoteProcess)
+        private ConnectStatus GetConnectionStatus() { return m_ConnectionStatus; }
+        private ConnectType   GetConnectionType()   { return m_ConnectionType; }
+        private IntPtr        GetRemoteProcessHande() { return Client.XeGetRemoteProcessHandle();  }
+
+        private string GetRemoteProcessDir()
         {
-            m_RemoteProcess = RemoteProcess;
+            var pid = NativeMethods.GetProcessId(GetRemoteProcessHande());
+            if (pid == 0)
+                return string.Empty;
+
+            var process = Process.GetProcessById((int)pid);
+            if (process == null)
+                return string.Empty;
+
+            return Path.GetDirectoryName(process.MainModule.FileName);
+        }
+
+
+        public KrkrMain()
+        {
             InitializeComponent();
             InitializationUIServerCallbacks();
 
             m_ConnectionStatus = ConnectStatus.Status_Not_Connect;
 
             var ConnectionType = Environment.GetEnvironmentVariable("KrkrConnectionType");
+
             if (String.IsNullOrEmpty(ConnectionType) || String.Compare(ConnectionType, "ncalrpc", true) == 0)
-                m_ConnectionType = ConnectType.Connect_ncalrpc;
+                m_ConnectionType = ConnectType.Connect_native;
             else
-                m_ConnectionType = ConnectType.Connect_ncacn_hvsocket;
+                m_ConnectionType = ConnectType.Connect_hypervisor_based;
 
             this.m_ConnectionStatus = ConnectStatus.Status_Not_Connect;
             this.Text = FormatTitle(null, 0, 0);
@@ -44,148 +59,81 @@ namespace KrkrExtract.UI.Legacy
         }
 
 
-        //Callbacks for UI server
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerProgressChangedClient(string TaskName, UInt64 Current, UInt64 Total);
+        private UnmanagedPointers.NotifyServerProgressChangedServer m_NotifyServerProgressChangedCallback;
+        private UnmanagedPointers.NotifyServerLogOutputServer m_NotifyServerLogOutputCallback;
+        private UnmanagedPointers.NotifyServerUIReadyServer m_NotifyServerUIReadyCallback;
+        private UnmanagedPointers.NotifyServerMessageBoxServer m_NotifyServerMessageBoxCallback;
+        private UnmanagedPointers.NotifyServerTaskStartAndDisableUIServer m_NotifyServerTaskStartAndDisableUICallback;
+        private UnmanagedPointers.NotifyServerTaskEndAndEnableUIServer m_NotifyServerTaskEndAndEnableUICallback;
+        private UnmanagedPointers.NotifyServerExitFromRemoteProcessServer m_NotifyServerExitFromRemoteProcessCallback;
+        private UnmanagedPointers.NotifyServerRaiseErrorServer m_NotifyServerRaiseErrorCallback;
 
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerLogOutputClient(LogLevel Level, string LogInfo, bool IsCmd);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerUIReadyClient();
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerMessageBoxClient(string Info, UInt32 Flags, bool Locked);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerTaskStartAndDisableUIClient();
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerTaskEndAndEnableUIClient(bool TaskCompleteStatus, string Description);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyServerExitFromRemoteProcessClient();
-
-
-        /// <summary>
-        /// not a rpc callback, just tell UI server...
-        /// </summary>
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void NotifyRemoteExitOrCrash(int ExitCode);
-
-        private NotifyConnectionFromRemote m_NotifyConnectionFromRemoteCallback;
-        private NotifyDisconnectionFromRemote m_NotifyDisconnectionFromRemoteCallback;
-        private NotifyProgressChanged m_NotifyProgressChangedCallback;
-        private NotifyEnterLockMode m_NotifyEnterLockModeCallback;
-        private NotifyExitLockMode m_NotifyExitLockMode;
-        private NotifySetCurrentItem m_NotifySetCurrentItem;
-        private NotifyUIReady m_NotifyUIReady;
-        private NotifyRemoteExitOrCrash m_NotifyRemoteExitOrCrash;
-        private NotifyTaskError m_NotifyTaskError;
-        private NotifyTaskErrorWithDescription m_NotifyTaskErrorWithDescription;
 
         private void InitializationUIServerCallbacks()
         {
-            m_NotifyConnectionFromRemoteCallback =
+            m_NotifyServerProgressChangedCallback = 
+                (string TaskName, UInt64 Current, UInt64 Total) =>
+            {
+                NotifyServerProgressChangedWorker(TaskName, Current, Total);
+            };
+
+            m_NotifyServerLogOutputCallback =
+                (LogLevel Level, string LogInfo, bool IsCmd) =>
+            {
+                NotifyServerLogOutputWorker(Level, LogInfo, IsCmd);
+            };
+
+            m_NotifyServerUIReadyCallback =
                 () =>
             {
-                NotifyConnectionFromRemoteWorker();
+                NotifyServerUIReadyWorker();
             };
 
-            m_NotifyDisconnectionFromRemoteCallback =
+
+            m_NotifyServerMessageBoxCallback =
+                (string Info, UInt32 Flags, bool Locked) =>
+            {
+                NotifyServerMessageBoxWorker(Info, Flags, Locked);
+            };
+
+
+            m_NotifyServerTaskStartAndDisableUICallback =
                 () =>
             {
-                NotifyDisconnectionFromRemoteWorker();
+                NotifyServerTaskStartAndDisableUIWorker();
             };
 
-            m_NotifyProgressChangedCallback =
-                (UInt64 Current, UInt64 Total) =>
+
+            m_NotifyServerTaskEndAndEnableUICallback =
+                (bool TaskCompleteStatus, string Description) =>
             {
-                NotifyProgressChangedWorker(Current, Total);
+                NotifyServerTaskEndAndEnableUIWorker(TaskCompleteStatus, Description);
             };
 
-            m_NotifyEnterLockModeCallback =
-                (string TaskName) =>
-            {
-                return NotifyEnterLockModeWorker(TaskName);
-            };
-
-            m_NotifyExitLockMode =
+            m_NotifyServerExitFromRemoteProcessCallback =
                 () =>
             {
-                return NotifyExitLockModeWorker();
+                NotifyServerExitFromRemoteProcessWorker();
             };
 
-            m_NotifySetCurrentItem =
-                (LogLevel Level, string Item) =>
+            m_NotifyServerRaiseErrorCallback =
+                (RaiseErrorType ErrorType, string Error) =>
             {
-                NotifySetCurrentItemWorker(Level, Item);
+                return NotifyServerRaiseErrorWorker(ErrorType, Error);
             };
 
-            m_NotifyUIReady =
-                () =>
-            {
-                NotifyUIReadyWorker();
-            };
-
-            m_NotifyTaskError =
-                () =>
-            {
-                MessageBox.Show(this, "KrkrExtract encountered with fatal error", "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            };
-
-            m_NotifyTaskErrorWithDescription =
-                (string Description) =>
-            {
-                MessageBox.Show(this, Description, "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            };
-
-            m_NotifyRemoteExitOrCrash =
-                (int ExitCode) =>
-            {
-                //0xC0000005
-                MessageBox.Show(
-                    this,
-                    String.Format("Remote process crashed or exited unexpectedly\nCode : {0}", ExitCode),
-                    "KrkrExtract",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-
-
-                /// duplicate this code
-                Environment.Exit(ExitCode);
-
-            };
-
-
-            m_GetRemoteProcess =
-                () =>
-            {
-                return m_RemoteProcess;
-            };
         }
-
-
 
         /// <summary>
-        /// Worker for NotifyConnectionFromRemote
+        /// Workers
         /// </summary>
-        private void NotifyConnectionFromRemoteWorker()
-        {
-            m_ConnectionStatus = ConnectStatus.Status_Connected;
-            RefreshConnectionStatus();
-        }
 
+        #region Workers
 
-        private void NotifyDisconnectionFromRemoteWorker()
+        private void NotifyServerProgressChangedWorker(string TaskName, UInt64 Current, UInt64 Total)
         {
-            m_ConnectionStatus = ConnectStatus.Status_Disconnected;
-            RefreshConnectionStatus();
-        }
+            var IsVistaOrHigher = Environment.OSVersion.Version >= new Version(6, 1);
 
-        private void NotifyProgressChangedWorker(UInt64 Current, UInt64 Total)
-        {
             if (Total == 0)
             {
                 TaskProgressBar.Style = ProgressBarStyle.Continuous;
@@ -230,37 +178,281 @@ namespace KrkrExtract.UI.Legacy
             }
         }
 
-        private bool NotifyEnterLockModeWorker(string TaskName)
+        private void NotifyServerLogOutputWorker(LogLevel Level, string LogInfo, bool IsCmd)
         {
+            var Time = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+            var IsWindows10 = Environment.OSVersion.Version >= new Version(6, 1);
+            var DebugSymbol = IsWindows10 ? "💠" : "DEBUG";
+            var InfoSymbol  = IsWindows10 ? "ℹ️" : "INFO";
+            var WarnSymbol  = IsWindows10 ? "⚠" : "WARN";
+            var ErrorSymbol = IsWindows10 ? "❌" : "ERROR";
+            var OkSymbol    = IsWindows10 ? "✔️"  : "OK";
+            var Output = "";
 
+            switch (Level)
+            {
+                case LogLevel.LOG_DEBUG:
+                    Output = "[" + DebugSymbol + " " + Time + (IsCmd ? " (cmd)" : "") + "]" + LogInfo;
+                    break;
+
+                case LogLevel.LOG_INFO:
+                    Output = "[" + InfoSymbol + " " + Time + (IsCmd ? " (cmd)" : "") + "]" + LogInfo;
+                    break;
+
+                case LogLevel.LOG_WARN:
+                    Output = "[" + WarnSymbol + " " + Time + (IsCmd ? " (cmd)" : "") + "]" + LogInfo;
+                    break;
+
+                case LogLevel.LOG_ERROR:
+                    Output = "[" + ErrorSymbol + " " + Time + (IsCmd ? " (cmd)" : "") + "]" + LogInfo;
+                    break;
+
+                case LogLevel.LOG_OK:
+                    Output = "[" + OkSymbol    + " " + Time + (IsCmd ? " (cmd)" : "") + "]" + LogInfo;
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(Output))
+            {
+                VirtualConsoleListBox.Items.Add(Output);
+                Console.WriteLine(Output);
+            }
         }
 
-        private bool NotifyExitLockModeWorker()
+        private void NotifyServerUIReadyWorker()
         {
-
+            EnableWindow();
+            SetStatusbarConnected();
         }
 
-        private void NotifySetCurrentItemWorker(LogLevel Level, string Item)
+        private void NotifyServerMessageBoxWorker(string Info, UInt32 Flags, bool Locked)
         {
-
+            if (Locked)
+                NativeMethods.MessageBoxW(this.Handle, Info, "KrkrExtract", Flags);
+            else
+                NativeMethods.MessageBoxW(IntPtr.Zero, Info, "KrkrExtract", Flags);
         }
 
-        private void NotifyUIReadyWorker()
+        private void NotifyServerTaskStartAndDisableUIWorker()
         {
+            LockdownWindow();
+        }
+
+        private void NotifyServerTaskEndAndEnableUIWorker(bool TaskCompleteStatus, string Description)
+        {
+            if (!TaskCompleteStatus)
+            {
+                if (string.IsNullOrEmpty(Description))
+                {
+                    MessageBox.Show(
+                        this, 
+                        "KrkrExtract : Unknown error", 
+                        "KrkrExtract", 
+                        MessageBoxButtons.OK, 
+                        MessageBoxIcon.Error
+                    );
+                }
+                else
+                {
+                    MessageBox.Show(
+                        this,
+                        Description,
+                        "KrkrExtract",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+
+            FormatTitle(null, 0, 0);
+            EnableWindow();
+        }
+
+        private void NotifyServerExitFromRemoteProcessWorker()
+        {
+            Environment.Exit(0);
+        }
+
+        private bool NotifyServerRaiseErrorWorker(RaiseErrorType ErrorType, string Error)
+        {
+            switch (ErrorType)
+            {
+                case RaiseErrorType.RAISE_ERROR_HEARTBEAT_TIMEOUT:
+                    Console.Write("Heartbeat timeout");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case RaiseErrorType.RAISE_ERROR_INVALID_PID:
+                    Console.Write("Invalid pid");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case RaiseErrorType.RAISE_ERROR_REMOTE_CRASH:
+                    Console.Write("Remote crash");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case RaiseErrorType.RAISE_ERROR_REMOTE_DEAD:
+                    Console.Write("Remote dead to early");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case RaiseErrorType.RAISE_ERROR_REMOTE_GENEROUS:
+                    Console.Write("Generou error raised");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case RaiseErrorType.RAISE_ERROR_REMOTE_PRIVILEGED:
+                    Console.Write("Privilege error");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case RaiseErrorType.RAISE_ERROR_SECRET_DISMATCH:
+                    Console.Write("Secret dismatch");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                default:
+                    Console.Write("Unknown errors (debug me)");
+                    MessageBox.Show(this, Error, "KrkrExtract : fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+            }
+
+            Environment.Exit(-1);
+            return false;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Current flags
+        /// </summary>
+
+
+        #region flags
+
+        private uint GetCurrentPsbFlags()
+        {
+            uint flags = 0;
+
+            flags |= PsbDecompileCheckBox.Checked ? (uint)KrkrPsbMode.PSB_DECOM : 0;
+            flags |= PsbDumpTextCheckBox.Checked ? (uint)KrkrPsbMode.PSB_TEXT : 0;
+            flags |= PsbFullCheckBox.Checked ? (uint)KrkrPsbMode.PSB_ALL : 0;
+            flags |= PsbJsonCheckBox.Checked ? (uint)KrkrPsbMode.PSB_JSON : 0;
+            flags |= PsbRawCheckBox.Checked ? (uint)KrkrPsbMode.PSB_RAW : 0;
+            flags |= PsbUnpackAnmCheckBox.Checked ? (uint)KrkrPsbMode.PSB_ANM : 0;
+            flags |= PsbUnpackImageCheckBox.Checked ? (uint)KrkrPsbMode.PSB_IMAGE : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrPsbMode.PSB_RAW;
+
+            return flags;
+        }
+
+        private uint GetCurrentTextFlags()
+        {
+            uint flags = 0;
+
+            flags |= TextRawRadioButton.Checked ? (uint)KrkrTextMode.TEXT_RAW : 0;
+            flags |= TextDecompileRadioButton.Checked ? (uint)KrkrTextMode.TEXT_DECODE : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrTextMode.TEXT_RAW;
+
+            return flags;
+        }
+
+        private uint GetCurrentPngFlags()
+        {
+            uint flags = 0;
+
+            flags |= PngRawRadioButton.Checked ? (uint)KrkrPngMode.PNG_RAW : 0;
+            flags |= PngSystemDecodeRadioButton.Checked ? (uint)KrkrPngMode.PNG_SYS : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrPngMode.PNG_RAW;
+
+            return flags;
+        }
+
+        private uint GetCurrentTjs2Flags()
+        {
+            uint flags = 0;
+
+            flags |= Tjs2RawRadioButton.Checked ? (uint)KrkrTjs2Mode.TJS2_RAW : 0;
+            flags |= Tjs2DisasmRadioButton.Checked ? (uint)KrkrTjs2Mode.TJS2_DEASM : 0;
+            flags |= Tjs2DecompileRadioButton.Checked ? (uint)KrkrTjs2Mode.TJS2_DECOM : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrTjs2Mode.TJS2_RAW;
+
+            return flags;
+        }
+
+        private uint GetCurrentTlgFlags()
+        {
+            uint flags = 0;
+
+            flags |= TlgRawRadioButton.Checked ? (uint)KrkrTlgMode.TLG_RAW : 0;
+            flags |= TlgPngRadioButton.Checked ? (uint)KrkrTlgMode.TLG_PNG : 0;
+            flags |= TlgJpgRadioButton.Checked ? (uint)KrkrTlgMode.TLG_JPG : 0;
+            flags |= TlgSystemRadioButton.Checked ? (uint)KrkrTlgMode.TLG_SYS : 0;
+            flags |= TlgBuiltinRadioButton.Checked ? (uint)KrkrTlgMode.TLG_BUILDIN : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrTlgMode.TLG_RAW;
+
+            return flags;
         }
 
 
-        private void NotifyRemoteExitOrCrashWorker()
+        private uint GetCurrentAmvFlags()
+        {
+            uint flags = 0;
+
+            flags |= AmvRawRadioButton.Checked ? (uint)KrkrAmvMode.AMV_RAW : 0;
+            flags |= AmvPngRadioButton.Checked ? (uint)KrkrAmvMode.AMV_PNG : 0;
+            flags |= AmvJpgRadioButton.Checked ? (uint)KrkrAmvMode.AMV_JPG : 0;
+            flags |= AmvGifRadioButton.Checked ? (uint)KrkrAmvMode.AMV_GIF : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrAmvMode.AMV_RAW;
+
+            return flags;
+        }
+
+        private uint GetCurrentPbdFlags()
+        {
+            uint flags = 0;
+
+            flags |= PbdRawRadioButton.Checked ? (uint)KrkrPbdMode.PBD_RAW : 0;
+            flags |= PbdJsonRadioButton.Checked ? (uint)KrkrPbdMode.PBD_JSON : 0;
+
+            if (flags == 0)
+                flags = (uint)KrkrPbdMode.PBD_RAW;
+
+            return flags;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Connections & Status
+        /// </summary>
+
+        #region Connection
+
+        private void SetStatusbarConnected()
+        {
+            m_ConnectionStatus = ConnectStatus.Status_Connected;
+            RefreshConnectionStatus();
+        }
+
+        private void SetStatusbarDisconnected()
         {
             m_ConnectionStatus = ConnectStatus.Status_Disconnected;
             RefreshConnectionStatus();
-            MessageBox.Show(this, "Remote process exited unexpectedly", "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
-
-        /// <summary>
-        /// Rpc connection status
-        /// </summary>
-
 
         private void RefreshConnectionStatus()
         {
@@ -268,64 +460,46 @@ namespace KrkrExtract.UI.Legacy
             {
                 this.ConnectToolStripStatusLabel.Text = 
                     String.Format("No Connection (desire type : {0})", 
-                    this.m_ConnectionType == ConnectType.Connect_ncalrpc ? "ncalrpc" : "hvsocket");
+                    this.m_ConnectionType == ConnectType.Connect_native ? "native" : "hvsocket");
                 this.ConnectToolStripStatusLabel.ForeColor = Color.Yellow;
             }
             else if (m_ConnectionStatus == ConnectStatus.Status_Connected)
             {
                 this.ConnectToolStripStatusLabel.Text = "Connected : " +
-                    (this.m_ConnectionType == ConnectType.Connect_ncalrpc ? "ncalrpc" : "hvsocket");
+                    (this.m_ConnectionType == ConnectType.Connect_native ? "native" : "hvsocket");
                 this.ConnectToolStripStatusLabel.ForeColor = Color.Green;
             }
             else
             {
                 this.ConnectToolStripStatusLabel.Text = "Disconnected : " +
-                    (this.m_ConnectionType == ConnectType.Connect_ncalrpc ? "ncalrpc" : "hvsocket") +
+                    (this.m_ConnectionType == ConnectType.Connect_native ? "native" : "hvsocket") +
                     " remote exited unexpectedly";
                 this.ConnectToolStripStatusLabel.ForeColor = Color.Red;
             }
         }
 
+        #endregion
 
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemotePsbModeChanged(KrkrPsbMode Mode);
-
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemoteTextModeChanged(KrkrTextMode Mode);
-
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemotePngModeChanged(KrkrPngMode Mode);
-
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemoteTjs2ModeChanged(KrkrTjs2Mode Mode);
-
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemoteTlgModeChanged(KrkrTlgMode Mode);
-
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemoteAlphaMovieModeChanged(KrkrAmvMode Mode);
-
-        [DllImport("KrkrExtract.Rpc.Client.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public static extern bool NotifyRemotePbdModeChanged(KrkrPbdMode Mode);
 
         /// <summary>
         /// UI helper
         /// </summary>
 
+        #region UI helper
 
         private string FormatTitle(string Task, UInt64 Current, UInt64 Total)
         {
             if (String.IsNullOrEmpty(Task))
             {
                 return String.Format("KrkrExtract(version : {0}, built on : {1})",
-                    GetKrkrExtractVersion(),
-                    GetKrkrExtractBuildTime()
+                    Helper.GetKrkrExtractVersion(),
+                    Helper.GetKrkrExtractBuildTime()
                     );
             }
 
             return String.Format("KrkrExtract(version : {0}, built on : {1}) [%s: {2}/{3}]",
-                GetKrkrExtractVersion(),
-                GetKrkrExtractBuildTime(),
+                Helper.GetKrkrExtractVersion(),
+                Helper.GetKrkrExtractBuildTime(),
                 Current,
                 Total
                 );
@@ -402,332 +576,441 @@ namespace KrkrExtract.UI.Legacy
         private void EnableWindow()
         {
 
+            ///png
+            this.PngRawRadioButton.Enabled = true;
+            this.PngSystemDecodeRadioButton.Enabled = true;
+
+            ///psb
+            this.PsbRawCheckBox.Enabled = true;
+            this.PsbUnpackAnmCheckBox.Enabled = true;
+            this.PsbDecompileCheckBox.Enabled = true;
+            this.PsbUnpackImageCheckBox.Enabled = true;
+            this.PsbJsonCheckBox.Enabled = true;
+            this.PsbDumpTextCheckBox.Enabled = true;
+            this.PsbFullCheckBox.Enabled = true;
+
+            ///text
+            this.TextRawRadioButton.Enabled = true;
+            this.TextDecompileRadioButton.Enabled = true;
+
+            ///tjs2 
+            this.Tjs2DecompileRadioButton.Enabled = true;
+            this.Tjs2DisasmRadioButton.Enabled = true;
+            this.Tjs2RawRadioButton.Enabled = true;
+
+            ///pbd
+            this.PbdJsonRadioButton.Enabled = true;
+            this.PbdRawRadioButton.Enabled = true;
+
+            ///tlg
+            this.TlgBuiltinRadioButton.Enabled = true;
+            this.TlgJpgRadioButton.Enabled = true;
+            this.TlgPngRadioButton.Enabled = true;
+            this.TlgRawRadioButton.Enabled = true;
+            this.TlgSystemRadioButton.Enabled = true;
+
+            ///amv
+            this.AmvGifRadioButton.Enabled = true;
+            this.AmvJpgRadioButton.Enabled = true;
+            this.AmvPngRadioButton.Enabled = true;
+            this.AmvRawRadioButton.Enabled = true;
+
+
+            ///task
+            this.VirtualConsoleInputTextBox.Enabled = true;
+            this.VirtualConsoleListBox.Enabled = true;
+            this.TaskOpenConsoleButton.Enabled = true;
+            this.TaskCancelButton.Enabled = true;
+
+            ///packer
+            this.BaseFolderTextBox.Enabled = true;
+            this.BaseFolderButton.Enabled = true;
+            this.OriginalArchiveTextBox.Enabled = true;
+            this.OriginalArchiveButton.Enabled  = true;
+            this.OutputArchiveTextBox.Enabled   = true;
+            this.OutputArchiveButton.Enabled    = true;
+            this.MakeArchiveButton.Enabled      = true;
+
+            ///universal patch
+            this.UniversalPatchInheritICONCheckBox.Enabled = true;
+            this.UniversalPatchProtectionCheckBox.Enabled  = true;
+            this.UniversalPatchInheritICONCheckBox.Enabled = true;
+
+            ///universal dumper
+            this.UniversalDumperButton.Enabled = true;
         }
 
-        private string GetKrkrExtractVersion()
-        {
-            try
-            {
-                var VersionInfo = FileVersionInfo.GetVersionInfo(Path.Combine(Environment.CurrentDirectory, "KrkrExtract.Core.dll"));
-                return VersionInfo.FileVersion;
-            }
-            catch (Exception e)
-            {
-                return "Unknown version";
-            }
-        }
+        #endregion
 
-        private string GetKrkrExtractBuildTime()
-        {
-            try
-            {
-                FileStream file = File.OpenRead(Path.Combine(Environment.CurrentDirectory, "KrkrExtract.Core.dll"));
-                using (var mmf = MemoryMappedFile.CreateFromFile(file, null,
-                                                      file.Length,
-                                                      MemoryMappedFileAccess.Read,
-                                                      null, HandleInheritability.None, false))
-                {
-                    NativeMethods.IMAGE_DOS_HEADER dosHeader = new NativeMethods.IMAGE_DOS_HEADER();
-                    using (var accessor = mmf.CreateViewAccessor(0,
-                                                                  Marshal.SizeOf(dosHeader),
-                                                                  MemoryMappedFileAccess.Read))
-                    {
-                        accessor.Read<NativeMethods.IMAGE_DOS_HEADER>(0, out dosHeader);
-                        if (dosHeader.e_magic != NativeMethods.IMAGE_DOS_SIGNATURE)
-                            throw new Exception();
-                    }
-                    int signature = 0;
-                    NativeMethods.IMAGE_FILE_HEADER imageFileHeader = new NativeMethods.IMAGE_FILE_HEADER();
-                    using (var accessor = mmf.CreateViewAccessor(dosHeader.e_lfanew,
-                                                                  Marshal.SizeOf(signature) + Marshal.SizeOf(imageFileHeader),
-                                                                  MemoryMappedFileAccess.Read))
-                    {
-                        signature = accessor.ReadInt32(0);
-                        if (signature != NativeMethods.IMAGE_NT_SIGNATURE)
-                            throw new Exception();
 
-                        accessor.Read<NativeMethods.IMAGE_FILE_HEADER>(Marshal.SizeOf(signature), out imageFileHeader);
-                    }
+        /// <summary>
+        /// Task
+        /// </summary>
 
-                    // convert a Unix timestamp to DateTime
-                    DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                    TimeSpan localOffset = TimeZone.CurrentTimeZone.GetUtcOffset(origin);
-                    DateTime originUTC  = origin.AddHours(localOffset.Hours);
-                    DateTime linkTime  = originUTC.AddSeconds((double)imageFileHeader.TimeDateStamp);
-                    return linkTime.ToString();
-                }
-            }
-            catch (Exception e)
-            {
-                return "Unknown time";
-            }
-        }
-
-        private void PngRawRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PngSystemDecodeRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        internal static class NativeMethods
-        {
-            internal const int IMAGE_DOS_SIGNATURE = 0x5A4D;    // MZ
-            internal const int IMAGE_NT_SIGNATURE = 0x00004550; // PE00
-
-            [StructLayout(LayoutKind.Sequential)]
-            internal struct IMAGE_DOS_HEADER
-            {  // DOS .EXE header
-                internal short e_magic;         // Magic number
-                internal short e_cblp;          // Bytes on last page of file
-                internal short e_cp;            // Pages in file
-                internal short e_crlc;          // Relocations
-                internal short e_cparhdr;       // Size of header in paragraphs
-                internal short e_minalloc;      // Minimum extra paragraphs needed
-                internal short e_maxalloc;      // Maximum extra paragraphs needed
-                internal short e_ss;            // Initial (relative) SS value
-                internal short e_sp;            // Initial SP value
-                internal short e_csum;          // Checksum
-                internal short e_ip;            // Initial IP value
-                internal short e_cs;            // Initial (relative) CS value
-                internal short e_lfarlc;        // File address of relocation table
-                internal short e_ovno;          // Overlay number
-                internal short e_res1;          // Reserved words
-                internal short e_res2;          // Reserved words
-                internal short e_res3;          // Reserved words
-                internal short e_res4;          // Reserved words
-                internal short e_oemid;         // OEM identifier (for e_oeminfo)
-                internal short e_oeminfo;       // OEM information; e_oemid specific
-                internal short e_res20;         // Reserved words
-                internal short e_res21;         // Reserved words
-                internal short e_res22;         // Reserved words
-                internal short e_res23;         // Reserved words
-                internal short e_res24;         // Reserved words
-                internal short e_res25;         // Reserved words
-                internal short e_res26;         // Reserved words
-                internal short e_res27;         // Reserved words
-                internal short e_res28;         // Reserved words
-                internal short e_res29;         // Reserved words
-                internal int e_lfanew;          // File address of new exe header
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            internal struct IMAGE_FILE_HEADER
-            {
-                internal short Machine;
-                internal short NumberOfSections;
-                internal int TimeDateStamp;
-                internal int PointerToSymbolTable;
-                internal int NumberOfSymbols;
-                internal short SizeOfOptionalHeader;
-                internal short Characteristics;
-            }
-        }
-
-        public void NotifyCustomStatusChanged(int Handle, int Value, bool Checked)
-        {
-
-        }
-
-        private void PsbRawCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PsbDecompileCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PsbUnpackImageCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PsbUnpackAnmCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PsbDumpTextCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PsbJsonCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PsbFullCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TextRawRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TextDecompileRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Tjs2RawRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Tjs2DisasmRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Tjs2DecompileRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PbdRawRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void PbdJsonRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TlgRawRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TlgBuiltinRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TlgSystemRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TlgPngRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TlgJpgRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void AmvJpgRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void AmvGifRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void AmvPngRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void AmvRawRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
+        #region Tasks
 
         private void TaskCancelButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                var Status = Client.XeClientCancelTask();
 
+                if (!Status)
+                    throw new NativeRpcException("Client.XeClientPackerChecked failed");
+            }
+            catch (NativeRpcException WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
+
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            catch (Exception WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
+
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
 
         private void TaskOpenConsoleButton_Click(object sender, EventArgs e)
         {
-
+            //Open Console
+            if (m_ConsoleIsAttached)
+            {
+                var Status = NativeMethods.FreeConsole();
+                if (Status)
+                {
+                    TaskOpenConsoleButton.Text = "Open Console";
+                    m_ConsoleIsAttached = false;
+                }
+                else
+                {
+                    TaskOpenConsoleButton.Text = "Open Console";
+                    m_ConsoleIsAttached = false;
+                }
+            }
+            else
+            {
+                var Status = NativeMethods.AllocConsole();
+                if (Status)
+                {
+                    TaskOpenConsoleButton.Text = "Close Console";
+                    m_ConsoleIsAttached = true;
+                }
+                else
+                {
+                    TaskOpenConsoleButton.Text = "Close Console";
+                    m_ConsoleIsAttached = true;
+                }
+            }
         }
 
-        /// <summary>
-        /// Packer
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void BaseFolderButton_Click(object sender, EventArgs e)
         {
+            using (FolderBrowserDialog FolderBrowser = new FolderBrowserDialog())
+            {
+                var RemoteDir = GetRemoteProcessDir();
 
+                FolderBrowser.Description  = "Select the folder to pack";
+                FolderBrowser.RootFolder   = Environment.SpecialFolder.Desktop;
+                FolderBrowser.SelectedPath = string.IsNullOrEmpty(RemoteDir) ? "C:\\" : RemoteDir;
+
+                if (FolderBrowser.ShowDialog() == DialogResult.OK)
+                {
+                    BaseFolderTextBox.Text = FolderBrowser.SelectedPath;
+                }
+            }
         }
 
         private void OriginalArchiveButton_Click(object sender, EventArgs e)
         {
+            using (OpenFileDialog FileDialog = new OpenFileDialog())
+            {
+                var RemoteDir = GetRemoteProcessDir();
 
+                FileDialog.InitialDirectory = string.IsNullOrEmpty(RemoteDir) ? "C:\\" : RemoteDir;
+                FileDialog.Title  = "Select an original archive";
+                FileDialog.Filter = "Xp3 file (*.txt)|*.txt|All file (*.*)|*.*";
+                FileDialog.FilterIndex = 2;
+                FileDialog.Multiselect      = false;
+                FileDialog.ReadOnlyChecked  = true;
+                FileDialog.RestoreDirectory = true;
+
+                if (FileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    OriginalArchiveTextBox.Text = FileDialog.FileName;
+                }
+            }
         }
 
         private void OutputArchiveButton_Click(object sender, EventArgs e)
         {
+            using (OpenFileDialog FileDialog = new OpenFileDialog())
+            {
+                var RemoteDir = GetRemoteProcessDir();
 
+                FileDialog.InitialDirectory = string.IsNullOrEmpty(RemoteDir) ? "C:\\" : RemoteDir;
+                FileDialog.Title  = "Select the output file path";
+                FileDialog.Filter = "Xp3 file (*.txt)|*.txt|All file (*.*)|*.*";
+                FileDialog.FilterIndex = 2;
+                FileDialog.Multiselect      = false;
+                FileDialog.ReadOnlyChecked  = false;
+                FileDialog.RestoreDirectory = true;
+
+                if (FileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    OutputArchiveTextBox.Text = FileDialog.FileName;
+                }
+            }
         }
 
         private void MakeArchiveButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                var Status = Client.XeClientPackerChecked(
+                    BaseFolderTextBox.Text,
+                    OriginalArchiveTextBox.Text,
+                    OutputArchiveTextBox.Text
+                    );
 
-        }
+                if (!Status)
+                    throw new NativeRpcException("Client.XeClientPackerChecked failed");
+            }
+            catch (NativeRpcException WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
 
-        private void BaseFolderTextBox_TextChanged(object sender, EventArgs e)
-        {
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            catch (Exception WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
 
-        }
-
-        private void OriginalArchiveTextBox_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void OutputArchiveTextBox_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        /// <summary>
-        /// Universal patch
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UniversalPatchInheritICONCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void UniversalPatchProtectionCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
 
         private void MakeUniversalPatchButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                var Status = Client.XeClientUniversalPatchMakeChecked(
+                    UniversalPatchProtectionCheckBox.Checked,
+                    UniversalPatchInheritICONCheckBox.Checked
+                    );
 
+                if (!Status)
+                    throw new NativeRpcException("Client.XeClientUniversalPatchMakeChecked");
+
+            }
+            catch (NativeRpcException WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
+
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            catch (Exception WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
+
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
 
-
-        /// <summary>
-        /// Universal dumper
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void UniversalDumperButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                var Status = Client.XeClientUniversalDumperModeChecked(
+                        (KrkrPsbMode) GetCurrentPsbFlags(),
+                        (KrkrTextMode)GetCurrentTextFlags(),
+                        (KrkrPngMode) GetCurrentPngFlags(),
+                        (KrkrTjs2Mode)GetCurrentTjs2Flags(),
+                        (KrkrTlgMode) GetCurrentTlgFlags(),
+                        (KrkrAmvMode) GetCurrentAmvFlags(),
+                        (KrkrPbdMode) GetCurrentPbdFlags()
+                    );
+
+                if (!Status)
+                    throw new NativeRpcException("Client.XeClientUniversalDumperModeChecked");
+
+            }
+            catch (NativeRpcException WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
+
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            catch (Exception WhichException)
+            {
+                Console.WriteLine(WhichException.ToString());
+
+                MessageBox.Show(
+                    this,
+                    WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        private void KrkrMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Client.XeClientTaskCloseWindow();
+        }
+
+        private void KrkrMain_Load(object sender, EventArgs e)
+        {
+
+            var Secret = Environment.GetEnvironmentVariable("KrkrSecret");
+            uint SecretValue = 0;
+            var Status = uint.TryParse(Secret, out SecretValue);
+
+            if (!Status)
+                SecretValue = 0;
+
+
+            try
+            {
+                Status = Client.XeCreateInstance(
+                    true,
+                    SecretValue,
+                    10000,
+                    5000
+                    );
+
+                if (!Status)
+                    throw new Exception("Client.XeCreateInstance failed");
+
+            }
+            catch(Exception WhichException)
+            {
+                MessageBox.Show(
+                    this,
+                    "Client.XeCreateInstance failed\n" + WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+
+                Environment.Exit(-1);
+            }
+
+            try
+            {
+                Status = Client.XeRunServer(
+                    m_NotifyServerProgressChangedCallback,
+                    m_NotifyServerLogOutputCallback,
+                    m_NotifyServerUIReadyCallback,
+                    m_NotifyServerMessageBoxCallback,
+                    m_NotifyServerTaskStartAndDisableUICallback,
+                    m_NotifyServerTaskEndAndEnableUICallback,
+                    m_NotifyServerExitFromRemoteProcessCallback,
+                    m_NotifyServerRaiseErrorCallback
+                );
+
+
+                if (!Status)
+                    throw new Exception("Client.XeRunServer failed");
+            }
+            catch (Exception WhichException)
+            {
+                MessageBox.Show(
+                    this,
+                    "Client.XeCreateInstance failed\n" + WhichException.ToString(),
+                    "KrkrExtract",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+
+                Environment.Exit(-1);
+            }
 
         }
 
-        
+        private void KrkrMain_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Link;
+            else
+                e.Effect = DragDropEffects.None;
+        }
+
+        private void KrkrMain_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+
+            if (FileList.Length == 0)
+                return;
+
+            var ArchivePath = FileList[0];
+            
+            try
+            {
+                var Status = Client.XeClientTaskDumpStart(
+                        (KrkrPsbMode) GetCurrentPsbFlags(),
+                        (KrkrTextMode)GetCurrentTextFlags(),
+                        (KrkrPngMode) GetCurrentPngFlags(),
+                        (KrkrTjs2Mode)GetCurrentTjs2Flags(),
+                        (KrkrTlgMode) GetCurrentTlgFlags(),
+                        (KrkrAmvMode) GetCurrentAmvFlags(),
+                        (KrkrPbdMode) GetCurrentPbdFlags(),
+                        ArchivePath
+                    );
+
+                if (!Status)
+                    throw new Exception("Client.XeClientTaskDumpStart failed");
+            }
+            catch (Exception WhichException)
+            {
+                NotifyServerLogOutputWorker(LogLevel.LOG_ERROR, WhichException.ToString(), false);
+            }
+        }
+
+        #endregion
     }
 }

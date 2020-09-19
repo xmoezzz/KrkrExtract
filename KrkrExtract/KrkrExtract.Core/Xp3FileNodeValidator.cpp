@@ -1,5 +1,6 @@
 #include "StatusMatcher.h"
 #include "KrkrHeaders.h"
+#include "XP3Parser.h"
 
 ChunkNodeKind NTAPI Xp3FileNodeValidator::GetKind()
 {
@@ -13,9 +14,14 @@ PCWSTR NTAPI Xp3FileNodeValidator::GetName()
 
 BOOL NTAPI Xp3FileNodeValidator::Validate(PBYTE Buffer, ULONG Size, DWORD& Magic)
 {
+	NTSTATUS                   Status;
 	ULONG                      Offset;
 	ULARGE_INTEGER             ChunkSize;
 	KRKR2_XP3_INDEX_CHUNK_FILE File;
+	KRKR2_XP3_INDEX_CHUNK_INFO Info;
+	ULONG                      ByteTransferred;
+	BOOL                       NullTerminated;
+
 
 	Magic = 0;
 	if (Buffer == NULL || Size < sizeof(File))
@@ -58,6 +64,27 @@ BOOL NTAPI Xp3FileNodeValidator::Validate(PBYTE Buffer, ULONG Size, DWORD& Magic
 			//
 
 		case CHUNK_MAGIC_INFO:
+		
+			ByteTransferred = 0;
+			NullTerminated = TRUE;
+
+			Status = ReadXp3InfoChunk(
+				Buffer,
+				Size,
+				Offset,
+				Info,
+				ByteTransferred,
+				NullTerminated
+			);
+
+			if (NT_FAILED(Status)) {
+				return FALSE;
+			}
+
+			Offset += ByteTransferred;
+			break;
+			
+
 		case CHUNK_MAGIC_SEGM:
 		case CHUNK_MAGIC_ADLR:
 		case CHUNK_MAGIC_TIME:

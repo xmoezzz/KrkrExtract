@@ -85,7 +85,7 @@ NTSTATUS KrkrExtractCore::InitExporterPrivate(iTVPFunctionExporter *Exporter)
 
 		ExportedData.Hash = XXH64(&ExportedData, sizeof(ExportedData), 0);
 
-
+		
 		//
 		// save data
 		//
@@ -356,6 +356,12 @@ NTSTATUS KrkrExtractCore::Initialize(HMODULE DllModule)
 		PrintConsoleW(L"InitializeHook failed\n");
 	}
 
+	return STATUS_SUCCESS;
+}
+
+
+NTSTATUS KrkrExtractCore::InitializeDarkMode()
+{
 	return STATUS_SUCCESS;
 }
 
@@ -850,6 +856,18 @@ NTSTATUS KrkrExtractCore::InitializeHook()
 
 	if (m_ModuleType == KrkrVersion::KRKRZ)
 	{
+		Status = m_HookEngine->HookMultiByteToWideChar();
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"Failed to hook MultiByteToWideChar\n");
+		}
+	}
+	else if (m_ModuleType == KrkrVersion::KRKR2)
+	{
+		Status = m_HookEngine->HookIsDBCSLeadByte();
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"Failed to hook IsDBCSLeadByte\n");
+		}
+
 		Status = m_HookEngine->HookMultiByteToWideChar();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook MultiByteToWideChar\n");

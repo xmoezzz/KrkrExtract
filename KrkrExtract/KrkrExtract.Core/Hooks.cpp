@@ -502,6 +502,47 @@ NTSTATUS KrkrHook::UnHookV2Link()
 }
 
 
+NTSTATUS KrkrHook::HookIsDBCSLeadByte()
+{
+	NTSTATUS         Status;
+	SectionProtector Section(m_Lock.Get());
+
+	switch (m_Mode)
+	{
+	case HookMode::HOOK_EPT:
+		Status = HookIsDBCSLeadByteEpt();
+		break;
+
+	case HookMode::HOOK_NATIVE:
+		Status = HookIsDBCSLeadByteNative();
+		break;
+	}
+
+	return Status;
+}
+
+
+NTSTATUS KrkrHook::UnHookIsDBCSLeadByte()
+{
+	NTSTATUS         Status;
+	SectionProtector Section(m_Lock.Get());
+
+	switch (m_Mode)
+	{
+	case HookMode::HOOK_EPT:
+		Status = UnHookIsDBCSLeadByteEpt();
+		break;
+
+	case HookMode::HOOK_NATIVE:
+		Status = UnHookIsDBCSLeadByteNative();
+		break;
+	}
+
+	return Status;
+}
+
+
+
 NTSTATUS KrkrHook::SetHwBreakPointAt(PVOID Address, SIZE_T Size, HardwareBreakpoint::Condition AccessStatus, INT& Index)
 {
 	NTSTATUS         Status;
@@ -561,6 +602,7 @@ NTSTATUS KrkrHook::RemoveAllHwBreakPointAt(PCONTEXT Context)
 
 	return Status;
 }
+
 
 NTSTATUS KrkrHook::GetBusyHwBreakPoint(_Out_ HwBreakPointStatus& BpStatus)
 {

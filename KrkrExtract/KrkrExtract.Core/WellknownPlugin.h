@@ -87,12 +87,11 @@ public:
 	
 private:
 
-	NTSTATUS CreateAmvExtractor();
-	NTSTATUS CleanAmvExtractor();
+	NTSTATUS CleanAmvExtractor(KrkrAmvMode Mode, PCWSTR BasePath, std::vector<std::wstring>& PngFiles);
+	NTSTATUS CleanAmvExtractor(KrkrAmvMode Mode, PCWSTR BasePath);
 
 	std::atomic<BOOL>  m_Registered;
 	std::atomic<INT>   m_Reference;
-	std::wstring       m_BasePath;
 	KrkrClientProxyer* m_Proxyer = nullptr;
 	HANDLE             m_Handle = 0;
 };

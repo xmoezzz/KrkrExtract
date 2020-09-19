@@ -75,25 +75,33 @@ inline BOOL SafeStringLength(const ByteType* StringPtr, const SIZE_T MaxLength, 
 {
 	SIZE_T Size;
 
-	StringLength = 0;
-	if (!StringPtr || !MaxLength)
-		return TRUE;
+	SEH_TRY {
 
-	Size = 0;
-	while (Size < MaxLength)
-	{
-		if (Size == MaxLength)
+		StringLength = 0;
+		if (!StringPtr || !MaxLength)
+			return TRUE;
+
+		Size = 0;
+		while (Size < MaxLength)
 		{
-			StringLength = Size;
-			return FALSE;
+			if (Size == MaxLength)
+			{
+				StringLength = Size;
+				return FALSE;
+			}
+
+			if (!StringPtr[Size])
+				break;
+
+			Size++;
 		}
-
-		if (!StringPtr[Size])
-			break;
-
-		Size++;
+		StringLength = Size;
 	}
-	StringLength = Size;
+	SEH_EXCEPT(EXCEPTION_EXECUTE_HANDLER) {
+		StringLength = 0;
+		return FALSE;
+	}
+
 	return TRUE;
 }
 

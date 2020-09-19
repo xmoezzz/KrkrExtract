@@ -157,6 +157,19 @@ public:
 		PCWSTR LibFileName
 	) = 0;
 
+	virtual BOOL NTAPI IsDBCSLeadByteBypass(
+		BYTE TestChar
+	) = 0;
+
+	virtual VOID NTAPI UndocApiBypass1() = 0;
+	virtual VOID NTAPI UndocApiBypass2() = 0;
+	virtual VOID NTAPI UndocApiBypass3() = 0;
+	virtual VOID NTAPI UndocApiBypass4() = 0;
+	virtual VOID NTAPI UndocApiBypass5() = 0;
+	virtual VOID NTAPI UndocApiBypass6() = 0;
+	virtual VOID NTAPI UndocApiBypass7() = 0;
+	virtual VOID NTAPI UndocApiBypass8() = 0;
+
 	virtual BOOL NTAPI TellServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total) = 0;
 	virtual BOOL NTAPI TellServerLogOutput(LogLevel Level, PCWSTR FormatString, ...) = 0;
 	virtual BOOL NTAPI TellServerCommandResultOutput(CommandStatus Status, PCWSTR FormatString, ...) = 0;

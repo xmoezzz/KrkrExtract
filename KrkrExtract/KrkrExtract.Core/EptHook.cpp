@@ -157,6 +157,17 @@ NTSTATUS KrkrHook::UnHookV2LinkEpt()
 }
 
 
+NTSTATUS KrkrHook::HookIsDBCSLeadByteEpt()
+{
+	return STATUS_NOT_IMPLEMENTED;
+}
+
+NTSTATUS KrkrHook::UnHookIsDBCSLeadByteEpt()
+{
+	return STATUS_NOT_IMPLEMENTED;
+}
+
+
 NTSTATUS KrkrHook::SetHwBreakPointEpt(PVOID Address, SIZE_T Size, HardwareBreakpoint::Condition AccessStatus, INT& Index)
 {
 	SectionProtector Section(m_Lock.Get());

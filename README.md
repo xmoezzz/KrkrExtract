@@ -31,11 +31,42 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 
 
 ## Build
-* vs2017
+* vs2017 only
 * Win10 SDK (10.0.17763.0)
 * Only `Release` build is supported
 
+## Build with debug version
+
+* require vs2019
+
+* This method requires kirikiri engine built with address sanitizer (asan) support
+
+* Asan will siglificently slow down debugee and impacts memory allocation behaviour
+
+* Bug & vulnerability feedback : any RPs are welcomed
+
+* Install required packages for visual studio installer
+
+  ![override sample](img/step0.png)
+
+* Select krkrExtract.Core project
+
+  ![override sample](img/step1.png)
+
+* Retarget project to v142
+
+  ![override sample](img/step2.png)
+
+  ![override sample](img/step2_1.png)
+
+* Enable address sanitizer (aka asan)
+
+  ![override sample](img/step3.png)
+
+  
+
 ## Improvement & New feature
+
 * PRs are welcomed. Since I'm very busy with my work, I almostly have no time to develop this project.
 * KrkrExtract will NEVER support custom kirikiri version (if it's not widely used)
 * Make sure executable binaries are not being protected
@@ -106,7 +137,8 @@ I don't think any company will use 64bit version.
 
 ## Special Thanks
 感谢amemiya帮我纠正英文错误，丢人现眼了。  
-![Files](https://github.com/xmoeproject/KrkrExtract/blob/master/img/shadiao.jpg)
+
+
 
 
 

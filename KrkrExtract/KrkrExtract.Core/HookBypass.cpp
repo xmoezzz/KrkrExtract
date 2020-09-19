@@ -285,4 +285,8 @@ PVOID KrkrHook::LoadLibraryWBypass(PCWSTR LibFileName)
 	return Nt_LoadLibrary((PWSTR)LibFileName);
 }
 
+BOOL KrkrHook::IsDBCSLeadByteBypass(BYTE TestChar)
+{
+	return IsDBCSLeadByteEx(GetACP(), TestChar);
+}
 

@@ -49,6 +49,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4091 /wd4005 %(AdditionalOptions)</AdditionalOptions>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,6 +85,7 @@
     <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
+    <ClCompile Include="AmvSystemDecoder.cpp" />
     <ClCompile Include="AmvUnpacker.cpp" />
     <ClCompile Include="argparse.cpp" />
     <ClCompile Include="AsyncCommandExecutor.cpp" />
@@ -118,6 +120,7 @@
     <ClCompile Include="KrkrExtract.cpp" />
     <ClCompile Include="ImageWorkerNcb.cpp" />
     <ClCompile Include="Signal.cpp" />
+    <ClCompile Include="sqlite3.c" />
     <ClCompile Include="TaskAutoUnlocker.cpp" />
     <ClCompile Include="TaskUniversalDumper.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -144,6 +147,7 @@
     <ClCompile Include="unzip.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="Xp3FileNodeValidator.cpp" />
+    <ClCompile Include="Xp3FileProtectedNodeValidator.cpp" />
     <ClCompile Include="Xp3M2ChunkNodeValidator.cpp" />
     <ClCompile Include="Xp3M2CompressedChunkNodeValidator.cpp" />
     <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV2.cpp" />
@@ -195,6 +199,8 @@
     <ClInclude Include="savetlg5.h" />
     <ClInclude Include="Signals.h" />
     <ClInclude Include="Slide.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="sqlite3ext.h" />
     <ClInclude Include="StatusMatcher.h" />
     <ClInclude Include="TaskAutoUnlocker.h" />
     <ClInclude Include="tp_stub.h" />
@@ -211,7 +217,6 @@
     <ResourceCompile Include="KrkrExtract.Core.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AlphaMovieDecode.zip" />
     <None Include="KrkrUniversalPatch.dll" />
     <None Include="PatchLoader.exe" />
   </ItemGroup>

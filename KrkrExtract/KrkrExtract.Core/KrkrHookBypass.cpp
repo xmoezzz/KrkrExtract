@@ -125,3 +125,12 @@ PVOID NTAPI KrkrExtractCore::LoadLibraryWBypass(
 	);
 }
 
+BOOL NTAPI KrkrExtractCore::IsDBCSLeadByteBypass(
+	BYTE TestChar
+)
+{
+	return m_HookEngine->IsDBCSLeadByteBypass(
+		TestChar
+	);
+}
+

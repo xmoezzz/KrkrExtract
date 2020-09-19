@@ -43,6 +43,8 @@ public:
 	NTSTATUS UnHookTVPSetXP3ArchiveExtractionFilter();
 	NTSTATUS HookV2Link(PVOID Module);
 	NTSTATUS UnHookV2Link();
+	NTSTATUS HookIsDBCSLeadByte();
+	NTSTATUS UnHookIsDBCSLeadByte();
 
 	//
 	// Bypass
@@ -106,6 +108,10 @@ public:
 		PCWSTR LibFileName
 	);
 
+	BOOL IsDBCSLeadByteBypass(
+		BYTE TestChar
+	);
+
 	//
 	// Status
 	//
@@ -121,6 +127,7 @@ public:
 	ForceInline BOOL IsLoadLibraryWHooked()                     { return m_IsLoadLibraryWHooked.load(); }
 	ForceInline BOOL IsV2LinkHooked()                           { return m_IsV2LinkHooked.load(); }
 	ForceInline BOOL IsTVPSetXP3ArchiveExtractionFilterHooked() { return m_IsTVPSetXP3ArchiveExtractionFilterHooked.load(); }
+	ForceInline BOOL IsDBCSLeadByteHooked()                     { return m_IsDBCSLeadByteHooked.load(); }
 
 	//
 	// Addresses for hooking
@@ -135,6 +142,7 @@ public:
 	Prototype::TVPGetFunctionExporterFunc  m_TVPGetFunctionExporter = nullptr;
 	Prototype::SetXP3FilterFunc            m_TVPSetXP3ArchiveExtractionFilter = nullptr;
 	Prototype::V2LinkFunc                  m_V2Link = nullptr;
+	API_POINTER(IsDBCSLeadByte)            m_IsDBCSLeadByte = nullptr;
 
 	KrkrHookExporter* GetKrkrInstance();
 
@@ -170,6 +178,8 @@ private:
 	NTSTATUS UnHookTVPSetXP3ArchiveExtractionFilterNative();
 	NTSTATUS HookV2LinkNative(PVOID Module);
 	NTSTATUS UnHookV2LinkNative();
+	NTSTATUS HookIsDBCSLeadByteNative();
+	NTSTATUS UnHookIsDBCSLeadByteNative();
 
 	//
 	// EPT (Hypervisor)
@@ -197,6 +207,8 @@ private:
 	NTSTATUS UnHookTVPSetXP3ArchiveExtractionFilterEpt();
 	NTSTATUS HookV2LinkEpt(PVOID Module);
 	NTSTATUS UnHookV2LinkEpt();
+	NTSTATUS HookIsDBCSLeadByteEpt();
+	NTSTATUS UnHookIsDBCSLeadByteEpt();
 
 	//
 	// Hardware breakpoints
@@ -236,6 +248,7 @@ private:
 	std::atomic<BOOL> m_IsLoadLibraryWHooked = FALSE;
 	std::atomic<BOOL> m_IsV2LinkHooked = FALSE;
 	std::atomic<BOOL> m_IsTVPSetXP3ArchiveExtractionFilterHooked = FALSE;
+	std::atomic<BOOL> m_IsDBCSLeadByteHooked = FALSE;
 
 	SectionLock       m_Lock;
 

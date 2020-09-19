@@ -14,7 +14,7 @@
 #include <Shlwapi.h>
 #include "magic_enum.hpp"
 #include "SafeMemory.h"
-#include "resource.h"
+#include <iterator>
 
 
 #pragma comment(lib, "Bcrypt.lib")
@@ -300,93 +300,71 @@ INT RemoveDirectoryR(std::wstring Dir)
 }
 
 
-NTSTATUS CAmvPlugin::CleanAmvExtractor()
+void RemoveAllPngs(std::vector<std::wstring>& PngFiles)
+{
+	for (auto& PngFile : PngFiles)
+	{
+		Io::DeleteFileW(PngFile.c_str());
+	}
+}
+
+
+NTSTATUS CAmvPlugin::CleanAmvExtractor(KrkrAmvMode Mode, PCWSTR BasePath, std::vector<std::wstring>& PngFiles)
 {
 	BOOL Success;
 	INT  State;
 
 	Success = TRUE;
-	State = RemoveDirectoryR(m_BasePath);
-	RemoveDirectoryW(m_BasePath.c_str());
+	State   = 0;
+
+	if (!BasePath) {
+		return STATUS_SUCCESS;
+	}
+
+	switch (Mode)
+	{
+	case KrkrAmvMode::AMV_JPG:
+		RemoveAllPngs(PngFiles);
+		break;
+
+	case KrkrAmvMode::AMV_GIF:
+		State = RemoveDirectoryR(BasePath);
+		RemoveDirectoryW(BasePath);
+		break;
+
+	case KrkrAmvMode::AMV_PNG:
+		return STATUS_SUCCESS;
+	}
 
 	Success = State == 0;
-	m_BasePath = {};
 	return Success ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
-
-NTSTATUS CAmvPlugin::CreateAmvExtractor()
+NTSTATUS CAmvPlugin::CleanAmvExtractor(KrkrAmvMode Mode, PCWSTR BasePath)
 {
-	NTSTATUS         Status;
-	HRESULT          hr;
-	IStream*         Stream;
-	STATSTG          Stat;
-	DWORD            Size;
-	ULONG            BytesRead;
-	WCHAR            CurrentDir[MAX_PATH];
-	wstring          ExtractBasePath, Hex;
-	HZIP             hZip;
-	ZIPENTRY         ze;
-	INT              Count;
-	DWORD            Attribute;
-	BYTE            GBuffer[128];
+	BOOL Success;
+	INT  State;
 
-	Stream = LoadFromResource(m_Proxyer->GetSelfModule(), IDR_ZIP1, L"ZIP", WALK_RESOURCE_BUFFER_DUMMY);
-	if (!Stream)
-		return STATUS_UNSUCCESSFUL;
+	Success = TRUE;
+	State = 0;
 
-	Stream->Stat(&Stat, STATFLAG_DEFAULT);
-	Size = Stat.cbSize.LowPart;
-	auto Buffer = AllocateMemorySafeP<BYTE>(Size);
-	if (!Buffer)
-	{
-		Stream->Release();
-		return STATUS_NO_MEMORY;
+	if (!BasePath) {
+		return STATUS_SUCCESS;
 	}
 
-	hr = Stream->Read(Buffer.get(), Size, &BytesRead);
-	if (FAILED(hr))
+	switch (Mode)
 	{
-		Stream->Release();
-		return STATUS_UNSUCCESSFUL;
+	case KrkrAmvMode::AMV_GIF:
+		State = RemoveDirectoryR(BasePath);
+		RemoveDirectoryW(BasePath);
+		break;
+
+	case KrkrAmvMode::AMV_PNG:
+		return STATUS_SUCCESS;
 	}
 
-	Stream->Release();
-
-	RtlZeroMemory(CurrentDir, sizeof(CurrentDir));
-	GetCurrentDirectoryW(countof(CurrentDir) - 1, CurrentDir);
-
-	hZip = OpenZip(Buffer.get(), Size, NULL);
-	ExtractBasePath = CurrentDir;
-	ExtractBasePath += L"\\AMV_";
-	RtlZeroMemory(GBuffer, sizeof(GBuffer));
-	Status = BCryptGenRandom(
-		NULL,
-		GBuffer,
-		sizeof(GBuffer),
-		BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-
-	GenMD5Code(GBuffer, sizeof(GBuffer), Hex);
-	ExtractBasePath += Hex;
-
-	Attribute = GetFileAttributesW(ExtractBasePath.c_str());
-	if (Attribute != INVALID_FILE_ATTRIBUTES)
-		return STATUS_UNSUCCESSFUL;
-
-	if (ERROR_SUCCESS != SHCreateDirectory(NULL, ExtractBasePath.c_str()))
-		return STATUS_UNSUCCESSFUL;
-
-	m_BasePath = ExtractBasePath;
-	SetUnzipBaseDir(hZip, ExtractBasePath.c_str());
-	GetZipItem(hZip, -1, &ze);
-	Count = ze.index;
-	for (int zi = 0; zi < Count; zi++)
-	{
-		GetZipItem(hZip, zi, &ze);
-		UnzipItem(hZip, zi, ze.name);
-	}
-	CloseZip(hZip);
-	return STATUS_SUCCESS;
+	Success = State == 0;
+	return Success ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
 
@@ -395,12 +373,7 @@ HRESULT STDMETHODCALLTYPE CAmvPlugin::Unpack(_In_ PCWSTR FilePath, _In_ IStream*
 	NTSTATUS            Status;
 	INT                 State;
 	BOOL                Success;
-	WCHAR               CmdLine[1000];
-	wstring             Name, BaseName, OutPath, RemovedDir;
-	STARTUPINFOW        StartupInfo;
-	PROCESS_INFORMATION ProcessInfo;
-	DWORD               WaitStatus;
-	DWORD               ExitCode;
+	wstring             Name, OutPath, FormatedPath;
 	vector<wstring>     FileList;
 	KrkrAmvMode         AmvMode;
 
@@ -433,70 +406,6 @@ HRESULT STDMETHODCALLTYPE CAmvPlugin::Unpack(_In_ PCWSTR FilePath, _In_ IStream*
 		return E_FAIL;
 	}
 
-	Status = CreateAmvExtractor();
-	if (NT_FAILED(Status))
-		return NtStatusToHResult(Status);
-
-	RtlZeroMemory(CmdLine, sizeof(CmdLine));
-	BaseName = GetPackageName(wstring(FilePath));
-	Name = m_BasePath + L"\\video\\" + BaseName;
-	Success = Io::CopyFileW(FilePath, Name.c_str(), FALSE);
-	if (!Success)
-		return STATUS_NO_SUCH_FILE;
-
-	wsprintfW(CmdLine,
-		L"\"%s\\\\%s\" \"-amvpath=%s\"",
-		m_BasePath.c_str(),
-		L"AlphaMovieDecoderFake.exe",
-		BaseName.c_str());
-
-	RtlZeroMemory(&StartupInfo, sizeof(StartupInfo));
-	StartupInfo.cb = sizeof(StartupInfo);
-	RtlZeroMemory(&ProcessInfo, sizeof(ProcessInfo));
-
-	Success = m_Proxyer->CreateProcessBypass(
-		NULL,
-		NULL,
-		CmdLine,
-		NULL,
-		NULL,
-		FALSE,
-		0,
-		NULL,
-		NULL,
-		&StartupInfo,
-		&ProcessInfo,
-		NULL
-	);
-
-	if (!Success)
-	{
-		ExitCode = GetLastError();
-		if (ExitCode != NO_ERROR)
-			return HRESULT_FROM_WIN32(ExitCode);
-
-		return E_FAIL;
-	}
-
-	ExitCode = 0;
-	WaitStatus = WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
-	Success = GetExitCodeProcess(ProcessInfo.hProcess, &ExitCode);
-	if (!Success || ExitCode == STILL_ACTIVE)
-	{
-		Status = NtTerminateProcess(ProcessInfo.hProcess, 0);
-	}
-
-	CloseHandle(ProcessInfo.hProcess);
-	CloseHandle(ProcessInfo.hThread);
-
-	Io::DeleteFileW(Name.c_str());
-	FileList = GetPNGFiles(m_BasePath + L"\\video");
-	if (!FileList.size())
-	{
-		CleanAmvExtractor();
-		return E_FAIL;
-	}
-
 	OutPath = ReplaceFileNameExtension(wstring(FilePath), L"");
 	LOOP_ONCE
 	{
@@ -506,9 +415,20 @@ HRESULT STDMETHODCALLTYPE CAmvPlugin::Unpack(_In_ PCWSTR FilePath, _In_ IStream*
 		State = SHCreateDirectory(NULL, OutPath.c_str());
 		if (State != ERROR_SUCCESS)
 		{
-			CleanAmvExtractor();
+			CleanAmvExtractor(AmvMode, nullptr);
 			return E_FAIL;
 		}
+	}
+
+	auto&& AmvPathPerfix = ReplaceFileNameExtension(OutPath + L"\\" + GetPackageName(FilePath), L"");
+	auto&& AmvFileName   = GetPackageName(FilePath);
+	
+	Status   = SaveAmv(AmvFileName.c_str(), FormatPathFull(AmvPathPerfix.c_str()).c_str());
+	FileList = GetPNGFiles(OutPath);
+	if (!FileList.size())
+	{
+		CleanAmvExtractor(AmvMode, nullptr);
+		return E_FAIL;
 	}
 
 	switch (AmvMode)
@@ -526,7 +446,7 @@ HRESULT STDMETHODCALLTYPE CAmvPlugin::Unpack(_In_ PCWSTR FilePath, _In_ IStream*
 		break;
 	}
 
-	CleanAmvExtractor();
+	CleanAmvExtractor(AmvMode, OutPath.c_str(), FileList);
 	return NtStatusToHResult(Status);
 }
 

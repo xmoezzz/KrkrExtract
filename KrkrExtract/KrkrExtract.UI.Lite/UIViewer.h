@@ -7,11 +7,13 @@
 #include <vector>
 #include <string>
 #include <Shobjidl.h>
+#include <uxtheme.h>
 #include "resource.h"
 #include "FolderDialog.h"
 
 
 #pragma comment(lib, "version.lib")
+#pragma comment(lib, "UxTheme.lib")
 
 class UIViewer;
 class UIViewerServer final : public ServerStub
@@ -37,6 +39,60 @@ private:
 };
 
 
+enum IMMERSIVE_HC_CACHE_MODE
+{
+	IHCM_USE_CACHED_VALUE,
+	IHCM_REFRESH
+};
+
+
+enum PreferredAppMode
+{
+	Default,
+	AllowDark,
+	ForceDark,
+	ForceLight,
+	Max
+};
+
+enum WINDOWCOMPOSITIONATTRIB
+{
+	WCA_UNDEFINED = 0,
+	WCA_NCRENDERING_ENABLED = 1,
+	WCA_NCRENDERING_POLICY = 2,
+	WCA_TRANSITIONS_FORCEDISABLED = 3,
+	WCA_ALLOW_NCPAINT = 4,
+	WCA_CAPTION_BUTTON_BOUNDS = 5,
+	WCA_NONCLIENT_RTL_LAYOUT = 6,
+	WCA_FORCE_ICONIC_REPRESENTATION = 7,
+	WCA_EXTENDED_FRAME_BOUNDS = 8,
+	WCA_HAS_ICONIC_BITMAP = 9,
+	WCA_THEME_ATTRIBUTES = 10,
+	WCA_NCRENDERING_EXILED = 11,
+	WCA_NCADORNMENTINFO = 12,
+	WCA_EXCLUDED_FROM_LIVEPREVIEW = 13,
+	WCA_VIDEO_OVERLAY_ACTIVE = 14,
+	WCA_FORCE_ACTIVEWINDOW_APPEARANCE = 15,
+	WCA_DISALLOW_PEEK = 16,
+	WCA_CLOAK = 17,
+	WCA_CLOAKED = 18,
+	WCA_ACCENT_POLICY = 19,
+	WCA_FREEZE_REPRESENTATION = 20,
+	WCA_EVER_UNCLOAKED = 21,
+	WCA_VISUAL_OWNER = 22,
+	WCA_HOLOGRAPHIC = 23,
+	WCA_EXCLUDED_FROM_DDA = 24,
+	WCA_PASSIVEUPDATEMODE = 25,
+	WCA_USEDARKMODECOLORS = 26,
+	WCA_LAST = 27
+};
+
+struct WINDOWCOMPOSITIONATTRIBDATA
+{
+	WINDOWCOMPOSITIONATTRIB Attribute;
+	PVOID pvData;
+	SIZE_T cbData;
+};
 
 class UIViewer
 {
@@ -47,6 +103,294 @@ public:
 	BOOL NotifyDllLoad(PVOID Module);
 	
 private:
+
+	//
+	// https://github.com/ysc3839/win32-darkmode/blob/master/win32-darkmode/DarkMode.h
+	//
+
+	using RefreshImmersiveColorPolicyStateApi = void (WINAPI *)(); // ordinal 104
+	using ShouldAppsUseDarkModeApi  = bool (WINAPI *)(); // ordinal 132
+	using AllowDarkModeForWindowApi = bool (WINAPI *)(HWND hWnd, bool allow); // ordinal 133
+	using AllowDarkModeForAppApi    = bool (WINAPI *)(bool allow); // ordinal 135, in 1809
+	using IsDarkModeAllowedForWindowApi           = bool (WINAPI *)(HWND hWnd); // ordinal 137
+	using GetIsImmersiveColorUsingHighContrastApi = bool (WINAPI *)(IMMERSIVE_HC_CACHE_MODE mode); // ordinal 106
+	using ShouldSystemUseDarkModeApi = bool (WINAPI *)(); // ordinal 138
+	using SetPreferredAppModeApi     = PreferredAppMode(WINAPI *)(PreferredAppMode appMode); // ordinal 135, in 1903
+	using IsDarkModeAllowedForAppApi = bool (WINAPI *)(); // ordinal 139
+	using SetWindowCompositionAttributeApi = BOOL(WINAPI *)(HWND hWnd, WINDOWCOMPOSITIONATTRIBDATA*);
+
+
+	ShouldAppsUseDarkModeApi                m_ShouldAppsUseDarkMode                = nullptr;
+	AllowDarkModeForWindowApi               m_AllowDarkModeForWindow               = nullptr;
+	AllowDarkModeForAppApi                  m_AllowDarkModeForApp                  = nullptr;
+	RefreshImmersiveColorPolicyStateApi     m_RefreshImmersiveColorPolicyState     = nullptr;
+	IsDarkModeAllowedForWindowApi           m_IsDarkModeAllowedForWindow           = nullptr;
+	GetIsImmersiveColorUsingHighContrastApi m_GetIsImmersiveColorUsingHighContrast = nullptr;
+	SetWindowCompositionAttributeApi        m_SetWindowCompositionAttribute        = nullptr;
+
+	//
+	// 1903 18362
+	//
+	ShouldSystemUseDarkModeApi m_ShouldSystemUseDarkMode = nullptr;
+	SetPreferredAppModeApi     m_SetPreferredAppMode     = nullptr;
+
+
+	BOOL  m_DarkModeEnabled = FALSE;
+	BOOL  m_DarkModeSupported = FALSE;
+	DWORD m_Major = 0;
+	DWORD m_Minor = 0;
+	DWORD m_BuildNumber = 0;
+
+	const COLORREF DarkBkColor   = 0x383838;
+	const COLORREF DarkTextColor = 0xFFFFFF;
+
+	HBRUSH m_NewBgBrush = nullptr;
+
+	inline constexpr BOOL IsDarkModeReady()
+	{
+		return m_DarkModeEnabled && m_DarkModeSupported;
+	}
+
+	VOID RefreshImmersiveColorPolicyState()
+	{
+		if (!IsDarkModeReady()) {
+			return;
+		}
+
+		if (!m_RefreshImmersiveColorPolicyState) {
+			return;
+		}
+
+		m_RefreshImmersiveColorPolicyState();
+	}
+
+	BOOL ShouldAppsUseDarkMode()
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_ShouldAppsUseDarkMode) {
+			return FALSE;
+		}
+
+		return m_ShouldAppsUseDarkMode();
+	}
+
+	BOOL AllowDarkModeForWindow(HWND hWnd, BOOL Allow)
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_AllowDarkModeForWindow) {
+			return FALSE;
+		}
+
+		return m_AllowDarkModeForWindow(hWnd, Allow);
+	}
+
+	BOOL AllowDarkModeForApp(BOOL Allow)
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_AllowDarkModeForApp) {
+			return FALSE;
+		}
+
+		return m_AllowDarkModeForApp(Allow);
+	}
+
+	BOOL IsDarkModeAllowedForWindow(HWND hWnd)
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_IsDarkModeAllowedForWindow) {
+			return FALSE;
+		}
+
+		return m_IsDarkModeAllowedForWindow(hWnd);
+	}
+
+	BOOL GetIsImmersiveColorUsingHighContrast(IMMERSIVE_HC_CACHE_MODE Mode)
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_GetIsImmersiveColorUsingHighContrast) {
+			return FALSE;
+		}
+
+		return m_GetIsImmersiveColorUsingHighContrast(Mode);
+	}
+
+	BOOL ShouldSystemUseDarkMode()
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_ShouldSystemUseDarkMode) {
+			return FALSE;
+		}
+
+		return m_ShouldSystemUseDarkMode();
+	}
+
+	BOOL SetPreferredAppMode(PreferredAppMode AppMode)
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_SetPreferredAppMode) {
+			return FALSE;
+		}
+
+		return m_SetPreferredAppMode(AppMode);
+	}
+
+	BOOL SetWindowCompositionAttribute(HWND hWnd, WINDOWCOMPOSITIONATTRIBDATA* Data)
+	{
+		if (!IsDarkModeReady()) {
+			return FALSE;
+		}
+
+		if (!m_SetWindowCompositionAttribute) {
+			return FALSE;
+		}
+
+		return m_SetWindowCompositionAttribute(hWnd, Data);
+	}
+
+	constexpr BOOL IsWindows10And1809Higher(DWORD Major, DWORD Minor, DWORD BuildNumber)
+	{
+		if (Major != 10 || Minor != 0) {
+			return FALSE;
+		}
+
+		//
+		// 1809
+		//
+
+		return BuildNumber >= 17763;
+	}
+
+	bool IsHighContrast()
+	{
+		HIGHCONTRASTW highContrast = { sizeof(highContrast) };
+
+		if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(highContrast), &highContrast, FALSE))
+			return highContrast.dwFlags & HCF_HIGHCONTRASTON;
+
+		return false;
+	}
+
+	VOID InitDarkMode()
+	{
+		HMODULE Uxtheme;
+		HMODULE User32;
+
+		RtlGetNtVersionNumbers(&m_Major, &m_Minor, &m_BuildNumber);
+		if (!IsWindows10And1809Higher(m_Major, m_Minor, m_BuildNumber))
+			return;
+
+		Uxtheme = LoadLibraryExW(L"uxtheme.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+		if (!Uxtheme)
+			return;
+
+		User32 = LoadLibraryExW(L"user32.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+		if (!User32)
+			return;
+
+		m_SetWindowCompositionAttribute        = reinterpret_cast<SetWindowCompositionAttributeApi>(Nt_GetProcAddress(User32, "SetWindowCompositionAttribute"));
+		m_RefreshImmersiveColorPolicyState     = reinterpret_cast<RefreshImmersiveColorPolicyStateApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(104)));
+		m_GetIsImmersiveColorUsingHighContrast = reinterpret_cast<GetIsImmersiveColorUsingHighContrastApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(106)));
+		m_ShouldAppsUseDarkMode                = reinterpret_cast<ShouldAppsUseDarkModeApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(132)));
+		m_AllowDarkModeForWindow               = reinterpret_cast<AllowDarkModeForWindowApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(133)));
+		
+		if (m_BuildNumber < 18362) {
+			m_AllowDarkModeForApp = reinterpret_cast<AllowDarkModeForAppApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(135)));
+		}
+		else {
+			m_SetPreferredAppMode = reinterpret_cast<SetPreferredAppModeApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(135)));
+		}
+
+		m_IsDarkModeAllowedForWindow = reinterpret_cast<IsDarkModeAllowedForWindowApi>(Nt_GetProcAddress(Uxtheme, MAKEINTRESOURCEA(137)));
+
+
+		if (m_RefreshImmersiveColorPolicyState &&
+			m_ShouldAppsUseDarkMode &&
+			m_AllowDarkModeForWindow &&
+			(m_AllowDarkModeForApp || m_SetPreferredAppMode) &&
+			m_IsDarkModeAllowedForWindow)
+		{
+			m_DarkModeSupported = TRUE;
+
+			if (m_BuildNumber < 18362) {
+				m_AllowDarkModeForApp(TRUE);
+			}
+			else {
+				m_SetPreferredAppMode(PreferredAppMode::AllowDark);
+			}
+
+			m_RefreshImmersiveColorPolicyState();
+
+			m_DarkModeEnabled = m_ShouldAppsUseDarkMode() && !IsHighContrast();
+		}
+	}
+
+	BOOL IsColorSchemeChangeMessage(LPARAM lParam)
+	{
+		BOOL Status;
+
+		Status = FALSE;
+		if (lParam && CompareStringOrdinal(reinterpret_cast<LPCWCH>(lParam), -1, L"ImmersiveColorSet", -1, TRUE) == CSTR_EQUAL)
+		{
+			RefreshImmersiveColorPolicyState();
+			Status = TRUE;
+		}
+
+		GetIsImmersiveColorUsingHighContrast(IHCM_REFRESH);
+
+		return Status;
+	}
+
+	BOOL IsColorSchemeChangeMessage(UINT Message, LPARAM lParam)
+	{
+		if (Message == WM_SETTINGCHANGE)
+			return IsColorSchemeChangeMessage(lParam);
+
+		return FALSE;
+	}
+
+	void RefreshTitleBarThemeColor(HWND hWnd)
+	{
+		BOOL dark = FALSE;
+
+		if (IsDarkModeAllowedForWindow(hWnd) &&
+			ShouldAppsUseDarkMode() &&
+			!IsHighContrast())
+		{
+			dark = TRUE;
+		}
+
+		if (m_BuildNumber < 18362) {
+			SetPropW(hWnd, L"UseImmersiveDarkModeColors", reinterpret_cast<HANDLE>(static_cast<INT_PTR>(dark)));
+		}
+		else if (m_SetWindowCompositionAttribute)
+		{
+			WINDOWCOMPOSITIONATTRIBDATA data = { WCA_USEDARKMODECOLORS, &dark, sizeof(dark) };
+			SetWindowCompositionAttribute(hWnd, &data);
+		}
+	}
+
+
 	VOID InitSubWindows(HWND hWnd)
 	{
 		m_hWndPsbRaw       = GetDlgItem(hWnd, IDC_PSB_RAW);
@@ -101,6 +445,53 @@ private:
 
 		m_hWndUniversalDump  = GetDlgItem(hWnd, IDC_BUTTON_UDUMP);
 		m_hWndVirtualConsole = GetDlgItem(hWnd, IDC_VCONSOLE);
+	}
+
+
+	std::vector<HWND> GetChildWindows()
+	{
+		return {
+			m_hWndPsbRaw,
+			m_hWndPsbText,
+			m_hWndPsbImage,
+			m_hWndPsbAnm,
+			m_hWndPsbDecompile,
+			m_hWndPsbAll,
+			m_hWndPsbJson,
+			m_hWndTextRaw,
+			m_hWndTextPlain,
+			m_hWndIcon,
+			m_hWndProtect,
+			m_hWndUniversalPatch,
+			m_hWndTlgRaw,
+			m_hWndTlgBuildin,
+			m_hWndTlgSys,
+			m_hWndTlgPng,
+			m_hWndTlgJpg,
+			m_hWndTjsRaw,
+			m_hWndTjsDisasm,
+			m_hWndTjsDecompile,
+			m_hWndAmvRaw,
+			m_hWndAmvPNG,
+			m_hWndAmvJPG,
+			m_hWndAmvGIF,
+			m_hWndPngRaw,
+			m_hWndPngSys,
+			m_hWndBaseDirEdit,
+			m_hWndOriginalArchiveEdit,
+			m_hWndOutputArchiveEdit,
+			m_hWndBaseDirSelect,
+			m_hWndOriginalArchiveSelect,
+			m_hWndOutputArchiveSelect,
+			m_hWndMakePack,
+			m_hWndProgressBar,
+			m_hWndConsole,
+			m_hWndCancelTask,
+			m_hWndPbdRaw,
+			m_hWndPbdJson,
+			m_hWndUniversalDump,
+			m_hWndVirtualConsole
+		};
 	}
 
 	VOID InitProgressBar()
@@ -287,6 +678,23 @@ private:
 		NTSTATUS    Status;
 
 
+		if (m_DarkModeSupported)
+		{
+			AllowDarkModeForWindow(hWnd, TRUE);
+			RefreshTitleBarThemeColor(hWnd);
+		}
+
+		if (m_DarkModeSupported)
+		{
+			auto&& ChildWindows = GetChildWindows();
+			
+			for (auto& Window : ChildWindows)
+			{
+				SetWindowTheme(Window, L"Explorer", nullptr);
+				SendMessageW(Window, WM_THEMECHANGED, 0, 0);
+			}
+		}
+
 		ResetTitle();
 
 		DragAcceptFiles(hWnd, TRUE);
@@ -313,6 +721,13 @@ private:
 	VOID OnDestroy(HWND hWnd)
 	{
 		UNREFERENCED_PARAMETER(hWnd);
+
+		if (m_NewBgBrush) 
+		{
+			DeleteObject(m_NewBgBrush);
+			m_NewBgBrush = nullptr;
+		}
+
 		Ps::ExitProcess(0);
 	}
 
@@ -941,12 +1356,24 @@ private:
 	{
 		RECT ControlRect;
 		INT  x, y, w, h;
+		HDWP hDWP;
 
 		if (m_LastWindowSize.cx == 0)
 			return;
 
 		if (State == SIZE_MINIMIZED)
 			return;
+
+		hDWP = BeginDeferWindowPos(1);
+		if (hDWP == nullptr)
+			return;
+
+		auto&& ChildWindows = GetChildWindows();
+		for (auto& Window : ChildWindows)
+		{
+			DeferWindowPos(hDWP, Window, 0, 0, 0, cx, cy, SWP_NOZORDER);
+			EndDeferWindowPos(hDWP);
+		}
 	}
 
 	VOID OnGetMinMaxInfo(HWND hWnd, LPMINMAXINFO MinMaxInfo)
@@ -966,19 +1393,75 @@ private:
 		SendMessageW(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
 	}
 
+	INT_PTR OnCtlColorDlg(HWND hWnd, HDC hdc, HWND, INT)
+	{
+		if (m_DarkModeSupported && m_DarkModeEnabled)
+		{
+			SetTextColor(hdc, DarkTextColor);
+			SetBkColor(hdc, DarkBkColor);
+
+			if (!m_NewBgBrush) {
+				m_NewBgBrush = CreateSolidBrush(DarkBkColor);
+			}
+
+			return reinterpret_cast<INT_PTR>(m_NewBgBrush);
+		}
+	}
+
+	VOID OnSettingChange(HWND hWnd, WPARAM wParam, LPARAM lParam)
+	{
+		if (m_DarkModeSupported && IsColorSchemeChangeMessage(lParam)) {
+			SendMessageW(hWnd, WM_THEMECHANGED, 0, 0);
+		}
+	}
+
+	VOID OnThemeChanged(HWND hWnd, WPARAM wParam, LPARAM lParam)
+	{
+		if (m_DarkModeSupported)
+		{
+			AllowDarkModeForWindow(hWnd, m_DarkModeEnabled);
+			RefreshTitleBarThemeColor(hWnd);
+
+			auto&& ChildWindows = GetChildWindows();
+			for (auto& Window : ChildWindows)
+			{
+				AllowDarkModeForWindow(Window, m_DarkModeEnabled);
+				SendMessageW(Window, WM_THEMECHANGED, 0, 0);
+			}
+
+			UpdateWindow(hWnd);
+		}
+	}
+
 	INT_PTR DialogProcWorker(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (Message)
 		{
-			HANDLE_MSG(hWnd, WM_COMMAND,       OnCommand);
-			HANDLE_MSG(hWnd, WM_DROPFILES,     OnDropFiles);
-			HANDLE_MSG(hWnd, WM_LBUTTONDOWN,   OnLButtonDown);
-			HANDLE_MSG(hWnd, WM_LBUTTONUP,     OnLButtonUp);
-			HANDLE_MSG(hWnd, WM_SIZE,          OnSize);
-			HANDLE_MSG(hWnd, WM_GETMINMAXINFO, OnGetMinMaxInfo);
-			HANDLE_MSG(hWnd, WM_CLOSE,         OnClose);
-			HANDLE_MSG(hWnd, WM_DESTROY,       OnDestroy);
-			HANDLE_MSG(hWnd, WM_INITDIALOG,    OnInitDialog);
+			HANDLE_MSG(hWnd, WM_COMMAND,         OnCommand);
+			HANDLE_MSG(hWnd, WM_DROPFILES,       OnDropFiles);
+			HANDLE_MSG(hWnd, WM_LBUTTONDOWN,     OnLButtonDown);
+			HANDLE_MSG(hWnd, WM_LBUTTONUP,       OnLButtonUp);
+			HANDLE_MSG(hWnd, WM_SIZE,            OnSize);
+			HANDLE_MSG(hWnd, WM_GETMINMAXINFO,   OnGetMinMaxInfo);
+			HANDLE_MSG(hWnd, WM_CLOSE,           OnClose);
+			HANDLE_MSG(hWnd, WM_DESTROY,         OnDestroy);
+			HANDLE_MSG(hWnd, WM_INITDIALOG,      OnInitDialog);
+			HANDLE_MSG(hWnd, WM_CTLCOLORDLG,     OnCtlColorDlg);
+			HANDLE_MSG(hWnd, WM_CTLCOLORSTATIC,  OnCtlColorDlg);
+			HANDLE_MSG(hWnd, WM_CTLCOLORLISTBOX, OnCtlColorDlg);
+			HANDLE_MSG(hWnd, WM_CTLCOLORMSGBOX,  OnCtlColorDlg);
+			HANDLE_MSG(hWnd, WM_CTLCOLOREDIT,    OnCtlColorDlg);
+			HANDLE_MSG(hWnd, WM_CTLCOLORBTN,     OnCtlColorDlg);
+			HANDLE_MSG(hWnd, WM_CTLCOLORSCROLLBAR, OnCtlColorDlg);
+
+
+		case WM_SETTINGCHANGE:
+			OnSettingChange(hWnd, wParam, lParam);
+			break;
+
+		case WM_THEMECHANGED:
+			OnSettingChange(hWnd, wParam, lParam);
+			break;
 		}
 
 		return FALSE;
@@ -1031,6 +1514,8 @@ private:
 			PrintConsoleW(L"UIViewer::DoModel : CoInitialize failed, %08x\n", Success);
 			return (INT_PTR)-1;
 		}
+
+		InitDarkMode();
 
 		m_Instance   = hInstance;
 		m_TemplateID = lpTemplateID;

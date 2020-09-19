@@ -35,6 +35,20 @@ GetKrkrExtractVersion()
 
 static KrkrExtractCore* g_Engine = nullptr;
 
+VOID SwitchToEmoji()
+{
+	CONSOLE_FONT_INFOEX ConsoleFont;
+
+	RtlZeroMemory(&ConsoleFont, sizeof(ConsoleFont));
+	ConsoleFont.cbSize = sizeof(ConsoleFont);
+
+	GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &ConsoleFont);
+
+	RtlZeroMemory(ConsoleFont.FaceName, sizeof(ConsoleFont.FaceName));
+	lstrcpyW(ConsoleFont.FaceName, L"Segoe UI");
+	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &ConsoleFont);
+}
+
 BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 {
 	NTSTATUS         Status;
@@ -44,7 +58,8 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 	switch (Reason)
 	{
 	case DLL_PROCESS_ATTACH:
-		AllocConsole();
+		
+		AllocConsole(); //SwitchToEmoji();
 		LdrDisableThreadCalloutsForDll(hModule);
 
 		MessageBoxW(0, 0, 0, 0);

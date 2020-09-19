@@ -78,24 +78,35 @@ PackInfo MatchXp3ArchiveKind(std::vector<Xp3ItemGeneral>& Chunks)
 	BOOL                          Success, HitCache;
 	DWORD                         Magic;
 	PackInfo                      ArchiveKind;
+	ULONG                         StartPos;
 	Trie<ChunkNodeKind, PackInfo> ArchiveChunkBuilder;
 	std::wstring                  HashName;
 	std::vector<ChunkNodeKind>    Characteristic;
 	std::unordered_map<ChunkNodeKind, std::shared_ptr<Xp3StatusValidator>> Xp3Validators;
 
-	auto Krkr2Pattern =
+
+	auto Krkr2Pattern1 =
 	{
 		ChunkNodeKind::FILE_CHUNK_NODE,
 		ChunkNodeKind::FILE_CHUNK_NODE
 	};
 
+	//
+	// With startup.tjs
+	//
+
 	auto KrkrZCompatiblePattern1 = 
 	{
 		ChunkNodeKind::FILE_CHUNK_NODE,
-		ChunkNodeKind::M2_CHUNK_NODE
+		ChunkNodeKind::M2_CHUNK_NODE,
+		ChunkNodeKind::FILE_CHUNK_NODE,
 	};
 
-	static auto KrkrZCompatiblePattern2 =
+	//
+	// Without startup.tjs
+	//
+
+	auto KrkrZCompatiblePattern2 =
 	{
 		ChunkNodeKind::M2_CHUNK_NODE,
 		ChunkNodeKind::FILE_CHUNK_NODE,
@@ -118,7 +129,7 @@ PackInfo MatchXp3ArchiveKind(std::vector<Xp3ItemGeneral>& Chunks)
 		ChunkNodeKind::M2_COMPRESSED_NODE_V2
 	};
 
-	ArchiveChunkBuilder.add(Krkr2Pattern,               PackInfo::NormalPack);
+	ArchiveChunkBuilder.add(Krkr2Pattern1,              PackInfo::NormalPack);
 	ArchiveChunkBuilder.add(KrkrZCompatiblePattern1,    PackInfo::KrkrZ);
 	ArchiveChunkBuilder.add(KrkrZCompatiblePattern2,    PackInfo::KrkrZ);
 	ArchiveChunkBuilder.add(KrkrZNekoPattern,           PackInfo::KrkrZ_V2);
@@ -133,18 +144,48 @@ PackInfo MatchXp3ArchiveKind(std::vector<Xp3ItemGeneral>& Chunks)
 
 #define CHUNK_RETRY_THRESHOLD 3
 
-	if (Chunks.size() < CHUNK_RETRY_THRESHOLD) 
+	StartPos = 0;
+
+	//
+	// Skip protected node
+	//
+
+	if (Chunks.size() < 1) 
 	{
-		PrintConsoleW(L"We need more chunks to detect archive format...\n");
+		PrintConsoleW(L"MatchXp3ArchiveKind : No chunk available...\n");
 		return PackInfo::UnknownPack;
 	}
+
+	auto ProtectedNodeValidator = std::shared_ptr<Xp3StatusValidator>(new Xp3FileProtectedNodeValidator());
+
+	//
+	// Or skip more?
+	//
+
+	Magic = 0;
+	if (ProtectedNodeValidator->Validate(Chunks[0].Buffer.get(), Chunks[0].ChunkSize.LowPart, Magic)) {
+
+		StartPos = 1;
+
+		PrintConsoleW(L"MatchXp3ArchiveKind : Skip protected chunk\n");
+	}
+
+	if (Chunks.size() < CHUNK_RETRY_THRESHOLD + StartPos)
+	{
+		PrintConsoleW(L"MatchXp3ArchiveKind : We need more chunks to detect archive format...\n");
+		return PackInfo::UnknownPack;
+	}
+
+	PrintConsoleW(L"Starting from : %d\n", StartPos);
+
 
 	//
 	// Better optimization?
 	// this chunk belongs to which kind
 	//
 
-	for (ULONG i = 0; i < CHUNK_RETRY_THRESHOLD; i++)
+
+	for (ULONG i = StartPos; i < CHUNK_RETRY_THRESHOLD + StartPos; i++)
 	{
 		HitCache = FALSE;
 		for (auto& Validator : Xp3Validators) 
@@ -385,7 +426,7 @@ ConvertToGeneralXp3Chunk(
 }
 
 
-ForceInline BOOL CheckItem(XP3Index& Item)
+BOOL CheckItem(XP3Index& Item)
 {
 	switch (Item.m_IsM2Format)
 	{
@@ -412,6 +453,18 @@ ForceInline BOOL CheckItem(XP3Index& Item)
 }
 
 
+BOOL CheckItem(KRKR2_XP3_INDEX_CHUNK_INFO& Item)
+{
+	if (!StrNCompareW(
+		Item.FileName,
+		ProtectionInfo,
+		min(CONST_STRLEN(ProtectionInfo), CONST_STRLEN(Item.FileName)))) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 NTSTATUS
 ReadXp3FileChunk(
 	PBYTE Buffer,
@@ -424,8 +477,17 @@ ReadXp3FileChunk(
 	ByteTransferred = 0;
 	RtlZeroMemory(&FileChunk, sizeof(FileChunk));
 
-	if (ByteTransferred + sizeof(FileChunk) + Offset > Size)
+	if (ByteTransferred + sizeof(FileChunk) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3FileChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			sizeof(FileChunk),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 
 	ByteTransferred = sizeof(FileChunk);
 	RtlCopyMemory(&FileChunk, Buffer + Offset, sizeof(FileChunk));
@@ -444,8 +506,17 @@ ReadXp3AdlrChunk(
 	ByteTransferred = 0;
 
 	RtlZeroMemory(&AdlrChunk, sizeof(AdlrChunk));
-	if (ByteTransferred + sizeof(AdlrChunk) + Offset > Size)
+	if (ByteTransferred + sizeof(AdlrChunk) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3AldrChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			sizeof(AdlrChunk),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 	
 	ByteTransferred = sizeof(AdlrChunk);
 	RtlCopyMemory(&AdlrChunk, Buffer + Offset, sizeof(AdlrChunk));
@@ -465,8 +536,17 @@ ReadXp3TimeChunk(
 	ByteTransferred = 0;
 
 	RtlZeroMemory(&TimeChunk, sizeof(TimeChunk));
-	if (ByteTransferred + sizeof(TimeChunk) + Offset > Size)
+	if (ByteTransferred + sizeof(TimeChunk) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3TimeChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			sizeof(TimeChunk),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 
 	ByteTransferred = sizeof(TimeChunk);
 	RtlCopyMemory(&TimeChunk, Buffer + Offset, sizeof(TimeChunk));
@@ -476,26 +556,44 @@ ReadXp3TimeChunk(
 NTSTATUS
 ReadXp3SegmChunk(
 	PBYTE Buffer,
-	ULONG Size,
-	ULONG Offset,
-	KRKR2_XP3_INDEX_CHUNK_SEGM& SegmChunk,
-	ULONG& ByteTransferred
+ULONG Size,
+ULONG Offset,
+KRKR2_XP3_INDEX_CHUNK_SEGM& SegmChunk,
+ULONG& ByteTransferred
 )
 {
-	ByteTransferred = 0;
-	RtlZeroMemory(&SegmChunk, sizeof(SegmChunk));
-	
-	if (ByteTransferred + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm) + Offset > Size)
-		return STATUS_BUFFER_OVERFLOW;
+ByteTransferred = 0;
+RtlZeroMemory(&SegmChunk, sizeof(SegmChunk));
 
-	RtlCopyMemory(&SegmChunk, Buffer + Offset, FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm));
-	ByteTransferred += FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm);
+if (ByteTransferred + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm) + Offset > Size) {
 
-	if (ByteTransferred + Offset + SegmChunk.ChunkSize.LowPart > Size)
-		return STATUS_BUFFER_OVERFLOW;
+	PrintConsoleW(
+		L"ReadXp3SegmChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+		FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName),
+		Offset,
+		Size
+	);
 
-	ByteTransferred += SegmChunk.ChunkSize.LowPart;
-	return STATUS_SUCCESS;
+	return STATUS_BUFFER_OVERFLOW;
+}
+
+RtlCopyMemory(&SegmChunk, Buffer + Offset, FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm));
+ByteTransferred += FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm);
+
+if (ByteTransferred + Offset + SegmChunk.ChunkSize.LowPart > Size) {
+
+	PrintConsoleW(
+		L"ReadXp3SegmChunk : Buffer overflow, Copied : %08x, Offset = %08x, Chunk = %08x\n",
+		ByteTransferred,
+		Offset,
+		SegmChunk.ChunkSize.LowPart
+	);
+
+	return STATUS_BUFFER_OVERFLOW;
+}
+
+ByteTransferred += SegmChunk.ChunkSize.LowPart;
+return STATUS_SUCCESS;
 }
 
 
@@ -510,27 +608,70 @@ ReadXp3InfoChunk(
 )
 {
 	ByteTransferred = 0;
-	NullTerminated  = TRUE;
+	NullTerminated = TRUE;
 	RtlZeroMemory(&InfoChunk, sizeof(InfoChunk));
 
-	if (ByteTransferred + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName) + Offset > Size)
+	if (ByteTransferred + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3InfoChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
-	
+	}
+
 	RtlCopyMemory(&InfoChunk, Buffer + Offset, FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName));
 	ByteTransferred += FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName);
 
-	if (ByteTransferred + Offset + InfoChunk.ChunkSize.LowPart > Size)
-		return STATUS_BUFFER_OVERFLOW;
+	if (sizeof(KRKR2_INDEX_CHUNK_GENERAL) + Offset + InfoChunk.ChunkSize.LowPart > Size) {
 
-	if (FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName) - sizeof(KRKR2_INDEX_CHUNK_GENERAL) + 
+		PrintConsoleW(
+			L"ReadXp3InfoChunk : Buffer overflow, Copied : %08x, Offset = %08x, Chunk = %08x\n",
+			ByteTransferred,
+			Offset,
+			InfoChunk.ChunkSize.LowPart
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+	}
+
+	if (FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName) - sizeof(KRKR2_INDEX_CHUNK_GENERAL) +
 		InfoChunk.FileNameLength * sizeof(WCHAR) == InfoChunk.ChunkSize.LowPart) {
 		NullTerminated = FALSE;
 	}
 
-	lstrcpynW(
+	if (FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName) - sizeof(KRKR2_INDEX_CHUNK_GENERAL) +
+		InfoChunk.FileNameLength * sizeof(WCHAR) > InfoChunk.ChunkSize.LowPart) {
+
+		PrintConsoleW(
+			L"ReadXp3InfoChunk : FileName Buffer overflow(chunk), Length : %08x, Offset = %08x, Chunk = %08x\n",
+			InfoChunk.FileNameLength,
+			Offset,
+			InfoChunk.ChunkSize.LowPart
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+	}
+
+	if (InfoChunk.FileNameLength > countof(InfoChunk.FileName)) {
+
+		PrintConsoleW(
+			L"ReadXp3InfoChunk : FileName Buffer overflow(dest), Length : %08x, Offset = %08x, Chunk = %08x\n",
+			InfoChunk.FileNameLength,
+			Offset,
+			InfoChunk.ChunkSize.LowPart
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+
+	}
+
+	StrCopyW(
 		InfoChunk.FileName, 
-		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName)), 
-		min(InfoChunk.FileNameLength + 1, FIELD_SIZE(KRKR2_XP3_INDEX_CHUNK_INFO, FileName)) * sizeof(WCHAR)
+		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName))
 	);
 
 	ByteTransferred = sizeof(KRKR2_INDEX_CHUNK_GENERAL) + InfoChunk.ChunkSize.LowPart;
@@ -585,10 +726,26 @@ ReadXp3M2InfoChunk(
 		NullTerminated = FALSE;
 	}
 
-	lstrcpynW(
+	if (FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName) - sizeof(KRKR2_INDEX_CHUNK_GENERAL) +
+		M2InfoChunk.FileNameLength * sizeof(WCHAR) > M2InfoChunk.ChunkSize.LowPart) {
+		NullTerminated = FALSE;
+	}
+
+	if (M2InfoChunk.FileNameLength > countof(M2InfoChunk.FileName)) {
+
+		PrintConsoleW(
+			L"ReadXp3M2InfoChunk : FileName Buffer overflow(chunk), Length : %08x, Offset = %08x, Chunk = %08x\n",
+			M2InfoChunk.FileNameLength,
+			Offset,
+			M2InfoChunk.ChunkSize.LowPart
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+	}
+
+	StrCopyW(
 		M2InfoChunk.FileName, 
-		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName)), 
-		min(M2InfoChunk.FileNameLength + 1, FIELD_SIZE(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName)) * sizeof(WCHAR)
+		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName))
 	);
 
 	ByteTransferred = sizeof(KRKR2_INDEX_CHUNK_GENERAL) + M2InfoChunk.ChunkSize.LowPart;
@@ -611,23 +768,52 @@ ReadXp3M2CompressedChunk(
 	NullTerminated = TRUE;
 	RtlZeroMemory(&CompressedChunk, sizeof(CompressedChunk));
 
-	if (ByteTransferred + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName) + Offset > Size)
+	if (ByteTransferred + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3M2CompressedChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 
 	RtlCopyMemory(&CompressedChunk, Buffer + Offset, FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName));
 	ByteTransferred += FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName);
 
-	if (ByteTransferred + Offset + CompressedChunk.ChunkSize.LowPart > Size)
+	if (ByteTransferred + Offset + CompressedChunk.ChunkSize.LowPart > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3M2CompressedChunk : Buffer overflow, Copied : %08x, Offset = %08x, Chunk = %08x\n",
+			ByteTransferred,
+			Offset,
+			CompressedChunk.ChunkSize.LowPart
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 
 	if (FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName) + CompressedChunk.LengthOfProduct * sizeof(WCHAR) == CompressedChunk.ChunkSize.LowPart) {
 		NullTerminated = FALSE;
 	}
 
-	lstrcpynW(
+	if (FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName) + CompressedChunk.LengthOfProduct * sizeof(WCHAR) > CompressedChunk.ChunkSize.LowPart) {
+		
+		PrintConsoleW(
+			L"ReadXp3M2CompressedChunk : Buffer overflow, Copied : %08x, Offset = %08x, Chunk = %08x\n",
+			ByteTransferred,
+			Offset,
+			CompressedChunk.ChunkSize.LowPart
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+	}
+
+	StrCopyW(
 		CompressedChunk.ProductName, 
-		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName)), 
-		min(CompressedChunk.LengthOfProduct + 1, FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName))
+		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName))
 	);
 
 	ByteTransferred = sizeof(KRKR2_INDEX_CHUNK_GENERAL) + CompressedChunk.ChunkSize.LowPart;
@@ -650,8 +836,17 @@ ReadXp3M2CompressedChunk(
 	NullTerminated = TRUE;
 	RtlZeroMemory(&CompressedChunk, sizeof(CompressedChunk));
 
-	if (ByteTransferred + sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2) + Offset > Size)
+	if (ByteTransferred + sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3M2CompressedChunk(v2) : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 
 	RtlCopyMemory(&CompressedChunk, Buffer + Offset, sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2));
 	ByteTransferred += sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2);
@@ -673,8 +868,17 @@ ReadXp3UnknownChunk(
 	ByteTransferred = 0;
 	RtlZeroMemory(&Chunk, sizeof(Chunk));
 
-	if (ByteTransferred + sizeof(Chunk) + Offset > Size)
+	if (ByteTransferred + sizeof(Chunk) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3UnknownChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			sizeof(Chunk),
+			Offset,
+			Size
+		);
+
 		return STATUS_BUFFER_OVERFLOW;
+	}
 
 	RtlCopyMemory(&Chunk, Buffer + Offset, sizeof(Chunk));
 	ByteTransferred += sizeof(Chunk) + Chunk.ChunkSize.LowPart;
@@ -710,17 +914,16 @@ WalkKrkrZIndexBuffer(
 		{
 		case CHUNK_MAGIC_FILE:
 			ByteTransferred = 0;
-			Item.m_IsM2Format                   = FALSE;
 			Item.m_IsM2InfoNullTerminated       = FALSE;
 
 			Status = ReadXp3FileChunk(Decompress, Size, PtrOffset, Item.file, ByteTransferred);
 			if (NT_FAILED(Status))
 				return Status;
 
-			FileChunkSize = ByteTransferred;
+			FileChunkSize = Item.file.ChunkSize.LowPart;
 			PtrOffset += sizeof(Item.file);
 
-			if (PtrOffset + sizeof(CHUNK_MAGIC_YUZU))
+			if (PtrOffset + sizeof(CHUNK_MAGIC_YUZU) > Size)
 				return STATUS_BUFFER_TOO_SMALL;
 
 			InChunkPtrOffset = 0;
@@ -784,7 +987,9 @@ WalkKrkrZIndexBuffer(
 				Proxy.AppendItem(Item);
 			}
 
-			PtrOffset += ByteTransferred;
+			Item.m_IsM2Format = FALSE;
+
+			PtrOffset += InChunkPtrOffset;
 			break;
 
 		default:
@@ -802,8 +1007,9 @@ WalkKrkrZIndexBuffer(
 			else
 			{
 				Proxyer->TellServerLogOutput(
-					LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x",
-					*(PDWORD)(Decompress + PtrOffset)
+					LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x at %08x",
+					*(PDWORD)(Decompress + PtrOffset),
+					PtrOffset
 				);
 
 				ByteTransferred = 0;
@@ -874,10 +1080,10 @@ Return Value:
 			if (NT_FAILED(Status))
 				return Status;
 
-			FileChunkSize = ByteTransferred;
-			PtrOffset += sizeof(Item.file);
+			FileChunkSize = Item.file.ChunkSize.LowPart;
+			PtrOffset += ByteTransferred;
 
-			if (PtrOffset + sizeof(CHUNK_MAGIC_YUZU))
+			if (PtrOffset + sizeof(CHUNK_MAGIC_YUZU) > Size)
 				return STATUS_BUFFER_TOO_SMALL;
 
 			InChunkPtrOffset = 0;
@@ -941,13 +1147,14 @@ Return Value:
 				Proxy.AppendItem(Item);
 			}
 
-			PtrOffset += ByteTransferred;
+			PtrOffset += InChunkPtrOffset;
 			break;
 
 		default:
 			Proxyer->TellServerLogOutput(
-				LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x",
-				*(PDWORD)(Decompress + PtrOffset)
+				LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x, at address : %08x",
+				*(PDWORD)(Decompress + PtrOffset),
+				PtrOffset
 			);
 
 			ByteTransferred = 0;

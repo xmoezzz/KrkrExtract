@@ -47,6 +47,14 @@ ServerImpl::~ServerImpl()
 	ShutdownServer();
 }
 
+HANDLE ServerImpl::GetRemoteProcessHandle()
+{
+	if (m_ServerThread)
+		return NULL;
+	
+	return m_ServerThread->GetRemoteProcess();
+}
+
 BOOL ServerImpl::RunServer(
 	NotifyServerProgressChangedCallback       NotifyServerProgressChangedStub,
 	NotifyServerLogOutputCallback             NotifyServerLogOutputStub,
@@ -54,6 +62,7 @@ BOOL ServerImpl::RunServer(
 	NotifyServerMessageBoxCallback            NotifyServerMessageBoxStub,
 	NotifyServerTaskStartAndDisableUICallback NotifyServerTaskStartAndDisableUIStub,
 	NotifyServerTaskEndAndEnableUICallback    NotifyServerTaskEndAndEnableUIStub,
+	NotifyServerExitFromRemoteProcessCallback NotifyServerExitFromRemoteProcessStub,
 	NotifyServerRaiseErrorCallback            NotifyServerRaiseErrorStub
 )
 {
@@ -65,6 +74,7 @@ BOOL ServerImpl::RunServer(
 	m_NotifyServerUIReadyStub               = NotifyServerUIReadyStub;
 	m_NotifyServerMessageBoxStub            = NotifyServerMessageBoxStub;
 	m_NotifyServerTaskStartAndDisableUIStub = NotifyServerTaskStartAndDisableUIStub;
+	m_NotifyServerExitFromRemoteProcessStub = NotifyServerExitFromRemoteProcessStub;
 	m_NotifyServerTaskEndAndEnableUIStub    = NotifyServerTaskEndAndEnableUIStub;
 	
 	m_ServerThread = new RevThread(

@@ -1,6 +1,7 @@
 #include "StatusMatcher.h"
 #include "KrkrHeaders.h"
 #include "Helper.h"
+#include "XP3Parser.h"
 
 ChunkNodeKind NTAPI Xp3M2ChunkNodeValidator::GetKind()
 {
@@ -16,53 +17,52 @@ PCWSTR NTAPI Xp3M2ChunkNodeValidator::GetName()
 
 BOOL NTAPI Xp3M2ChunkNodeValidator::Validate(PBYTE Buffer, ULONG Size, DWORD& M2Magic)
 {
-	DWORD         Hash;
-	LARGE_INTEGER ChunkSize;
-	ULONG         Offset;
-	USHORT        FileNameLength;
-	SIZE_T        FileNameSize;
-
-	UNREFERENCED_PARAMETER(Hash);
+	KRKRZ_XP3_INDEX_CHUNK_YUZU Chunk;
+	ULONG                      Offset;
+	SIZE_T                     FileNameSize;
 
 	M2Magic = 0;
 	Offset  = 0;
 
 	Size += sizeof(KRKR2_INDEX_CHUNK_GENERAL);
 
-	if (Offset + sizeof(M2Magic) > Size)
+	if (Offset + sizeof(M2Magic) > Size) {
 		return FALSE;
+	}
 
-	Offset += sizeof(M2Magic);
-
-	if (Offset += sizeof(ChunkSize) > Size)
+	if (IsBuiltinChunk(*(PDWORD)Buffer)) {
 		return FALSE;
+	}
 
-	ChunkSize.QuadPart = *(PULONG64)(Buffer + Offset);
-	Offset += sizeof(ChunkSize);
+	RtlZeroMemory(&Chunk, sizeof(Chunk));
 
-	if (ChunkSize.QuadPart != Size)
+	if (FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName) + Offset > Size) {
 		return FALSE;
+	}
 
-	if (Offset + sizeof(Hash) > Size)
+	RtlCopyMemory(&Chunk, Buffer + Offset, FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName));
+	Offset += FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName);
+
+	if (Chunk.ChunkSize.LowPart + sizeof(KRKR2_INDEX_CHUNK_GENERAL) != Size) {
 		return FALSE;
-	
-	Offset += sizeof(Hash);
+	}
 
-	if (Offset += sizeof(FileNameLength) > Size)
+	if (Chunk.FileNameLength * sizeof(WCHAR) + Offset > Size) {
 		return FALSE;
-
-	FileNameLength = *(PUSHORT)(Offset + Buffer);
-	Offset += sizeof(FileNameLength);
+	}
 
 	FileNameSize = 0;
-	if (!SafeStringLength<WCHAR>((PCWSTR)(Offset + Buffer), FileNameLength, FileNameSize))
+	if (!SafeStringLength<WCHAR>((PCWSTR)(Offset + Buffer), Chunk.FileNameLength, FileNameSize)) {
 		return FALSE;
+	}
 
-	if (FileNameSize != (USHORT)FileNameSize)
+	if (FileNameSize != (USHORT)FileNameSize) {
 		return FALSE;
+	}
 
-	if (FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName) + sizeof(WCHAR) * FileNameLength > Size)
+	if (FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName) + sizeof(WCHAR) * Chunk.FileNameLength > Size) {
 		return FALSE;
+	}
 
 	M2Magic = *(PDWORD)Buffer;
 	return TRUE;

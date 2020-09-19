@@ -107,7 +107,7 @@ namespace KrkrExtract
             else
             {
                 this.Hide();
-                UILoader.LoadUIAndRun(RemoteProcess);
+                UILoader.LoadUIAndRun();
                 this.Close();
                 Environment.Exit(0);
             }

@@ -324,13 +324,10 @@ void RevThread::ThreadFunction()
 			{
 				if (m_NotifyServerRaiseErrorStub)
 				{
-					if (!m_NotifyServerRaiseErrorStub(
+					m_NotifyServerRaiseErrorStub(
 						RaiseErrorType::RAISE_ERROR_REMOTE_DEAD,
-						L"Remote process is dead")
-						)
-					{
-						Ps::ExitProcess(0);
-					}
+						L"Remote process is dead"
+					);
 				}
 			}
 

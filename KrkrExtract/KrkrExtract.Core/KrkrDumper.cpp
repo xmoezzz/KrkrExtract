@@ -266,12 +266,37 @@ HRESULT CoDumperTask::DumpStreamSafe(IStream* Stream, PCWSTR ExtName, PCWSTR Out
 			}
 
 			Success = Plugin->Unpack(OutputFileName, Stream);
-			if (FAILED(Stream)) {
-				PrintConsoleW(L"CoDumperTask::DumpStreamSafe : Plugin->Unpack failed, hr = %08x\n", Success);
+			switch (Success)
+			{
+				//
+				// This plugin was skipped
+				//
+
+			case E_ABORT:
+				Plugin = m_Proxyer->GetDefaultPlugin();
+				Success = Plugin->Unpack(OutputFileName, Stream);
+				if (FAILED(Success)) {
+					PrintConsoleW(L"CoDumperTask::DumpStreamSafe : Plugin->Unpack failed (default plugin), hr = %08x\n", Success);
+				}
+				break;
+
+			default:
+				if (FAILED(Success))
+				{
+					PrintConsoleW(L"CoDumperTask::DumpStreamSafe : Plugin->Unpack failed, hr = %08x\n", Success);
+
+					Plugin = m_Proxyer->GetDefaultPlugin();
+					Success = Plugin->Unpack(OutputFileName, Stream);
+					if (FAILED(Success)) {
+						PrintConsoleW(L"CoDumperTask::DumpStreamSafe : Plugin->Unpack failed (default plugin, secondary), hr = %08x\n", Success);
+					}
+				}
 				break;
 			}
 
-			Stream->Release();
+			if (Stream) {
+				Stream->Release();
+			}
 		}
 	}
 	SEH_EXCEPT(DumperEpFilter(GetExceptionCode(), GetExceptionInformation()))

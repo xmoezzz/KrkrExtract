@@ -98,6 +98,12 @@ FARPROC
 WINAPI
 XeGetProcAddress(HMODULE Module, LPCSTR ProcName)
 {
+	if (!ProcName)
+		return NULL;
+
+	if ((ULONG)ProcName <= 0xFFFF)
+		return (FARPROC)Nt_GetProcAddress(Module, ProcName);
+
 	if (!lstrcmpA(ProcName, "GetSystemWow64DirectoryA"))
 		return NULL;
 
@@ -237,6 +243,11 @@ HRESULT WINAPI XeV2Link(iTVPFunctionExporter *Exporter)
 	return V2LinkStub(Exporter);
 }
 
+
+BOOL WINAPI XeIsDBCSLeadByte(BYTE TestChar)
+{
+	return IsDBCSLeadByteEx(932, TestChar);
+}
 
 
 LONG NTAPI FindPrivateProcHandler(PEXCEPTION_POINTERS ExceptionInfo)
@@ -1106,6 +1117,46 @@ NTSTATUS KrkrHook::UnHookV2LinkNative()
 	return Status;
 }
 
+NTSTATUS KrkrHook::HookIsDBCSLeadByteNative()
+{
+	NTSTATUS Status;
+
+	Mp::PATCH_MEMORY_DATA f[] =
+	{
+		Mp::FunctionJumpVa(IsDBCSLeadByte, XeIsDBCSLeadByte, &m_IsDBCSLeadByte)
+	};
+
+	if (m_IsDBCSLeadByteHooked)
+		return STATUS_SUCCESS;
+
+	Status = Mp::PatchMemory(f, countof(f));
+	if (NT_SUCCESS(Status))
+	{
+		m_IsDBCSLeadByte = nullptr;
+		m_IsDBCSLeadByteHooked = TRUE;
+		return Status;
+	}
+
+	return Status;
+
+}
+
+
+NTSTATUS KrkrHook::UnHookIsDBCSLeadByteNative()
+{
+	NTSTATUS Status;
+
+	if (!m_IsDBCSLeadByteHooked)
+		return STATUS_UNSUCCESSFUL;
+
+	Status = Mp::RestoreMemory(m_IsDBCSLeadByte);
+	if (NT_SUCCESS(Status))
+	{
+		m_IsDBCSLeadByteHooked = FALSE;
+	}
+
+	return Status;
+}
 
 
 NTSTATUS KrkrHook::SetHwBreakPointNative(PVOID Address, SIZE_T Size, HardwareBreakpoint::Condition AccessStatus, INT& Index)

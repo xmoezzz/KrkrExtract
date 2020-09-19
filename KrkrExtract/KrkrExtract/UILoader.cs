@@ -12,7 +12,7 @@ namespace KrkrExtract
     static class UILoader
     {
 
-        static dynamic LoadLegacyUI(IntPtr RemoteProcess)
+        static dynamic LoadLegacyUI()
         {
             try
             {
@@ -57,18 +57,18 @@ namespace KrkrExtract
         }
 
 
-        public static void LoadUIAndRun(IntPtr RemoteProcess)
+        public static void LoadUIAndRun()
         {
             if (Environment.OSVersion.Version.Major == 10 &&
                 Environment.OSVersion.Version.Minor == 1  &&
                 Environment.OSVersion.Version.Revision >= 16299)
             {
-                dynamic f = LoadLegacyUI(RemoteProcess);
+                dynamic f = LoadLegacyUI();
                 f.Run();
             }
             else
             {
-                dynamic f = LoadLegacyUI(RemoteProcess);
+                dynamic f = LoadLegacyUI();
                 f.Run();
             }
         }

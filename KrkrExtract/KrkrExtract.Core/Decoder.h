@@ -17,6 +17,7 @@
 
 NTSTATUS InitLayer(KrkrClientProxyer* Proxyer);
 NTSTATUS SavePng(LPCWSTR FileName, LPCWSTR Path);
+NTSTATUS SaveAmv(LPCWSTR FileName, LPCWSTR Path);
 
 HRESULT WINAPI ImageWorkerV2Link(iTVPFunctionExporter *exporter);
 

@@ -30,6 +30,7 @@ public:
 
 	void AppendItem(XP3Index& Item) { m_Items.push_back(Item); };
 	void SetM2Krkr()      { m_IsM2Krkr = TRUE; };
+	void SetNormalKrkr()  { m_IsM2Krkr = FALSE; };
 	void SetExtractFile() { m_ExtractFile = TRUE; };
 	bool IsM2Krkr() const { return m_IsM2Krkr; };
 	bool IsExtractFile() const        { return m_ExtractFile; };
@@ -85,8 +86,9 @@ WalkXp3ArchiveIndex(
 )
 {
 	NTSTATUS                    Status;
-	NtFileDisk                  File;
+	NtFileDisk                  File, IndexFile;
 	ULONG                       CountOfEntry;
+	WCHAR                       IndexFileName[MAX_NTPATH];
 	KRKR2_XP3_HEADER            XP3Header;
 	KRKR2_XP3_DATA_HEADER       DataHeader;
 	LARGE_INTEGER               BeginOffset, Offset;
@@ -201,6 +203,17 @@ WalkXp3ArchiveIndex(
 		Status = ConvertToGeneralXp3Chunk(Decompress.get(), DataHeader.OriginalSize.LowPart, Xp3Chunks, M2ChunkMagic);
 		if (NT_FAILED(Status))
 			return Status;
+
+		LOOP_ONCE
+		{
+			FormatStringW(IndexFileName, L"%s.index", FilePath);
+			Status = IndexFile.Create(IndexFileName);
+			if (NT_FAILED(Status))
+				break;
+			
+			IndexFile.Write(Decompress.get(), DataHeader.OriginalSize.LowPart);
+			IndexFile.Close();
+		}
 
 		ArchiveKind = MatchXp3ArchiveKind(Xp3Chunks);
 		switch (ArchiveKind)
@@ -488,4 +501,9 @@ ReadXp3UnknownChunk(
 	ULONG Offset,
 	ULONG& ByteTransferred
 );
+
+
+BOOL CheckItem(XP3Index& Item);
+BOOL CheckItem(KRKR2_XP3_INDEX_CHUNK_INFO& Item);
+
 

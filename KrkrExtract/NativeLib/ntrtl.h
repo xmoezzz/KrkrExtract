@@ -2934,6 +2934,16 @@ RtlWow64SetThreadContext(
     _In_ HANDLE ThreadHandle,
     _In_ PWOW64_CONTEXT ThreadContext
     );
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlWow64SuspendThread(
+	__in HANDLE ThreadHandle,
+	__out_opt PULONG PreviousSuspendCount
+);
+
+
 #endif
 
 NTSYSAPI

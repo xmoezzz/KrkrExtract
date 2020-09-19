@@ -82,17 +82,6 @@ namespace KrkrExtract.Lite
             }
         }
 
-        private static void RaiseErrorOnDllNotFound(string DllName)
-        {
-            var FullPath = Path.Combine(Directory.GetCurrentDirectory(), DllName);
-            if (File.Exists(FullPath))
-                return;
-
-            MessageBox.Show(String.Format("{0} not found!", DllName), "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            Environment.Exit(0);
-        }
-
-
 
         [STAThread]
         static void Main()

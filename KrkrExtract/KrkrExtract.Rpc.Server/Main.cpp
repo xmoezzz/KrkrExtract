@@ -52,6 +52,7 @@ public:
 		NotifyServerMessageBoxCallback            NotifyServerMessageBoxStub,
 		NotifyServerTaskStartAndDisableUICallback NotifyServerTaskStartAndDisableUIStub,
 		NotifyServerTaskEndAndEnableUICallback    NotifyServerTaskEndAndEnableUIStub,
+		NotifyServerExitFromRemoteProcessCallback NotifyServerExitFromRemoteProcessStub,
 		NotifyServerRaiseErrorCallback            NotifyServerRaiseErrorStub
 	)
 	{
@@ -67,6 +68,7 @@ public:
 			NotifyServerMessageBoxStub,
 			NotifyServerTaskStartAndDisableUIStub,
 			NotifyServerTaskEndAndEnableUIStub,
+			NotifyServerExitFromRemoteProcessStub,
 			NotifyServerRaiseErrorStub
 		);
 	}
@@ -193,6 +195,16 @@ public:
 		return m_Server->TellClientTaskCloseWindow();
 	}
 
+	HANDLE XeGetRemoteProcessHandle()
+	{
+		SectionProtector<RTL_CRITICAL_SECTION> Protection(&m_CriticalSection);
+
+		if (!m_Server)
+			return FALSE;
+
+		return m_Server->GetRemoteProcessHandle();
+	}
+
 private:
 	RTL_CRITICAL_SECTION m_CriticalSection;
 	ServerImpl*          m_Server = nullptr;
@@ -274,6 +286,7 @@ XeRunServer(
 	NotifyServerMessageBoxCallback            NotifyServerMessageBoxStub,
 	NotifyServerTaskStartAndDisableUICallback NotifyServerTaskStartAndDisableUIStub,
 	NotifyServerTaskEndAndEnableUICallback    NotifyServerTaskEndAndEnableUIStub,
+	NotifyServerExitFromRemoteProcessCallback NotifyServerExitFromRemoteProcessStub,
 	NotifyServerRaiseErrorCallback            NotifyServerRaiseErrorStub
 )
 {
@@ -286,6 +299,7 @@ XeRunServer(
 			NotifyServerMessageBoxStub,
 			NotifyServerTaskStartAndDisableUIStub,
 			NotifyServerTaskEndAndEnableUIStub,
+			NotifyServerExitFromRemoteProcessStub,
 			NotifyServerRaiseErrorStub
 		);
 	}
@@ -474,4 +488,18 @@ XeClientTaskCloseWindow()
 	return FALSE;
 }
 
+#if ML_X86
+#pragma comment(linker, "/EXPORT:XeGetRemoteProcessHandle=_XeGetRemoteProcessHandle@0")
+#elif ML_ARM64
+#pragma comment(linker, "/EXPORT:XeGetRemoteProcessHandle=XeGetRemoteProcessHandle")
+#endif
+EXTC_EXPORT
+HANDLE
+NTAPI
+XeGetRemoteProcessHandle()
+{
+	if (g_Server)
+		return g_Server->XeGetRemoteProcessHandle();
 
+	return NULL;
+}

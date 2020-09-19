@@ -27,6 +27,7 @@ public:
 		NotifyServerMessageBoxCallback            NotifyServerMessageBoxStub      = nullptr,
 		NotifyServerTaskStartAndDisableUICallback NotifyServerTaskStartAndDisableUIStub = nullptr,
 		NotifyServerTaskEndAndEnableUICallback    NotifyServerTaskEndAndEnableUIStub    = nullptr,
+		NotifyServerExitFromRemoteProcessCallback NotifyServerExitFromRemoteProcessStub = nullptr,
 		NotifyServerRaiseErrorCallback            NotifyServerRaiseErrorStub            = nullptr
 		);
 
@@ -35,7 +36,6 @@ public:
 private:
 
 	BOOL ParseMessage(PVOID MessageBuffer, SIZE_T MessageSize);
-
 
 	//
 	// Server Stubs
@@ -103,6 +103,8 @@ public:
 
 	BOOL TellClientCancelTask();
 	BOOL TellClientTaskCloseWindow();
+
+	HANDLE GetRemoteProcessHandle();
 
 private:
 	BOOL                                      m_GetHandShakePackage    = FALSE;
