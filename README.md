@@ -110,7 +110,7 @@ krkrz supports msvc while krkr2 can only built by bcb.
 Some companies modified krkrz so we need more steps to unpack archives.  
 
 ## Why universal patch not compatible with krkr2?  
-krkr2 use bcb(C++ Builder, legency version...) as default compiler.   
+krkr2 use bcb(C++ Builder, legacy version...) as default compiler.   
 bcb will make code more complex so sometimes it's more difficult to analyze code automatically, plus, KrkrExtract can pack archives for krkr2.  
 
 ## How to use & How to ...  
