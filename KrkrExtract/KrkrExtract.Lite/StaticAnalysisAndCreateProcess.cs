@@ -7,55 +7,14 @@ using System.Windows.Forms;
 using WindowsPE;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
+using R2;
 
 public class StaticAnalysisAndCreateProcess
 {
-    private Process m_Process;
-
-    private string m_FilePath;
-
-    private string m_TempFile;
-
-    private bool m_InTask;
-
-    private Func<string, bool> m_NotifyStatus;
-
-    private Func<string, bool> m_NotifyError;
-
-    private Func<bool> m_NotifyStart;
-
-    private Func<bool> m_NotifyEnd;
-
-    public StaticAnalysisAndCreateProcess(Func<string, bool> NotifyStatus, Func<string, bool> NotifyError, Func<bool> NotifyStart, Func<bool> NotifyEnd)
+    private bool IsConsoleMode = false;
+    public StaticAnalysisAndCreateProcess(bool IsConsole)
     {
-        m_NotifyStatus = NotifyStatus;
-        m_NotifyError = NotifyError;
-        m_NotifyStart = NotifyStart;
-        m_NotifyEnd   = NotifyEnd;
-    }
-
-    public static bool CheckStaticAnalysisIsPresent()
-    {
-        string currentDirectory = Directory.GetCurrentDirectory();
-        string ScriptPath = Path.Combine(Path.Combine(Path.Combine(Path.Combine(currentDirectory, "Externals"), "scripts"), "r2"), "find_private_proc.py");
-        string R2Home = Path.Combine(Path.Combine(Path.Combine(currentDirectory, "Externals"), Environment.Is64BitOperatingSystem ? "radare2_64" : "radare2"), "bin");
-        string PythonPath = Path.Combine(Path.Combine(Path.Combine(currentDirectory, "Externals"), "python"), "python.exe");
-        if (!Directory.Exists(R2Home))
-        {
-            Console.WriteLine("R2Home (not found) : {0}", R2Home);
-            return false;
-        }
-        if (!File.Exists(ScriptPath))
-        {
-            Console.WriteLine("ScriptPath (not found) : {0}", ScriptPath);
-            return false;
-        }
-        if (!File.Exists(PythonPath))
-        {
-            Console.WriteLine("PythonPath (not found) : {0}", PythonPath);
-            return false;
-        }
-        return true;
+        IsConsoleMode = IsConsole;
     }
 
     public static bool CheckStaticAnalysisResultIsPersent(string FilePath)
@@ -91,225 +50,105 @@ public class StaticAnalysisAndCreateProcess
         return true;
     }
 
-    private string JoinToArgs(string[] args)
+
+    private void NotifyError(string error)
     {
-        string retv = "";
-        foreach (string v in args)
+        if (IsConsoleMode)
         {
-            retv = retv + "\"" + v + "\" ";
+            Console.WriteLine(error);
         }
-        return retv;
+        else
+        {
+            MessageBox.Show(
+                error,
+                "KrkrExtract",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+        }
     }
 
-    private void CleanupVars()
+    private void NotifyStatus(string status)
     {
-        m_FilePath = null;
-        m_TempFile = null;
-        if (m_Process != null)
-        {
-            m_Process = null;
-        }
-        m_InTask = false;
+        Console.WriteLine(status);
     }
 
-    private void ProcessExitHandler(object sender, EventArgs eventArgs)
+    /// <summary>
+    /// create process with desire filepath 
+    /// and inject dll to the remote process
+    /// </summary>
+    /// <param name="FilePath">desire filepath</param>
+    private bool CreateProcessWithDll(string FilePath)
     {
-        m_NotifyEnd();
-        if (!File.Exists(m_TempFile) || m_Process.ExitCode != 0)
+        if (!LoaderHelper.CreateProcessWithDll(FilePath, "KrkrExtract.Core.dll"))
         {
-            Console.WriteLine("static analysis failed : {0}", m_Process.ExitCode);
-            m_NotifyStatus("static analysis failed");
-            CleanupVars();
-            return;
+            NotifyError("Failed to create process...\nCode :" + Marshal.GetLastWin32Error());
+            return false;
         }
-        ulong ExporterOffset = 0uL;
-        try
-        {
-            using (StreamReader stream = new StreamReader(File.Open(m_TempFile, FileMode.Open, FileAccess.Read)))
-            {
-                ExporterOffset = ulong.Parse(stream.ReadLine().Replace(Environment.NewLine, string.Empty));
-                PEImage pe = PEImage.ReadFromFile(m_FilePath);
-                if (ExporterOffset <= (ulong)(long)pe.BaseAddress)
-                {
-                    throw new Exception("Exporter address < pe.BaseAddress");
-                }
-                ExporterOffset = (ulong)((long)ExporterOffset - (long)pe.BaseAddress);
-            }
-            File.Delete(m_TempFile);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(Environment.StackTrace);
-            Console.WriteLine("Exception:");
-            Console.WriteLine(ex.ToString());
-            CleanupVars();
-            return;
-        }
-        if (ExporterOffset == 0L)
-        {
-            m_NotifyStatus("failed to parse exporter address");
-            CleanupVars();
-            return;
-        }
-        try
-        {
-            if (!KrkrHelper.WriteKrkrConfigFile(m_FilePath + ".krconfig", ExporterOffset))
-            {
-                m_NotifyStatus("failed to write info to config file");
-                CleanupVars();
-                return;
-            }
-        }
-        catch (Exception)
-        {
-            m_NotifyStatus("failed to write info to config file");
-            CleanupVars();
-            return;
-        }
-        m_NotifyStatus("Static analysis : ok");
-        CreateProcessAndExit(m_FilePath);
-        CleanupVars();
+
+        return true;
     }
 
-    private void CreateProcessAndExit(string FilePath)
-    {
-        uint ProcessId = 0u;
-        SafeFileHandle Handle = new SafeFileHandle(IntPtr.Zero, false);
-        try
-        {
-            Handle = NativeHelper.CreateProcessInternalWithDll(FilePath, KrkrMode.NORMAL, ref ProcessId);
-        }
-        catch (DllNotFoundException e)
-        {
-            MessageBox.Show("LoaderHelper.dll not found", "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-            Environment.Exit(0);
-        }
-
-        if (Handle.IsInvalid)
-        {
-            MessageBox.Show("Failed to create process...\nCode :" + Marshal.GetLastWin32Error(), "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            Environment.Exit(-1);
-        }
-        Handle.Close();
-        Environment.Exit(0);
-    }
-
-    private bool RunStaticAnalysisSubProcess(string FilePath)
+    /// <summary>
+    /// vaildate file and perform static analysis on this binary
+    /// TODO : ...
+    /// </summary>
+    /// <param name="FilePath">the binary path</param>
+    /// <returns>the VA of target function</returns>
+    private UInt64 RunStaticAnalysis(string FilePath)
     {
         bool RunStaticAnalysis = true;
         if (RunStaticAnalysis && !KrkrHelper.IsKrkrEngine(FilePath))
         {
-            m_NotifyStatus("Unsupported krkr engine or packed file");
+            NotifyStatus("Unsupported krkr engine or packed file");
             RunStaticAnalysis = false;
         }
         if (RunStaticAnalysis && !KrkrHelper.NeedStaticAnalysis(FilePath))
         {
-            m_NotifyStatus("Skip static analysis");
+            NotifyStatus("Skip static analysis");
             RunStaticAnalysis = false;
         }
-        m_InTask = true;
-        string CurrentDir = Directory.GetCurrentDirectory();
-        string ScriptPath = Path.Combine(Path.Combine(Path.Combine(Path.Combine(CurrentDir, "Externals"), "scripts"), "r2"), "find_private_proc.py");
-        string R2Home = Path.Combine(Path.Combine(Path.Combine(CurrentDir, "Externals"), Environment.Is64BitOperatingSystem ? "radare2_64" : "radare2"), "bin");
-        string PythonPath = Path.Combine(Path.Combine(Path.Combine(CurrentDir, "Externals"), "python"), "python.exe");
 
-        string TempFile = Path.Combine(CurrentDir, "3389.bin");
-        ProcessStartInfo info = new ProcessStartInfo(PythonPath, JoinToArgs(new string[4]
-        {
-            ScriptPath,
-            FilePath,
-            R2Home,
-            TempFile
-        }));
-
-
-        info.UseShellExecute = false;
-        m_Process = new Process();
-        m_Process.Exited += ProcessExitHandler;
-        m_Process.StartInfo = info;
-        m_Process.EnableRaisingEvents = true;
-        m_TempFile = TempFile;
-        m_FilePath = FilePath;
-        try
-        {
-            m_Process.Start();
-            m_NotifyStatus("Analyzing");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(Environment.StackTrace);
-            Console.WriteLine("Exception:");
-            Console.WriteLine(ex.ToString());
-            CleanupVars();
-            return false;
-        }
-        m_NotifyStart();
-        return true;
+        return StaticAnalysis.Run(FilePath);
     }
 
-    public bool InTask()
-    {
-        return m_InTask;
-    }
 
-    public bool KillSubProcess()
-    {
-        try
-        {
-            if (m_Process != null)
-            {
-                m_Process.Kill();
-            }
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-        return true;
-    }
 
-    public bool Run(string FilePath, bool RunStaticAnalysis)
+    public bool Run(string FilePath, bool PreformStaticAnalysis)
     {
-        if (m_InTask)
-        {
-            return false;
-        }
         string ProgramName = FilePath;
         if (ProgramName.ToLower().EndsWith(".lnk"))
         {
             ProgramName = LnkHelper.GetShortcutTargetFile(ProgramName);
             if (string.IsNullOrEmpty(ProgramName))
             {
-                m_NotifyError("Couldn't resolve symbolic link");
-                CleanupVars();
+                NotifyError("Couldn't resolve symbolic link");
                 return false;
             }
         }
 
         if (!ProgramName.ToLower().EndsWith(".exe"))
         {
-            m_NotifyError("Only *.exe (PE files) are supported");
-            CleanupVars();
+            NotifyError("Only *.exe (PE files) are supported");
             return false;
         }
 
-
-        m_FilePath = FilePath;
-
         if (CheckStaticAnalysisResultIsPersent(FilePath))
         {
-            m_NotifyStatus("Found the last static analysis result");
-            CleanupVars();
-            RunStaticAnalysis = false;
+            NotifyStatus("Found the last static analysis result");
+            PreformStaticAnalysis = false;
         }
 
-        if (!RunStaticAnalysis)
+        if (PreformStaticAnalysis)
         {
-            CreateProcessAndExit(ProgramName);
+            var address = RunStaticAnalysis(FilePath);
+            var configFile = FilePath + ".krconfig";
+            if (address != 0 && address != UInt64.MaxValue)
+            {
+                KrkrHelper.WriteKrkrConfigFile(configFile, address);
+            }
         }
 
-
-        m_InTask = true;
-        return RunStaticAnalysisSubProcess(ProgramName);
+        return CreateProcessWithDll(FilePath);
     }
 }

@@ -12352,6 +12352,39 @@ NTSTATUS EnvironmentAppend(PUNICODE_STRING Key, PUNICODE_STRING Value)
 
 ML_NAMESPACE_END_(Rtl);
 
+
+BOOL
+IsNameInExpression2(
+	IN PUNICODE_STRING  Expression,
+	IN PUNICODE_STRING  Name,
+	IN BOOL             DEF_VAL(IgnoreCase, TRUE),
+	IN PWSTR            DEF_VAL(UpcaseTable, NULL) OPTIONAL
+)
+{
+	return Rtl::IsNameInExpression(Expression, Name, IgnoreCase, UpcaseTable);
+}
+
+
+ULONG_PTR GetOpCodeSize32_2(PVOID Buffer)
+{
+	return LdeGetOpCodeSize32(Buffer);
+}
+
+ULONG_PTR GetOpCodeSize64_2(PVOID Buffer)
+{
+	return LdeGetOpCodeSize64(Buffer);
+}
+
+ULONG_PTR GetOpCodeSize_2(PVOID Buffer)
+{
+#if ML_AMD64
+	return GetOpCodeSize64(Buffer);
+#elif ML_X86
+	return GetOpCodeSize32(Buffer);
+#endif
+}
+
+
 ML_NAMESPACE_BEGIN(Nls);
 
 NTSTATUS
@@ -12548,6 +12581,7 @@ NTSTATUS OpenPredefinedKeyHandle(PHANDLE KeyHandle, HANDLE PredefinedKey, ACCESS
 	ULONG_PTR           Length;
 	NTSTATUS            Status;
 	OBJECT_ATTRIBUTES   ObjectAttributes;
+	UNICODE_STRING      AttributeValue;
 	UNICODE_STRING      KeyPath;
 	PWSTR               LocalKeyBuffer;
 
@@ -12600,7 +12634,8 @@ NTSTATUS OpenPredefinedKeyHandle(PHANDLE KeyHandle, HANDLE PredefinedKey, ACCESS
 		NO_BREAK;
 
 	case KEY_INDEX(HKEY_MACHINE_CLASS):
-		InitializeObjectAttributes(&ObjectAttributes, PUSTR(L"\\Registry\\Machine\\Software\\Classes"), OBJ_CASE_INSENSITIVE, NULL, NULL);
+		RtlInitUnicodeString(&AttributeValue, L"\\Registry\\Machine\\Software\\Classes");
+		InitializeObjectAttributes(&ObjectAttributes, &AttributeValue, OBJ_CASE_INSENSITIVE, NULL, NULL);
 		Status = XOpenKey(KeyHandle, DesiredAccess, &ObjectAttributes);
 		break;
 
@@ -12613,12 +12648,14 @@ NTSTATUS OpenPredefinedKeyHandle(PHANDLE KeyHandle, HANDLE PredefinedKey, ACCESS
 #endif // r3
 
 	case KEY_INDEX(HKEY_LOCAL_MACHINE):
-		InitializeObjectAttributes(&ObjectAttributes, PUSTR(L"\\Registry\\Machine"), OBJ_CASE_INSENSITIVE, NULL, NULL);
+		RtlInitUnicodeString(&AttributeValue, L"\\Registry\\Machine");
+		InitializeObjectAttributes(&ObjectAttributes, &AttributeValue, OBJ_CASE_INSENSITIVE, NULL, NULL);
 		Status = XOpenKey(KeyHandle, DesiredAccess, &ObjectAttributes);
 		break;
 
 	case KEY_INDEX(HKEY_USERS):
-		InitializeObjectAttributes(&ObjectAttributes, PUSTR(L"\\Registry\\User"), OBJ_CASE_INSENSITIVE, NULL, NULL);
+		RtlInitUnicodeString(&AttributeValue, L"\\Registry\\User");
+		InitializeObjectAttributes(&ObjectAttributes, &AttributeValue, OBJ_CASE_INSENSITIVE, NULL, NULL);
 		Status = XOpenKey(KeyHandle, DesiredAccess, &ObjectAttributes);
 		break;
 
@@ -12630,7 +12667,8 @@ NTSTATUS OpenPredefinedKeyHandle(PHANDLE KeyHandle, HANDLE PredefinedKey, ACCESS
 		break;
 
 	case KEY_INDEX(HKEY_CURRENT_CONFIG):
-		InitializeObjectAttributes(&ObjectAttributes, PUSTR(L"\\Registry\\Machine\\System\\CurrentControlSet\\Hardware Profiles\\Current"), OBJ_CASE_INSENSITIVE, NULL, NULL);
+		RtlInitUnicodeString(&AttributeValue, L"\\Registry\\Machine\\System\\CurrentControlSet\\Hardware Profiles\\Current");
+		InitializeObjectAttributes(&ObjectAttributes, &AttributeValue, OBJ_CASE_INSENSITIVE, NULL, NULL);
 		Status = XOpenKey(KeyHandle, DesiredAccess, &ObjectAttributes);
 		break;
 

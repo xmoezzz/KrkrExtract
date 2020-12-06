@@ -1406,6 +1406,8 @@ private:
 
 			return reinterpret_cast<INT_PTR>(m_NewBgBrush);
 		}
+		
+		return reinterpret_cast<INT_PTR>(GetStockObject(NULL_BRUSH));
 	}
 
 	VOID OnSettingChange(HWND hWnd, WPARAM wParam, LPARAM lParam)

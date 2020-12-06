@@ -11,78 +11,14 @@ using CommandLine;
 
 namespace KrkrExtract.Lite
 {
+    public class Options
+    {
+        [Option('s', "static", Required = false, HelpText = "Preform static analysis on this binary.")]
+        public bool PreformStaticAnalysis { get; set; }
+    }
+
     static class Program
     {
-        private static bool ConsoleIsAttached = false;
-        private static StatusForm m_StatusForm = new StatusForm();
-
-        private static bool NotifyError(string Info)
-        {
-            if (ConsoleIsAttached == false)
-            {
-                ConsoleIsAttached = NativeHelper.AllocConsole();
-            }
-
-            try
-            {
-                MessageBox.Show(Info, "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Console.WriteLine(Info);
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool NotifyStatus(string Info)
-        {
-            if (ConsoleIsAttached == false)
-            {
-                ConsoleIsAttached = NativeHelper.AllocConsole();
-            }
-
-            try
-            {
-                m_StatusForm.Text = Info;
-                Console.WriteLine(Info);
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
-
-        private static bool NotifyStart()
-        {
-            try
-            {
-                m_StatusForm.Begin();
-                return true;
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
-        }
-
-
-        private static bool NotifyEnd()
-        {
-            try
-            {
-                m_StatusForm.End();
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
-
-
         [STAThread]
         static void Main()
         {
@@ -90,28 +26,26 @@ namespace KrkrExtract.Lite
             Application.SetCompatibleTextRenderingDefault(false);
             NativeHelper.SetProcessDPIAware();
 
-            var DllLoader = new BuiltinDlls();
-            DllLoader.ResolveInternalDlls();
+            var UnmanagedDllStatus = EmbeddedDllClass.LoadUnmanagedDlls();
 
             Environment.SetEnvironmentVariable("KrkrRunMode", "Local");
-            
+
             var args = Environment.GetCommandLineArgs();
-
-            if (args.Length >= 2)
+            if (args.Length > 2)
             {
-                string ProgramName = args[1];
-                bool RunStaticAnalysis = true;
-                if (args.Length >= 3 && args[2].ToLower() == "-noana")
-                {
-                    RunStaticAnalysis = false;
-                }
-
-                var Module = new StaticAnalysisAndCreateProcess(NotifyStatus, NotifyError, NotifyStart, NotifyEnd);
-                Module.Run(ProgramName, RunStaticAnalysis);
+                Parser.Default.ParseArguments<Options>(args)
+                   .WithParsed<Options>(o =>
+                   {
+                       var filename = args.Last();
+                       var Module = new StaticAnalysisAndCreateProcess(true);
+                       var finalStatus = UnmanagedDllStatus && o.PreformStaticAnalysis;
+                       Module.Run(filename, finalStatus);
+                       Environment.Exit(0);
+                   });
             }
             else
             {
-                Application.Run(new Form1());
+                Application.Run(new Form1(UnmanagedDllStatus));
             }
         }
     }

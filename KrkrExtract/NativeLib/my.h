@@ -7321,6 +7321,10 @@ UnmapDllSection(
 _ML_C_TAIL_
 
 
+ULONG_PTR GetOpCodeSize_2(PVOID Buffer);
+ULONG_PTR GetOpCodeSize32_2(PVOID Buffer);
+ULONG_PTR GetOpCodeSize64_2(PVOID Buffer);
+
 PVOID LookupImportTable(PVOID ImageBase, PCSTR DllName, PCSTR RoutineName);
 PVOID LookupImportTable(PVOID ImageBase, PCSTR DllName, ULONG Hash);
 
@@ -7876,7 +7880,7 @@ PVOID WalkOpCode64T(PVOID Buffer, LONG_PTR Size, T Callback)
 	{
 		ULONG_PTR Length;
 
-		Length = GetOpCodeSize64(_Buffer);
+		Length = GetOpCodeSize64_2(_Buffer);
 
 		if (NT_SUCCESS(Callback(_Buffer, Length, ret)))
 			break;
@@ -7899,7 +7903,7 @@ PVOID WalkOpCodeT(PVOID Buffer, LONG_PTR Size, T Callback)
 	{
 		ULONG_PTR Length;
 
-		Length = GetOpCodeSize(_Buffer);
+		Length = GetOpCodeSize_2(_Buffer);
 
 		if (NT_SUCCESS(Callback(_Buffer, Length, ret)))
 			break;
@@ -10138,11 +10142,21 @@ protected:
 
 
 
+BOOL
+IsNameInExpression2(
+	IN PUNICODE_STRING  Expression,
+	IN PUNICODE_STRING  Name,
+	IN BOOL             DEF_VAL(IgnoreCase, TRUE),
+	IN PWSTR            DEF_VAL(UpcaseTable, NULL) OPTIONAL
+);
+
+
 #define STRING_DEBUG 0
 #define USE_TEMPLATE 1
 
 #pragma warning(push)
 #pragma warning(disable:4172)
+
 
 template<typename STRING_LENGTH_TYPE = USHORT, typename LARGE_LENGTH_TYPE = ULONG>
 class StringImplementT
@@ -10372,7 +10386,7 @@ protected:
 		Name.MaximumLength = Name.Length;
 		Name.Buffer = GetBuffer();
 
-		return Rtl::IsNameInExpression(&Expr, &Name, IgnoreCase);
+		return IsNameInExpression2(&Expr, &Name, IgnoreCase);
 	}
 
 	VOID ToLower()
@@ -10475,6 +10489,88 @@ protected:
 	}
 };
 
+
+
+
+ML_NAMESPACE_BEGIN(Reg);
+
+PVOID
+AllocateKeyInfo(
+	ULONG_PTR Size
+);
+
+VOID
+FreeKeyInfo(
+	PVOID Info
+);
+
+NTSTATUS
+OpenPredefinedKeyHandle(
+	PHANDLE     KeyHandle,
+	HANDLE      PredefinedKey,
+	ACCESS_MASK DEF_VAL(DesiredAccess, KEY_ALL_ACCESS)
+);
+
+NTSTATUS
+OpenKey(
+	PHANDLE     KeyHandle,
+	HANDLE      hKey,
+	ACCESS_MASK DesiredAccess,
+	PCWSTR      SubKey
+);
+
+NTSTATUS
+CloseKeyHandle(
+	HANDLE KeyHandle
+);
+
+NTSTATUS
+GetKeyValue(
+	HANDLE                      hKey,
+	PCWSTR                      SubKey,
+	PCWSTR                      ValueName,
+	KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+	PVOID                       KeyValueInformation,
+	ULONG                       Length,
+	PULONG                      DEF_VAL(ResultLength, NULL),
+	ULONG                       DEF_VAL(Flags, 0)
+);
+
+NTSTATUS
+GetKeyValue(
+	HANDLE                          hKey,
+	PCWSTR                          SubKey,
+	PCWSTR                          ValueName,
+	PKEY_VALUE_PARTIAL_INFORMATION* Value
+);
+
+NTSTATUS
+SetKeyValue(
+	HANDLE      hKey,
+	PCWSTR      SubKey,
+	PCWSTR      ValueName,
+	ULONG       ValueType,
+	LPCVOID     ValueData,
+	DWORD       ValueDataLength,
+	ULONG_PTR   Flags = 0
+);
+
+NTSTATUS
+DeleteKey(
+	HANDLE      hKey,
+	PCWSTR      SubKey,
+	ULONG_PTR   Flags = 0
+);
+
+NTSTATUS
+DeleteKeyValue(
+	HANDLE      hKey,
+	PCWSTR      SubKey,
+	PCWSTR      ValueName,
+	ULONG_PTR   Flags = 0
+);
+
+ML_NAMESPACE_END_(Reg);
 
 //typedef StringImplementT<> StringImplement;
 
@@ -11841,6 +11937,9 @@ inline unsigned int MurmurHash32(const void * key, int len, unsigned int seed = 
 
 #pragma warning(pop)
 
+LONG_PTR MlInitialize();
+LONG_PTR MlUnInitialize();
+
 
 template<typename TYPE, ULONG_PTR INITIAL_TABLE_SIZE = 521>
 class HashTableT
@@ -12994,6 +13093,7 @@ protected:
 			VOID
 		);
 
+	
 	BOOL
 		IsNameInExpression(
 			IN PUNICODE_STRING  Expression,
@@ -13963,7 +14063,7 @@ protected:
 		OpJR10 = 0xA0000000,
 	};
 
-	typedef struct
+	typedef struct _TRAMPOLINE_NAKED_CONTEXT
 	{
 
 #if ML_X86
@@ -15355,13 +15455,6 @@ protected:
 	}
 
 
-
-ML_NAMESPACE
-
-LONG_PTR MlInitialize();
-LONG_PTR MlUnInitialize();
-
-ML_NAMESPACE_END;
 
 
 	using namespace ml::Native;

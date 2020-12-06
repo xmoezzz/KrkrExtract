@@ -19,29 +19,26 @@ namespace KrkrExtract.Lite
     {
 
         private StaticAnalysisAndCreateProcess m_Module = null;
-        public Form1()
+        private bool GlobalStaticAnalysisModuleIsLoaded = false;
+
+        public Form1(bool StaticAnalysisModuleIsLoaded)
         {
             InitializeComponent();
-            StatusLabel.Text = "";
-            m_Module = new StaticAnalysisAndCreateProcess(NotifyStatus, NotifyError, NotifyStart, NotifyEnd);
-            if (!StaticAnalysisAndCreateProcess.CheckStaticAnalysisIsPresent())
-            {
-                StaticAnalysisCheckBox.Enabled = false;
-                StaticAnalysisCheckBox.Checked = false;
-                ProgressBar.Enabled = false;
-                StatusLabel.Text = "No static analysis module.";
-            }
-            else
+            m_Module = new StaticAnalysisAndCreateProcess(false);
+            GlobalStaticAnalysisModuleIsLoaded = StaticAnalysisModuleIsLoaded;
+
+            if (StaticAnalysisModuleIsLoaded)
             {
                 StaticAnalysisCheckBox.Enabled = true;
                 StaticAnalysisCheckBox.Checked = true;
                 ProgressBar.Enabled = true;
             }
-        }
-
-        private void StaticAnalysisCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-
+            else
+            {
+                StaticAnalysisCheckBox.Enabled = false;
+                StaticAnalysisCheckBox.Checked = false;
+                ProgressBar.Enabled = false;
+            }
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
@@ -52,91 +49,27 @@ namespace KrkrExtract.Lite
                 e.Effect = DragDropEffects.None;
         }
 
-        private bool NotifyStart()
-        {
-            try
-            {
-                ProgressBar.Style = ProgressBarStyle.Marquee;
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool NotifyEnd()
-        {
-            try
-            {
-                ProgressBar.Style = ProgressBarStyle.Blocks;
-                ProgressBar.Value = ProgressBar.Minimum;
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private bool NotifyStatus(string Info)
-        {
-            try
-            {
-                StatusLabel.Text = Info;
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool NotifyError(string Info)
-        {
-            try
-            {
-                MessageBox.Show(Info, "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch(Exception e)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            if (m_Module.InTask())
-                return;
-
+            this.Enabled = false;
             string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+
             if (FileList.Length > 1)
             {
-                MessageBox.Show("DrapDrop only accepts one file", "KrkrExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    "DrapDrop only accepts one file",
+                    "KrkrExtract", 
+                    MessageBoxButtons.OK, 
+                    MessageBoxIcon.Error
+                );
+
+                this.Enabled = true;
                 return;
             }
 
             string ProgramName = FileList[0];
-            m_Module.Run(ProgramName, StaticAnalysisCheckBox.Checked);
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            m_Module.KillSubProcess();
-        }
-
-        private bool ConsoleIsAttached = false;
-
-        private void StatusLabel_TextChanged(object sender, EventArgs e)
-        {
-            if (ConsoleIsAttached == false)
-            {
-                ConsoleIsAttached = NativeHelper.AllocConsole();
-            }
+            m_Module.Run(ProgramName, StaticAnalysisCheckBox.Checked && GlobalStaticAnalysisModuleIsLoaded);
+            this.Enabled = true;
         }
     }
 }

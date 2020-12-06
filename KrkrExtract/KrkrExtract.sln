@@ -20,33 +20,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrzUniversalPatch", "Krkr
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99} = {DAA25F59-2B60-422E-9AF6-BE56CF70DA99}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrFile", "KrkrFile\KrkrFile.vcxproj", "{656AF14C-E697-49B8-885C-3395A6727342}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PatchLoader", "PatchLoader\PatchLoader.vcxproj", "{874DAFBC-E177-449E-9BC4-550987A5569A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99} = {DAA25F59-2B60-422E-9AF6-BE56CF70DA99}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrFilePacker", "KrkrFilePacker\KrkrFilePacker.vcxproj", "{991DAFA9-6382-460D-9737-1B2DE0E01DA2}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeLib", "NativeLib\NativeLib.vcxproj", "{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrkrExtract", "KrkrExtract\KrkrExtract.csproj", "{BE5B4141-7B11-4993-8E33-6B432E34CECF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5} = {C1073E4A-0389-457A-89C4-5319BA1B05A5}
-		{06306AED-150D-4B51-B02A-C67872B0C8D2} = {06306AED-150D-4B51-B02A-C67872B0C8D2}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoaderHelper", "LoaderHelper\LoaderHelper.vcxproj", "{C1073E4A-0389-457A-89C4-5319BA1B05A5}"
-	ProjectSection(ProjectDependencies) = postProject
-		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99} = {DAA25F59-2B60-422E-9AF6-BE56CF70DA99}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrkrExtract.UI.Legacy", "KrkrExtract.UI.Legacy\KrkrExtract.UI.Legacy.csproj", "{06306AED-150D-4B51-B02A-C67872B0C8D2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeContextMenuHandler", "KeContextMenuHandler\KeContextMenuHandler.csproj", "{0041073D-2FA7-4B35-B904-9C606C89C8CD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrkrExtractInstaller", "KrkrExtractInstaller\KrkrExtractInstaller.csproj", "{444E0A08-8DB6-4627-831A-BBFA75CC2037}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone_static", "capstone_static\capstone_static.vcxproj", "{5B01D900-2359-44CA-9914-6B0C6AFB7BE7}"
 EndProject
@@ -59,11 +38,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "libpng\libpng.vcxproj", "{D6973076-9317-4EF2-A0B8-B7A18AC0713E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrkrExtract.Lite", "KrkrExtract.Lite\KrkrExtract.Lite.csproj", "{049B04AF-3DF1-49CE-B968-2F5D8279273C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5} = {C1073E4A-0389-457A-89C4-5319BA1B05A5}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrkrExtract.Config", "KrkrExtract.Config\KrkrExtract.Config.csproj", "{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KrkrExtract.UI.Lite", "KrkrExtract.UI.Lite\KrkrExtract.UI.Lite.vcxproj", "{E736EA18-AF20-4E43-9C6A-0218A915A6A9}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -96,20 +70,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeLib.64", "NativeLib.6
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeLib.Arm64", "NativeLib.Arm64\NativeLib.Arm64.vcxproj", "{57153B75-E237-400D-82A8-105F7D348F61}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DetoursNT.Arm64", "DetoursNT.Arm64\DetoursNT.Arm64.vcxproj", "{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoadHelper.32x32", "LoadHelper.32x32\LoadHelper.32x32.vcxproj", "{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoadHelper.64x32", "LoadHelper.64x32\LoadHelper.64x32.vcxproj", "{42049ED8-01D2-4F37-AF3A-CC5928441351}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4A55A82D-6917-4581-B202-BCCCA697D89A} = {4A55A82D-6917-4581-B202-BCCCA697D89A}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoadHelper.Arm64x32", "LoadHelper.Arm64x32\LoadHelper.Arm64x32.vcxproj", "{42B33EB1-BFA9-4ADA-857F-D179F2700876}"
-	ProjectSection(ProjectDependencies) = postProject
-		{57153B75-E237-400D-82A8-105F7D348F61} = {57153B75-E237-400D-82A8-105F7D348F61}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|ARM = Release|ARM
@@ -133,13 +93,6 @@ Global
 		{B0493974-0D01-4557-A98A-AD16D0C60651}.Release|x64.ActiveCfg = Release|Win32
 		{B0493974-0D01-4557-A98A-AD16D0C60651}.Release|x86.ActiveCfg = Release|Win32
 		{B0493974-0D01-4557-A98A-AD16D0C60651}.Release|x86.Build.0 = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|ARM.ActiveCfg = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|ARM64.ActiveCfg = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|KrkrUniversalPlatform.Build.0 = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|x64.ActiveCfg = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|x86.ActiveCfg = Release|Win32
-		{656AF14C-E697-49B8-885C-3395A6727342}.Release|x86.Build.0 = Release|Win32
 		{874DAFBC-E177-449E-9BC4-550987A5569A}.Release|ARM.ActiveCfg = Release|Win32
 		{874DAFBC-E177-449E-9BC4-550987A5569A}.Release|ARM64.ActiveCfg = Release|Win32
 		{874DAFBC-E177-449E-9BC4-550987A5569A}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
@@ -147,13 +100,6 @@ Global
 		{874DAFBC-E177-449E-9BC4-550987A5569A}.Release|x64.ActiveCfg = Release|Win32
 		{874DAFBC-E177-449E-9BC4-550987A5569A}.Release|x86.ActiveCfg = Release|Win32
 		{874DAFBC-E177-449E-9BC4-550987A5569A}.Release|x86.Build.0 = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|ARM.ActiveCfg = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|ARM64.ActiveCfg = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|KrkrUniversalPlatform.Build.0 = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|x64.ActiveCfg = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|x86.ActiveCfg = Release|Win32
-		{991DAFA9-6382-460D-9737-1B2DE0E01DA2}.Release|x86.Build.0 = Release|Win32
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}.Release|ARM.ActiveCfg = Release|Win32
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}.Release|ARM64.ActiveCfg = Release|Win32
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
@@ -161,53 +107,6 @@ Global
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}.Release|x64.ActiveCfg = Release|Win32
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}.Release|x86.ActiveCfg = Release|Win32
 		{DAA25F59-2B60-422E-9AF6-BE56CF70DA99}.Release|x86.Build.0 = Release|Win32
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|ARM.ActiveCfg = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|ARM.Build.0 = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|ARM64.Build.0 = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|KrkrUniversalPlatform.Build.0 = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|x64.ActiveCfg = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|x64.Build.0 = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|x86.ActiveCfg = Release|Any CPU
-		{BE5B4141-7B11-4993-8E33-6B432E34CECF}.Release|x86.Build.0 = Release|Any CPU
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|ARM.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|ARM64.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|KrkrUniversalPlatform.Build.0 = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|x64.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|x86.ActiveCfg = Release|Win32
-		{C1073E4A-0389-457A-89C4-5319BA1B05A5}.Release|x86.Build.0 = Release|Win32
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|ARM.ActiveCfg = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|ARM.Build.0 = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|ARM64.Build.0 = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|KrkrUniversalPlatform.Build.0 = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|x64.ActiveCfg = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|x64.Build.0 = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|x86.ActiveCfg = Release|Any CPU
-		{06306AED-150D-4B51-B02A-C67872B0C8D2}.Release|x86.Build.0 = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|ARM.ActiveCfg = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|ARM.Build.0 = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|ARM64.Build.0 = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|KrkrUniversalPlatform.Build.0 = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|x64.ActiveCfg = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|x64.Build.0 = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|x86.ActiveCfg = Release|Any CPU
-		{0041073D-2FA7-4B35-B904-9C606C89C8CD}.Release|x86.Build.0 = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|ARM.ActiveCfg = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|ARM.Build.0 = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|ARM64.Build.0 = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|KrkrUniversalPlatform.Build.0 = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|x64.ActiveCfg = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|x64.Build.0 = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|x86.ActiveCfg = Release|Any CPU
-		{444E0A08-8DB6-4627-831A-BBFA75CC2037}.Release|x86.Build.0 = Release|Any CPU
 		{5B01D900-2359-44CA-9914-6B0C6AFB7BE7}.Release|ARM.ActiveCfg = Release|Win32
 		{5B01D900-2359-44CA-9914-6B0C6AFB7BE7}.Release|ARM64.ActiveCfg = Release|Win32
 		{5B01D900-2359-44CA-9914-6B0C6AFB7BE7}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
@@ -253,16 +152,6 @@ Global
 		{049B04AF-3DF1-49CE-B968-2F5D8279273C}.Release|x64.Build.0 = Release|Any CPU
 		{049B04AF-3DF1-49CE-B968-2F5D8279273C}.Release|x86.ActiveCfg = Release|Any CPU
 		{049B04AF-3DF1-49CE-B968-2F5D8279273C}.Release|x86.Build.0 = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|ARM.ActiveCfg = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|ARM.Build.0 = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|ARM64.Build.0 = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|KrkrUniversalPlatform.Build.0 = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|x64.ActiveCfg = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|x64.Build.0 = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|x86.ActiveCfg = Release|Any CPU
-		{11D8D54B-69B8-4938-8835-A1B6F9E12B9F}.Release|x86.Build.0 = Release|Any CPU
 		{E736EA18-AF20-4E43-9C6A-0218A915A6A9}.Release|ARM.ActiveCfg = Release|Win32
 		{E736EA18-AF20-4E43-9C6A-0218A915A6A9}.Release|ARM64.ActiveCfg = Release|Win32
 		{E736EA18-AF20-4E43-9C6A-0218A915A6A9}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
@@ -319,34 +208,6 @@ Global
 		{57153B75-E237-400D-82A8-105F7D348F61}.Release|KrkrUniversalPlatform.Build.0 = Release|ARM64
 		{57153B75-E237-400D-82A8-105F7D348F61}.Release|x64.ActiveCfg = Release|ARM64
 		{57153B75-E237-400D-82A8-105F7D348F61}.Release|x86.ActiveCfg = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|ARM.ActiveCfg = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|ARM64.ActiveCfg = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|ARM64.Build.0 = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|KrkrUniversalPlatform.ActiveCfg = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|KrkrUniversalPlatform.Build.0 = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|x64.ActiveCfg = Release|ARM64
-		{C78B9003-FC49-4BBF-8F29-52FAD48BB58A}.Release|x86.ActiveCfg = Release|ARM64
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|ARM.ActiveCfg = Release|Win32
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|ARM64.ActiveCfg = Release|Win32
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|KrkrUniversalPlatform.Build.0 = Release|Win32
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|x64.ActiveCfg = Release|Win32
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|x86.ActiveCfg = Release|Win32
-		{EF1520D6-D866-49D3-A1F5-58AE1FA45F71}.Release|x86.Build.0 = Release|Win32
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|ARM.ActiveCfg = Release|x64
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|ARM64.ActiveCfg = Release|x64
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|KrkrUniversalPlatform.ActiveCfg = Release|x64
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|KrkrUniversalPlatform.Build.0 = Release|x64
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|x64.ActiveCfg = Release|x64
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|x64.Build.0 = Release|x64
-		{42049ED8-01D2-4F37-AF3A-CC5928441351}.Release|x86.ActiveCfg = Release|x64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|ARM.ActiveCfg = Release|ARM64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|ARM64.ActiveCfg = Release|ARM64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|ARM64.Build.0 = Release|ARM64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|KrkrUniversalPlatform.ActiveCfg = Release|ARM64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|KrkrUniversalPlatform.Build.0 = Release|ARM64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|x64.ActiveCfg = Release|ARM64
-		{42B33EB1-BFA9-4ADA-857F-D179F2700876}.Release|x86.ActiveCfg = Release|ARM64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
