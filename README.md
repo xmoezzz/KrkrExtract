@@ -31,7 +31,7 @@ A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)
 
 
 ## Build
-* vs2017 only
+* vs2019
 * Win10 SDK (10.0.17763.0)
 * Only `Release` build is supported
 
