@@ -194,7 +194,7 @@ PackInfo MatchXp3ArchiveKind(std::vector<Xp3ItemGeneral>& Chunks)
 			if (Validator.second->Validate(Chunks[i].Buffer.get(), Chunks[i].ChunkSize.LowPart, Magic) && Magic == Chunks[i].Magic) {
 				Characteristic.push_back(Validator.first);
 				HitCache = TRUE;
-				continue;
+				break;
 			}
 
 			//PrintConsoleW(L"chunk magic : %08x %08x\n", Magic, Chunks[i].Magic);

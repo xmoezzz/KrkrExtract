@@ -10,35 +10,18 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Diagnostics;
-using WindowsPE;
-using Newtonsoft.Json;
 
 namespace KrkrExtract.Lite
 {
     public partial class Form1 : Form
     {
 
-        private StaticAnalysisAndCreateProcess m_Module = null;
-        private bool GlobalStaticAnalysisModuleIsLoaded = false;
+        private CreateProcess m_Module = null;
 
-        public Form1(bool StaticAnalysisModuleIsLoaded)
+        public Form1()
         {
             InitializeComponent();
-            m_Module = new StaticAnalysisAndCreateProcess(false);
-            GlobalStaticAnalysisModuleIsLoaded = StaticAnalysisModuleIsLoaded;
-
-            if (StaticAnalysisModuleIsLoaded)
-            {
-                StaticAnalysisCheckBox.Enabled = true;
-                StaticAnalysisCheckBox.Checked = true;
-                ProgressBar.Enabled = true;
-            }
-            else
-            {
-                StaticAnalysisCheckBox.Enabled = false;
-                StaticAnalysisCheckBox.Checked = false;
-                ProgressBar.Enabled = false;
-            }
+            m_Module = new CreateProcess(false);
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
@@ -68,7 +51,7 @@ namespace KrkrExtract.Lite
             }
 
             string ProgramName = FileList[0];
-            m_Module.Run(ProgramName, StaticAnalysisCheckBox.Checked && GlobalStaticAnalysisModuleIsLoaded);
+            m_Module.Run(ProgramName);
             this.Enabled = true;
         }
     }

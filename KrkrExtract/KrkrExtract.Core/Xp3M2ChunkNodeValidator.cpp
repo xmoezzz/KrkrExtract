@@ -47,6 +47,10 @@ BOOL NTAPI Xp3M2ChunkNodeValidator::Validate(PBYTE Buffer, ULONG Size, DWORD& M2
 		return FALSE;
 	}
 
+	if (Chunk.FileNameLength == 0) {
+		return FALSE;
+	}
+
 	if (Chunk.FileNameLength * sizeof(WCHAR) + Offset > Size) {
 		return FALSE;
 	}
