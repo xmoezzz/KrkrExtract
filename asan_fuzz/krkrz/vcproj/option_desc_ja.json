@@ -1,0 +1,1040 @@
+[
+	{
+		"category":"システム全般",
+		"options":[
+			{
+				"caption":"データ保存場所",
+				"description":"吉里吉里が様々なデータを保存する場所を指定します。\n\n指定する文字列中には以下の特殊な文字列を埋め込む事ができます。\n\n$(exepath)  この文字列はSystem.exePathに置き換えられます。\n\n$(appdatapath)  この文字列はSystem.appDataPathに置き換えられます。\n\n$(personalpath)  この文字列はSystem.personalPathに置き換えれます。\n\n$(vistapath)  この文字列は、OSがVista以降の場合には$(appdatapath)の内容に、Vista未満の場合は$(exepath)の内容に置き換えられます。\n\nこのオプションの値は、System.dataPath プロパティで取得することができます。",
+				"name":"datapath",
+				"type":"string",
+				"length":255,
+				"user":false,
+				"value":"$(exepath)\\savedata"
+			},
+			{
+				"caption":"処理ウェイト",
+				"description":"トランジション(画面切り替え)時などに、各処理をウェイトをかけながら特定の時間間隔で呼び出すことによりにCPUの使用を制限し、CPU使用率を低減させるかどうかの設定です。\n\n「ウェイトをかけない」を指定するとウェイトをかけずに実行するため、トランジション(画面切り替え)時にCPUを100%使い切る事になります。\n\n12～120(Hz)の各数値を設定すると、その周期で処理を行います。数値が小さければ小さいほどCPUへの負担は小さくなりますが、動作がなめらかで無くなる可能性があります。環境によってはあまり効果がないこともありえます。\n\nこの設定は、グラフィック-垂直同期待ちが「使用する」の設定の場合は無視されます。",
+				"name":"contfreq",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"0", "desc":"ウェイトをかけない", "default":true },
+					{ "value":"12", "desc":"12Hz" },
+					{ "value":"15", "desc":"15Hz" },
+					{ "value":"25", "desc":"25Hz" },
+					{ "value":"30", "desc":"30Hz" },
+					{ "value":"45", "desc":"45Hz" },
+					{ "value":"50", "desc":"50Hz" },
+					{ "value":"60", "desc":"60Hz" },
+					{ "value":"70", "desc":"70Hz" },
+					{ "value":"75", "desc":"75Hz" },
+					{ "value":"80", "desc":"80Hz" },
+					{ "value":"83", "desc":"83Hz" },
+					{ "value":"90", "desc":"90Hz" },
+					{ "value":"93", "desc":"93Hz" },
+					{ "value":"100", "desc":"100Hz" },
+					{ "value":"107", "desc":"107Hz" },
+					{ "value":"120", "desc":"120Hz" }
+				]
+			},
+			{
+				"caption":"メモリ使用量",
+				"description":"使用するメモリの使用量の設定です。\n\n「低い」を選択すると「通常」を選択したときよりもメモリを節約して使用するようになりますが、パフォーマンスは低下します。「低い」を選択すると、「グラフィック-画像キャッシュ制限」は強制的に「キャッシュを行わない」の設定であると見なされます。",
+				"name":"memusage",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"normal", "desc":"通常", "default":true },
+					{ "value":"low", "desc":"低い" }
+				]
+			},
+			{
+				"caption":"タイマの精度",
+				"description":"タイマの精度の設定です。\n\n「高い」を指定すると動作のもたつきが改善される場合がありますが、パフォーマンスが低下する場合もあります。このオプションは、NT 系 OS (NT/2000/XP/Vista以降) においてのみ意味を持ちます。",
+				"name":"timerprec",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"normal", "desc":"通常", "default":true },
+					{ "value":"higher", "desc":"やや高い" },
+					{ "value":"high", "desc":"高い" }
+				]
+			},
+			{
+				"caption":"タイマイベント許容量制限",
+				"description":"タイマイベントの許容量を制限するかどうかの設定です。\n\n「する」を指定すると、処理の遅いコンピュータ上でシステムの処理が追いつかず、ユーザの操作がしづらくなる状況を回避できる場合があります。",
+				"name":"laxtimer",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"しない", "default":true },
+					{ "value":"yes", "desc":"する" }
+				]
+			},
+			{
+				"caption":"低優先度",
+				"description":"トランジション(画面切り替え)時などに実行の優先度を低くするかどうかの設定です。\n\n「する」を指定するとトランジション時の音飛びなどが改善される場合があります。",
+				"name":"lowpri",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"しない", "default":true },
+					{ "value":"yes", "desc":"する" }
+				]
+			},
+			{
+				"caption":"起動スクリプト",
+				"description":"最初に実行するスクリプトファイル名を指定します。",
+				"name":"startup",
+				"type":"string",
+				"length":255,
+				"user":false,
+				"value":"startup.tjs"
+			},
+			{
+				"caption":"例外時起動エディタ",
+				"description":"例外発生時に起動するエディタを指定します。",
+				"name":"exceptionexe",
+				"type":"string",
+				"length":255,
+				"user":false,
+				"value":"notepad.exe"
+			},
+			{
+				"caption":"例外時起動エディタオプション",
+				"description":"例外発生時にエディタを起動する時に指定するオプションを指定します。\n\n%filepath% はファイルパスに、%line%は行番号に変換されます。",
+				"name":"exceptionarg",
+				"type":"string",
+				"length":255,
+				"user":false,
+				"value":"%filepath%"
+			},
+			{
+				"caption":"LFHを使用する",
+				"description":"メモリの断片化を抑止する機能を有効化します。\n\nメモリ不足等のエラーが発生した場合、有効にすると解消される可能性があります。Vista以降ではどちらを指定しても有効になります。",
+				"name":"uselfh",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"しない", "default":true },
+					{ "value":"yes", "desc":"する" }
+				]
+			},
+			{
+				"caption":"プロセス・CRTヒープのコンパクションを行う",
+				"description":"ガベージ・コレクションが実行される時、プロセス・CRTヒープのコンパクションも行います。\n\nメモリ不足エラーが頻発する時に有効にすると改善する可能性がありますが、コンパクション実行に少し処理時間がかかります。",
+				"name":"ghcompact",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"しない", "default":true },
+					{ "value":"yes", "desc":"する" }
+				]
+			}
+		]
+	},
+	{
+		"category":"入力",
+		"options":[
+			{
+				"caption":"マウスホイール回転検出方法",
+				"description":"マウスホイールの回転をどのように検出するかの設定です。\n\n「使わない」を選択するとマウスホイールは使用不可能になります。\n\n「DirectInput」を選択するとDirectInputを使用するようになります。\n\n「ウィンドウメッセージ」を選択するとDirectInputを使用せずにマウスホイールの回転を検出するようになります。\n\n設定を変えるとマウスホイール関連の不具合が改善される可能性があります。",
+				"name":"wheel",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"使わない" },
+					{ "value":"dinput", "desc":"DirectInput", "default":true },
+					{ "value":"message", "desc":"ウィンドウメッセージ" }
+				]
+			},
+			{
+				"caption":"パッド使用可否",
+				"description":"パッド(ジョイスティック)を使用するかどうかの設定です。\n\n「使わない」を選択するとパッドは使用不可能になります。パッドを正常に検出できない場合、あるいはパッドを正常に使用できない場合に「使わない」の設定にしてください。",
+				"name":"joypad",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"使わない" },
+					{ "value":"dinput", "desc":"使う", "default":true }
+				]
+			},
+			{
+				"caption":"パッドキーリピートディレイ",
+				"description":"パッド(ジョイスティック)のキーリピートまでの時間をミリ秒単位で指定します。",
+				"name":"paddelay",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"100", "desc":"100ミリ秒" },
+					{ "value":"200", "desc":"200ミリ秒" },
+					{ "value":"300", "desc":"300ミリ秒" },
+					{ "value":"400", "desc":"400ミリ秒" },
+					{ "value":"500", "desc":"500ミリ秒", "default":true },
+					{ "value":"600", "desc":"600ミリ秒" },
+					{ "value":"700", "desc":"700ミリ秒" },
+					{ "value":"800", "desc":"800ミリ秒" },
+					{ "value":"900", "desc":"900ミリ秒" },
+					{ "value":"1000", "desc":"1000ミリ秒" },
+					{ "value":"-1", "desc":"キーリピートしない" }
+				]
+			},
+			{
+				"caption":"パッドキーリピート間隔",
+				"description":"パッド(ジョイスティック)のキーリピートの間隔をミリ秒単位で指定します。値が小さいほどリピートが高速になります。",
+				"name":"padinterval",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"10", "desc":"10ミリ秒" },
+					{ "value":"20", "desc":"20ミリ秒" },
+					{ "value":"30", "desc":"30ミリ秒", "default":true },
+					{ "value":"40", "desc":"40ミリ秒" },
+					{ "value":"50", "desc":"50ミリ秒" },
+					{ "value":"60", "desc":"60ミリ秒" },
+					{ "value":"70", "desc":"70ミリ秒" },
+					{ "value":"80", "desc":"80ミリ秒" },
+					{ "value":"90", "desc":"90ミリ秒" },
+					{ "value":"100", "desc":"100ミリ秒" },
+					{ "value":"200", "desc":"200ミリ秒" },
+					{ "value":"300", "desc":"300ミリ秒" },
+					{ "value":"400", "desc":"400ミリ秒" },
+					{ "value":"500", "desc":"500ミリ秒" },
+					{ "value":"700", "desc":"700ミリ秒" },
+					{ "value":"1000", "desc":"1000ミリ秒" }
+				]
+			},
+			{
+				"caption":"IME状態制御",
+				"description":"IME(日本語などの変換入力ソフト)の状態制御を行うかどうかの設定です。\n\n「行わない」を選択すると、日本語などの入力ができない不具合を回避できる可能性があります。",
+				"name":"controlime",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"行う", "default":true },
+					{ "value":"no", "desc":"行わない" }
+				]
+			}
+		]
+	},
+	{
+		"category":"サウンド",
+		"options":[
+			{
+				"caption":"PCM デコードスレッド優先順位",
+				"description":"PCMのデコードを行うスレッドの実行優先順位です。\n\n再生中に音飛びをする場合に優先順位を高くしてみてください。",
+				"name":"wsdecpri",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"0", "desc":"アイドル(最低)" },
+					{ "value":"1", "desc":"低い", "default":true },
+					{ "value":"2", "desc":"通常以下" },
+					{ "value":"3", "desc":"通常" },
+					{ "value":"4", "desc":"通常以上" },
+					{ "value":"5", "desc":"高い" }
+				]
+			},
+			{
+				"caption":"DirectSound ソフトウェアミキシング",
+				"description":"DirectSoundでソフトウェアを使ってミキシングを行うかどうかの設定です。\n\n設定を変更すると 音切れや音飛びが改善される場合があります。",
+				"name":"wssoft",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"ソフトウェアのみ", "default":true },
+					{ "value":"no", "desc":"ハードウェア優先" }
+				]
+			},
+			{
+				"caption":"DirectSound セカンダリバッファ再生成",
+				"description":"DirectSoundでセカンダリバッファを常に再生成するかどうかの設定です。\n\n設定を変更すると 再生開始時の音切れや音飛びが改善される場合があります。",
+				"name":"wsrecreate",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"常に再生成" },
+					{ "value":"no", "desc":"必要に応じて再生成", "default":true }
+				]
+			},
+			{
+				"caption":"DirectSound セカンダリバッファ長さ",
+				"description":"DirectSoundセカンダリバッファの長さを指定します。\n\n一般に長くとると再生が安定しますが、メモリを消費します。",
+				"name":"wsl1len",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"250", "desc":"250ms" },
+					{ "value":"375", "desc":"375ms" },
+					{ "value":"500", "desc":"500ms" },
+					{ "value":"625", "desc":"625ms" },
+					{ "value":"750", "desc":"750ms" },
+					{ "value":"875", "desc":"875ms" },
+					{ "value":"1000", "desc":"1000ms", "default":true },
+					{ "value":"1125", "desc":"1125ms" },
+					{ "value":"1250", "desc":"1250ms" },
+					{ "value":"1375", "desc":"1375ms" },
+					{ "value":"1500", "desc":"1500ms" },
+					{ "value":"1625", "desc":"1625ms" },
+					{ "value":"1750", "desc":"1750ms" },
+					{ "value":"1875", "desc":"1875ms" },
+					{ "value":"2000", "desc":"2000ms" },
+					{ "value":"2125", "desc":"2125ms" },
+					{ "value":"2250", "desc":"2250ms" },
+					{ "value":"2375", "desc":"2375ms" },
+					{ "value":"2500", "desc":"2500ms" },
+					{ "value":"2625", "desc":"2625ms" },
+					{ "value":"2750", "desc":"2750ms" },
+					{ "value":"2875", "desc":"2875ms" },
+					{ "value":"3000", "desc":"3000ms" },
+					{ "value":"3125", "desc":"3125ms" },
+					{ "value":"3250", "desc":"3250ms" },
+					{ "value":"3375", "desc":"3375ms" },
+					{ "value":"3500", "desc":"3500ms" },
+					{ "value":"3625", "desc":"3625ms" },
+					{ "value":"3750", "desc":"3750ms" },
+					{ "value":"3875", "desc":"3875ms" },
+					{ "value":"4000", "desc":"4000ms" },
+					{ "value":"4500", "desc":"4500ms" },
+					{ "value":"5000", "desc":"5000ms" },
+					{ "value":"5500", "desc":"5500ms" },
+					{ "value":"6000", "desc":"6000ms" },
+					{ "value":"6500", "desc":"6500ms" },
+					{ "value":"7000", "desc":"7000ms" },
+					{ "value":"7500", "desc":"7500ms" },
+					{ "value":"8000", "desc":"8000ms" },
+					{ "value":"8500", "desc":"8500ms" },
+					{ "value":"9000", "desc":"9000ms" },
+					{ "value":"9500", "desc":"9500ms" },
+					{ "value":"10000", "desc":"10000ms" }
+				]
+			},
+			{
+				"caption":"DirectSound セカンダリ補助バッファ長さ",
+				"description":"DirectSoundセカンダリバッファ用の補助バッファの長さを指定します。\n\n一般に長くとると再生が安定しますが、メモリを消費します。",
+				"name":"wsl2len",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"250", "desc":"250ms" },
+					{ "value":"375", "desc":"375ms" },
+					{ "value":"500", "desc":"500ms" },
+					{ "value":"625", "desc":"625ms" },
+					{ "value":"750", "desc":"750ms" },
+					{ "value":"875", "desc":"875ms" },
+					{ "value":"1000", "desc":"1000ms", "default":true },
+					{ "value":"1125", "desc":"1125ms" },
+					{ "value":"1250", "desc":"1250ms" },
+					{ "value":"1375", "desc":"1375ms" },
+					{ "value":"1500", "desc":"1500ms" },
+					{ "value":"1625", "desc":"1625ms" },
+					{ "value":"1750", "desc":"1750ms" },
+					{ "value":"1875", "desc":"1875ms" },
+					{ "value":"2000", "desc":"2000ms" },
+					{ "value":"2125", "desc":"2125ms" },
+					{ "value":"2250", "desc":"2250ms" },
+					{ "value":"2375", "desc":"2375ms" },
+					{ "value":"2500", "desc":"2500ms" },
+					{ "value":"2625", "desc":"2625ms" },
+					{ "value":"2750", "desc":"2750ms" },
+					{ "value":"2875", "desc":"2875ms" },
+					{ "value":"3000", "desc":"3000ms" },
+					{ "value":"3125", "desc":"3125ms" },
+					{ "value":"3250", "desc":"3250ms" },
+					{ "value":"3375", "desc":"3375ms" },
+					{ "value":"3500", "desc":"3500ms" },
+					{ "value":"3625", "desc":"3625ms" },
+					{ "value":"3750", "desc":"3750ms" },
+					{ "value":"3875", "desc":"3875ms" },
+					{ "value":"4000", "desc":"4000ms" },
+					{ "value":"4500", "desc":"4500ms" },
+					{ "value":"5000", "desc":"5000ms" },
+					{ "value":"5500", "desc":"5500ms" },
+					{ "value":"6000", "desc":"6000ms" },
+					{ "value":"6500", "desc":"6500ms" },
+					{ "value":"7000", "desc":"7000ms" },
+					{ "value":"7500", "desc":"7500ms" },
+					{ "value":"8000", "desc":"8000ms" },
+					{ "value":"8500", "desc":"8500ms" },
+					{ "value":"9000", "desc":"9000ms" },
+					{ "value":"9500", "desc":"9500ms" },
+					{ "value":"10000", "desc":"10000ms" }
+				]
+			},
+			{
+				"caption":"DirectSound ミュート",
+				"description":"DirectSound でアプリケーションが非アクティブあるいは最小化した際にミュートするか(音量を下げるか)どうかの設定です。\n\n「ミュートしない」を選択するとミュートは行われません。\n\n「最小化時」や「非アクティブ」では、それぞれアプリケーションが最小化したとき、非アクティブになったときにミュートされます。",
+				"name":"wsmute",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"never", "desc":"ミュートしない", "default":true },
+					{ "value":"minimize", "desc":"最小化時" },
+					{ "value":"deactive", "desc":"非アクティブ時" }
+				]
+			},
+			{
+				"caption":"DirectSound ミュート音量",
+				"description":"「DirectSound ミュート」でのミュート時の音量の設定です。\n\n「0%」を指定すると完全に無音となり、「50%」を指定すると半分の音量(約-6dB)となります。",
+				"name":"wsmutevol",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"0", "desc":"0%(-∞dB)", "default":true },
+					{ "value":"5", "desc":"5%(-26.0dB)" },
+					{ "value":"10", "desc":"10%(-20.0dB)" },
+					{ "value":"15", "desc":"15%(-16.5dB)" },
+					{ "value":"20", "desc":"20%(-14.0dB)" },
+					{ "value":"25", "desc":"25%(-12.0dB)" },
+					{ "value":"30", "desc":"30%(-10.5dB)" },
+					{ "value":"35", "desc":"35%(-9.1dB)" },
+					{ "value":"40", "desc":"40%(-8.0dB)" },
+					{ "value":"45", "desc":"45%(-6.9dB)" },
+					{ "value":"50", "desc":"50%(-6.0dB)" },
+					{ "value":"55", "desc":"55%(-5.2dB)" },
+					{ "value":"60", "desc":"60%(-4.4dB)" },
+					{ "value":"65", "desc":"65%(-3.7dB)" },
+					{ "value":"70", "desc":"70%(-3.1dB)" },
+					{ "value":"75", "desc":"75%(-2.5dB)" },
+					{ "value":"80", "desc":"80%(-1.9dB)" },
+					{ "value":"85", "desc":"85%(-1.4dB)" },
+					{ "value":"90", "desc":"90%(-0.9dB)" },
+					{ "value":"95", "desc":"95%(-0.4dB)" }
+				]
+			},
+			{
+				"caption":"DirectSound 強制フォーマット変換",
+				"description":"DirectSoundに再生させるPCMデータを、指定の形式に強制的に変換するかどうかの設定です。\n\n設定を変更すると再生時の障害が改善する場合があります。\n\n「16bit整数モノラルに変換」を選択すると「DirectSound 強制4ch再生」の設定は無視されます。",
+				"name":"wsforcecnv",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"none", "desc":"変換しない", "default":true },
+					{ "value":"i16", "desc":"16bit整数に変換" },
+					{ "value":"i16m", "desc":"16bit整数モノラルに変換" }
+				]
+			},
+			{
+				"caption":"DirectSound 3D制御",
+				"description":"DirectSoundで3D制御を行うかどうかの設定です。\n\n「する」を選択すると、サウンドの3D制御が有効になります(アプリケーションによっては効果がありません)。また、多くの環境では、ステレオやモノラルのサウンドが、サラウンドスピーカーを使用するように拡張されて再生されます。「する」を選択すると「DirectSound 強制4ch再生」の設定は無視されます。",
+				"name":"wsuse3d",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"しない", "default":true },
+					{ "value":"yes", "desc":"する" }
+				]
+			},
+			{
+				"caption":"DirectSound 強制4ch再生",
+				"description":"DirectSoundでステレオやモノラルのサウンドを再生する場合に、強制的にリアスピーカーを含む4chで再生させるかどうかの設定です。\n\n「する」を設定すると、ステレオやモノラルのサウンドがフロントスピーカーでしか再生されない環境でも、フロントスピーカーとリアスピーカーの両方でサウンドを再生させることができます。",
+				"name":"wsexpandquad",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"no", "desc":"しない", "default":true },
+					{ "value":"yes", "desc":"する" }
+				]
+			},
+			{
+				"caption":"DirectSound プライマリバッファ周波数",
+				"description":"DirectSoundのプライマリバッファの再生周波数の設定です。\n\n設定を変更しても再生状態に変化がない場合もあります。",
+				"name":"wsfreq",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"8000", "desc":"8kHz" },
+					{ "value":"11025", "desc":"11kHz" },
+					{ "value":"12000", "desc":"12kHz" },
+					{ "value":"16000", "desc":"16kHz" },
+					{ "value":"22050", "desc":"22kHz" },
+					{ "value":"24000", "desc":"24kHz" },
+					{ "value":"32000", "desc":"32kHz" },
+					{ "value":"44100", "desc":"44.1kHz", "default":true },
+					{ "value":"48000", "desc":"48kHz" },
+					{ "value":"64000", "desc":"64kHz" },
+					{ "value":"88200", "desc":"88.2kHz" },
+					{ "value":"96000", "desc":"96kHz" }
+				]
+			},
+			{
+				"caption":"DirectSound プライマリバッファビット数",
+				"description":"DirectSoundのプライマリバッファの再生ビット数の設定です。\n\n設定を変更しても再生状態に変化がない場合もあります。",
+				"name":"wsbits",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"i8", "desc":"8bit整数" },
+					{ "value":"i16", "desc":"16bit整数", "default":true },
+					{ "value":"i24", "desc":"24bit整数" },
+					{ "value":"i32", "desc":"32bit整数" },
+					{ "value":"f32", "desc":"32bit浮動小数点数" }
+				]
+			},
+			{
+				"caption":"DirectSound プライマリバッファ再生制御",
+				"description":"DirectSoundのプライマリバッファに対して再生/停止の制御を行うかどうかの設定です。\n\n設定を変更すると 音切れや音飛びが改善される場合があります。",
+				"name":"wscontrolpri",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"制御を行う", "default":true },
+					{ "value":"no", "desc":"制御を行わない" }
+				]
+			},
+			{
+				"caption":"DirectSound プライマリバッファ設定試行レベル",
+				"description":"DirectSoundプライマリバッファのフォーマットを指定する際にどれほど多くの設定を試すかの設定です。\n\nレベル 0 を指定すると、ステレオ 16bit整数のフォーマットの設定を試行します。\n\nレベル 1 を指定すると レベル 0 を試行する前に、システムのスピーカー設定に従ったチャンネル数、16bit整数でのフォーマットの設定を試行します。\n\nレベル 2 を指定すると レベル 1 を試行する前に、「DirectSound プライマリバッファビット数」で指定されたビット数、システムのスピーカー設定に従ったチャンネル数、WAVEFORMATEX 構造体によるフォーマットの設定を試行します。\n\n「すべて」を指定すると レベル 2 を試行する前に、レベル 2 と同様の設定で WAVEFORMATEXTENSIBLE 構造体によるフォーマットの指定を試行します。",
+				"name":"wspritry",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"0", "desc":"レベル0" },
+					{ "value":"1", "desc":"レベル1" },
+					{ "value":"2", "desc":"レベル2" },
+					{ "value":"all", "desc":"すべて", "default":true }
+				]
+			}
+		]
+	},
+	{
+		"category":"グラフィック",
+		"options":[
+			{
+				"caption":"画像キャッシュ制限",
+				"description":"画像キャッシュに使用するメモリの最大値の設定です。\n\n実行中に頻繁にスワップが起こる場合は「キャッシュを行わない」に設定すると改善される場合があります。",
+				"name":"gclim",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"auto", "desc":"自動(推奨)", "default":true },
+					{ "value":"0", "desc":"キャッシュを行わない" },
+					{ "value":"4", "desc":"4MB" },
+					{ "value":"8", "desc":"8MB" },
+					{ "value":"12", "desc":"12MB" },
+					{ "value":"16", "desc":"16MB" },
+					{ "value":"20", "desc":"20MB" },
+					{ "value":"24", "desc":"24MB" },
+					{ "value":"28", "desc":"28MB" },
+					{ "value":"32", "desc":"32MB" },
+					{ "value":"36", "desc":"36MB" },
+					{ "value":"40", "desc":"40MB" },
+					{ "value":"44", "desc":"44MB" },
+					{ "value":"48", "desc":"48MB" },
+					{ "value":"52", "desc":"52MB" },
+					{ "value":"56", "desc":"56MB" },
+					{ "value":"60", "desc":"60MB" },
+					{ "value":"64", "desc":"64MB" },
+					{ "value":"68", "desc":"68MB" },
+					{ "value":"72", "desc":"72MB" },
+					{ "value":"76", "desc":"76MB" },
+					{ "value":"80", "desc":"80MB" },
+					{ "value":"84", "desc":"84MB" },
+					{ "value":"88", "desc":"88MB" },
+					{ "value":"92", "desc":"92MB" },
+					{ "value":"96", "desc":"96MB" },
+					{ "value":"100", "desc":"100MB" },
+					{ "value":"104", "desc":"104MB" },
+					{ "value":"108", "desc":"108MB" },
+					{ "value":"112", "desc":"112MB" },
+					{ "value":"116", "desc":"116MB" },
+					{ "value":"120", "desc":"120MB" },
+					{ "value":"124", "desc":"124MB" },
+					{ "value":"128", "desc":"128MB" },
+					{ "value":"132", "desc":"132MB" },
+					{ "value":"136", "desc":"136MB" },
+					{ "value":"140", "desc":"140MB" },
+					{ "value":"144", "desc":"144MB" },
+					{ "value":"148", "desc":"148MB" },
+					{ "value":"152", "desc":"152MB" },
+					{ "value":"156", "desc":"156MB" },
+					{ "value":"160", "desc":"160MB" },
+					{ "value":"164", "desc":"164MB" },
+					{ "value":"168", "desc":"168MB" },
+					{ "value":"172", "desc":"172MB" },
+					{ "value":"176", "desc":"176MB" },
+					{ "value":"180", "desc":"180MB" },
+					{ "value":"184", "desc":"184MB" },
+					{ "value":"188", "desc":"188MB" },
+					{ "value":"192", "desc":"192MB" },
+					{ "value":"196", "desc":"196MB" },
+					{ "value":"200", "desc":"200MB" },
+					{ "value":"204", "desc":"204MB" },
+					{ "value":"208", "desc":"208MB" },
+					{ "value":"212", "desc":"212MB" },
+					{ "value":"216", "desc":"216MB" },
+					{ "value":"220", "desc":"220MB" },
+					{ "value":"224", "desc":"224MB" },
+					{ "value":"228", "desc":"228MB" },
+					{ "value":"232", "desc":"232MB" },
+					{ "value":"236", "desc":"236MB" },
+					{ "value":"240", "desc":"240MB" },
+					{ "value":"244", "desc":"244MB" },
+					{ "value":"248", "desc":"248MB" },
+					{ "value":"252", "desc":"252MB" },
+					{ "value":"256", "desc":"256MB" }
+				]
+			},
+			{
+				"caption":"フルスクリーン時の画面解像度",
+				"description":"フルスクリーン時の画面解像度の設定です。\n\n「自動」を選択すると、最も適している画面解像度を自動的に選択して使用します。この場合は、縦横比が同じ解像度のうち、プログラム内で指定されている解像度にフィットする解像度があればそれを選択しますが、そのような解像度がない場合は解像度を変えずにエンジン側で拡大表示をします。この設定の場合は、「フルスクリーン時のエンジンによる拡大表示」に「しない」が指定されていても、常に「モニタ内にフィットさせる」であるとみなされます。\n\n「縦横比が同じ解像度」を選択すると、画面の縦横比が非フルスクリーン時と同じ解像度のうち、もっとも近い解像度が選択されます。\n\n「最も近い解像度」を選択すると、プログラム内で指定されている解像度に最も近い解像度が選択されますが、非フルスクリーン時と同じ縦横比の解像度が選択される保証はありません。ブラウン管モニタや、画面のアスペクト比を保ったままでの拡大表示に対応している液晶モニタなどでは、この設定が適している場合があります。\n\n「解像度を変えない」を選択すると、非フルスクリーン時の解像度のまま、解像度を変更しなくなります。",
+				"name":"fsres",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"auto", "desc":"自動" },
+					{ "value":"proportional", "desc":"縦横比が同じ解像度" },
+					{ "value":"nearest", "desc":"最も近い解像度" },
+					{ "value":"nochange", "desc":"解像度を変えない", "default":true }
+				]
+			},
+			{
+				"caption":"フルスクリーン時のエンジンによる拡大表示",
+				"description":"フルスクリーン時に、エンジン側による画面の拡大をどのように行うかどうかを指定します。\n\n「モニタ内にフィットさせる」を選択すると必要に応じてエンジンによる画面の拡大を行います。この際、画面はモニタ内にそのすべてが収まるように拡大されます。画面のうち、もし上下や左右に隙間ができる場合はそこは真っ黒になります。\n\n「モニタいっぱいに拡大する」を選択するとエンジンによる画面の拡大を行いますが、隙間ができないようにめいいっぱいまで拡大が行われます。このため、モニタ外にはみ出る領域が発生する可能性があります。\n\n「しない」を選択するとエンジンによる画面の拡大は常に行われません。\n\n「フルスクリーン時の画面解像度」が「自動」の場合は、この設定を「しない」にしても常に「モニタ内にフィットさせる」であると見なされます。",
+				"name":"fszoom",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"inner", "desc":"モニタ内にフィットさせる", "default":true },
+					{ "value":"outer", "desc":"モニタいっぱいに拡大する" },
+					{ "value":"no", "desc":"しない" }
+				]
+			},
+			{
+				"caption":"画像演算の分割処理",
+				"description":"画像演算を細かく分割して行うかどうかの設定です。\n\n設定を変えると、画面のちらつきを抑えられる場合がありますが、描画のパフォーマンスが低下する場合もあります。\n\n「ダブルバッファリング」を使用する設定にした場合は、この設定は「しない」以外に設定することをお勧めします。",
+				"name":"gsplit",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"する", "default":true },
+					{ "value":"int", "desc":"インターレース分割" },
+					{ "value":"bidi", "desc":"双方向分割" },
+					{ "value":"no", "desc":"しない" }
+				]
+			},
+			{
+				"caption":"拡大表示時のスムージング",
+				"description":"拡大表示時のスムージングを行うかどうかの設定です。\n\nここで言うスムージングとは、「フルスクリーン時の画面解像度」の設定によってはエンジンが画面を拡大しますが、この際に「なめらかに」拡大を行うかどうかを表します。スムージングを行わない場合は「ダブルバッファリング」に「GDI使用」が選択された物と見なされます。",
+				"name":"smoothzoom",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"する", "default":true },
+					{ "value":"no", "desc":"しない" }
+				]
+			},
+			{
+				"caption":"アンチエイリアス文字描画方式",
+				"description":"アンチエイリアス文字描画方法の設定です。\n\n設定を変えると、文字が表示されない、文字が崩れるなどの問題が改善される場合があります。\n\nリサンプリング(4×4) は リサンプリング(8×8) よりも高速ですが、精度は低くなります。",
+				"name":"aamethod",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"auto", "desc":"自動", "default":true },
+					{ "value":"res8", "desc":"リサンプリング(8×8)" },
+					{ "value":"res4", "desc":"リサンプリング(4×4)" },
+					{ "value":"api", "desc":"Windows API" }
+				]
+			},
+			{
+				"caption":"JPEG画像デコード精度",
+				"description":"JPEG画像のデコード(展開)の精度の設定です。\n\n「高い」を選択すると精度は高くなりますが、デコードは低速になります。\n\n「低い」を選択すると精度は低くなりますが、デコードは高速になります。",
+				"name":"jpegdec",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"high", "desc":"高い" },
+					{ "value":"normal", "desc":"標準", "default":true },
+					{ "value":"low", "desc":"低い" }
+				]
+			},
+			{
+				"caption":"描画スレッド数",
+				"description":"描画処理時に、使用するスレッドの数の設定です。\n\n描画スレッドを複数設定することで、マルチコア環境での描画パフォーマンスを向上させられる可能性がありますが、逆にパフォーマンスが低下する場合もあります。",
+				"name":"drawthread",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"auto", "desc":"自動(プロセッサ数に等しいスレッド)" },
+					{ "value":"1", "desc":"1スレッド", "default":true },
+					{ "value":"2", "desc":"2スレッド" },
+					{ "value":"4", "desc":"4スレッド" },
+					{ "value":"8", "desc":"8スレッド" }
+				]
+			},
+			{
+				"caption":"ビットマップメモリ確保方式",
+				"description":"ビットマップ用のメモリをどのようにして確保するかを指定します。\n\n通常はprocessheapのままで問題ありません。",
+				"name":"bitmapallocator",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"processheap", "desc":"プロセスヒープを使用", "default":true },
+					{ "value":"globalalloc", "desc":"GlobalAllocで確保" },
+					{ "value":"separateheap", "desc":"分割ヒープを使用" },
+					{ "value":"malloc", "desc":"mallocを使用" }
+				]
+			},
+			{
+				"caption":"初期分割ヒープサイズ",
+				"description":"ビットマップメモリ確保方式で分割ヒープを使用を選んだ場合の初期サイズを指定します。",
+				"name":"bitmapheapsize",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"auto", "desc":"自動(推奨)", "default":true },
+					{ "value":"0", "desc":"自動的に拡大" },
+					{ "value":"64", "desc":"64MB" },
+					{ "value":"128", "desc":"128MB" },
+					{ "value":"256", "desc":"256MB" },
+					{ "value":"512", "desc":"512MB" },
+					{ "value":"1024", "desc":"1GB" },
+					{ "value":"2048", "desc":"2GB" }
+				]
+			}
+		]
+	},
+	{
+		"category":"CPU 機能",
+		"options":[
+			{
+				"caption":"MMX",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpummx",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"3DNow!",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpu3dn",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSE",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpusse",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"CMOVcc",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpucmov",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"Enhanced 3DNow!",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpue3dn",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"EMMX (MMX2)",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpuemmx",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSE2",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpusse2",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSE3",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpusse3",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSSE3",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpussse3",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSE4.1",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpusse41",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSE4.2",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpusse42",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"SSE4a",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpusse4a",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"AVX",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpuavx",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"AVX2",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpuavx2",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"FMA3",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpufma3",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"AES",
+				"description":"CPU 認識トラブルが起こったときに調整してください。",
+				"name":"cpuaes",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"yes", "desc":"使用可能であれば使用する", "default":true },
+					{ "value":"no", "desc":"使用可能であっても使用しない" },
+					{ "value":"force", "desc":"強制的に使用する" }
+				]
+			},
+			{
+				"caption":"Core Limitation",
+				"description":"動作に問題が起こった時に調整してください。",
+				"name":"cpucorelimit",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"yes", "desc":"制限する", "default":true },
+					{ "value":"no", "desc":"制限しない" }
+				]
+			}
+		]
+	},
+	{
+		"category":"デバッグ",
+		"options":[
+			{
+				"caption":"デバッグモード",
+				"description":"デバッグモードを有効にするかどうかの設定です。\n\n「有効」を選択すると吉里吉里はデバッグモードで動作し、いくつかのデバッグ支援機能が有効になりますが、実行速度は低下します。",
+				"name":"debug",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"no", "desc":"無効", "default":true },
+					{ "value":"yes", "desc":"有効" }
+				]
+			},
+			{
+				"caption":"ファイルへのログ",
+				"description":"コンソールのログをファイルに出力するかどうかの設定です。\n\n「出力する」を選択するとファイルに追加しながらログを出力します。\n\n「クリア」を選択するとファイルの内容をクリアしてからログを開始します。",
+				"name":"forcelog",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"no", "desc":"出力しない", "default":true },
+					{ "value":"yes", "desc":"出力する" },
+					{ "value":"clear", "desc":"クリア" }
+				]
+			},
+			{
+				"caption":"エラー時のファイルへのログ",
+				"description":"エラーが発生したときに、自動的にコンソールのログをファイルへ出力するかどうかの設定です。\n\n「出力する」を選択するとファイルに追加しながらログを出力します。\n\n「クリア」を選択するとファイルの内容をクリアしてからログを開始します。",
+				"name":"logerror",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"no", "desc":"出力しない" },
+					{ "value":"yes", "desc":"出力する", "default":true },
+					{ "value":"clear", "desc":"クリア" }
+				]
+			},
+			{
+				"caption":"ROTテーブルへの登録",
+				"description":"ムービー再生時にROT(Running Object Table)へ登録するかどうかの設定です。「する」を選択すると、DirectX SDK付属のGraphEditを用いてムービー再生トラブルの解析を行うことができます。「ポーズ」を選択すると、さらにグラフの構築直後にメッセージボックスを表示して一時停止するようになります。",
+				"name":"movie_reg_rot",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"no", "desc":"いいえ", "default":true },
+					{ "value":"yes", "desc":"はい" },
+					{ "value":"pause", "desc":"ポーズ" }
+				]
+			}
+		]
+	},
+	{
+		"category":"システム互換性",
+		"options":[
+			{
+				"caption":"アーカイブデリミタ",
+				"description":"アーカイブ名とアーカイブ内ストレージ名を区切る文字の設定です。\n\n2.19 beta 14 より、デフォルトが '#' から '>' に変更になりました。2.19 beta 14 未満を想定しているアプリケーションでは、この設定を '#' にしないと動作しない可能性があります。",
+				"name":"arcdelim",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":">", "desc":"'>'を使う", "default":true },
+					{ "value":"#", "desc":"'#'を使う" }
+				]
+			},
+			{
+				"caption":"後置'!'演算子の動作",
+				"description":"後置'!'演算子(eval)の動作の設定です。\n\nTJS2の後置'!'演算子は式をglobalコンテキスト上で実行していましたが、2.21 beta 9 より、this コンテキスト上で実行するようになりました。2.21 beta 9 未満を想定しているアプリケーションでは、この設定を「global上で式を評価」にしないと動作しない可能性があります。",
+				"name":"evalcontext",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"this", "desc":"this上で式を評価", "default":true },
+					{ "value":"global", "desc":"global上で式を評価" }
+				]
+			},
+			{
+				"caption":"Layer.holdAlphaのデフォルト",
+				"description":"Layer.holdAlpha プロパティ(アルファチャンネルを保護するか)のデフォルトの値です。\n\n2.23 beta 5 未満を想定しているアプリケーションでは、この設定を「真」にしないと正常に動作しない可能性があります。",
+				"name":"holdalpha",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"false", "desc":"偽", "default":true },
+					{ "value":"true", "desc":"真" }
+				]
+			},
+			{
+				"caption":"前置'*'演算子の動作",
+				"description":"前置'*'演算子(プロパティアクセス迂回)の設定です。\n\nTJS2の前置'*'演算子は、プロパティオブジェクトそのものを、プロパティハンドラを介さずに取り出す演算子でしたが、2.25 beta 1 より、この機能を持つ演算子は前置の'&'となり、前置'*'演算子はプロパティオブジェクトのプロパティハンドラを動作させるための演算子となりました。2.25 beta 1 未満を想定しているアプリケーションでは、この設定を「2.25未満と互換」にしないと正常に動作しない可能性があります。",
+				"name":"unaryaster",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"default", "desc":"2.25以降の動作", "default":true },
+					{ "value":"compat", "desc":"2.25未満と互換" }
+				]
+			},
+			{
+				"caption":"DirectSoundボリュームカーブ",
+				"description":"DirectSoundのボリュームカーブです。\n\nDirectSoundのボリュームカーブは、2.31 2011/6/14 より、より直感的なカーブになりました。",
+				"name":"dsvolfactor",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"3322", "desc":"2.31 以降の動作", "default":true },
+					{ "value":"5000", "desc":"2.31 未満と互換" }
+				]
+			},
+			{
+				"caption":"スクリプト読込み文字コード",
+				"description":"スクリプトを読み込むのに使用する文字コードです。",
+				"name":"readencoding",
+				"type":"select",
+				"user":false,
+				"values":[
+					{ "value":"Shift_JIS", "desc":"Shift-JIS" },
+					{ "value":"UTF-8", "desc":"UTF-8", "default":true }
+				]
+			},
+			{
+				"caption":"タッチイベントの無効化",
+				"description":"タッチイベントを無効化して、代わりにマウスイベントを発生させます。",
+				"name":"ignoretouch",
+				"type":"select",
+				"user":true,
+				"values":[
+					{ "value":"false", "desc":"有効", "default":true },
+					{ "value":"true", "desc":"無効" }
+				]
+			}
+		]
+	}
+]

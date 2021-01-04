@@ -1,0 +1,110 @@
+-------------------------------------------------------------------------------
+* QuickStartGuide
+
+Software required to build the project:
+
+- Visual Studio 2012 Update 4 or later.
+
+- nasm 2.10.09 (latest version not checked.)
+	You can download nasm from http://www.nasm.us/ .
+	After downloading it somewhere, make sure it is
+	discoverable by adding it to the PATH environment
+	variable.
+
+Build instructions:
+
+- Open src/core/vc2012/tvpwin32.sln inside Visual Studio.
+
+- Build the tvpwin32 project.
+	The compiled binary will appear at bin/win32/tvpwin32(_d).exe .
+
+- Enjoy!
+
+-------------------------------------------------------------------------------
+* とりあえずコンパイルしたい人向けの説明
+
+吉里吉里Zのコンパイルには下記が必要です。
+
+- Visual Studio 2012 Update 4 以降
+
+- nasm 2.10.09 (最新版は未チェック)
+	http://www.nasm.us/ からダウンロードして
+	あらかじめ nasm.exe のパスを環境変数 PATH に登録しておいてください。
+
+コンパイル方法：
+
+- src/core/vc2012/tvpwin32.sln を VS2012で開きます
+
+- 同ソリューション内の tvpwin32 プロジェクトをビルドします
+
+- bin/win32/tvpwin32(_d).exe にバイナリが出力されます
+-------------------------------------------------------------------------------
+* 快速开始指南
+
+该项目编译所需要的软件环境：
+
+- Visual Studio 2012 with Update 4 或者更新。
+- nasm 2.10.09 （最新版本未测试。）你可以从 http://www.nasm.us/ 下载到 nasm。下载完成安装到某个位置之后，记得配置好环境变量可以在命令提示符窗口中使用。
+
+编译指南：
+
+- 打开 vcproj/tvpwin32.sln。
+- 编译 tvpwin32 项目。编译后的二进制文件会在 bin/win32/tvpwin32(_d).exe 存放。
+- 完成！
+-------------------------------------------------------------------------------
+* Detailed information (in Japanese)
+
+jpeg-6bx ( SIMD版 libjpg )
+nasm 2.10.09 が必要です。
+http://www.nasm.us/
+
+zlib
+MASMが必要です。
+Visual Studio 2012 に入っています。
+
+その他のライブラリには特に別途必要なものはありません。
+
+tvpsnd_ia32
+nasm 2.10.09 が必要です。
+
+
+tvpgl_ia32
+nasm 2.10.09 が必要です。
+
+
+
+自動生成ファイル
+吉里吉里Z本体にはいくつかの自動生成ファイルが存在します。
+自動生成ファイルは直接編集せず、生成元のファイルを編集します。
+生成には主にbatファイルとperlが使用されているので、perlのインストールが必要です。
+各生成ファイルを左に ':' 以降に生成元ファイルを列挙します。
+
+src/core/tjs2/syntax/compile.bat で以下のファイルが生成されます。
+tjs.tab.cpp/tjs.tab.hpp : tjs.y
+tjsdate.tab.cpp/tjsdate.tab.hpp : tjsdate.y
+tjspp.tab.cpp/tjspp.tab.hpp : tjspp.y
+tjsDateWordMap.cc : gen_wordtable.bat
+
+これらのファイルの生成には bison が必要です。
+bison には libiconv2.dll libintl3.dll regex2.dll が必要なので一緒にインストールする必要があります。
+http://gnuwin32.sourceforge.net/packages/bison.htm
+http://gnuwin32.sourceforge.net/packages/libintl.htm
+http://gnuwin32.sourceforge.net/packages/libiconv.htm
+http://gnuwin32.sourceforge.net/packages/regex.htm
+
+
+
+
+src/core/visual/glgen/gengl.bat で以下のファイルが生成されます。
+tvpgl.c/tvpgl.h : maketab.c/tvpps.c
+
+src/core/visual/IA32/compile.bat で以下のファイルが生成されます。
+tvpgl_ia32_intf.c/tvpgl_ia32_intf.h : *.nas
+
+src/core/msg/win32/gen_optdesc_res.bat で以下のファイルが生成されます。
+OptionsDesc.cpp : option_desc_ja.txt
+
+src/core/base/win32/makestub.bat で以下のファイルが生成されます。
+FuncStubs.cpp/FuncStubs.h : makestub.pl内で指定されたヘッダーファイル内のTJS_EXP_FUNC_DEF/TVP_GL_FUNC_PTR_EXTERN_DECLマクロで記述された関数
+tp_stub.cpp/tp_stub.h : 同上
+

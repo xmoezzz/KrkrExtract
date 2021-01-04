@@ -1,0 +1,20 @@
+// IRendererBufferAccess.idl
+import "oaidl.idl";
+[
+    object,
+    uuid(2F8FFFC5-E7BE-497a-9254-DB97639131A6),
+]
+interface IRendererBufferAccess : IUnknown
+{
+    HRESULT SetFrontBuffer( [in] BYTE *buff, [in,out] long *size );
+    HRESULT SetBackBuffer( [in] BYTE *buff, [in,out] long *size );
+    HRESULT GetFrontBuffer( [out] BYTE **buff, [in,out] long *size );
+    HRESULT GetBackBuffer( [out] BYTE **buff, [in,out] long *size );
+}
+//library RendererBufferAccessLib
+//{
+//    coclass RendererBufferAccess
+//    {
+//        [default] interface IRendererBufferAccess
+//    };
+//};

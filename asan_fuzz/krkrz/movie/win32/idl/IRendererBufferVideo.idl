@@ -1,0 +1,20 @@
+// IRendererBufferVideo.idl
+import "oaidl.idl";
+[
+    object,
+    uuid(8B6D85F9-ECD5-4acd-872D-0BA7493204BA),
+
+]
+interface IRendererBufferVideo : IUnknown
+{
+	typedef double REFTIME;
+
+    [propget]
+    HRESULT AvgTimePerFrame([out, retval] REFTIME *pAvgTimePerFrame);
+
+    [propget]
+    HRESULT VideoWidth([out, retval] long *pVideoWidth);
+
+    [propget]
+    HRESULT VideoHeight([out, retval] long *pVideoHeight);
+}

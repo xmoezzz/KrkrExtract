@@ -1,0 +1,399 @@
+全般的に。
+
+文字列をプラグインがわから本体的に返すときは、本体側から渡された文字列バッ
+ファと、そのサイズ ( ゼロ終結文字を含む ) が渡されるので ( ただし例外あり)、
+プラグイン側はその文字列バッファに書き込み、そのサイズを超えて書き込んで
+はならない。文字コードはワイド文字列を用いる。
+
+URL で、ファイルがローカルにある場合は file: を省略できる。また、パス区
+切りは / を使うこととする。
+もちろん、本体側はローカルファイルのみのサポートでもよい。
+
+以下、「サンプル単位」とは、16bit pcm の場合 2byte、8bit pcm の場合は
+1byte を占有する、量子化データの単位である。また、「マルチチャネルサンプル
+単位」とは、モノラルの場合 1 サンプル単位、ステレオの場合 2 サンプル単位
+を占有する、すべてのチャネルを合わせた量子化データの単位である。
+
+
+----------------------------------------------------------------------
+DLL からエクスポートされるもの
+これらの関数はメインスレッドからのみ呼ぶ。
+
+HRESULT _stdcall GetModuleInstance(ITSSModule **out, ITSSStorageProvider *provider,
+	IStream * config, HWND mainwin);
+機能:
+	　モジュールのインスタンスの取得
+プラグイン側:
+	　out に ITSSModule のインスタンスを作成するなどして返す。
+	　provider には、本体側のファイルを開くための ITSSStorageProvider イ
+	ンタフェースが渡されるので、ファイルを開く必要があるときに利用する。
+	　config には、このプラグイン用の設定データを記録してある IStream イ
+	ンタフェースが渡されるが、NULL が渡されたときは設定データは渡されなか
+	ったものとして処理する。
+	　mainwin にはアプリケーションのメインウィンドウのハンドルが渡され
+	ているが、NULL の場合もある。
+本体側:
+	　プラグインを使用するときにこの関数を呼ぶ。out にはプラグインから
+	ITSSModule インタフェースが渡されるので、使用し終わったら Release
+	メソッドで解放する。
+	　config には、そのプラグイン用の設定データファイルなどの IStream
+	インタフェースを渡す ( データは読み込みモードで開けばいい )。面倒な
+	ときや、設定データが無い場合は NULL を渡してもよい。
+	　mainwin にはアプリケーションのメインウィンドウのハンドルを渡すが、
+	NULL でもよい。
+戻り値:
+	S_OK : 正常
+	それ以外 : 異常
+
+
+ULONG _stdcall GetModuleThreadModel(void)
+機能:
+	　モジュールのスレッドモデルを得る
+プラグイン側:
+	　*result にスレッドモデルを返す。
+		0  シングルスレッドモデル ( リエントラントでない )
+		1  アパートメントスレッドモデル ( リエントラントである )
+	　この関数をエクスポートしていないときは、アパートメントスレッドモ
+	デルであると見なされる。
+本体側:
+	　0 が返された場合は、プラグインに対して複数のスレッドから同時にア
+	クセスできない ( 複数スレッドが同時にではなければアクセスすることは
+	できる )。
+	　1 が返された場合は、プラグインに対して複数のスレッドから同時にア
+	クセスはできるが、一つのオブジェクトに対しては複数スレッドから同時
+	にアクセスしてはならない。
+	　プラグインがこの関数をエクスポートしていないときは、アパートメン
+	トスレッドモデルであると見なす。
+戻り値 :
+	0 : シングルスレッドモデル ( リエントラントでない )
+	1 : アパートメントスレッドモデル ( リエントラントである )
+
+
+
+HRESULT _stdcall ShowConfigWindow([in] HWND parentwin, [in]  IStream * storage );
+機能:
+	　設定ダイアログの表示
+プラグイン側:
+	　設定ダイアログを表示する。parentwin には親ウィンドウとなるべきウ
+	ィンドウのハンドルが渡されるので、活用する。設定が終わったら、storage
+	に設定データを格納する。格納形式はプラグインが決める。
+	　設定ダイアログを表示しない場合は、この関数をエクスポートしなくてよい。
+本体側:
+	　設定ダイアログを表示したいときに呼び出す。parentwin には親ウィン
+	ドウとなるべきウィンドウのハンドルを渡す。
+	　storage には設定データを渡すための IStream インタフェースを渡す
+	( ストリームに書き込める必要がある )。
+	　この関数がエクスポートされていないときは、設定ダイアログを表示さ
+	せることはできない。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない
+	それ以外 : 異常
+
+
+
+ULONG _stdcall CanUnloadNow(void);
+機能:
+	　プラグインを解放できるかどうかを返す
+プラグイン側:
+	　この DLL をすぐに解放してもよいかを返す。一般的には、内部に参照カ
+	ウンタをおき、ITSSModule などのインタフェースが作成されたらその参照
+	カウンタをインクリメント、削除されればデクリメントして、その参照カ
+	ウンタを返せばよい。
+本体側:
+	　プラグインを解放するまえにこの関数でチェックすべき。
+	　この関数がエクスポートされていないときは、すぐに解放してかまわない。
+戻り値:
+	0 : 解放可能
+	それ以外 : 解放不可
+
+
+----------------------------------------------------------------------
+ITSSModule
+プラグインにつき１個、必要になるオブジェクト。GetModuleInstance でこの
+インタフェースを返す。
+
+HRESULT _stdcall GetModuleCopyright([in] LPWSTR buffer, [in] unsigned long buflen );
+機能:
+	　モジュールの著作権情報の取得
+プラグイン側:
+	　プラグインの著作権情報を buffer に書き込む。buffer の長さは buflen
+	( ゼロ終結文字を含む ) で与えられているので、これを越えて書き込んで
+	はならない。
+本体側:
+	　プラグインの著作権情報が必要になれば呼び出す。buffer には文字列バ
+	ッファ、buflen にはそのサイズ ( ゼロ終結文字を含む ) を与える。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない
+	それ以外 : 異常
+
+
+HRESULT _stdcall GetModuleDescription([in] LPWSTR buffer, [in] unsigned long buflen );
+機能:
+	　モジュールの追加情報の取得
+プラグイン側:
+	　GetModuleCopyright と同じ。
+本体側:
+	　プラグインの追加情報が必要になれば呼び出す。そのほかは
+	GetModuleCopyright と同じ。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない
+	それ以外 : 異常
+
+
+HRESULT _stdcall GetSupportExts([in] unsigned long index, [in] LPWSTR mediashortname, [in] LPWSTR buf, [in] unsigned long buflen );
+機能:
+	　対応ファイル拡張子の取得
+プラグイン側:
+	　index には、本体側から 0 から順に数値が渡されるので、その数値に対
+	応したファイル拡張子を返す。対応している拡張子インデックスを越えて
+	呼ばれれば、S_FALSE を返す。
+	　mediashortname には、その拡張子に対応するメディア名を書き込むため
+	のバッファへのポインタが渡される。本体側では char[33] で確保されて
+	いるバッファなので、ゼロ終結文字を含んで 32 文字まで書き込むことが
+	できる。
+	　buf には、ファイル拡張子を書き込む。buflen はバッファ長。ファイル
+	拡張子は . (ドット) をふくむ。もし、ファイル形式が拡張子によらない
+	場合は、ドットもなしに空文字を返す ( buf[0]='\0' )。
+本体側:
+	　mediashortname には char[33] で確保したバッファへのポインタを渡す。
+	　buf, buflen には、ファイル拡張子が返されるので、MAX_PATH +1 のバ
+	ッファ長を確保する。
+	　index は 0 からはじめ、プラグインが S_FALSE を返すまで 1 を加えつ
+	つ繰り返し呼び出す。ただし、プラグイン側が S_FALSE を返したときには
+	既にインデックスを越えているので、mediashortname , buf には情報は格
+	納されていない。
+	　buf に空文字列が設定された場合は、そのプラグインを蹴ってもよいし、
+	GetMediaSupport を呼び出してプラグインにその都度対応を確認させるこ
+	ともできる。
+戻り値:
+	S_OK : 正常 ( 情報は格納された )
+	S_FALSE : インデックスを越えている ( 情報は格納されていない )
+	そのほか : 異常
+
+
+HRESULT _stdcall GetMediaInfo([in] LPWSTR url, [out, retval] ITSSMediaBaseInfo ** info );
+機能:
+	　指定メディアの情報を取得
+プラグイン側:
+	　url にはメディアの存在する場所 ( Uniform Resource Locator で ) が
+	渡される。必要であれば、GetModuleInstance で渡された provider を用
+	いてファイルを開き、メディアの内容を得る。
+	　info には、作成した ITSSMediaBaseInfo インタフェース、またはその
+	派生インタフェースを返す。
+本体側:
+	　url にはメディアの存在する場所を渡す。
+	　info には ITSSMediaBaseInfo インタフェースが渡されるので、これで
+	メディアの情報を得る。使用し終わったら Release メソッドで解放するこ
+	と。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない ( 情報は得られない )
+	それ以外 : 異常
+
+
+HRESULT _stdcall GetMediaSupport([in] LPWSTR url );
+機能:
+	　指定メディアをこのプラグインで扱えるか検査
+プラグイン側:
+	　渡された url を頼りに、このメディアが扱える形式であるかどうかを
+	返す。
+本体側:
+	　メディアがプラグインで扱えるかどうかを検査したいときに、このメソ
+	ッドを呼び出す。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない ( GetSupportExts で指定した拡張子を持つ
+		ファイルは例外なく読めるんじゃボケ )
+	それ以外 : 異常
+
+
+HRESULT _stdcall GetMediaInstance([in] LPWSTR url, [out, retval]  IUnknown ** instance );
+機能:
+	　メディア再生用オブジェクトの取得
+プラグイン側:
+	　渡された url を再生することのできる再生用オブジェクトを返し、
+	instance に返す。
+本体側:
+	　url については GetMediaInfo を参照。
+	　プラグインから帰ってくる instance は IUnknown * 型 なので、本体側
+	で instance->QueryInterface メソッドを呼び出し、どのような種類のメ
+	ディア再生用オブジェクトなのかを特定する。現在 ITSSWaveDecoder が規
+	定されている。
+	　instance で返されたオブジェクトを使用し終わったら、Release メソッ
+	ドを呼び出して解放する。
+戻り値:
+	S_OK : 正常
+	それ以外 : 異常
+
+
+----------------------------------------------------------------------
+ITSSMediaBaseInfo
+指定された曲に関する情報を得るためのインタフェース。
+より高度な情報もこのインタフェースから派生したクラスによって得られる。
+
+HRESULT _stdcall GetMediaType([in] LPWSTR shortname, [in] LPWSTR descbuf, [in] unsigned long descbuflen );
+機能:
+	　メディアの種類文字列の取得
+プラグイン側:
+	　このメディアの種類を shortname, descbuf に返す。
+	　shortname については、ITSSModule::GetSupportExts の mediashortname
+	を参照。
+本体側:
+	　メディアの種類に関する情報を得たいときにこのメソッドを呼ぶ。
+	　shortname については、ITSSModule::GetSupportExts の mediashortname
+	を参照。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない
+	それ以外 : 異常
+
+
+HRESULT _stdcall GetLength([out, retval] unsigned long * length );
+機能:
+	　曲長さの取得
+プラグイン側:
+	　このメディアの曲長を *length に ms 単位で返す。
+	　曲長がわからない場合は、メソッドの戻り値として E_NOTIMPL を返すこ
+	と。
+本体側:
+	　メディアの曲長を得たいときにこのメソッドを呼ぶ。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 曲長はわからない
+	それ以外 : 異常
+
+HRESULT _stdcall GetTitle([in] LPWSTR buf, [in] unsigned long buflen );
+機能:
+	　メディアタイトルの取得
+
+
+HRESULT _stdcall GetCopyright([in] LPWSTR buf, [in] unsigned long buflen );
+機能:
+	　メディア著作権情報の取得
+
+
+HRESULT _stdcall GetComment([in] LPWSTR buf, [in] unsigned long buflen );
+機能:
+	　メディアコメントの取得
+
+
+HRESULT _stdcall GetArtist([in] LPWSTR buf, [in] unsigned long buflen );
+機能:
+	　メディアアーティストの取得
+
+
+----------------------------------------------------------------------
+ITSSWaveDecoder
+Wave 形式のファイルをデコードするためのインタフェース。
+
+
+HRESULT _stdcall GetFormat([in] TSSWaveFormat * format );
+機能:
+	　再生フォーマットの取得
+プラグイン側:
+	　format に、このメディアの再生フォーマットを設定する。
+		typedef struct tagTSSWaveFormat
+		{
+			unsigned long dwSamplesPerSec;
+			unsigned long dwChannels;
+			unsigned long dwBitsPerSample;
+			unsigned long dwSeekable;
+			unsigned __int64 ui64TotalSamples; // マルチチャネルサンプル単位
+			unsigned long dwTotalTime;
+			unsigned long dwReserved0;
+			unsigned long dwReserved1;
+		} TSSWaveFormat;
+	　TSSWaveFormat の dwSeekable フィールドは、サンプル数単位精度でシ
+	ーク可能な場合は 2、ms 単位精度でシーク可能な場合は 1、シークがで
+	きない、あるいはシークできても精度が悪いという場合は 0 を入れる。
+本体側:
+	　format には TSSWaveFormat へのポインタを渡す。
+	　プラグイン側からフォーマットが返されるので、再生の準備をする。
+戻り値:
+	S_OK : 正常
+	それ以外 : 異常
+
+
+HRESULT _stdcall Render([in] void * buf, [in] unsigned long bufsamplelen, [out] unsigned long * rendered, [out, retval] unsigned long * continue );
+機能:
+	　現在位置からデコード
+プラグイン側:
+	　現在のデコード位置からデコードをする。
+	　デコードの格納先は buf 、格納すべきサンプル数は bufsamplelen でマ
+	ルチチャネルサンプル単位で示されている。bufsamplelen はバッファのバ
+	イト数ではなく、マルチチャネルサンプル数である。*rendered には実際に
+	デコードしたサンプル数をマルチチャネルサンプル単位で返す。
+	　buf が NULL の場合は出力 PCM を格納する必要はない ( スキップ動作 )。
+	　continue には、デコードが終わったかどうかのデコーダのステータスを
+	返す。まだデコードを続けられる場合は 1 を返し、デコードが終了した場
+	合は 0 を返す。
+	　rendered や continue に NULL が渡された場合はこれらには情報を格納
+	しない。
+本体側:
+	　buf には PCM のサンプルを格納するためのバッファ、bufsamplelen に
+	は、そのバッファに格納できる最大サンプル数を渡す。
+	　プラグインにスキップの動作を行わせたい場合は buf に NULL、bufsamplelen
+	にスキップしたいサンプル数を指定するが、rendered には実際にスキップ
+	されたサンプル数が格納され、それは bufsamplelen よりも少ない場合が
+	ある。
+	　rendered には実際に格納されたサンプル数が渡されるが、bufsamplelen
+	よりも小さい場合がある。また、小さいからと言ってデコードが終わった
+	わけではない。rendered に 0 が返されても、continue が 1 ならば次の
+	サンプルをデコードできる。
+	　continue が 1 で返ってきたときは、続けて次のデコードをすることが
+	できる。0 で返ってきたときは次のデコードはできない。
+戻り値:
+	S_OK : 正常
+	それ以外 : 異常
+
+ド位
+HRESULT _stdcall SetPosition([in] unsigned __int64 samplepos );
+機能:
+	　指定位置へのデコード位置の移動
+プラグイン側:
+	　samplepos には、移動先の位置がマルチチャネルサンプル単位で渡され
+	る ( ms 単位ではない ) ので、その位置にデコード位置を移動する。
+	　プラグインによっては、ms 単位に精度を丸めて移動してもよいが、推
+	奨しない。
+本体側:
+	　シークを行うときに呼び出す。
+戻り値:
+	S_OK : 正常
+	E_NOTIMPL : 実装していない
+	それ以外 : 異常
+
+
+----------------------------------------------------------------------
+ITSSStorageProvider
+本体側で実装し、GetModuleInstance を呼ぶときにこのインタフェースを渡す。
+本体側はアパートメントスレッドモデルでこれを実装する必要がある。
+
+HRESULT _stdcall GetStreamForRead([in] LPWSTR url, [out, retval]  IUnknown ** stream );
+機能:
+	　ストレージの読み込み用IStreamの取得
+プラグイン側:
+	　このメソッドを用いて、指定 URL のファイルを読み込みモードで開くこ
+	とができる。
+	　*stream には作成された IStream インタフェースが返ってくるので、使
+	い終わったら Release する事。
+本体側:
+	　プラグイン側が要求してきたファイルを読み込みモードで開き、その
+	IStream インタフェースを返す。
+戻り値:
+	S_OK : 正常
+	それ以外 : 異常
+
+
+HRESULT _stdcall GetStreamForWrite([in] LPWSTR url, [out, retval]  IUnknown ** stream );
+機能:
+	　ストレージの書き込み用IStreamの取得
+
+HRESULT _stdcall GetStreamForUpdate([in] LPWSTR url, [out, retval]  IUnknown ** stream );
+機能:
+	　ストレージの更新用IStreamの取得
+
+　上記二つは実装する必要なし
+

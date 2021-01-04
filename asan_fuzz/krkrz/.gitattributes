@@ -1,0 +1,11 @@
+*.cpp       encoding=shiftjis
+*.h         encoding=shiftjis
+*.hpp       encoding=shiftjis
+*.cc        encoding=shiftjis
+*.pl        encoding=shiftjis
+*.bat       encoding=shiftjis
+*.y         encoding=shiftjis
+*.sh        encoding=shiftjis
+*.rc        encoding=shiftjis
+*.tjs       encoding=utf-8
+*.ks        encoding=utf-8
