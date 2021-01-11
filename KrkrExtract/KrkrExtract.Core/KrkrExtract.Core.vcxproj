@@ -85,6 +85,7 @@
     <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
+    <ClCompile Include="Alpc.cpp" />
     <ClCompile Include="AmvSystemDecoder.cpp" />
     <ClCompile Include="AmvUnpacker.cpp" />
     <ClCompile Include="argparse.cpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="xxhash.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Alpc.h" />
     <ClInclude Include="argparse.h" />
     <ClInclude Include="AsyncCommandExecutor.h" />
     <ClInclude Include="ChunkReader.h" />
@@ -208,6 +210,7 @@
     <ClInclude Include="unzip.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="WellknownPlugin.h" />
+    <ClInclude Include="WinReg.h" />
     <ClInclude Include="XP3Parser.h" />
     <ClInclude Include="xxhash.h" />
     <ClInclude Include="zconf.h" />

@@ -7,6 +7,7 @@
 #include "RevThread.h"
 #include "AlpcRev.h"
 #include "PrivateStub.h"
+#include "concurrentqueue.h"
 
 
 class ServerImpl final : 
@@ -20,18 +21,9 @@ public:
 	ServerImpl(BOOL IsOfficialServer, ULONG Secret, ULONG HeartbeatTimeoutThreshold = 2000, ULONG HandshakeTimeoutThreshold = 20000);
 	~ServerImpl();
 
-	BOOL RunServer(
-		NotifyServerProgressChangedCallback       NotifyServerProgressChangedStub = nullptr,
-		NotifyServerLogOutputCallback             NotifyServerLogOutputStub       = nullptr,
-		NotifyServerUIReadyCallback               NotifyServerUIReadyStub         = nullptr,
-		NotifyServerMessageBoxCallback            NotifyServerMessageBoxStub      = nullptr,
-		NotifyServerTaskStartAndDisableUICallback NotifyServerTaskStartAndDisableUIStub = nullptr,
-		NotifyServerTaskEndAndEnableUICallback    NotifyServerTaskEndAndEnableUIStub    = nullptr,
-		NotifyServerExitFromRemoteProcessCallback NotifyServerExitFromRemoteProcessStub = nullptr,
-		NotifyServerRaiseErrorCallback            NotifyServerRaiseErrorStub            = nullptr
-		);
-
+	BOOL RunServer();
 	BOOL ShutdownServer();
+	EventMsg* PopEventMessage();
 
 private:
 
@@ -105,8 +97,11 @@ public:
 	BOOL TellClientTaskCloseWindow();
 
 	HANDLE GetRemoteProcessHandle();
+	ULONG  GetRemoteProcessId();
 
 private:
+	HANDLE                                    m_AlpcServerPort         = nullptr;
+	HANDLE                                    m_RemoteProcess          = nullptr;
 	BOOL                                      m_GetHandShakePackage    = FALSE;
 	BOOL                                      m_ServerPortInitialized  = FALSE;
 	BOOL                                      m_IsOfficialServer       = FALSE;
@@ -119,13 +114,6 @@ private:
 	std::atomic<ULONG64>                      m_HeartbeatTimeoutThreshold = 2000;
 	ULONG64                                   m_HandshakeTimeoutThreshold = 20000;
 	ULONG64                                   m_LastHeartbeat = 0;
-	NotifyServerProgressChangedCallback       m_NotifyServerProgressChangedStub       = nullptr;
-	NotifyServerLogOutputCallback             m_NotifyServerLogOutputStub             = nullptr;
-	NotifyServerTaskEndAndEnableUICallback    m_NotifyServerTaskEndAndEnableUIStub    = nullptr;
-	NotifyServerUIReadyCallback               m_NotifyServerUIReadyStub               = nullptr;
-	NotifyServerMessageBoxCallback            m_NotifyServerMessageBoxStub            = nullptr;
-	NotifyServerTaskStartAndDisableUICallback m_NotifyServerTaskStartAndDisableUIStub = nullptr;
-	NotifyServerExitFromRemoteProcessCallback m_NotifyServerExitFromRemoteProcessStub = nullptr;
-	NotifyServerRaiseErrorCallback            m_NotifyServerRaiseErrorStub            = nullptr;
+	moodycamel::ConcurrentQueue<EventMsg*>    m_EventQueue;
 };
 

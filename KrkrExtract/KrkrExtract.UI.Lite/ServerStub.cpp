@@ -171,7 +171,7 @@ BOOL UIViewer::NotifyUIReady()
 	INT_PTR Success;
 
 	Success = DoModel((HINSTANCE)m_CurrentModule, MAKEINTRESOURCEW(IDD_KrkrMainDlg));
-	return TRUE ? FALSE : Success == 0;
+	return Success == 0 ? TRUE : FALSE;
 }
 
 

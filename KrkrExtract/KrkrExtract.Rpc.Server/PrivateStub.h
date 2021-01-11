@@ -14,20 +14,6 @@ enum class RaiseErrorType
 	RAISE_ERROR_REMOTE_GENEROUS = 6
 };
 
-using NotifyServerProgressChangedCallback = void (NTAPI*)(PCWSTR, ULONG64, ULONG64);
-using NotifyServerLogOutputCallback = void (NTAPI*)(LogLevel, PCWSTR, BOOL IsCmd);
-using NotifyServerUIReadyCallback = void (NTAPI*)();
-using NotifyServerMessageBoxCallback = void (NTAPI*)(PCWSTR, ULONG, BOOL);
-using NotifyServerTaskStartAndDisableUICallback = void (NTAPI*)();
-using NotifyServerTaskEndAndEnableUICallback = void (NTAPI*)(BOOL, PCWSTR);
-using NotifyServerExitFromRemoteProcessCallback = void (NTAPI*)();
-
-//
-// Handle this error
-// TRUE  : continue execution
-// FALSE : exit now
-//
-using NotifyServerRaiseErrorCallback = BOOL(NTAPI*)(RaiseErrorType ErrorType, PCWSTR Error);
 
 
 

@@ -75,7 +75,7 @@ NTSTATUS KrkrHook::HookGetProcAddress()
 	case HookMode::HOOK_EPT:
 		Status = HookGetProcAddressEpt();
 		break;
-
+		
 	case HookMode::HOOK_NATIVE:
 		Status = HookGetProcAddressNative();
 		break;

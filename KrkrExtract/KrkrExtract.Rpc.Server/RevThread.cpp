@@ -1,24 +1,21 @@
 #include "RevThread.h"
 #include "Console.h"
+#include <memory>
 #include <RpcSequence.h>
+#include <my.h>
+#include <memory>
+#include <stdint.h>
 
 RevThread::RevThread(
-	AlpcRev*                       Instance, 
-	PCWSTR                         IoPrivatePath, 
-	ULONG                          ShakehandTimeout,
-	ULONG                          Secret,
-	NotifyServerRaiseErrorCallback NotifyServerRaiseError
+	AlpcRev*    Instance,
+	ULONG       ShakehandTimeout,
+	ULONG       Secret
 ) :
 	m_Instance(Instance),
 	m_ShakehandTimeout(ShakehandTimeout),
-	m_Secret(Secret),
-	m_NotifyServerRaiseErrorStub(NotifyServerRaiseError)
+	m_Secret(Secret)
 {
-	WCHAR  Path[0x200];
 
-	wsprintfW(Path, L"\\RPC Control\\%s", IoPrivatePath);
-	m_RpcPath        = Path;
-	m_AlpcClientPort = nullptr;
 }
 
 RevThread::~RevThread()
@@ -26,38 +23,34 @@ RevThread::~RevThread()
 	Stop();
 }
 
-BOOL RevThread::CloseRemoteProcess()
+
+BOOL RevThread::CreateAlpcServer()
 {
-	NTSTATUS                  Status;
-	PROCESS_BASIC_INFORMATION BasicInfo;
+	WCHAR    PrivId[0x100];
+	WCHAR    Path[0x100];
 
-	if (!m_RemoteProcess)
-		return TRUE;
+	RtlZeroMemory(PrivId, sizeof(PrivId));
+	RtlZeroMemory(Path, sizeof(Path));
+	GetEnvironmentVariableW(L"KrkrRpcIoPrivatePath", PrivId, countof(PrivId));
 
-	Status = NtQueryInformationProcess(m_RemoteProcess, ProcessBasicInformation, &BasicInfo, sizeof(BasicInfo), nullptr);
-	if (NT_FAILED(Status) || BasicInfo.ExitStatus != STATUS_PENDING)
-		return FALSE;
+	wsprintfW(Path, L"\\RPC Control\\%s", PrivId);
+	m_Server = ALPCServer::create(
+		Path,
+		0x1000 // one page
+	);
 
-	NtTerminateProcess(m_RemoteProcess, 0);
-	NtClose(m_RemoteProcess);
-	m_RemoteProcess = nullptr;
-	return TRUE;
+	return m_Server ? TRUE : FALSE;
 }
+
 
 BOOL RevThread::Stop()
 {
-	CloseRemoteProcess();
+	m_Instance = nullptr;
 
-	if (m_AlpcClientPort) {
-		NtAlpcDisconnectPort(m_AlpcClientPort, 0);
+	if (m_Server) {
+		delete m_Server;
+		m_Server = FALSE;
 	}
-	m_AlpcClientPort = nullptr;
-
-	if (m_AlpcServerPort) {
-		NtClose(m_AlpcServerPort);
-	}
-	m_AlpcServerPort = nullptr;
-	m_Instance       = nullptr;
 	
 	return TRUE;
 }
@@ -65,7 +58,7 @@ BOOL RevThread::Stop()
 
 BOOL RevThread::IsAlpcServerReady()
 {
-	return m_PortIsReady.load();
+	return m_ReadyClientPid != 0;
 }
 
 BOOL RevThread::ParseMessage(PVOID MessageBuffer, SIZE_T MessageSize)
@@ -79,81 +72,39 @@ struct HandShakeRequest
 	UINT32 Secret;
 	UINT32 RemoteProcessPid;
 };
+
+
+//
+// sent by client
+//
+struct ConnectionRequest
+{
+	enum class ConnectionStatus : ULONG {
+		OK            = TAG4('Krkr'),
+		CHILD_PROCESS = 1
+	};
+
+	UINT32           RemoteProcessPid;
+	ConnectionStatus Status;
+};
 #pragma pack()
 
-
-BOOL NTAPI NotifyServerRaiseErrorDefault(RaiseErrorType ErrorType, PCWSTR Error)
-{
-	NtPrintConsole(L"%s\n", Error);
-	return FALSE;
-}
-
-HANDLE RevThread::GetRemoteProcess()
-{
-	return m_RemoteProcess;
-}
 
 NTSTATUS RevThread::ValidateHandleShakeMessage(PVOID MessageBuffer, SIZE_T MessageSize)
 {
 	NTSTATUS                  Status;
-	HANDLE                    RemoteProcess;
-	OBJECT_ATTRIBUTES         ObjectAttribute;
-	CLIENT_ID                 ClientID;
-	PROCESS_BASIC_INFORMATION BasicInfo;
 	HandShakeRequest*         Request;
 
 	if (MessageSize < sizeof(HandShakeRequest))
 		return FALSE;
 
+	//
+	// 好孩子不要在生产环境写这样的代码==
+	//
 	Request = (HandShakeRequest*)MessageBuffer;
 	if (Request->Secret != m_Secret)
 		return FALSE;
 
-	if (!m_NotifyServerRaiseErrorStub)
-		m_NotifyServerRaiseErrorStub = NotifyServerRaiseErrorDefault;
-	
-	if (Request->RemoteProcessPid == GetCurrentProcessId())
-	{
-		if (!m_NotifyServerRaiseErrorStub(RaiseErrorType::RAISE_ERROR_INVALID_PID, L"Remote Process : Invalid pid")) {
-			Ps::ExitProcess(0);
-		}
-	}
-
-	ClientID.UniqueThread  = nullptr;
-	ClientID.UniqueProcess = (HANDLE)Request->RemoteProcessPid;
-
-	RtlZeroMemory(&ObjectAttribute, sizeof(ObjectAttribute));
-	ObjectAttribute.Length = sizeof(ObjectAttribute);
-	ObjectAttribute.Attributes = 0;
-
-	Status = NtOpenProcess(&RemoteProcess, PROCESS_ALL_ACCESS, &ObjectAttribute, &ClientID);
-	if (NT_FAILED(Status))
-	{
-		switch (Status)
-		{
-		case STATUS_ACCESS_DENIED:
-			if (!m_NotifyServerRaiseErrorStub(RaiseErrorType::RAISE_ERROR_REMOTE_PRIVILEGED, L"Remote Process : access denied")) {
-				Ps::ExitProcess(0);
-			}
-			break;
-
-		default:
-			if (!m_NotifyServerRaiseErrorStub(RaiseErrorType::RAISE_ERROR_REMOTE_GENEROUS, L"Remote Process : failed to lookup process")) {
-				Ps::ExitProcess(0);
-			}
-			break;
-		}
-	}
-
-	Status = NtQueryInformationProcess(RemoteProcess, ProcessBasicInformation, &BasicInfo, sizeof(BasicInfo), nullptr);
-	if (NT_FAILED(Status) || BasicInfo.ExitStatus != STATUS_PENDING)
-	{
-		if (!m_NotifyServerRaiseErrorStub(RaiseErrorType::RAISE_ERROR_REMOTE_DEAD, L"Remote Process : failed to lookup process")) {
-			Ps::ExitProcess(0);
-		}
-	}
-
-	m_RemoteProcess = RemoteProcess;
 	return TRUE;
 }
 
@@ -169,79 +120,28 @@ template <class T> inline std::shared_ptr<T> AllocateMemorySafe(SIZE_T Size)
 	});
 }
 
-std::shared_ptr<PORT_MESSAGE> AllocateAlpcMessage(PPORT_MESSAGE PortMessage, ULONG MessageType, SIZE_T MessageSize, LPVOID Message)
-{
-	auto AlpcMessage = AllocateMemorySafe<PORT_MESSAGE>(MessageSize + sizeof(PORT_MESSAGE) + sizeof(MessageType));
-	if (!AlpcMessage)
-		return AlpcMessage;
-
-	RtlCopyMemory(AlpcMessage.get(), PortMessage, sizeof(PORT_MESSAGE));
-	RtlCopyMemory((PBYTE)AlpcMessage.get() + sizeof(PORT_MESSAGE), &MessageType, sizeof(UINT32));
-	RtlCopyMemory((PBYTE)AlpcMessage.get() + sizeof(PORT_MESSAGE) + sizeof(UINT32), Message, MessageSize);
-
-	return AlpcMessage;
-}
-
-
 BOOL RevThread::SendMessageToRemote(ULONG MessageType, std::string&& Request)
 {
 	NTSTATUS     Status;
-	PORT_MESSAGE PortMessage;
 
 	if (!IsAlpcServerReady())
 		return FALSE;
-	
-	if (!m_AlpcClientPort)
-		return FALSE;
 
-	RtlZeroMemory(&PortMessage, 0, sizeof(PortMessage));
+	auto msg = std::make_unique<ALPCMessage>(Request.length() + sizeof(MessageType));
+	msg->with_attribute(new ALPCMessageAttribute(ALPC_MESSAGE_ALL_ATTRIBUTE));
 
-	PortMessage.u1.s1.DataLength = Request.length();
-	PortMessage.u1.s1.TotalLength = Request.length() + sizeof(PortMessage);
+	RtlCopyMemory(msg->data(), &MessageType, sizeof(MessageType));
+	RtlCopyMemory(static_cast<uint8_t*>(msg->data()) + sizeof(MessageType), Request.data(), Request.length());
 
-	auto Message = AllocateAlpcMessage(&PortMessage, MessageType, Request.length(), (PVOID)Request.data());
-	if (!Message)
-		return STATUS_NO_MEMORY;
-
-	Status = NtAlpcSendWaitReceivePort(m_AlpcClientPort, 0, Message.get(), NULL, NULL, NULL, NULL, NULL);
-	return NT_SUCCESS(Status);
+	return m_Server->send(*msg);
 }
+
 
 BOOL RevThread::SendMessageToRemote(ULONG MessageType, std::string& Request)
 {
-	NTSTATUS     Status;
-	PORT_MESSAGE PortMessage;
-
-	if (!IsAlpcServerReady())
-		return FALSE;
-
-	if (!m_AlpcClientPort)
-		return FALSE;
-
-	RtlZeroMemory(&PortMessage, 0, sizeof(PortMessage));
-
-	PortMessage.u1.s1.DataLength = Request.length();
-	PortMessage.u1.s1.TotalLength = Request.length() + sizeof(PortMessage);
-
-	auto Message = AllocateAlpcMessage(&PortMessage, MessageType, Request.length(), (PVOID)Request.data());
-	if (!Message)
-		return STATUS_NO_MEMORY;
-
-	Status = NtAlpcSendWaitReceivePort(m_AlpcClientPort, 0, Message.get(), NULL, NULL, NULL, NULL, NULL);
-	return NT_SUCCESS(Status);
+	return SendMessageToRemote(MessageType, std::move(Request));
 }
 
-BOOL RevThread::IsRemoteProcessAlive()
-{
-	NTSTATUS                  Status;
-	PROCESS_BASIC_INFORMATION BasicInfo;
-
-	Status = NtQueryInformationProcess(m_RemoteProcess, ProcessBasicInformation, &BasicInfo, sizeof(BasicInfo), nullptr);
-	if (NT_FAILED(Status) || BasicInfo.ExitStatus != STATUS_PENDING)
-		return FALSE;
-
-	return TRUE;
-}
 
 
 void RevThread::ThreadFunction()
@@ -249,93 +149,71 @@ void RevThread::ThreadFunction()
 	NTSTATUS             Status;
 	PPORT_MESSAGE        ReceivedMessage;
 	SIZE_T               MessageSize;
-	UNICODE_STRING       PortName;
-	OBJECT_ATTRIBUTES    ObjectAttribute;
-	ALPC_PORT_ATTRIBUTES PortAttribute;
 	LARGE_INTEGER        TimeOut;
 	static BYTE          SharedBuffer[0x1000];
 
+	auto msg = std::make_unique<ALPCMessage>(0x1000);
+	msg->with_attribute(new ALPCMessageAttribute(ALPC_MESSAGE_ALL_ATTRIBUTE));
+	
+
 	while (m_ShouldRun)
 	{
-		RtlInitUnicodeString(&PortName, m_RpcPath.c_str());
-		InitializeObjectAttributes(&ObjectAttribute, &PortName, 0, 0, 0);
-		RtlZeroMemory(&PortAttribute, sizeof(PortAttribute));
-
-		Status = NtAlpcCreatePort(&m_AlpcServerPort, &ObjectAttribute, &PortAttribute);
-		if (NT_FAILED(Status))
-			break;
-
-		ReceivedMessage = (PPORT_MESSAGE)SharedBuffer;
-		FormatTimeOut(&TimeOut, m_ShakehandTimeout);
-		for (ULONG RetryCount = 0; RetryCount <= 5; RetryCount++)
-		{
-			RtlZeroMemory(SharedBuffer, sizeof(SharedBuffer));
-			Status = NtAlpcSendWaitReceivePort(
-				m_AlpcServerPort,
-				0,
-				NULL,
-				NULL,
-				ReceivedMessage,
-				&MessageSize,
-				NULL,
-				&TimeOut
-			);
-
-			if (Status == STATUS_TIMEOUT)
-				break;
-
-			if (NT_SUCCESS(Status) && ValidateHandleShakeMessage((PBYTE)SharedBuffer + sizeof(PORT_MESSAGE), ReceivedMessage->u1.s1.DataLength))
-				break;
-		}
-
-		if (NT_FAILED(Status))
-		{
-			NtPrintConsole(L"Handshake failed : %08x\n", Status);
+		if (!m_ShouldRun) {
 			break;
 		}
 
-		m_PortIsReady = TRUE;
+		if (!m_Server->recv(*msg)) {
+			Ps::Sleep(20);
+			continue;
+		}
 
-		LOOP_FOREVER
+		switch (msg->type())
 		{
-			if (!InterlockedCompareExchange(&m_ShouldRun, FALSE, TRUE))
-				 break;
+		case LPC_CONNECTION_REQUEST:
+			if (m_ReadyClientPid) {
+				break;
+			}
 
-			FormatTimeOut(&TimeOut, 20);
+			if (msg->size() != sizeof(ConnectionRequest)) {
+				break;
+			}
+
+			if (static_cast<ConnectionRequest*>(msg->data())->Status != ConnectionRequest::ConnectionStatus::OK) {
+				break;
+			}
+
+			if (!m_Server->accept(*msg)) {
+				PrintConsoleW(L"server : accept failed\n");
+				break;
+			}
 			
-			Status = NtAlpcSendWaitReceivePort(
-				m_AlpcServerPort,
-				0,
-				NULL,
-				NULL,
-				ReceivedMessage,
-				&MessageSize,
-				NULL,
-				&TimeOut
+			m_ReadyClientPid = (ULONG)msg->buffer()->ClientId.UniqueProcess;
+			break;
+
+		case LPC_REQUEST:
+			m_Instance->ParseMessage(
+				msg->data(),
+				msg->size()
 			);
+			break;
 
-			if (NT_SUCCESS(Status))
-			{
-				m_Instance->ParseMessage(SharedBuffer + sizeof(PORT_MESSAGE), ReceivedMessage->u1.s1.DataLength);
-				RtlZeroMemory(SharedBuffer, sizeof(SharedBuffer));
+		case LPC_CLIENT_DIED:
+		case LPC_PORT_CLOSED:
+			if (m_ReadyClientPid == (ULONG)msg->buffer()->ClientId.UniqueProcess) {
+				PrintConsoleW(L"Client died\n");
+				break;
 			}
+			break;
 
-			if (!IsRemoteProcessAlive())
-			{
-				if (m_NotifyServerRaiseErrorStub)
-				{
-					m_NotifyServerRaiseErrorStub(
-						RaiseErrorType::RAISE_ERROR_REMOTE_DEAD,
-						L"Remote process is dead"
-					);
-				}
-			}
-
-			Ps::Sleep(10);
+		default:
+			break;
 		}
+
+		msg->clear();
+		Ps::Sleep(10);
 	}
 	
-	m_PortIsReady = FALSE;
-	InterlockedExchange(&m_ShouldRun, FALSE);
+	m_ReadyClientPid = 0;
+	m_ShouldRun = FALSE;
 }
 

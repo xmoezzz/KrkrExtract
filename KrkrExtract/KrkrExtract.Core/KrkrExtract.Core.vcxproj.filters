@@ -76,14 +76,14 @@
     <Filter Include="Source Files\Debugger">
       <UniqueIdentifier>{3ef0a2a3-13e0-4187-a5f0-013a22853a0a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Hook">
-      <UniqueIdentifier>{95ab2043-daa3-47ce-9c18-434053b53442}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\WellknownFiles">
       <UniqueIdentifier>{0a0e85be-d5f3-4093-a80b-fdbba6e93298}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\WellknownFiles\Psb">
       <UniqueIdentifier>{4f15f6ad-ea73-4c2c-95d1-fa78a6955d1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Hook">
+      <UniqueIdentifier>{95ab2043-daa3-47ce-9c18-434053b53442}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -270,9 +270,6 @@
     <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc">
       <Filter>Source Files\Protobuf.Stub</Filter>
     </ClCompile>
-    <ClCompile Include="AsyncCommandExecutor.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="TaskAutoUnlocker.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -341,6 +338,12 @@
     </ClCompile>
     <ClCompile Include="AmvSystemDecoder.cpp">
       <Filter>Source Files\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncCommandExecutor.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Alpc.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -510,6 +513,12 @@
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
     <ClInclude Include="sqlite3ext.h">
+      <Filter>Header Files\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Alpc.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="WinReg.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
   </ItemGroup>

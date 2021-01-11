@@ -47,6 +47,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -58,13 +59,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Alpc.h" />
     <ClInclude Include="AlpcRev.h" />
+    <ClInclude Include="concurrentqueue.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="NativeThread.h" />
+    <ClInclude Include="picojson.h" />
     <ClInclude Include="PrivateStub.h" />
     <ClInclude Include="RevThread.h" />
     <ClInclude Include="SectionProtector.h" />
     <ClInclude Include="ServerImpl.h" />
+    <ClInclude Include="UniversalShellCode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc" />
@@ -83,6 +88,7 @@
     <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
+    <ClCompile Include="Alpc.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="ExportedClient.cpp" />
     <ClCompile Include="IncomingMessage.cpp" />
@@ -90,6 +96,7 @@
     <ClCompile Include="NativeThread.cpp" />
     <ClCompile Include="RevThread.cpp" />
     <ClCompile Include="ServerImpl.cpp" />
+    <ClCompile Include="UniversalShellCode.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

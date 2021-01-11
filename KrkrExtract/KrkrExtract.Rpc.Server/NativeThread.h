@@ -1,6 +1,7 @@
 #pragma once
 
 #include <my.h>
+#include <atomic>
 
 class NativeThread
 {
@@ -22,8 +23,8 @@ public:
 	bool Run();
 
 protected:
-	HANDLE        m_Handle;
-	volatile LONG m_ShouldRun;
-	CLIENT_ID     m_Client;
+	HANDLE            m_Handle;
+	std::atomic<BOOL> m_ShouldRun;
+	CLIENT_ID         m_Client;
 };
 

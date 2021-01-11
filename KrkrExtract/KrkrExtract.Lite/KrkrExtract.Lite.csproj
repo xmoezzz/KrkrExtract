@@ -50,6 +50,7 @@
     <Compile Include="LnkHelper.cs" />
     <Compile Include="LoaderHelper.cs" />
     <Compile Include="NativeHelper.cs" />
+    <Compile Include="PeHeaderReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CreateProcess.cs" />

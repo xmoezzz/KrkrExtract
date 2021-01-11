@@ -43,10 +43,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;_M_AMD64;_AMD64_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <UndefinePreprocessorDefinitions>_M_IX86</UndefinePreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -57,13 +59,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\Alpc.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\AlpcRev.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\concurrentqueue.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\Console.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\NativeThread.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\picojson.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\PrivateStub.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\RevThread.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\SectionProtector.h" />
     <ClInclude Include="..\KrkrExtract.Rpc.Server\ServerImpl.h" />
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\UniversalShellCode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc" />
@@ -82,6 +88,7 @@
     <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
     <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\Alpc.cpp" />
     <ClCompile Include="..\KrkrExtract.Rpc.Server\Console.cpp" />
     <ClCompile Include="..\KrkrExtract.Rpc.Server\ExportedClient.cpp" />
     <ClCompile Include="..\KrkrExtract.Rpc.Server\IncomingMessage.cpp" />
@@ -89,6 +96,7 @@
     <ClCompile Include="..\KrkrExtract.Rpc.Server\NativeThread.cpp" />
     <ClCompile Include="..\KrkrExtract.Rpc.Server\RevThread.cpp" />
     <ClCompile Include="..\KrkrExtract.Rpc.Server\ServerImpl.cpp" />
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\UniversalShellCode.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

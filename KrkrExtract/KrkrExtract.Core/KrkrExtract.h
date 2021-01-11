@@ -515,6 +515,7 @@ public:
 	
 private:
 	NTSTATUS InitializeRand();
+	NTSTATUS InitializeGlobalFlags();
 	NTSTATUS InitializeAndDetectBuiltinCxdec2();
 	NTSTATUS InitializePlugins();
 	NTSTATUS InitializePluginsPrivateWithCustom();

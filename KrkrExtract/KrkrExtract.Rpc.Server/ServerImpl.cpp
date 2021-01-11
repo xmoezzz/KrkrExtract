@@ -1,5 +1,6 @@
 #include "ServerImpl.h"
 #include "Console.h"
+#include "AlpcRev.h"
 #include <my.h>
 #include <time.h>
 #include <ctime>
@@ -49,40 +50,31 @@ ServerImpl::~ServerImpl()
 
 HANDLE ServerImpl::GetRemoteProcessHandle()
 {
-	if (m_ServerThread)
+	if (!m_ServerThread)
 		return NULL;
 	
-	return m_ServerThread->GetRemoteProcess();
+	return m_RemoteProcess;
 }
 
-BOOL ServerImpl::RunServer(
-	NotifyServerProgressChangedCallback       NotifyServerProgressChangedStub,
-	NotifyServerLogOutputCallback             NotifyServerLogOutputStub,
-	NotifyServerUIReadyCallback               NotifyServerUIReadyStub,
-	NotifyServerMessageBoxCallback            NotifyServerMessageBoxStub,
-	NotifyServerTaskStartAndDisableUICallback NotifyServerTaskStartAndDisableUIStub,
-	NotifyServerTaskEndAndEnableUICallback    NotifyServerTaskEndAndEnableUIStub,
-	NotifyServerExitFromRemoteProcessCallback NotifyServerExitFromRemoteProcessStub,
-	NotifyServerRaiseErrorCallback            NotifyServerRaiseErrorStub
-)
+ULONG ServerImpl::GetRemoteProcessId()
 {
+	if (!m_ServerThread)
+		return NULL;
+
+	return m_RemoteProcessPid;
+}
+
+BOOL ServerImpl::RunServer()
+{
+	NTSTATUS Status;
+
 	if (m_ServerThread)
 		return TRUE;
 
-	m_NotifyServerProgressChangedStub       = NotifyServerProgressChangedStub;
-	m_NotifyServerLogOutputStub             = NotifyServerLogOutputStub;
-	m_NotifyServerUIReadyStub               = NotifyServerUIReadyStub;
-	m_NotifyServerMessageBoxStub            = NotifyServerMessageBoxStub;
-	m_NotifyServerTaskStartAndDisableUIStub = NotifyServerTaskStartAndDisableUIStub;
-	m_NotifyServerExitFromRemoteProcessStub = NotifyServerExitFromRemoteProcessStub;
-	m_NotifyServerTaskEndAndEnableUIStub    = NotifyServerTaskEndAndEnableUIStub;
-	
 	m_ServerThread = new RevThread(
 		this,
-		nullptr,
 		m_HandshakeTimeoutThreshold,
-		m_CurrentSecret,
-		m_NotifyServerRaiseErrorStub
+		m_CurrentSecret
 	);
 
 	return m_ServerThread->Run();
@@ -90,6 +82,8 @@ BOOL ServerImpl::RunServer(
 
 BOOL ServerImpl::ShutdownServer()
 {
+	EventMsg* Item;
+
 	if (m_ServerThread)
 	{
 		m_ServerThread->SendKill();
@@ -99,7 +93,16 @@ BOOL ServerImpl::ShutdownServer()
 		delete m_ServerThread;
 	}
 
+	if (m_AlpcServerPort) {
+		NtClose(m_AlpcServerPort);
+	}
+
 	m_ServerThread = nullptr;
+
+	while (m_EventQueue.try_dequeue(Item)) {
+		delete Item;
+	}
+
 	return TRUE;
 }
 
@@ -114,11 +117,13 @@ BOOL ServerImpl::NotifyServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULO
 	if (!m_UIIsReady)
 		return FALSE;
 
-	if (m_NotifyServerProgressChangedStub) {
-		m_NotifyServerProgressChangedStub(TaskName, Current, Total);
-	}
-	
-	return TRUE;
+	return m_EventQueue.enqueue(
+		new (std::nothrow) NotifyServerProgressChangedMsg(
+			Current,
+			Total,
+			TaskName
+		)
+	);
 }
 
 
@@ -133,18 +138,22 @@ BOOL ServerImpl::NotifyServerLogOutput(LogLevel Level, PCWSTR Command)
 	if (!m_UIIsReady)
 		return FALSE;
 
-	if (m_NotifyServerLogOutputStub) {
-		m_NotifyServerLogOutputStub(Level, Command, FALSE);
-	}
-	else {
-		NtPrintConsole(L"%s\n", Command);
-	}
+	return m_EventQueue.enqueue(
+		new NotifyServerLogOutputMsg(
+			Level,
+			Command,
+			FALSE
+		)
+	);
 
 	return TRUE;
 }
 
 BOOL ServerImpl::NotifyServerCommandResultOutput(CommandStatus Status, PCWSTR Reply)
 {
+	BOOL     IsCmd;
+	LogLevel Level;
+
 	if (!m_ServerPortInitialized)
 		return FALSE;
 
@@ -154,27 +163,32 @@ BOOL ServerImpl::NotifyServerCommandResultOutput(CommandStatus Status, PCWSTR Re
 	if (!m_UIIsReady)
 		return FALSE;
 
-	if (m_NotifyServerLogOutputStub) {
-		switch (Status)
-		{
-		case CommandStatus::COMMAND_OK:
-			m_NotifyServerLogOutputStub(LogLevel::LOG_OK, Reply, TRUE);
-			break;
+	switch (Status)
+	{
+	case CommandStatus::COMMAND_OK:
+		Level = LogLevel::LOG_OK;
+		break;
 
-		case CommandStatus::COMMAND_WARN:
-			m_NotifyServerLogOutputStub(LogLevel::LOG_WARN, Reply, TRUE);
-			break;
+	case CommandStatus::COMMAND_WARN:
+		Level = LogLevel::LOG_WARN;
+		break;
 
-		case CommandStatus::COMMAND_ERROR:
-			m_NotifyServerLogOutputStub(LogLevel::LOG_ERROR, Reply, TRUE);
-			break;
-		}
+	case CommandStatus::COMMAND_ERROR:
+		Level = LogLevel::LOG_ERROR;
+		break;
+
+	default:
+		Level = LogLevel::LOG_OK;
+		break;
 	}
-	else {
-		NtPrintConsole(L"%s\n", Reply);
-	}
-	
-	return TRUE;
+
+	return m_EventQueue.enqueue(
+		new NotifyServerLogOutputMsg(
+			Level,
+			Reply,
+			TRUE
+		)
+	);
 }
 
 
@@ -191,11 +205,10 @@ BOOL ServerImpl::NotifyServerUIReady()
 
 	m_UIIsReady = TRUE;
 
-	if (m_NotifyServerUIReadyStub) {
-		m_NotifyServerUIReadyStub();
-	}
-
-	return TRUE;
+	return m_EventQueue.enqueue(
+		new NotifyServerUIReadyMsg(
+		)
+	);
 }
 
 BOOL ServerImpl::NotifyServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Locked)
@@ -209,11 +222,13 @@ BOOL ServerImpl::NotifyServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Lo
 	if (!m_UIIsReady)
 		return FALSE;
 	
-	if (m_NotifyServerMessageBoxStub) {
-		m_NotifyServerMessageBoxStub(Description, Flags, Locked);
-	}
-
-	return TRUE;
+	return m_EventQueue.enqueue(
+		new NotifyServerMessageBoxMsg(
+			Description,
+			Flags,
+			Locked
+		)
+	);
 }
 
 BOOL ServerImpl::NotifyServerTaskStartAndDisableUI()
@@ -227,11 +242,10 @@ BOOL ServerImpl::NotifyServerTaskStartAndDisableUI()
 	if (!m_UIIsReady)
 		return FALSE;
 
-	if (m_NotifyServerTaskStartAndDisableUIStub) {
-		m_NotifyServerTaskStartAndDisableUIStub();
-	}
-
-	return TRUE;
+	return m_EventQueue.enqueue(
+		new NotifyServerTaskStartAndDisableUIMsg(
+		)
+	);
 }
 
 BOOL ServerImpl::NotifyServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR Description)
@@ -245,11 +259,10 @@ BOOL ServerImpl::NotifyServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR 
 	if (m_UIIsReady)
 		return TRUE;
 
-	if (m_NotifyServerTaskEndAndEnableUIStub) {
-		m_NotifyServerTaskEndAndEnableUIStub(TaskCompleteStatus, Description);
-	}
-
-	return TRUE;
+	return m_EventQueue.enqueue(
+		new NotifyServerTaskEndAndEnableUIMsg(
+		)
+	);
 }
 
 BOOL ServerImpl::NotifyServerUIHeartbeatPackage()
@@ -268,18 +281,15 @@ BOOL ServerImpl::NotifyServerUIHeartbeatPackage()
 	
 	if (GetTickCount64() - m_LastHeartbeat > m_HeartbeatTimeoutThreshold) 
 	{
-		if (m_NotifyServerRaiseErrorStub)
-		{
-			if (!m_NotifyServerRaiseErrorStub(
+		m_EventQueue.enqueue(
+			new NotifyServerRaiseErrorMsg(
 				RaiseErrorType::RAISE_ERROR_HEARTBEAT_TIMEOUT,
-				L"Heartbeat timeout"))
-			{
-				Ps::ExitProcess(0);
-			}
-		}
+				L"Heartbeat timeout"
+			)
+		);
 	}
+
 	m_LastHeartbeat = GetTickCount64();
-	
 	return TRUE;
 }
 
@@ -295,16 +305,20 @@ BOOL ServerImpl::NotifyServerExitFromRemoteProcess()
 	if (!m_UIIsReady)
 		return FALSE;
 
-	if (m_NotifyServerExitFromRemoteProcessStub) {
-		m_EnterExitRoutine = TRUE;
-		m_NotifyServerExitFromRemoteProcessStub();
-		return TRUE;
-	}
-
-	Ps::ExitProcess(0);
-	return TRUE;
+	return m_EventQueue.enqueue(
+		new NotifyServerExitFromRemoteProcessMsg(
+		)
+	);
 }
 
 
-
+EventMsg* ServerImpl::PopEventMessage()
+{
+	EventMsg* Msg = nullptr;
+	if (m_EventQueue.try_dequeue(Msg)) {
+		return Msg;
+	}
+	
+	return nullptr;
+}
 

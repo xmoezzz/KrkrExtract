@@ -5,6 +5,7 @@
 #include <atomic>
 #include <string>
 #include "PrivateStub.h"
+#include "Alpc.h"
 
 class RevThread final : public NativeThread
 {
@@ -13,10 +14,8 @@ public:
 	RevThread(const RevThread&) = delete;
 	RevThread(
 		AlpcRev*                       Instance, 
-		PCWSTR                         IoPrivatePath, 
 		ULONG                          ShakehandTimeout, 
-		ULONG                          Secret,
-		NotifyServerRaiseErrorCallback NotifyServerRaiseError
+		ULONG                          Secret
 	);
 
 	~RevThread();
@@ -25,13 +24,11 @@ public:
 	BOOL   ParseMessage(PVOID MessageBuffer, SIZE_T MessageSize);
 	BOOL   SendMessageToRemote(ULONG MessageType, std::string&& Request);
 	BOOL   SendMessageToRemote(ULONG MessageType, std::string&  Request);
-	HANDLE GetRemoteProcess();
-	BOOL   CloseRemoteProcess();
 	BOOL   Stop();
+	BOOL   CreateAlpcServer();
 
 private:
 	void ThreadFunction();
-	BOOL IsRemoteProcessAlive();
 
 	//
 	// Call this function only if
@@ -41,14 +38,10 @@ private:
 	NTSTATUS ValidateHandleShakeMessage(PVOID MessageBuffer, SIZE_T MessageSize);
 
 	AlpcRev*                       m_Instance       = nullptr;
-	HANDLE                         m_AlpcServerPort = nullptr;
-	HANDLE                         m_AlpcClientPort = nullptr;
-	HANDLE                         m_RemoteProcess  = nullptr;
 	ULONG                          m_ShakehandTimeout;
 	ULONG                          m_Secret = 0;
-	std::wstring                   m_RpcPath;
-	std::atomic<BOOL>              m_PortIsReady = FALSE;
-	NotifyServerRaiseErrorCallback m_NotifyServerRaiseErrorStub = nullptr;
+	ALPCServer*                    m_Server          = nullptr;
+	std::atomic<ULONG>             m_ReadyClientPid  = 0;
 };
 
 

@@ -39,6 +39,18 @@
     <ClInclude Include="..\KrkrExtract.Rpc.Server\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\Alpc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\concurrentqueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\picojson.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\KrkrExtract.Rpc.Server\UniversalShellCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\KrkrExtract.Rpc.Server\Main.cpp">
@@ -109,6 +121,12 @@
     </ClCompile>
     <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc">
       <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\Alpc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\KrkrExtract.Rpc.Server\UniversalShellCode.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -38,7 +38,11 @@ BOOL ServerImpl::ParseMessage(PVOID MessageBuffer, SIZE_T MessageSize)
 		if (!Success)
 			return FALSE;
 
-		return NotifyServerProgressBar(ServerProgressBarMessage.current(), ServerProgressBarMessage.total());
+		return NotifyServerProgressBar(
+			Utf8ToUtf16(ServerProgressBarMessage.taskname()).c_str(),
+			ServerProgressBarMessage.current(), 
+			ServerProgressBarMessage.total()
+		);
 
 	case ServerSequence::SID_ServerLogOutput:
 		Success = ServerLogOutputMessage.ParseFromArray((PBYTE)MessageBuffer + sizeof(UINT32), MessageSize - sizeof(UINT32));

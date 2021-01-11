@@ -22,12 +22,13 @@ NativeThread::~NativeThread()
 
 bool NativeThread::Run()
 {
-	NTSTATUS Status;
+	NTSTATUS             Status;
 
 	if (m_Handle)
 		return false;
 
 	m_ShouldRun = true;
+
 	Status = Nt_CreateThread(ThreadFunctionStatic, this, 0, NtCurrentProcess(), &m_Handle, &m_Client);
 	if (NT_FAILED(Status))
 		return false;

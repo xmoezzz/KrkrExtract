@@ -59,10 +59,8 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		
-		AllocConsole(); //SwitchToEmoji();
 		LdrDisableThreadCalloutsForDll(hModule);
 
-		MessageBoxW(0, 0, 0, 0);
 		g_Engine = new (std::nothrow) KrkrExtractCore();
 		if (!g_Engine) 
 		{

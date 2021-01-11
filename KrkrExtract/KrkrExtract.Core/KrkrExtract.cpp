@@ -13,6 +13,7 @@
 #include "xxhash.h"
 #include "WellknownPlugin.h"
 #include "KrkrHookExporter.h"
+#include "WinReg.h"
 #include <stdint.h>
 #include <json/json.h>
 #include <zlib.h>
@@ -218,6 +219,7 @@ NTSTATUS KrkrExtractCore::Initialize(HMODULE DllModule)
 	//
 	//Initialize random generator
 	//
+	InitializeGlobalFlags();
 	InitializeRand();
 	InitializePlugins();
 	InitializeCommandUtils();
@@ -367,7 +369,7 @@ NTSTATUS KrkrExtractCore::InitializeDarkMode()
 
 INT NTAPI InitializePluginsEpFilter(ULONG Code, EXCEPTION_POINTERS* Ep)
 {
-	switch (Code)
+	switch ((NTSTATUS)Code)
 	{
 	case EXCEPTION_ACCESS_VIOLATION:
 		PrintConsoleW(L"InitializePlugin : EXCEPTION_ACCESS_VIOLATION\n");
@@ -1306,6 +1308,20 @@ NTSTATUS KrkrExtractCore::InitializeRand()
 
 	init_by_array64(Seeds, countof(Seeds));
 	return STATUS_SUCCESS;
+}
+
+
+NTSTATUS KrkrExtractCore::InitializeGlobalFlags()
+{
+	try {
+		auto Reg = winreg::RegKey(HKEY_CURRENT_USER, L"SOFTWARE\\KrkrExtract\\Settings");
+		if (Reg.TryGetQwordValue(L"OpenConsole") == 1) {
+			AllocConsole();
+		}
+	}
+	catch (...) {
+		return STATUS_UNSUCCESSFUL;
+	}
 }
 
 
