@@ -105,13 +105,13 @@ inline BOOL SafeStringLength(const ByteType* StringPtr, const SIZE_T MaxLength, 
 	return TRUE;
 }
 
-wstring GetFileName(wstring& Path);
-wstring GetFileBasePath(wstring& Path);
-wstring GetFileNameExtension(wstring& Path);
-wstring GetFileNamePrefix(wstring& Path);
-wstring GetUpperExtName(wstring& FileName);
+wstring GetFileName(const wstring& Path);
+wstring GetFileBasePath(const wstring& Path);
+wstring GetFileNameExtension(const wstring& Path);
+wstring GetFileNamePrefix(const wstring& Path);
+wstring GetUpperExtName(const wstring& FileName);
 wstring ToLowerString(LPCWSTR lpString);
-wstring ReplaceFileNameExtension(wstring& Path, PCWSTR NewExtensionName);
+wstring ReplaceFileNameExtension(const wstring& Path, PCWSTR NewExtensionName);
 wstring FormatPathFull(LPCWSTR Path);
 
 ULONG64 MurmurHash64B(const void * key, int len, ULONG seed = 0xEE6B27EB);

@@ -176,7 +176,7 @@ bool CompressPNG::compress_third(PngChunk &chunk, long width, long height, BufRe
 }
 
 static void b64e(tjs_char *p, unsigned char const *r, long len) {
-	tjs_char *b64 = TJS_W("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=");
+	const tjs_char *b64 = TJS_W("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=");
 	long i, stop = len - 3;
 	for (i = 0; i <= stop; i += 3) {
 		*p++ = b64[(r[i] >> 2) & 0x3F];

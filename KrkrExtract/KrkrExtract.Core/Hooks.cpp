@@ -305,7 +305,7 @@ NTSTATUS KrkrHook::UnHookIsDebuggerPresent()
 
 NTSTATUS KrkrHook::HookLoadLibraryA()
 {
-	NTSTATUS         Status;
+	NTSTATUS Status = STATUS_SUCCESS;
 	SectionProtector Section(m_Lock.Get());
 
 	switch (m_Mode)

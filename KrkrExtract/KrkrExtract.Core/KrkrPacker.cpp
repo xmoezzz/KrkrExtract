@@ -11,6 +11,7 @@
 #include "magic_enum.hpp"
 #include <zlib.h>
 
+import Xp3Parser;
 
 class MemoryStream
 {
@@ -253,7 +254,7 @@ NTSTATUS CoPackerTask::ReadWriteEncrypt(NtFileDisk& Source, NtFileDisk& Dest)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS CoPackerTask::ReadWriteEncrypt(std::wstring& Source, NtFileDisk& Dest, LARGE_INTEGER& Size)
+NTSTATUS CoPackerTask::ReadWriteEncrypt(const std::wstring& Source, NtFileDisk& Dest, LARGE_INTEGER& Size)
 {
 	HRESULT      Success;
 	STATSTG      Stat;
@@ -375,7 +376,7 @@ std::vector<BYTE> CoPackerTask::SerializeToArray(KRKRZ_XP3_INDEX_CHUNK_COMPRESSE
 }
 
 
-ttstr CoPackerTask::GetAutoSearchPath(std::wstring& FileName)
+ttstr CoPackerTask::GetAutoSearchPath(const std::wstring& FileName)
 {
 	ttstr    Path = L"file://./";
 

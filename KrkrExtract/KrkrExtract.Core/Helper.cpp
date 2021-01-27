@@ -33,7 +33,7 @@ wstring GetDirName(wstring FileName)
 }
 
 
-wstring GetUpperExtName(wstring& FileName)
+wstring GetUpperExtName(const wstring& FileName)
 {
 	auto Index = FileName.find_last_of(L'.');
 	if (Index != std::wstring::npos)
@@ -215,7 +215,7 @@ void FormatPath(wstring& Package, ttstr& out)
 	out += L'>';
 }
 
-wstring GetFileName(wstring& Path)
+wstring GetFileName(const wstring& Path)
 {
 	ULONG_PTR Ptr;
 
@@ -227,7 +227,7 @@ wstring GetFileName(wstring& Path)
 }
 
 
-wstring GetFileBasePath(wstring& Path)
+wstring GetFileBasePath(const wstring& Path)
 {
 	ULONG_PTR Ptr;
 
@@ -239,7 +239,7 @@ wstring GetFileBasePath(wstring& Path)
 }
 
 
-wstring GetFileNameExtension(wstring& Path)
+wstring GetFileNameExtension(const wstring& Path)
 {
 	ULONG_PTR Ptr;
 
@@ -250,7 +250,7 @@ wstring GetFileNameExtension(wstring& Path)
 	return Path.substr(Ptr + 1, std::wstring::npos);
 }
 
-wstring GetFileNamePrefix(wstring& Path)
+wstring GetFileNamePrefix(const wstring& Path)
 {
 	ULONG_PTR Ptr;
 
@@ -261,7 +261,7 @@ wstring GetFileNamePrefix(wstring& Path)
 	return Path.substr(0, Ptr);
 }
 
-wstring ReplaceFileNameExtension(wstring& Path, PCWSTR NewExtensionName)
+wstring ReplaceFileNameExtension(const wstring& Path, PCWSTR NewExtensionName)
 {
 	ULONG_PTR Ptr;
 

@@ -46,7 +46,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4091 /wd4005 /wd5045 %(AdditionalOptions)</AdditionalOptions>
       <SDLCheck>false</SDLCheck>
@@ -153,6 +153,7 @@
     <ClCompile Include="Xp3M2CompressedChunkNodeValidator.cpp" />
     <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV2.cpp" />
     <ClCompile Include="XP3Parser.cpp" />
+    <ClCompile Include="Xp3Parser.ixx" />
     <ClCompile Include="Xp3PluginEnum.cpp" />
     <ClCompile Include="xxhash.cpp" />
   </ItemGroup>
@@ -172,6 +173,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="MemoryEntry.h" />
     <ClInclude Include="NativeThread.h" />
+    <ClInclude Include="PEFile32.h" />
     <ClInclude Include="PsbDecompression.h" />
     <ClInclude Include="PsbDecryption.h" />
     <ClInclude Include="SafeMemory.h" />
@@ -222,6 +224,7 @@
   <ItemGroup>
     <None Include="KrkrUniversalPatch.dll" />
     <None Include="PatchLoader.exe" />
+    <None Include="tvpwin64.exe" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="win.manifest" />

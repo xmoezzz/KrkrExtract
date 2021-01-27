@@ -91,18 +91,18 @@ bool CompressTLG5::main(long width, long height, BufRefT buffer, long pitch) {
 				// composite colors
 				switch (colors){
 					case 1:
-					cmpinbuf[0][inp] = val[0];
+					cmpinbuf[0][inp] = static_cast<unsigned char>(val[0]);
 					break;
 				case 3:
-					cmpinbuf[0][inp] = val[0] - val[1];
-					cmpinbuf[1][inp] = val[1];
-					cmpinbuf[2][inp] = val[2] - val[1];
+					cmpinbuf[0][inp] = static_cast<unsigned char>(val[0] - val[1]);
+					cmpinbuf[1][inp] = static_cast<unsigned char>(val[1]);
+					cmpinbuf[2][inp] = static_cast<unsigned char>(val[2] - val[1]);
 					break;
 				case 4:
-					cmpinbuf[0][inp] = val[0] - val[1];
-					cmpinbuf[1][inp] = val[1];
-					cmpinbuf[2][inp] = val[2] - val[1];
-					cmpinbuf[3][inp] = val[3];
+					cmpinbuf[0][inp] = static_cast<unsigned char>(val[0] - val[1]);
+					cmpinbuf[1][inp] = static_cast<unsigned char>(val[1]);
+					cmpinbuf[2][inp] = static_cast<unsigned char>(val[2] - val[1]);
+					cmpinbuf[3][inp] = static_cast<unsigned char>(val[3]);
 					break;
 				}
 				inp++;

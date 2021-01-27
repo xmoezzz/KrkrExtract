@@ -1,0 +1,137 @@
+; this is a part of TVP (KIRIKIRI) software source.
+; see other sources for license.
+; (C)2001-2003 W.Dee <dee@kikyou.info> and contributors
+
+
+; common macros for nasm
+
+
+; add here platform depended definitions
+
+
+;---- borland32 definitions
+BITS 32
+
+	segment .data align=16 class=DATA use32
+	segment .text align=16 class=CODE use32
+	segment .adata align=16 class=DATA use32
+
+%define segment_data segment .data
+%define segment_code segment .text
+%define segment_data_aligned segment .adata
+
+%macro start_const_aligned 0
+		align 16
+		segment_data_aligned
+%endmacro
+
+%macro end_const_aligned 0
+		align 16
+%endmacro
+
+
+%imacro globaldef 1
+	%define %1 _%1
+	global %1
+%endmacro
+
+%imacro externdef 1
+	%define %1 _%1
+	extern %1
+%endmacro
+
+%macro function_align 0
+		segment_code
+		align 4
+%endmacro
+%define loop_align			align 4
+; since borland linker seems not to align functions except for DWORD
+; ( loop_align should be 16 when considering CPU memrory cache )
+
+
+%macro	proc_start	1
+	%push	%1
+		function_align
+%1:
+		%define		%$stack_restore
+		%assign		%$arg_base		28
+		%assign		%$var_base		4
+		push		edi
+		push		esi
+		push		ebx
+		push		ecx
+		push		edx
+		push		ebp
+		mov			ebp,			esp
+%endmacro
+
+%macro	proc_name_def 2
+		%define %$%1 %2
+%endmacro
+
+%macro	proc_arg	2
+		proc_name_def	%2,		ebp+%$arg_base
+		%assign		%$arg_base		%$arg_base+%1
+%endmacro
+
+%macro	local_var	2
+		%assign		%$var_base		%$var_base+%1
+		proc_name_def	%2,		ebp-%$var_base
+%endmacro
+
+%macro	end_local_vars	0
+		sub			esp,			%$var_base
+		%define		%$stack_restore		add			esp,		%$var_base
+%endmacro
+
+%macro	proc_end	0
+		%$stack_restore
+		pop			ebp
+		pop			edx
+		pop			ecx
+		pop			ebx
+		pop			esi
+		pop			edi
+		ret
+	%pop
+%endmacro
+
+
+;---- useful macros
+%macro IF 1 
+	%push if 
+	j%-1 %$ifnot 
+%endmacro
+
+%macro ELSE 0 
+	%ifctx if 
+		%repl else 
+		jmp %$ifend 
+		%$ifnot: 
+	%else 
+		%error "expected `if' before `else'" 
+	%endif 
+%endmacro
+
+%macro ENDIF 0 
+	%ifctx if 
+		%$ifnot: 
+		%pop 
+	%elifctx else 
+		%$ifend: 
+		%pop 
+	%else 
+		%error "expected `if' or `else' before `endif'" 
+	%endif 
+%endmacro
+
+
+%macro REPEAT 0 
+%push repeat 
+%$begin: 
+%endmacro
+
+%macro UNTIL 1 
+          j%-1 %$begin 
+%pop 
+%endmacro

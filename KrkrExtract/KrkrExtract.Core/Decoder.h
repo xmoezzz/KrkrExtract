@@ -28,7 +28,7 @@ DumpPsbTjs2(
 	BOOL               SaveText,
 	BOOL               SaveImage,
 	BOOL               SaveScript,
-	wstring&           ExtName,
+	const wstring&     ExtName,
 	PCWSTR             OutputFileName
 );
 

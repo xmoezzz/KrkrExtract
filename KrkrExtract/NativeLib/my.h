@@ -2216,13 +2216,14 @@ __if_not_exists(NTSTATUS)
 char _RTL_CONSTANT_STRING_type_check(const void *s);
 #define _RTL_CONSTANT_STRING_remove_const_macro(s) (s)
 
-
+#ifndef RTL_CONSTANT_STRING
 #define RTL_CONSTANT_STRING(s) \
 						{ \
     sizeof( s ) - sizeof( (s)[0] ), \
     sizeof( s ) / sizeof(_RTL_CONSTANT_STRING_type_check(s)), \
     _RTL_CONSTANT_STRING_remove_const_macro((PWSTR)s) \
 						}
+#endif
 
 /************************************************************************/
 /* others                                                               */
@@ -3491,7 +3492,7 @@ RtlSetUnicodeString(
 
 	if (String == nullptr)
 	{
-		UnicodeString->Buffer[0] = 0;
+		((PWSTR)UnicodeString->Buffer)[0] = 0;
 		UnicodeString->Length = 0;
 
 		return STATUS_SUCCESS;
@@ -3503,8 +3504,8 @@ RtlSetUnicodeString(
 	if (Length < UnicodeString->MaximumLength)
 	{
 		UnicodeString->Length = (USHORT)Length;
-		CopyMemory(UnicodeString->Buffer, String, Length);
-		UnicodeString->Buffer[Length / sizeof(WCHAR)] = 0;
+		CopyMemory((PWSTR)UnicodeString->Buffer, String, Length);
+		((PWSTR)UnicodeString->Buffer)[Length / sizeof(WCHAR)] = 0;
 
 		return STATUS_SUCCESS;
 	}
@@ -4770,7 +4771,7 @@ BOOL Nt_TerminateThread(IN HANDLE hThread, IN ULONG dwExitCode);
 
 ForceInline PWCHAR Nt_GetCommandLine()
 {
-	return Nt_CurrentPeb()->ProcessParameters->CommandLine.Buffer;
+	return (PWSTR)Nt_CurrentPeb()->ProcessParameters->CommandLine.Buffer;
 }
 
 ForceInline PVOID Nt_GetExeModuleHandle()
@@ -7359,6 +7360,12 @@ inline PIMAGE_NT_HEADERS ImageNtHeaders(PVOID ImageBase, PULONG_PTR NtHeadersVer
 	return ImageNtHeadersFast(ImageBase, NtHeadersVersion);
 }
 
+inline PIMAGE_NT_HEADERS ImageFileNtHeaders(PVOID ImageBase, PULONG_PTR NtHeadersVersion = nullptr)
+{
+	return ImageNtHeadersFast(ImageBase, NtHeadersVersion);
+}
+
+
 inline ULONG_PTR ImageGetSizeOfImage(PVOID ImageBase)
 {
 	ULONG_PTR Version;
@@ -8391,14 +8398,14 @@ public:
 	NTSTATUS
 		Print(
 			PLARGE_INTEGER  BytesWritten,
-			PWSTR           Format,
+			PCWSTR          Format,
 			...
 		);
 
 	NTSTATUS
 		Print(
 			PLARGE_INTEGER  BytesWritten,
-			PSTR            Format,
+			PCSTR           Format,
 			...
 		);
 
@@ -12566,6 +12573,7 @@ protected:
 		ML_THREAD_CONTEXT()
 		{
 			Flags.Value = 0;
+			RtlZeroMemory(this, sizeof(*this));
 		}
 
 	} ML_THREAD_CONTEXT, *PML_THREAD_CONTEXT;
@@ -12672,7 +12680,7 @@ protected:
 
 	inline PWSTR GetCommandLine()
 	{
-		return CurrentPeb()->ProcessParameters->CommandLine.Buffer;
+		return (PWSTR)CurrentPeb()->ProcessParameters->CommandLine.Buffer;
 	}
 
 #define ThreadCallbackM(...) (PTHREAD_START_ROUTINE)(LambdaCastHelper<ULONG(NTAPI *)(__VA_ARGS__)>::FUNC)[] (__VA_ARGS__) -> ULONG
@@ -13044,7 +13052,7 @@ protected:
 
 	inline PWSTR QueryCommandLine()
 	{
-		return Ps::CurrentPeb()->ProcessParameters->CommandLine.Buffer;
+		return (PWSTR)Ps::CurrentPeb()->ProcessParameters->CommandLine.Buffer;
 	}
 
 	NTSTATUS

@@ -13,6 +13,8 @@
 #include <Windows.h>
 #include <Objidl.h>
 
+#pragma warning(disable : 4100)
+
 #ifndef __cplusplus
 	#error Sorry, currently tp_stub.h can only be used in C++ mode.
 #endif

@@ -2,6 +2,8 @@
 #include "XP3Parser.h"
 #include <Utf.Convert.h>
 
+import Xp3Parser;
+
 DumpIndexCommandPlugin::DumpIndexCommandPlugin(KrkrClientProxyer* Proxyer):
 	m_Proxyer(Proxyer)
 {

@@ -81,7 +81,7 @@ private:
 	NTSTATUS InitializeCompIndex(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2& CompChunk);
 
 	NTSTATUS ReadWriteEncrypt(NtFileDisk& Source, NtFileDisk& Dest);
-	NTSTATUS ReadWriteEncrypt(std::wstring& Source, NtFileDisk& Dest, LARGE_INTEGER& Size);
+	NTSTATUS ReadWriteEncrypt(const std::wstring& Source, NtFileDisk& Dest, LARGE_INTEGER& Size);
 	
 	
 	ULONG64 CalculateChunkSize(KRKR2_XP3_INDEX_CHUNK_TIME& TimeChunk);
@@ -106,7 +106,7 @@ private:
 	std::vector<BYTE> SerializeToArray(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED& M2CompressedChunk);
 	std::vector<BYTE> SerializeToArray(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2& M2CompressedChunk);
 
-	ttstr GetAutoSearchPath(std::wstring& FileName);
+	ttstr GetAutoSearchPath(const std::wstring& FileName);
 
 	void DecryptWorker(ULONG64 EncryptOffset, PBYTE Buffer, ULONG BufferSize, ULONG Hash);
 

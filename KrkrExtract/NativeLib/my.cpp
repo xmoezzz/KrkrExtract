@@ -5493,7 +5493,7 @@ BOOL IsValidImage(PVOID ImageBase, ULONG_PTR Flags)
 
 NTSTATUS
 ReadRelocFromDisk(
-	PWSTR       ImageModule,
+	PCWSTR      ImageModule,
 	PVOID*      Relocation,
 	PLONG_PTR   RelocSize
 )
@@ -7496,7 +7496,7 @@ NTSTATUS
 NtFileDisk::
 Print(
 	PLARGE_INTEGER  BytesWritten,
-	PWSTR           Format,
+	PCWSTR          Format,
 	...
 )
 {
@@ -7517,7 +7517,7 @@ NTSTATUS
 NtFileDisk::
 Print(
 	PLARGE_INTEGER  BytesWritten,
-	PSTR            Format,
+	PCSTR           Format,
 	...
 )
 {
@@ -11631,7 +11631,7 @@ BOOLEAN - TRUE if one or more wild card characters was found.
 #endif // r3
 
 	if (Name->Length) {
-		for (p = Name->Buffer + (Name->Length / sizeof(WCHAR)) - 1;
+		for (p = (PWSTR)Name->Buffer + (Name->Length / sizeof(WCHAR)) - 1;
 			p >= Name->Buffer && *p != L'\\';
 			p--) {
 
@@ -12331,8 +12331,8 @@ NTSTATUS EnvironmentAppend(PUNICODE_STRING Key, PUNICODE_STRING Value)
 
 	RtlExpandEnvironmentStrings_U(nullptr, &QuoteKey, &Env, nullptr);
 
-	Env.Buffer[Env.Length / sizeof(Env.Buffer[0])] = 0;
-	Sub = wcsstr(Env.Buffer, Value->Buffer);
+	((PWSTR)Env.Buffer)[Env.Length / sizeof(Env.Buffer[0])] = 0;
+	Sub = (PWSTR)wcsstr(Env.Buffer, Value->Buffer);
 	if (Sub != nullptr)
 	{
 		switch (Sub[Value->Length / sizeof(Value->Buffer[0])])
@@ -12934,7 +12934,7 @@ SetKeyValue(
 		{
 			PWSTR Name, End;
 
-			Name = ObjectAttributes.ObjectName->Buffer;
+			Name = (PWSTR)ObjectAttributes.ObjectName->Buffer;
 			End = PtrAdd(Name, ObjectAttributes.ObjectName->Length);
 
 			while (Name < End)
@@ -13615,10 +13615,10 @@ NTSTATUS QueryFirstFile(PHANDLE Handle, PCWSTR FileName, PML_FIND_DATA FindFileD
 	FreeMemory(FileNameBuffer);
 	FAIL_RETURN(Status);
 
-	LocalFileName = BaseFileName.Buffer;
+	LocalFileName = (PWSTR)BaseFileName.Buffer;
 	if (LocalFileName == NULL)
 	{
-		LocalFileName = PtrAdd(NtPath.Buffer, NtPath.Length);
+		LocalFileName = PtrAdd((PWSTR)NtPath.Buffer, NtPath.Length);
 		BaseFileName.Buffer = LocalFileName;
 	}
 
@@ -14092,8 +14092,8 @@ NTSTATUS QueryDosDevice(PCWSTR DeviceName, PUNICODE_STRING TargetPath)
 	Length = Target.Length / sizeof(WCHAR);
 	if (Target.Buffer[Length - 1] != '\\')
 	{
-		Target.Buffer[Length++] = '\\';
-		Target.Buffer[Length] = 0;
+		((PWSTR)Target.Buffer)[Length++] = '\\';
+		((PWSTR)Target.Buffer)[Length]   = 0;
 		Target.Length = (USHORT)(Length * sizeof(WCHAR));
 	}
 

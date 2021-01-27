@@ -19,6 +19,9 @@
 #include <zlib.h>
 
 
+import Xp3Parser;
+
+
 struct KrkrExportedData
 {
 	ULONG64 Hash;

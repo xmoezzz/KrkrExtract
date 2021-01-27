@@ -396,7 +396,7 @@ Dump - emotedriver:.rdata
 Address   Hex dump                                         ASCII
 633C2350  31 39 32 39 | 31 38 38 35 | 34                       192918854
 */
-static PCHAR ReferKey[] = { { "192918854" } };
+// static PCHAR ReferKey[] = { { "192918854" } };
 
 struct PSBObject
 {
@@ -1267,7 +1267,7 @@ public:
 			return;
 
 		for (auto& Item : StringList) {
-			File.Print(NULL, "%s\r\n", Item.c_str());
+			File.Print(nullptr, "%s\r\n", Item.c_str());
 		}
 
 		File.Close();
@@ -1420,7 +1420,7 @@ NTSTATUS DumpPsbTjs2(
 	BOOL               SaveText,
 	BOOL               SaveImage,
 	BOOL               SaveScript, 
-	wstring&           ExtName, 
+	const wstring&     ExtName, 
 	PCWSTR             OutputFileName
 )
 { 

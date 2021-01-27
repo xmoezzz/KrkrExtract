@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tvpwin32", "tvpwin32.vcxproj", "{0DA37E3E-48F9-4853-AB2A-76D79042203C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6BCEBA3B-7D1D-4D63-AB31-CA4570295560} = {6BCEBA3B-7D1D-4D63-AB31-CA4570295560}
+		{70F4D261-0235-4052-B1CF-5BE29660A43E} = {70F4D261-0235-4052-B1CF-5BE29660A43E}
+		{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B} = {78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}
+		{01EE84B8-057A-3435-8FE2-AB4A2FB93841} = {01EE84B8-057A-3435-8FE2-AB4A2FB93841}
+		{6030C310-D5E7-39A0-A65F-6344447A66CC} = {6030C310-D5E7-39A0-A65F-6344447A66CC}
+		{E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA} = {E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\external\zlib\zlib.vcxproj", "{70F4D261-0235-4052-B1CF-5BE29660A43E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "..\external\lpng\libpng.vcxproj", "{6BCEBA3B-7D1D-4D63-AB31-CA4570295560}"
+	ProjectSection(ProjectDependencies) = postProject
+		{70F4D261-0235-4052-B1CF-5BE29660A43E} = {70F4D261-0235-4052-B1CF-5BE29660A43E}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "onig", "..\external\onig\onig.vcxproj", "{6030C310-D5E7-39A0-A65F-6344447A66CC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "turbojpeg-static", "..\external\libjpeg-turbo\vcproj\turbojpeg-static.vcxproj", "{01EE84B8-057A-3435-8FE2-AB4A2FB93841}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "freetype", "..\external\freetype\builds\windows\vc2012\freetype.vcxproj", "{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaseClasses", "..\external\baseclasses\BaseClasses.vcxproj", "{E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0DA37E3E-48F9-4853-AB2A-76D79042203C}.Release|x64.ActiveCfg = Release|x64
+		{0DA37E3E-48F9-4853-AB2A-76D79042203C}.Release|x64.Build.0 = Release|x64
+		{70F4D261-0235-4052-B1CF-5BE29660A43E}.Release|x64.ActiveCfg = Release|x64
+		{70F4D261-0235-4052-B1CF-5BE29660A43E}.Release|x64.Build.0 = Release|x64
+		{6BCEBA3B-7D1D-4D63-AB31-CA4570295560}.Release|x64.ActiveCfg = Release|x64
+		{6BCEBA3B-7D1D-4D63-AB31-CA4570295560}.Release|x64.Build.0 = Release|x64
+		{6030C310-D5E7-39A0-A65F-6344447A66CC}.Release|x64.ActiveCfg = Release|x64
+		{6030C310-D5E7-39A0-A65F-6344447A66CC}.Release|x64.Build.0 = Release|x64
+		{01EE84B8-057A-3435-8FE2-AB4A2FB93841}.Release|x64.ActiveCfg = Release|x64
+		{01EE84B8-057A-3435-8FE2-AB4A2FB93841}.Release|x64.Build.0 = Release|x64
+		{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}.Release|x64.ActiveCfg = Release|x64
+		{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}.Release|x64.Build.0 = Release|x64
+		{E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA}.Release|x64.ActiveCfg = Release|x64
+		{E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {29780E45-1C42-4123-A44E-EC0F5679CD43}
+	EndGlobalSection
+EndGlobal

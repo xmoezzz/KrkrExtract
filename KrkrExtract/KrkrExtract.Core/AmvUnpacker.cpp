@@ -420,7 +420,7 @@ HRESULT STDMETHODCALLTYPE CAmvPlugin::Unpack(_In_ PCWSTR FilePath, _In_ IStream*
 		}
 	}
 
-	auto&& AmvPathPerfix = ReplaceFileNameExtension(OutPath + L"\\" + GetPackageName(FilePath), L"");
+	auto&& AmvPathPerfix = ReplaceFileNameExtension((OutPath + L"\\" + GetPackageName(FilePath)), L"");
 	auto&& AmvFileName   = GetPackageName(FilePath);
 	
 	Status   = SaveAmv(AmvFileName.c_str(), FormatPathFull(AmvPathPerfix.c_str()).c_str());

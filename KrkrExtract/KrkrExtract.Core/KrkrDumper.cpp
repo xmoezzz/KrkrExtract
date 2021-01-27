@@ -6,6 +6,8 @@
 #include <zlib.h>
 #include <Shlobj.h>
 
+import Xp3Parser;
+
 void FormatM2PackName(wstring& PackageName, ttstr& OutName);
 
 CoDumperTask::CoDumperTask(KrkrClientProxyer* Proxyer, PCWSTR FilePath)

@@ -1,5 +1,6 @@
 #include <my.h>
 #include <vector>
+#include "detours.h"
 
 #pragma pack(push, 1)
 typedef struct SHELL_DATA
@@ -458,34 +459,35 @@ int WINAPI wWinMain(
 	LPWSTR    lpCmdLine,
 	int       nShowCmd)
 {
-	PWSTR*              Argv;
-	INT                 Argc;
 	STARTUPINFOW        si;
 	PROCESS_INFORMATION pi;
 	ULONG               Length;
+	PCSTR               DllNames[2];
+	
 
 	RtlZeroMemory(&si, sizeof(si));
 	RtlZeroMemory(&pi, sizeof(pi));
 	si.cb = sizeof(si);
 
-	Argv = CommandLineToArgvW(lpCmdLine, &Argc);
-	if (Argv == NULL || Argc < 1)
-	{
-		LocalFree(Argv);
-		return 0;
-	}
-
 	if (Nt_GetFileAttributes(L"KrkrUniversalPatch.dll") == (DWORD)-1) {
 		MessageBoxW(NULL, L"Couldn't find KrkrUniversalPatch.dll", L"Krkr Universal Patch", MB_OK | MB_ICONERROR);
-		LocalFree(Argv);
 		return 0;
 	}
+	
+	DllNames[0] = "KrkrUniversalPatch.dll";
+	DllNames[1] = nullptr;
+	
+	if (!DetourCreateProcessWithDllsW(
+		NULL, 
+		LinkerData.FileName,
+		NULL, 
+		NULL,
+		FALSE, NULL, NULL, NULL,
+		&si, &pi, 1, DllNames, NULL)) {
 
-	if (!CheckAndCreateProcess()) {
 		MessageBoxW(NULL, L"Couldn't Launch Game", L"Krkr Universal Patch", MB_OK | MB_ICONERROR);
 	}
 
-	LocalFree(Argv);
 	return 0;
 }
 

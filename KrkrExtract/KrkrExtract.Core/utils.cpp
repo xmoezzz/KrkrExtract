@@ -477,7 +477,7 @@ NCB_ATTACH_FUNCTION(isBlank, Layer, isBlank);
 static tjs_error TJS_INTF_METHOD
 clearAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
 {
-	int threthold = numparams <= 0 ? 0 : *param[0];
+	int threthold = numparams <= 0 ? 0 : (int)*param[0];
 	unsigned long fillColor = (unsigned long)((numparams > 1 ? param[1]->AsInteger() : 0) & 0xffffff);
 
 	// ‘‚«‚İæ

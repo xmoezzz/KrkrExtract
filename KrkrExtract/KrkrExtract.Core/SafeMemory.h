@@ -99,7 +99,7 @@ template <class T> inline std::shared_ptr<T> CopyStringSafeP(T* Buffer)
 
 template <class T> inline std::shared_ptr<T> CopyMemorySafe(T* Buffer, SIZE_T Size)
 {
-	auto NewBuffer = AllocateMemorySafe(Size);
+	auto NewBuffer = AllocateMemorySafe<T>(Size);
 	if (!NewBuffer)
 		return nullptr;
 
@@ -109,7 +109,7 @@ template <class T> inline std::shared_ptr<T> CopyMemorySafe(T* Buffer, SIZE_T Si
 
 template <class T> inline std::shared_ptr<T> CopyMemorySafeP(T* Buffer, SIZE_T Size)
 {
-	auto NewBuffer = AllocateMemorySafeP(Size);
+	auto NewBuffer = AllocateMemorySafeP<T>(Size);
 	if (!NewBuffer)
 		return nullptr;
 

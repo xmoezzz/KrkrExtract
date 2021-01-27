@@ -345,6 +345,9 @@
     <ClCompile Include="Alpc.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Xp3Parser.ixx">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -521,6 +524,9 @@
     <ClInclude Include="WinReg.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
+    <ClInclude Include="PEFile32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KrkrExtract.Core.rc">
@@ -530,6 +536,7 @@
   <ItemGroup>
     <None Include="PatchLoader.exe" />
     <None Include="KrkrUniversalPatch.dll" />
+    <None Include="tvpwin64.exe" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="win.manifest" />

@@ -112,7 +112,7 @@ typedef struct _UNICODE_STRING
 {
     USHORT Length;
     USHORT MaximumLength;
-    _Field_size_bytes_part_(MaximumLength, Length) PWCH Buffer;
+    _Field_size_bytes_part_(MaximumLength, Length) PCWCH Buffer;
 } UNICODE_STRING, *PUNICODE_STRING;
 
 typedef const UNICODE_STRING *PCUNICODE_STRING;
