@@ -852,6 +852,12 @@ private:
 		Checked = FALSE;
 		Status  = 0;
 
+		if (SendMessageW(m_hWndPsbAll, BM_GETCHECK, 0, 0))
+		{
+			SET_FLAG(Status, (ULONG)KrkrPsbMode::PSB_ALL);
+			Checked = TRUE;
+		}
+
 		if (SendMessageW(m_hWndPsbRaw, BM_GETCHECK, 0, 0))
 		{
 			SET_FLAG(Status, (ULONG)KrkrPsbMode::PSB_RAW);
@@ -882,12 +888,6 @@ private:
 			Checked = TRUE;
 		}
 
-		if (SendMessageW(m_hWndPsbAll, BM_GETCHECK, 0, 0))
-		{
-			SET_FLAG(Status, (ULONG)KrkrPsbMode::PSB_ALL);
-			Checked = TRUE;
-		}
-
 		if (SendMessageW(m_hWndPsbJson, BM_GETCHECK, 0, 0))
 		{
 			SET_FLAG(Status, (ULONG)KrkrPsbMode::PSB_JSON);
@@ -908,7 +908,7 @@ private:
 		Button_SetCheck(m_hWndPsbJson,      BST_UNCHECKED);
 	}
 
-	VOID PsbSelectRawAll()
+	VOID PsbSelectAll()
 	{
 		Button_SetCheck(m_hWndPsbRaw,       BST_CHECKED);
 		Button_SetCheck(m_hWndPsbText,      BST_CHECKED);
@@ -928,6 +928,7 @@ private:
 
 		ULONG Value;
 
+		// (1) Get the flags
 		if (PsbSelectStatus(Value)) {
 			m_PsbFlag = (KrkrPsbMode)Value;
 		}
@@ -935,6 +936,17 @@ private:
 		{
 			PsbSelectRawOnly();
 			m_PsbFlag = KrkrPsbMode::PSB_RAW;
+		}
+
+		// (2) Apply the button status
+		if (m_PsbFlag == KrkrPsbMode::PSB_ALL) {
+			PsbSelectAll();
+		}
+		else if (m_PsbFlag == KrkrPsbMode::PSB_NONE) {
+			PsbSelectRawOnly();
+		}
+		else {
+			// ignore, normal status
 		}
 	}
 

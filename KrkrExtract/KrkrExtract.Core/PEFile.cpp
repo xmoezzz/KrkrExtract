@@ -350,7 +350,7 @@ DWORD PEFile::calcNewImportsSize(DWORD &sizeDlls, DWORD &sizeFunctions, DWORD &s
 	return sizeDlls + 2 * sizeFunctions + sizeStrings;
 }
 //==============================================================================
-int PEFile::addSection(char* name, DWORD size, bool isExecutable) {
+int PEFile::addSection(const char* name, DWORD size, bool isExecutable) {
 	if (peHeaders.FileHeader.NumberOfSections == MAX_SECTION_COUNT) {
 		return -1;
 	}

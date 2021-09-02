@@ -71,7 +71,7 @@ public:
 	bool				loadFromFile(LPCWSTR filePath);
 	bool				loadFromMemory(PBYTE memoryAddress);
 	bool				saveToFile(LPCWSTR filePath);
-	int					addSection(char* name, DWORD size, bool isExecutable);
+	int					addSection(const char* name, DWORD size, bool isExecutable);
 	void				addImport(char* dllName, char** functions, int functionCount);
 	void				commit();
 

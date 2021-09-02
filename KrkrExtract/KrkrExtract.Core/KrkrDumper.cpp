@@ -350,7 +350,7 @@ NTSTATUS CoDumperTask::DumpFileWithIStream(ttstr M2Prefix, ttstr NormalPrefix, X
 		if (Proxyer.IsM2Krkr() && Item.m_IsM2Format)
 		{
 			OutFileName = M2Prefix + Item.yuzu.FileName;
-			m_Proxyer->TellServerLogOutput(LogLevel::LOG_INFO, Item.yuzu.FileName);
+			m_Proxyer->TellServerLogOutput(LogLevel::LOG_INFO, L"%s", Item.yuzu.FileName);
 
 			ExtName = GetExtensionUpper(Item.yuzu.FileName);
 			OutFilePathFull = OutFilePath + Item.yuzu.FileName;
@@ -358,7 +358,7 @@ NTSTATUS CoDumperTask::DumpFileWithIStream(ttstr M2Prefix, ttstr NormalPrefix, X
 		else
 		{
 			OutFileName = NormalPrefix + Item.info.FileName;
-			m_Proxyer->TellServerLogOutput(LogLevel::LOG_INFO, Item.info.FileName);
+			m_Proxyer->TellServerLogOutput(LogLevel::LOG_INFO, L"%s", Item.info.FileName);
 
 			ExtName = GetExtensionUpper(Item.info.FileName);
 			OutFilePathFull = OutFilePath + Item.info.FileName;
@@ -439,7 +439,7 @@ NTSTATUS CoDumperTask::DumpFileWithArchive(Xp3WalkerProxy& Proxyer)
 		SHCreateDirectory(NULL, GetDirName(OutputFilePath).c_str());
 
 		m_Proxyer->TellServerProgressBar(L"Dumper", Index, Items.size());
-		m_Proxyer->TellServerLogOutput(LogLevel::LOG_INFO, Item.info.FileName);
+		m_Proxyer->TellServerLogOutput(LogLevel::LOG_INFO, L"%s", Item.info.FileName);
 
 		if (Item.info.EncryptedFlag & 7)
 		{
