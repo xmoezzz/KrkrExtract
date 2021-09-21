@@ -1,9 +1,0 @@
-syntax = "proto3";
-option optimize_for = LITE_RUNTIME;
-message ServerMessageBox {
-	uint64 SequenceId = 1;
-	string Description = 2;
-	uint32 Flags = 3;
-	bool   Locked = 4;
-}
-

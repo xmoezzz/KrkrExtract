@@ -222,54 +222,6 @@
     <ClCompile Include="ClientImpl.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalPatchMakeChecked.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalDumperModeChecked.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskDumpStart.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskCloseWindow.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientPackerChecked.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientCommandEmitted.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskEndAndEnableUI.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerProgressBar.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerMessageBox.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerLogOutput.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerExitFromRemoteProcess.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
-    <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc">
-      <Filter>Source Files\Protobuf.Stub</Filter>
-    </ClCompile>
     <ClCompile Include="TaskAutoUnlocker.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -347,6 +299,18 @@
     </ClCompile>
     <ClCompile Include="Xp3Parser.ixx">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\client.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\client.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\server.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\server.pb.cc">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -526,6 +490,12 @@
     </ClInclude>
     <ClInclude Include="PEFile32.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GrpcConnectionApi.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GrpcCoreApi.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

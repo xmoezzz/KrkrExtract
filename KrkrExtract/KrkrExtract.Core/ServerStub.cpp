@@ -1,32 +1,12 @@
 #include "KrkrExtract.h"
-
 #include <RpcSequence.h>
 #include <Utf.Convert.h>
-#include <ServerProgressBar.pb.h>
-#include <ServerLogOutput.pb.h>
-#include <ServerCommandResultOutput.pb.h>
-#include <ServerUIReady.pb.h>
-#include <ServerMessageBox.pb.h>
-#include <ServerTaskStartAndDisableUI.pb.h>
-#include <ServerTaskEndAndEnableUI.pb.h>
-#include <ServerUIHeartbeatPackage.pb.h>
-#include <ServerExitFromRemoteProcess.pb.h>
 
-std::string RpcTellServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total)
-{
-	ServerProgressBar Data;
-	
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerProgressBar);
-	Data.set_taskname(Utf16ToUtf8(TaskName));
-	Data.set_current(Current);
-	Data.set_total(Total);
-	
-	return Data.SerializeAsString();
-}
 
 BOOL NTAPI KrkrExtractCore::TellServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total)
 {
-	BOOL Success;
+	BOOL LocalState, RemoteState;
+	BOOL Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
@@ -34,8 +14,22 @@ BOOL NTAPI KrkrExtractCore::TellServerProgressBar(PCWSTR TaskName, ULONGLONG Cur
 		Success = m_LocalServer->NotifyServerProgressBar(TaskName, Current, Total);
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerProgressBar(TaskName, Current, Total);
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerProgressBar(TaskName, Current, Total);
+		}
+		LocalState = m_LocalServer->NotifyServerProgressBar(TaskName, Current, Total);
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerProgressBar, RpcTellServerProgressBar(TaskName, Current, Total));
+		PrintConsoleW(L"TellServerProgressBar: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
@@ -43,19 +37,11 @@ BOOL NTAPI KrkrExtractCore::TellServerProgressBar(PCWSTR TaskName, ULONGLONG Cur
 }
 
 
-std::string RpcServerLogOutput(LogLevel Level, PCWSTR Command)
-{
-	ServerLogOutput Data;
-
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerLogOutput);
-	Data.set_level((uint64_t)Level);
-	Data.set_command(Utf16ToUtf8(Command).c_str());
-	return Data.SerializeAsString();
-}
-
 BOOL NTAPI KrkrExtractCore::TellServerLogOutput(LogLevel Level, PCWSTR FormatString, ...)
 {
-	BOOL        Success;
+	BOOL        LocalState = FALSE;
+	BOOL        RemoteState = FALSE;
+	BOOL        Success = FALSE;
 	WCHAR       Message[0x200];
 	va_list     Args;
 
@@ -68,8 +54,22 @@ BOOL NTAPI KrkrExtractCore::TellServerLogOutput(LogLevel Level, PCWSTR FormatStr
 		Success = m_LocalServer->NotifyServerLogOutput(Level, Message);
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerLogOutput(Level, Message);
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerLogOutput(Level, Message);
+		}
+		LocalState  = m_LocalServer->NotifyServerLogOutput(Level, Message);
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerLogOutput, RpcServerLogOutput(Level, Message));
+		PrintConsoleW(L"TellServerLogOutput: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
@@ -77,19 +77,11 @@ BOOL NTAPI KrkrExtractCore::TellServerLogOutput(LogLevel Level, PCWSTR FormatStr
 }
 
 
-std::string RpcTellServerCommandResultOutput(CommandStatus Status, PCWSTR Reply)
-{
-	ServerCommandResultOutput Data;
-
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerCommandResultOutput);
-	Data.set_status((uint64_t)Status);
-	Data.set_reply(Utf16ToUtf8(Reply).c_str());
-	return Data.SerializeAsString();
-}
-
 BOOL NTAPI KrkrExtractCore::TellServerCommandResultOutput(CommandStatus Status, PCWSTR FormatString, ...)
 {
-	BOOL        Success;
+	BOOL        LocalState = FALSE;
+	BOOL        RemoteState = FALSE;
+	BOOL        Success = FALSE;
 	WCHAR       Message[0x200];
 	va_list     Args;
 
@@ -102,8 +94,22 @@ BOOL NTAPI KrkrExtractCore::TellServerCommandResultOutput(CommandStatus Status, 
 		Success = m_LocalServer->NotifyServerCommandResultOutput(Status, Message);
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerCommandResultOutput(Status, Message);
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerCommandResultOutput(Status, Message);
+		}
+		LocalState  = m_LocalServer->NotifyServerCommandResultOutput(Status, Message);
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerCommandResultOutput, RpcTellServerCommandResultOutput(Status, Message));
+		PrintConsoleW(L"TellServerCommandResultOutput: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
@@ -111,46 +117,50 @@ BOOL NTAPI KrkrExtractCore::TellServerCommandResultOutput(CommandStatus Status, 
 }
 
 
-std::string RpcServerUIReady()
+BOOL NTAPI KrkrExtractCore::TellServerUIReady(
+	ULONG ClientPort,
+	PCSTR SessionKey,
+	ULONG Extra
+)
 {
-	ServerUIReady Data;
-	
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerUIReady);
-	return Data.SerializeAsString();
-}
-
-BOOL NTAPI KrkrExtractCore::TellServerUIReady()
-{
-	BOOL Success;
+	BOOL  LocalState = FALSE;
+	BOOL  RemoteState = FALSE;
+	BOOL  Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
 	case KrkrRunMode::LOCAL_MODE:
-		Success = m_LocalServer->NotifyServerUIReady();
+		Success = m_LocalServer->NotifyServerUIReady(ClientPort, SessionKey, Extra);
+		break;
+
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerUIReady(ClientPort, SessionKey, Extra);
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			LocalState = m_ConnectionApi->NotifyServerUIReady(ClientPort, SessionKey, Extra);
+		}
+		RemoteState = m_LocalServer->NotifyServerUIReady(ClientPort, SessionKey, Extra);
+		Success = LocalState && RemoteState;
 		break;
 
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerUIReady, RpcServerUIReady());
+		PrintConsoleW(L"TellServerUIReady: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
 	return Success;
 }
 
-std::string RpcServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Locked)
-{
-	ServerMessageBox Data;
-
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerMessageBox);
-	Data.set_flags(Flags);
-	Data.set_locked(Locked);
-
-	return Data.SerializeAsString();
-}
 
 BOOL NTAPI KrkrExtractCore::TellServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Locked)
 {
-	BOOL Success;
+	BOOL  LocalState = FALSE;
+	BOOL  RemoteState = FALSE;
+	BOOL  Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
@@ -158,8 +168,22 @@ BOOL NTAPI KrkrExtractCore::TellServerMessageBox(PCWSTR Description, ULONG Flags
 		Success = m_LocalServer->NotifyServerMessageBox(Description, Flags, Locked);
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerMessageBox(Description, Flags, Locked);
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerMessageBox(Description, Flags, Locked);
+		}
+		LocalState  = m_LocalServer->NotifyServerMessageBox(Description, Flags, Locked);
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerMessageBox, RpcServerMessageBox(Description, Flags, Locked));
+		PrintConsoleW(L"TellServerMessageBox: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
@@ -167,17 +191,11 @@ BOOL NTAPI KrkrExtractCore::TellServerMessageBox(PCWSTR Description, ULONG Flags
 }
 
 
-std::string RpcServerTaskStartAndDisableUI()
-{
-	ServerTaskStartAndDisableUI Data;
-
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerTaskStartAndDisableUI);
-	return Data.SerializeAsString();
-}
-
 BOOL NTAPI KrkrExtractCore::TellServerTaskStartAndDisableUI()
 {
-	BOOL Success;
+	BOOL  LocalState = FALSE;
+	BOOL  RemoteState = FALSE;
+	BOOL  Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
@@ -185,25 +203,34 @@ BOOL NTAPI KrkrExtractCore::TellServerTaskStartAndDisableUI()
 		Success = m_LocalServer->NotifyServerTaskStartAndDisableUI();
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerTaskStartAndDisableUI();
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerTaskStartAndDisableUI();
+		}
+		LocalState = m_LocalServer->NotifyServerTaskStartAndDisableUI();
+		Success = LocalState && RemoteState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerTaskStartAndDisableUI, RpcServerTaskStartAndDisableUI());
+		PrintConsoleW(L"TellServerTaskStartAndDisableUI: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
 	return Success;
 }
 
-std::string RpcServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR Description)
-{
-	ServerTaskEndAndEnableUI Data;
-	
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerTaskEndAndEnableUI);
-	return Data.SerializeAsString();
-}
 
 BOOL NTAPI KrkrExtractCore::TellServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR Description)
 {
-	BOOL Success;
+	BOOL  LocalState = FALSE;
+	BOOL  RemoteState = FALSE;
+	BOOL  Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
@@ -211,25 +238,34 @@ BOOL NTAPI KrkrExtractCore::TellServerTaskEndAndEnableUI(BOOL TaskCompleteStatus
 		Success = m_LocalServer->NotifyServerTaskEndAndEnableUI(TaskCompleteStatus, Description);
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerTaskEndAndEnableUI(TaskCompleteStatus, Description);
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerTaskEndAndEnableUI(TaskCompleteStatus, Description);
+		}
+		LocalState  = m_LocalServer->NotifyServerTaskEndAndEnableUI(TaskCompleteStatus, Description);
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerTaskEndAndEnableUI, RpcServerTaskEndAndEnableUI(TaskCompleteStatus, Description));
+		PrintConsoleW(L"TellServerTaskEndAndEnableUI: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
 	return Success;
 }
 
-std::string RpcServerUIHeartbeatPackage()
-{
-	ServerUIHeartbeatPackage Data;
-	
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerUIHeartbeatPackage);
-	return Data.SerializeAsString();
-}
 
 BOOL NTAPI KrkrExtractCore::TellServerUIHeartbeatPackage()
 {
-	BOOL Success;
+	BOOL  LocalState = FALSE;
+	BOOL  RemoteState = FALSE;
+	BOOL  Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
@@ -237,8 +273,22 @@ BOOL NTAPI KrkrExtractCore::TellServerUIHeartbeatPackage()
 		Success = m_LocalServer->NotifyServerUIHeartbeatPackage();
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerUIHeartbeatPackage();
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerUIHeartbeatPackage();
+		}
+		LocalState = m_LocalServer->NotifyServerUIHeartbeatPackage();
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer((ULONG)ServerSequence::SID_ServerUIHeartbeatPackage, RpcServerUIHeartbeatPackage());
+		PrintConsoleW(L"TellServerUIHeartbeatPackage: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 
@@ -246,17 +296,11 @@ BOOL NTAPI KrkrExtractCore::TellServerUIHeartbeatPackage()
 }
 
 
-std::string RpcServerExitFromRemoteProcess()
-{
-	ServerExitFromRemoteProcess Data;
-	
-	Data.set_sequenceid((uint64_t)ServerSequence::SID_ServerExitFromRemoteProcess);
-	return Data.SerializeAsString();
-}
-
 BOOL NTAPI KrkrExtractCore::TellServerExitFromRemoteProcess()
 {
-	BOOL Success;
+	BOOL  LocalState = FALSE;
+	BOOL  RemoteState = FALSE;
+	BOOL  Success = FALSE;
 
 	switch (m_RunMode.load())
 	{
@@ -264,10 +308,22 @@ BOOL NTAPI KrkrExtractCore::TellServerExitFromRemoteProcess()
 		Success = m_LocalServer->NotifyServerExitFromRemoteProcess();
 		break;
 
+	case KrkrRunMode::REMOTE_MODE:
+		if (m_ConnectionApi) {
+			Success = m_ConnectionApi->NotifyServerExitFromRemoteProcess();
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		if (m_ConnectionApi) {
+			RemoteState = m_ConnectionApi->NotifyServerExitFromRemoteProcess();
+		}
+		LocalState  = m_LocalServer->NotifyServerExitFromRemoteProcess();
+		Success = RemoteState && LocalState;
+		break;
+
 	default:
-		Success = RpcSendToServer(
-			(ULONG)ServerSequence::SID_ServerExitFromRemoteProcess,
-			RpcServerExitFromRemoteProcess());
+		PrintConsoleW(L"TellServerExitFromRemoteProcess: Unknown mode %d\n", (INT)m_RunMode.load());
 		break;
 	}
 

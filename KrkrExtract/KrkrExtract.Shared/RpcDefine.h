@@ -5,6 +5,7 @@
 
 enum class KrkrPsbMode : uint32_t
 {
+	PSB_NONE = 0UL, //for checking only
 	PSB_RAW = 1UL,
 	PSB_TEXT = (1UL << 1),
 	PSB_DECOM = (1UL << 2),

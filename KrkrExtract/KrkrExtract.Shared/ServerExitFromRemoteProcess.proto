@@ -1,6 +1,0 @@
-syntax = "proto3";
-option optimize_for = LITE_RUNTIME;
-message ServerExitFromRemoteProcess {
-	uint64 SequenceId = 1;
-}
-

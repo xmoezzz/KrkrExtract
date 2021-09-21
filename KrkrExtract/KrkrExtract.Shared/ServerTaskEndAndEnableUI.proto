@@ -1,8 +1,0 @@
-syntax = "proto3";
-option optimize_for = LITE_RUNTIME;
-message ServerTaskEndAndEnableUI {
-    uint64 SequenceId = 1;
-	uint32 TaskCompleteStatus = 2;
-	string Description = 3;
-}
-

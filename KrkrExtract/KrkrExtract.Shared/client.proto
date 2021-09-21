@@ -1,0 +1,89 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package krclient;
+
+message CancelTaskRequest {
+}
+
+message CancelTaskResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message EmitCommandRequest {
+    string Command = 1;
+}
+
+message EmitCommandResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message PackerRequest {
+    string BaseDir = 1;
+    string OriginalArchiveName = 2;
+    string OutputArchiveName = 3;
+}
+
+message PackerResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message TaskCloseWindowRequest {
+}
+
+message TaskCloseWindowResponse {
+}
+
+message TaskDumpStartRequest {
+    string File = 1;
+    uint64 PsbMode = 2;
+    uint64 TextMode = 3;
+    uint64 PngMode  = 4;
+    uint64 Tjs2Mode = 5;
+    uint64 TlgMode  = 6;
+    uint64 AmvMode  = 7;
+    uint64 PdbMode  = 8;
+}
+
+message TaskDumpStartResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message UniversalDumperRequest {
+    uint64 PsbMode  = 1;
+    uint64 TextMode = 2;
+    uint64 PngMode  = 3;
+    uint64 Tjs2Mode = 4;
+    uint64 TlgMode = 5;
+    uint64 AmvMode = 6;
+    uint64 PdbMode = 7;
+}
+
+message UniversalDumperResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message UniversalPatchRequest {
+    uint32 Protect = 1;
+    uint32 Icon    = 2;
+}
+
+message UniversalPatchResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+service KrCoreApi {
+    rpc CancelTask (CancelTaskRequest) returns (CancelTaskResponse) {}
+    rpc EmitCommand (EmitCommandRequest) returns (EmitCommandResponse) {}
+    rpc Packer (PackerRequest) returns (PackerResponse) {}
+    rpc TaskCloseWindow (TaskCloseWindowRequest) returns (TaskCloseWindowResponse) {}
+    rpc TaskDumpStart (TaskDumpStartRequest) returns (TaskDumpStartResponse) {}
+    rpc UniversalDumper (UniversalDumperRequest) returns (UniversalDumperResponse) {}
+    rpc UniversalPatch (UniversalPatchRequest) returns (UniversalPatchResponse) {}
+}
+

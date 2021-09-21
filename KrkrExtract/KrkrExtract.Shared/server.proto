@@ -1,0 +1,104 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package krserver;
+
+message ServerCommandResultOutputRequest {
+	uint64 Status = 1;
+	string Reply = 2;
+}
+
+message ServerCommandResultOutputResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerExitFromRemoteProcessRequest {
+}
+
+message ServerExitFromRemoteProcessResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerLogOutputRequest {
+	uint64 Level = 1;
+	string Command = 2;
+}
+
+message ServerLogOutputResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerMessageBoxRequest {
+	string Description = 1;
+	uint32 Flags = 2;
+	bool   Locked = 3;
+}
+
+message ServerMessageBoxResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerProgressBarRequest {
+	string TaskName = 1;
+	uint64 Current = 2;
+	uint64 Total = 3;
+}
+
+message ServerProgressBarResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerTaskEndAndEnableUIRequest {
+	bool TaskCompleteStatus = 1;
+	string Description = 2;
+}
+
+message ServerTaskEndAndEnableUIResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerTaskStartAndDisableUIRequest {
+}
+
+message ServerTaskStartAndDisableUIResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message ServerUIHeartbeatPackageRequest {
+}
+
+message ServerUIHeartbeatPackageResponse {
+}
+
+message ServerUIReadyRequest {
+	uint32 ClientPort = 1;
+	string SessionKey = 2;
+	uint32 Extra = 3;
+}
+
+message ServerUIReadyResponse {
+    bool Success = 1;
+    string Message = 2;
+	uint32 HeartbeatInterval = 3;
+}
+
+
+
+service KrConnectionApi {
+    rpc ServerProgressBar (ServerProgressBarRequest) returns (ServerProgressBarResponse) {}
+    rpc ServerCommandResultOutput (ServerCommandResultOutputRequest) returns (ServerCommandResultOutputResponse) {}
+    rpc ServerExitFromRemoteProcess (ServerExitFromRemoteProcessRequest) returns (ServerExitFromRemoteProcessResponse) {}
+    rpc ServerLogOutput (ServerLogOutputRequest) returns (ServerLogOutputResponse) {}
+    rpc ServerMessageBox (ServerMessageBoxRequest) returns (ServerMessageBoxResponse) {}
+    rpc ServerTaskEndAndEnableUI (ServerTaskEndAndEnableUIRequest) returns (ServerTaskEndAndEnableUIResponse) {}
+    rpc ServerTaskStartAndDisableUI (ServerTaskStartAndDisableUIRequest) returns (ServerTaskStartAndDisableUIResponse) {}
+    rpc ServerUIHeartbeatPackage (ServerUIHeartbeatPackageRequest) returns (ServerUIHeartbeatPackageResponse) {}
+    rpc ServerUIReady (ServerUIReadyRequest) returns (ServerUIReadyResponse) {}
+}
+

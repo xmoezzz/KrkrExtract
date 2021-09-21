@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "chromehtml2pdf": "^1.0.4"
+  }
+}

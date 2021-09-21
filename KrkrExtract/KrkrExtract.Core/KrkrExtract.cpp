@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <json/json.h>
 #include <zlib.h>
-
+#include "GrpcConnectionApi.h"
 
 import Xp3Parser;
 
@@ -313,24 +313,22 @@ NTSTATUS KrkrExtractCore::Initialize(HMODULE DllModule)
 	if (m_HookEngine == nullptr)
 		return STATUS_NO_MEMORY;
 
-
-	switch ((USHORT)RunModeString[0])
-	{
-	case L'R':
-		m_RunMode = KrkrRunMode::REMOTE_MODE;
+	if (lstrcmpiW(RunModeString, L"remote") == 0) {
 
 		//
 		// Connect to server
 		//
+		m_RunMode = KrkrRunMode::REMOTE_MODE;
+
 		Status = InitializeWithRpcMode();
 		PrintConsoleW(L"Rpc Mode\n");
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"KrkrExtractCore::Initialize : InitializeWithRpcMode failed, %08x\n", Status);
 			return Status;
 		}
-		break;
+	}
+	else if (lstrcmpiW(RunModeString, L"local") == 0) {
 
-	default:
 		m_RunMode = KrkrRunMode::LOCAL_MODE;
 
 		//
@@ -343,9 +341,28 @@ NTSTATUS KrkrExtractCore::Initialize(HMODULE DllModule)
 			PrintConsoleW(L"KrkrExtractCore::Initialize : InitializeWithLocalMode failed, %08x\n", Status);
 			return Status;
 		}
-		break;
 	}
+	else if (lstrcmpiW(RunModeString, L"mixed") == 0) {
 
+		m_RunMode = KrkrRunMode::MIXED_MODE;
+		
+	}
+	else {
+
+		PrintConsoleW(L"Unknown mode(%s), back to local mode.\n", RunModeString);
+		m_RunMode = KrkrRunMode::LOCAL_MODE;
+
+		//
+		// Load dll and create stubs
+		//
+
+		Status = InitializeWithLocalMode();
+		PrintConsoleW(L"Local Mode\n");
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"KrkrExtractCore::Initialize : InitializeWithLocalMode failed, %08x\n", Status);
+			return Status;
+		}
+	}
 
 	//
 	// ok, now we can initialize other stuffs
@@ -587,105 +604,50 @@ NTSTATUS KrkrExtractCore::InitializeAndDetectBuiltinCxdec2()
 }
 
 
-DWORD NTAPI AlpcClientThread(PVOID Param)
-{
-	NTSTATUS         Status;
-	KrkrExtractCore* Instance;
-	PPORT_MESSAGE    ReceivedMessage;
-	SIZE_T           MessageSize;
-	static BYTE      SharedBuffer[0x1000];
-	
-	Instance = (KrkrExtractCore*)Param;
-	if (!Instance)
-		return STATUS_INVALID_PARAMETER;
-
-	while (Instance->AlpcClientShouldRun())
-	{
-		LOOP_ONCE
-		{
-			MessageSize     = 0;
-			ReceivedMessage = (PPORT_MESSAGE)SharedBuffer;
-			RtlZeroMemory(SharedBuffer, sizeof(SharedBuffer));
-
-			Status = NtAlpcSendWaitReceivePort(
-				Instance->AlpcGetPortHandle(),
-				0,
-				NULL,
-				NULL,
-				ReceivedMessage,
-				&MessageSize,
-				NULL,
-				NULL
-				);
-
-			if (NT_FAILED(Status))
-				break;
-			
-			Instance->AlpcProcessClientPackage(ReceivedMessage + sizeof(PORT_MESSAGE), ReceivedMessage->u1.s1.DataLength);
-		}
-
-
-		Ps::Sleep(20);
-	}
-
-	return 0;
-}
-
 NTSTATUS KrkrExtractCore::InitializeWithRpcMode()
 {
 	NTSTATUS       Status;
-	UNICODE_STRING PortName;
-	WCHAR          Path[0x200];
-	WCHAR          IoPrivatePath[0x100];
+	WCHAR          IoPrivatePort[0x100];
+	CHAR           SessionKey[0x100];
+	CHAR           ConnectionString[0x100];
 	ULONG          Size;
+	ULONG          Port;
 
-	Size = GetEnvironmentVariableW(L"KrkrRpcIoPrivatePath", IoPrivatePath, countof(IoPrivatePath));
-	if (Size == 0)
+	RtlZeroMemory(IoPrivatePort, sizeof(IoPrivatePort));
+	Size = GetEnvironmentVariableW(L"KrkrRpcIoPrivatePort", IoPrivatePort, countof(IoPrivatePort));
+	if (Size == 0) {
+		PrintConsoleW(L"KrkrRpcIoPrivatePort is not set\n");
 		return STATUS_NOT_FOUND;
+	}
+
+	RtlZeroMemory(SessionKey, sizeof(SessionKey));
+	Size = GetEnvironmentVariableA("KrkrRpcSessionKey", SessionKey, countof(SessionKey));
+	if (Size == 0) {
+		PrintConsoleW(L"KrkrRpcSessionKey is not set\n");
+		return STATUS_NOT_FOUND;
+	}
 	
-	FormatStringW(Path, L"\\RPC Control\\%s", IoPrivatePath);
-	RtlInitUnicodeString(&PortName, Path);
-	Status = NtAlpcConnectPort(&m_AlpcPort, &PortName, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
-	if (NT_FAILED(Status))
-		return Status;
+	m_SessionKey = SessionKey;
+	Port = (ULONG)_wtoi(IoPrivatePort);
+	if (Port <= 0 || Port >= 0xFFFF) {
+		PrintConsoleW(L"Invaild port : %d\n", Port);
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	FormatStringA(ConnectionString, "localhost:%d", Port);
+	PrintConsoleA("ConnectionApi : Connecting to %s\n", ConnectionString);
+
+	try {
+		m_ConnectionApi = std::make_unique<ConnectionApi>(
+			grpc::CreateChannel(ConnectionString, grpc::InsecureChannelCredentials())
+			);
+	}
+	catch (std::exception& error) {
+		PrintConsoleA("InitializeWithRpcMode : failed to connect to remote (%s)\n", error.what());
+		return STATUS_NETWORK_UNREACHABLE;
+	}
 	
-	return Nt_CreateThread(AlpcClientThread, this, FALSE, NtCurrentProcess(), &m_AlpcClientThread);
-}
-
-BOOL KrkrExtractCore::RpcSendToServer(ULONG MessageType, std::string&& Request)
-{
-	NTSTATUS     Status;
-	PORT_MESSAGE PortMessage;
-
-	RtlZeroMemory(&PortMessage, sizeof(PortMessage));
-
-	PortMessage.u1.s1.DataLength  = (CSHORT)Request.length();
-	PortMessage.u1.s1.TotalLength = (CSHORT)(Request.length() + sizeof(PortMessage));
-	
-	auto Message= AllocateAlpcMessage(&PortMessage, MessageType, Request.length(), Request.data());
-	if (!Message)
-		return STATUS_NO_MEMORY;
-
-	Status = NtAlpcSendWaitReceivePort(m_AlpcPort, 0, Message.get(), NULL, NULL, NULL, NULL, NULL);
-	return NT_SUCCESS(Status);
-}
-
-BOOL KrkrExtractCore::RpcSendToServer(ULONG MessageType, std::string&  Request)
-{
-	NTSTATUS     Status;
-	PORT_MESSAGE PortMessage;
-
-	RtlZeroMemory(&PortMessage, sizeof(PortMessage));
-
-	PortMessage.u1.s1.DataLength = (CSHORT)Request.length();
-	PortMessage.u1.s1.TotalLength = (CSHORT)(Request.length() + sizeof(PortMessage));
-
-	auto Message = AllocateAlpcMessage(&PortMessage, MessageType, Request.length(), Request.data());
-	if (!Message)
-		return STATUS_NO_MEMORY;
-
-	Status = NtAlpcSendWaitReceivePort(m_AlpcPort, 0, Message.get(), NULL, NULL, NULL, NULL, NULL);
-	return NT_SUCCESS(Status);
+	return STATUS_SUCCESS;
 }
 
 using KrCreateWindowFunc = NTSTATUS (*NTAPI) (
@@ -719,6 +681,25 @@ NTSTATUS KrkrExtractCore::InitializeWithLocalMode()
 	return KrCreateWindow(m_SelfModule, this, &m_LocalServer);
 }
 
+
+NTSTATUS KrkrExtractCore::InitializeWithMixedMode()
+{
+	NTSTATUS Status;
+
+	Status = InitializeWithLocalMode();
+	if (NT_FAILED(Status)) {
+		PrintConsoleW(L"Mixed mode: InitializeWithLocalMode failed.\n");
+		return Status;
+	}
+
+	Status = InitializeWithRpcMode();
+	if (NT_FAILED(Status)) {
+		PrintConsoleW(L"Mixed mode: InitializeWithRpcMode failed.\n");
+		return Status;
+	}
+
+	return Status;
+}
 
 NTSTATUS KrkrExtractCore::InitializePrivatePointersFromFile()
 {
@@ -1360,6 +1341,169 @@ BOOL KrkrExtractCore::AddFileEntry(PCWSTR FileName, ULONG Length)
 }
 
 
+ULONG CalcHeartbeatRealTime(ULONG SleepTime)
+{
+	if (SleepTime > 100) {
+		SleepTime -= 100;
+		return SleepTime;
+	}
+
+	if (SleepTime > 50) {
+		SleepTime -= 50;
+		return SleepTime;
+	}
+
+	if (SleepTime > 20) {
+		SleepTime -= 20;
+		return SleepTime;
+	}
+
+	PrintConsoleW(L"CalcHeartbeatRealTime : heartbeat interval is too short...\n");
+	return SleepTime;
+}
+
+
+VOID KrkrExtractCore::MakeHeartbeat()
+{
+	if (m_ConnectionApi) {
+		m_ConnectionApi->NotifyServerUIHeartbeatPackage();
+	}
+}
+
+
+DWORD NTAPI HeartbeatThread(PVOID Param)
+{
+	KrkrExtractCore* Instance = (KrkrExtractCore*)Param;
+	ULONG SleepTime = Instance->GetHeartbeatInterval();
+	SleepTime = CalcHeartbeatRealTime(SleepTime);
+
+	while (Instance->IsCoreApiInitialized()) {
+		
+		Instance->MakeHeartbeat();
+		Ps::Sleep(SleepTime);
+	}
+
+	return 0;
+}
+
+BOOL KrkrExtractCore::CreateHeartbeatThread()
+{
+	NTSTATUS Status;
+
+	Status = Nt_CreateThread(HeartbeatThread, this, FALSE, NtCurrentProcess(), &m_CoreApiHeartbeatThread);
+	if (NT_FAILED(Status)) {
+		PrintConsoleW(L"KrkrExtractCore::CreateHeartbeatThread : failed to create heartbeat thread\n");
+	}
+
+	return NT_SUCCESS(Status);
+}
+
+
+NTSTATUS KrkrExtractCore::InitWindowLocalMode()
+{
+	BOOL Success;
+
+	Success = TellServerUIReady(0, "", 0);
+	if (!Success)
+	{
+		TellServerLogOutput(LogLevel::LOG_ERROR, L"UI : Failed to change UI status");
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	return STATUS_SUCCESS;
+}
+
+
+
+DWORD NTAPI CoreApiServerThread(PVOID Param)
+{
+	NTSTATUS         Status;
+	INT              ClientPort = 0;
+	KrkrExtractCore* Instance = (KrkrExtractCore*)Param;
+
+	if (!Instance) {
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	CoreApiService   Service(Instance);
+	ServerBuilder    Builder;
+
+	grpc::EnableDefaultHealthCheckService(true);
+	grpc::reflection::InitProtoReflectionServerBuilderPlugin();
+	Builder.AddListeningPort("localhost:0", grpc::InsecureServerCredentials(), &ClientPort);
+	Builder.RegisterService(&Service);
+	std::unique_ptr<Server> Server(Builder.BuildAndStart());
+	PrintConsoleW(L"Server listening on localhost:%d\n", ClientPort);
+	
+	Instance->SetClientPort(static_cast<ULONG>(ClientPort));
+	Instance->SetCoreApiInitialized();
+	Server->Wait();
+	Instance->SetCoreApiUninitialized();
+	return 0;
+}
+
+
+NTSTATUS KrkrExtractCore::InitWindowRemoteMode()
+{
+	NTSTATUS Status;
+	BOOL     Success;
+
+	Status = Nt_CreateThread(CoreApiServerThread, this, FALSE, NtCurrentProcess(), &m_CoreApiThread);
+	if (NT_FAILED(Status)) {
+		m_ConnectionApi->NotifyServerExitFromRemoteProcess();
+		PrintConsoleW(L"KrkrExtractCore::InitWindowRemoteMode : CreateThread failed %08x\n", Status);
+		return Status;
+	}
+
+	for (ULONG RetryCount = 0; RetryCount < 5; RetryCount++) {
+		if (IsCoreApiInitialized()) {
+			break;
+		}
+		Ps::Sleep(100);
+	}
+
+	if (!IsCoreApiInitialized()) {
+		m_ConnectionApi->NotifyServerExitFromRemoteProcess();
+		PrintConsoleW(L"KrkrExtractCore::InitWindowRemoteMode : Connection fails the maximum number of retries(5)\n");
+		return STATUS_NETWORK_UNREACHABLE;
+	}
+
+	Success = m_ConnectionApi->NotifyServerUIReady(m_ClientPort, m_SessionKey.c_str(), 0);
+	if (!Success) {
+		m_ConnectionApi->NotifyServerExitFromRemoteProcess();
+		PrintConsoleW(L"KrkrExtractCore::InitWindowRemoteMode : Handleshake failed\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	Status = CreateHeartbeatThread();
+	if (!Success) {
+		m_ConnectionApi->NotifyServerExitFromRemoteProcess();
+		PrintConsoleW(L"KrkrExtractCore::InitWindowRemoteMode : CreateHeartbeatThread failed\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	return Status;
+}
+
+NTSTATUS KrkrExtractCore::InitWindowMixedMode()
+{
+	NTSTATUS Status;
+
+	LOOP_ONCE
+	{
+		Status = InitWindowRemoteMode();
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"KrkrExtractCore::InitWindowMixedMode : shutdown(remote) ... %08x\n", Status);
+			break;
+		}
+
+		Status = InitWindowLocalMode();
+	}
+
+	return Status;
+}
+
+
 NTSTATUS KrkrExtractCore::InitWindow()
 {
 	BOOL  Status;
@@ -1368,11 +1512,32 @@ NTSTATUS KrkrExtractCore::InitWindow()
 		TellServerLogOutput(LogLevel::LOG_WARN, L"UI : The main window is alreay actived");
 		return STATUS_SUCCESS;
 	}
-	
-	if (!TellServerUIReady())
+
+	switch (m_RunMode)
 	{
-		TellServerLogOutput(LogLevel::LOG_ERROR, L"UI : Failed to change UI status");
-		return STATUS_UNSUCCESSFUL;
+	case KrkrRunMode::LOCAL_MODE:
+		Status = InitWindowLocalMode();
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"KrkrExtractCore::InitWindow : InitWindowLocalMode (%08x)\n", Status);
+			return Status;
+		}
+		break;
+
+	case KrkrRunMode::REMOTE_MODE:
+		Status = InitWindowRemoteMode();
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"KrkrExtractCore::InitWindow : InitWindowRemoteMode (%08x)\n", Status);
+			return Status;
+		}
+		break;
+
+	case KrkrRunMode::MIXED_MODE:
+		Status = InitWindowMixedMode();
+		if (NT_FAILED(Status)) {
+			PrintConsoleW(L"KrkrExtractCore::InitWindow : InitWindowMixMode (%08x)\n", Status);
+			return Status;
+		}
+		break;
 	}
 
 	TellServerLogOutput(LogLevel::LOG_INFO, L"Virtual Console initializated, type `help` to see list of commands");

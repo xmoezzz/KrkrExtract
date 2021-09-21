@@ -1,9 +1,0 @@
-syntax = "proto3";
-option optimize_for = LITE_RUNTIME;
-message ServerProgressBar {
-	uint64 SequenceId = 1;
-	string TaskName = 2;
-	uint64 Current = 3;
-	uint64 Total = 4;
-}
-

@@ -26,6 +26,9 @@ public:
 	) = 0;
 
 	virtual BOOL NotifyServerUIReady(
+		ULONG ClientPort,
+		PCSTR SessionKey,
+		ULONG Extra
 	) = 0;
 
 	virtual BOOL NotifyServerMessageBox(

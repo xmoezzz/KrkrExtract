@@ -22,6 +22,8 @@
 #include "AsyncCommandExecutor.h"
 #include "KrkrHook.h"
 #include "trie.h"
+#include "GrpcConnectionApi.h"
+#include "GrpcCoreApi.h"
 
 enum class KrkrMode
 {
@@ -34,7 +36,8 @@ enum class KrkrMode
 enum class KrkrRunMode
 {
 	LOCAL_MODE   = 0,
-	REMOTE_MODE  = 1
+	REMOTE_MODE  = 1,
+	MIXED_MODE   = 2
 };
 
 
@@ -167,10 +170,11 @@ private:
 	std::atomic<ModuleInitializationType> m_InitializationType    = ModuleInitializationType::NotInited;
 	std::atomic<TVPExporterInitializationType> m_TVPExporterInitializationType = TVPExporterInitializationType::NotInited;
 	std::atomic<BOOL>                          m_PointersInitialized           = FALSE;
-	HANDLE                                     m_AlpcPort                      = nullptr;
-	HANDLE                                     m_AlpcClientThread              = nullptr;
-	std::atomic<BOOL>                          m_AlpcClientInitialized         = FALSE;
-	BOOL                                       m_AlpcClientShouldRun           = TRUE;
+	std::unique_ptr<ConnectionApi>             m_ConnectionApi = nullptr;
+	HANDLE                                     m_CoreApiThread              = nullptr;
+	std::atomic<BOOL>                          m_CoreApiInitialized         = FALSE;
+	HANDLE                                     m_CoreApiHeartbeatThread     = nullptr;
+	ULONG                                      m_HeartbeatInterval          = 5000;
 	
 	//
 	// Stubs (local or remote)
@@ -207,29 +211,26 @@ public:
 	BOOL NTAPI TellServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total);
 	BOOL NTAPI TellServerLogOutput(LogLevel Level, PCWSTR FormatString, ...);
 	BOOL NTAPI TellServerCommandResultOutput(CommandStatus Status, PCWSTR FormatString, ...);
-	BOOL NTAPI TellServerUIReady();
+	BOOL NTAPI TellServerUIReady(ULONG ClientPort, PCSTR SessionKey, ULONG Extra);
 	BOOL NTAPI TellServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Locked);
 	BOOL NTAPI TellServerTaskStartAndDisableUI();
 	BOOL NTAPI TellServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR Description);
 	BOOL NTAPI TellServerUIHeartbeatPackage();
 	BOOL NTAPI TellServerExitFromRemoteProcess();
 
-private:
-
-	BOOL RpcSendToServer(ULONG MessageType, std::string&& Request);
-	BOOL RpcSendToServer(ULONG MessageType, std::string&  Request);
-
 public:
 
-	VOID   SendKillSignalToAlpcClientThread() { m_AlpcClientShouldRun = FALSE; };
-	BOOL   AlpcClientShouldRun()              { return m_AlpcClientShouldRun; };
-	HANDLE AlpcGetPortHandle()                { return m_AlpcPort; };
+	VOID   SetCoreApiInitialized()   { m_CoreApiInitialized = TRUE; };
+	VOID   SetCoreApiUninitialized() { m_CoreApiInitialized = FALSE; };
+	BOOL   IsCoreApiInitialized()  { return m_CoreApiInitialized; };
+	BOOL   CreateHeartbeatThread();
+	ULONG  GetHeartbeatInterval() { return m_HeartbeatInterval; };
+	VOID   MakeHeartbeat();
+
 	//
 	// Rpc client
 	// process requests
 	//
-
-	BOOL AlpcProcessClientPackage(PVOID Message, SIZE_T MessageSize);
 
 	BOOL NotifyClientUniversalDumperModeChecked(
 		KrkrPsbMode PsbMode,
@@ -481,12 +482,17 @@ private:
 public:
 	BOOL     FindCodeSlow(PCCHAR Start, ULONG Size, PCCHAR Pattern, ULONG PatternLen);
 	NTSTATUS InitWindow();
+	NTSTATUS InitWindowLocalMode();
+	NTSTATUS InitWindowRemoteMode();
+	NTSTATUS InitWindowMixedMode();
 	NTSTATUS InitHookWithDll(LPCWSTR ModuleName, PVOID ImageBase);
 	NTSTATUS InitHookWithExe();
 
+	ULONG GetClientPort() { return m_ClientPort.load(); }
+	VOID SetClientPort(ULONG Port) { m_ClientPort = Port; }
 
 	//
-	// getters (Plugins)
+	// getters (Plsugins)
 	//
 
 	ULONG    NTAPI GetCustomFlag(HANDLE Handle) { return 0; };
@@ -529,6 +535,10 @@ private:
 
 	NTSTATUS InitializeWithRpcMode();
 	NTSTATUS InitializeWithLocalMode();
+	NTSTATUS InitializeWithMixedMode();
+
+	std::string          m_SessionKey;
+	std::atomic<ULONG>   m_ClientPort = 0;
 
 	KrkrHook* m_HookEngine = nullptr;
 

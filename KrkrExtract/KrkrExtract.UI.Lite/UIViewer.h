@@ -26,7 +26,7 @@ public:
 	BOOL NotifyServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total);
 	BOOL NotifyServerLogOutput(LogLevel Level, PCWSTR Command);
 	BOOL NotifyServerCommandResultOutput(CommandStatus Status, PCWSTR Reply);
-	BOOL NotifyServerUIReady();
+	BOOL NotifyServerUIReady(ULONG ClientPort, PCSTR SessionKey, ULONG Extra);
 	BOOL NotifyServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Locked);
 	BOOL NotifyServerTaskStartAndDisableUI();
 	BOOL NotifyServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR Description);

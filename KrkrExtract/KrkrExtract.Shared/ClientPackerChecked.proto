@@ -1,9 +1,0 @@
-syntax = "proto3";
-option optimize_for = LITE_RUNTIME;
-message ClientPackerChecked {
-    uint64 SequenceId = 1;
-    string BaseDir = 2;
-    string OriginalArchiveName = 3;
-    string OutputArchiveName = 4;
-}
-

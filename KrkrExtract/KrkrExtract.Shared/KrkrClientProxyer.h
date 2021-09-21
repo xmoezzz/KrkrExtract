@@ -173,7 +173,7 @@ public:
 	virtual BOOL NTAPI TellServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total) = 0;
 	virtual BOOL NTAPI TellServerLogOutput(LogLevel Level, PCWSTR FormatString, ...) = 0;
 	virtual BOOL NTAPI TellServerCommandResultOutput(CommandStatus Status, PCWSTR FormatString, ...) = 0;
-	virtual BOOL NTAPI TellServerUIReady() = 0;
+	virtual BOOL NTAPI TellServerUIReady(ULONG ClientPort, PCSTR SessionKey, ULONG Extra) = 0;
 	virtual BOOL NTAPI TellServerMessageBox(PCWSTR Description, ULONG Flags, BOOL Locked) = 0;
 	virtual BOOL NTAPI TellServerTaskStartAndDisableUI() = 0;
 	virtual BOOL NTAPI TellServerTaskEndAndEnableUI(BOOL TaskCompleteStatus, PCWSTR Description) = 0;

@@ -11,7 +11,7 @@ BOOL UIViewerServer::NotifyServerLogOutput(LogLevel Level, PCWSTR Command)
 	return m_Viewer->NotifyUILogOutput(Level, Command, FALSE);
 }
 
-BOOL UIViewerServer::NotifyServerUIReady()
+BOOL UIViewerServer::NotifyServerUIReady(ULONG ClientPort, PCSTR SessionKey, ULONG Extra)
 {
 	return m_Viewer->NotifyUIReady();
 }

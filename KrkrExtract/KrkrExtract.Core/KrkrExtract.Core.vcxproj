@@ -16,7 +16,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -32,7 +32,7 @@
     <LinkIncremental>false</LinkIncremental>
     <TargetName>KrkrExtract.Core</TargetName>
     <GenerateManifest>true</GenerateManifest>
-    <IncludePath>$(SolutionDir)KrkrExtract.Shared;$(SolutionDir)libpng;$(SolutionDir)jsoncpp_static;$(SolutionDir)NativeLib;$(SolutionDir)Protobuf.Lite;$(SolutionDir)capstone_static\include;$(SolutionDir)zlib;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)KrkrExtract.Shared;$(SolutionDir)libpng;$(SolutionDir)jsoncpp_static;$(SolutionDir)NativeLib;$(SolutionDir)capstone_static\include;$(SolutionDir)zlib;$(SolutionDir)3rdParts\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -46,7 +46,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4091 /wd4005 /wd5045 %(AdditionalOptions)</AdditionalOptions>
       <SDLCheck>false</SDLCheck>
@@ -60,7 +60,7 @@
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <AdditionalDependencies>$(TargetDir)NativeLib.lib;$(TargetDir)zlib.lib;$(TargetDir)libpng16.lib;$(TargetDir)Protobuf.Lite.lib;$(TargetDir)jsoncpp_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(TargetDir)NativeLib.lib;$(TargetDir)zlib.lib;$(TargetDir)libpng16.lib;$(TargetDir)jsoncpp_static.lib;$(SolutionDir)3rdParts\lib32\address_sorting.lib;$(SolutionDir)3rdParts\lib32\gpr.lib;$(SolutionDir)3rdParts\lib32\grpc.lib;$(SolutionDir)3rdParts\lib32\upb.lib;$(SolutionDir)3rdParts\lib32\libprotobuf.lib;$(SolutionDir)3rdParts\lib32\grpc++_reflection.lib;$(SolutionDir)3rdParts\lib32\grpc_plugin_support.lib;$(SolutionDir)3rdParts\lib32\grpc++.lib;$(SolutionDir)3rdParts\lib32\crypto.lib;$(SolutionDir)3rdParts\lib32\ssl.lib;$(SolutionDir)3rdParts\lib32\cares.lib;$(SolutionDir)3rdParts\lib32\absl_bad_any_cast_impl.lib;$(SolutionDir)3rdParts\lib32\absl_bad_optional_access.lib;$(SolutionDir)3rdParts\lib32\absl_bad_variant_access.lib;$(SolutionDir)3rdParts\lib32\absl_base.lib;$(SolutionDir)3rdParts\lib32\absl_city.lib;$(SolutionDir)3rdParts\lib32\absl_civil_time.lib;$(SolutionDir)3rdParts\lib32\absl_cord.lib;$(SolutionDir)3rdParts\lib32\absl_debugging_internal.lib;$(SolutionDir)3rdParts\lib32\absl_demangle_internal.lib;$(SolutionDir)3rdParts\lib32\absl_examine_stack.lib;$(SolutionDir)3rdParts\lib32\absl_exponential_biased.lib;$(SolutionDir)3rdParts\lib32\absl_failure_signal_handler.lib;$(SolutionDir)3rdParts\lib32\absl_flags.lib;$(SolutionDir)3rdParts\lib32\absl_flags_commandlineflag.lib;$(SolutionDir)3rdParts\lib32\absl_flags_commandlineflag_internal.lib;$(SolutionDir)3rdParts\lib32\absl_flags_config.lib;$(SolutionDir)3rdParts\lib32\absl_flags_internal.lib;$(SolutionDir)3rdParts\lib32\absl_flags_marshalling.lib;$(SolutionDir)3rdParts\lib32\absl_flags_parse.lib;$(SolutionDir)3rdParts\lib32\absl_flags_private_handle_accessor.lib;$(SolutionDir)3rdParts\lib32\absl_flags_program_name.lib;$(SolutionDir)3rdParts\lib32\absl_flags_reflection.lib;$(SolutionDir)3rdParts\lib32\absl_flags_usage.lib;$(SolutionDir)3rdParts\lib32\absl_flags_usage_internal.lib;$(SolutionDir)3rdParts\lib32\absl_graphcycles_internal.lib;$(SolutionDir)3rdParts\lib32\absl_hash.lib;$(SolutionDir)3rdParts\lib32\absl_hashtablez_sampler.lib;$(SolutionDir)3rdParts\lib32\absl_int128.lib;$(SolutionDir)3rdParts\lib32\absl_leak_check.lib;$(SolutionDir)3rdParts\lib32\absl_leak_check_disable.lib;$(SolutionDir)3rdParts\lib32\absl_log_severity.lib;$(SolutionDir)3rdParts\lib32\absl_malloc_internal.lib;$(SolutionDir)3rdParts\lib32\absl_periodic_sampler.lib;$(SolutionDir)3rdParts\lib32\absl_random_distributions.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_distribution_test_util.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_platform.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_pool_urbg.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_randen.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_randen_hwaes.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_randen_hwaes_impl.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_randen_slow.lib;$(SolutionDir)3rdParts\lib32\absl_random_internal_seed_material.lib;$(SolutionDir)3rdParts\lib32\absl_random_seed_gen_exception.lib;$(SolutionDir)3rdParts\lib32\absl_random_seed_sequences.lib;$(SolutionDir)3rdParts\lib32\absl_raw_hash_set.lib;$(SolutionDir)3rdParts\lib32\absl_raw_logging_internal.lib;$(SolutionDir)3rdParts\lib32\absl_scoped_set_env.lib;$(SolutionDir)3rdParts\lib32\absl_spinlock_wait.lib;$(SolutionDir)3rdParts\lib32\absl_stacktrace.lib;$(SolutionDir)3rdParts\lib32\absl_status.lib;$(SolutionDir)3rdParts\lib32\absl_statusor.lib;$(SolutionDir)3rdParts\lib32\absl_str_format_internal.lib;$(SolutionDir)3rdParts\lib32\absl_strerror.lib;$(SolutionDir)3rdParts\lib32\absl_strings.lib;$(SolutionDir)3rdParts\lib32\absl_strings_internal.lib;$(SolutionDir)3rdParts\lib32\absl_symbolize.lib;$(SolutionDir)3rdParts\lib32\absl_synchronization.lib;$(SolutionDir)3rdParts\lib32\absl_throw_delegate.lib;$(SolutionDir)3rdParts\lib32\absl_time.lib;$(SolutionDir)3rdParts\lib32\absl_time_zone.lib;$(SolutionDir)3rdParts\lib32\absl_wyhash.lib;$(SolutionDir)3rdParts\lib32\re2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
     </Link>
     <Manifest>
@@ -69,22 +69,6 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\KrkrExtract.Shared\ClientCancelTask.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ClientCommandEmitted.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ClientPackerChecked.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskCloseWindow.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ClientTaskDumpStart.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalDumperModeChecked.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ClientUniversalPatchMakeChecked.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerCommandResultOutput.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerExitFromRemoteProcess.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerLogOutput.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerMessageBox.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerProgressBar.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskEndAndEnableUI.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerTaskStartAndDisableUI.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerUIHeartbeatPackage.pb.cc" />
-    <ClCompile Include="..\KrkrExtract.Shared\ServerUIReady.pb.cc" />
     <ClCompile Include="Alpc.cpp" />
     <ClCompile Include="AmvSystemDecoder.cpp" />
     <ClCompile Include="AmvUnpacker.cpp" />
@@ -156,6 +140,10 @@
     <ClCompile Include="Xp3Parser.ixx" />
     <ClCompile Include="Xp3PluginEnum.cpp" />
     <ClCompile Include="xxhash.cpp" />
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\client.grpc.pb.cc" />
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\client.pb.cc" />
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\server.grpc.pb.cc" />
+    <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\server.pb.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alpc.h" />
@@ -166,6 +154,8 @@
     <ClInclude Include="CoTaskBase.h" />
     <ClInclude Include="DebuggerHandler.h" />
     <ClInclude Include="gif.h" />
+    <ClInclude Include="GrpcConnectionApi.h" />
+    <ClInclude Include="GrpcCoreApi.h" />
     <ClInclude Include="HardwareBreakpoint.h" />
     <ClInclude Include="KrkrHook.h" />
     <ClInclude Include="KrkrHookExporter.h" />
