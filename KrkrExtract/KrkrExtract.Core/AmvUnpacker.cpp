@@ -118,6 +118,7 @@ NTSTATUS ProcessAmvToPNG(std::vector<std::wstring>& FileList, std::wstring DestD
 	BOOL          Success;
 	std::wstring  NewPath;
 
+	Success = FALSE;
 	for (auto& FileName : FileList)
 	{
 		NewPath = DestDir + L"\\" + GetPackageName(FileName);

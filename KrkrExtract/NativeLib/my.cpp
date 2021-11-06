@@ -1786,7 +1786,7 @@ BOOL Nt_SetExeDirectoryAsCurrent()
 misc
 ************************************************************************/
 
-PVOID Nt_LoadLibrary(PWSTR ModuleFileName)
+PVOID Nt_LoadLibrary(PCWSTR ModuleFileName)
 {
 	return ml::Native::Ldr::LoadDll(ModuleFileName);
 }

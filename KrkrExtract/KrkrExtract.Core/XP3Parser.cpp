@@ -30,6 +30,45 @@ NTSTATUS IsXp3File(PCWSTR FileName, BOOL& IsXp3)
 }
 
 
+VOID HexDump(PCSTR Description, PVOID Address, SIZE_T Length) 
+{
+	BYTE Buffer[17];
+	PBYTE pc = static_cast<PBYTE>(Address);
+
+	if (Description != NULL) {
+		PrintConsoleA("%s:\n", Description);
+	}
+
+	SIZE_T i = 0;
+	for (i = 0; i < Length; i++) 
+	{
+		if ((i % 16) == 0) {
+			if (i != 0) {
+				PrintConsoleA("  %s\n", Buffer);
+			}
+			PrintConsoleA("  %04x ", i);
+		}
+
+		PrintConsoleA(" %02x", pc[i]);
+
+		if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
+			Buffer[i % 16] = '.';
+		}
+		else {
+			Buffer[i % 16] = pc[i];
+		}
+
+		Buffer[(i % 16) + 1] = '\0';
+	}
+
+	while ((i % 16) != 0) {
+		PrintConsoleA("   ");
+		i++;
+	}
+
+	PrintConsoleA("  %s\n", Buffer);
+}
+
 NTSTATUS FindTheFirstUnknownMagic(PBYTE Buffer, SIZE_T Size, DWORD& M2Magic)
 {
 	ULONG64        Offset;
@@ -287,7 +326,7 @@ NTSTATUS IsXp3File(NtFileDisk& File, BOOL& IsXp3)
 		return STATUS_SUCCESS;
 	}
 
-	Status = FindEmbededXp3OffsetSlow(File, NULL);
+	Status = FindEmbededXp3OffsetSlow(File, 0);
 	if (NT_SUCCESS(Status))
 	{
 		IsXp3 = TRUE;
@@ -480,7 +519,7 @@ ReadXp3FileChunk(
 	if (ByteTransferred + sizeof(FileChunk) + Offset > Size) {
 
 		PrintConsoleW(
-			L"ReadXp3FileChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			L"ReadXp3FileChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 			sizeof(FileChunk),
 			Offset,
 			Size
@@ -509,7 +548,7 @@ ReadXp3AdlrChunk(
 	if (ByteTransferred + sizeof(AdlrChunk) + Offset > Size) {
 
 		PrintConsoleW(
-			L"ReadXp3AldrChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			L"ReadXp3AldrChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 			sizeof(AdlrChunk),
 			Offset,
 			Size
@@ -539,7 +578,7 @@ ReadXp3TimeChunk(
 	if (ByteTransferred + sizeof(TimeChunk) + Offset > Size) {
 
 		PrintConsoleW(
-			L"ReadXp3TimeChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			L"ReadXp3TimeChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 			sizeof(TimeChunk),
 			Offset,
 			Size
@@ -568,7 +607,7 @@ RtlZeroMemory(&SegmChunk, sizeof(SegmChunk));
 if (ByteTransferred + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_SEGM, segm) + Offset > Size) {
 
 	PrintConsoleW(
-		L"ReadXp3SegmChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+		L"ReadXp3SegmChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 		FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName),
 		Offset,
 		Size
@@ -697,7 +736,7 @@ ReadXp3M2InfoChunk(
 	if (ByteTransferred + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName) + Offset > Size) 
 	{
 		PrintConsoleW(
-			L"ReadXp3M2InfoChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			L"ReadXp3M2InfoChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 			FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName),
 			Offset,
 			Size
@@ -771,7 +810,7 @@ ReadXp3M2CompressedChunk(
 	if (ByteTransferred + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName) + Offset > Size) {
 
 		PrintConsoleW(
-			L"ReadXp3M2CompressedChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			L"ReadXp3M2CompressedChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 			FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName),
 			Offset,
 			Size
@@ -871,7 +910,7 @@ ReadXp3UnknownChunk(
 	if (ByteTransferred + sizeof(Chunk) + Offset > Size) {
 
 		PrintConsoleW(
-			L"ReadXp3UnknownChunk : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			L"ReadXp3UnknownChunk : Buffer overflow in pre-check, Field = %08x, Offset = %08x, Size = %08x\n",
 			sizeof(Chunk),
 			Offset,
 			Size

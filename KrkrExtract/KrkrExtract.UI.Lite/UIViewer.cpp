@@ -47,7 +47,7 @@ BOOL UIViewer::ActiveUIViewer(PVOID DllModule, ClientStub* Client, ServerStub** 
 		}
 	}
 
-	using GetKrkrExtractVersionFunc = PCWSTR(*NTAPI) ();
+	using GetKrkrExtractVersionFunc = PCWSTR(NTAPI*) ();
 	auto GetKrkrExtractVersion = (GetKrkrExtractVersionFunc)Nt_GetProcAddress(m_KrkrModule, "GetKrkrExtractVersion");
 	if (!GetKrkrExtractVersion) {
 		m_Version = L"Unknown";

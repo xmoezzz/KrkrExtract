@@ -9,7 +9,7 @@
 				"type":"string",
 				"length":255,
 				"user":false,
-				"value":"$(exepath)\\savedata_loader"
+				"value":"$(exepath)\\savedata"
 			},
 			{
 				"caption":"処理ウェイト",

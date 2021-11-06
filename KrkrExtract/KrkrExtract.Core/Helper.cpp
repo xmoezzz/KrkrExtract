@@ -286,7 +286,7 @@ NTSTATUS CopyExeIcon(PCWCHAR To, ULONG_PTR Check)
 
 	for (ULONG_PTR i = 0; i < Check; i++)
 	{
-		hRes = FindResource(hExe, MAKEINTRESOURCEW(i), RT_GROUP_ICON);
+		hRes = FindResourceW(hExe, MAKEINTRESOURCEW(i), RT_GROUP_ICON);
 		if (hRes != NULL)
 		{
 			if (!UpdateResourceW(hUpdateRes, RT_GROUP_ICON, MAKEINTRESOURCEW(i), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), LockResource(LoadResource(hExe, hRes)), SizeofResource(hExe, hRes))

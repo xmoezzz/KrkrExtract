@@ -10,11 +10,13 @@
 //! @file
 //! @brief Waveフォーマットコンバータのコア関数
 //---------------------------------------------------------------------------
-#include <intrin.h>
+
 #include "tjsCommHead.h"
 #include "MathAlgorithms.h"
 #if defined(_M_IX86)||defined(_M_X64)
 //---------------------------------------------------------------------------
+
+#include <intrin.h>
 
 _ALIGN16(const float) TJS_V_VEC_REDUCE[4] =
 	{ 1.0f/32767.0f, 1.0f/32767.0f, 1.0f/32767.0f, 1.0f/32767.0f };

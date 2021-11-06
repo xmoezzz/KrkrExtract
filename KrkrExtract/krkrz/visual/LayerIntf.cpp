@@ -12,6 +12,7 @@
 #include "tjsCommHead.h"
 
 #include <math.h>
+#include <cmath>
 
 #include "tjsArray.h"
 #include "LayerIntf.h"
@@ -9827,25 +9828,25 @@ tjs_int tTJSNI_Font::GetTextHeight(const ttstr & text)
 double tTJSNI_Font::GetEscWidthX(const ttstr & text)
 {
 	if( Layer ) return Layer->GetEscWidthX(text);
-	else return cos(Font.Angle * (M_PI/1800)) * GetTextWidthDirect(text);
+	else return std::cos(Font.Angle * (M_PI/1800)) * GetTextWidthDirect(text);
 }
 //---------------------------------------------------------------------------
 double tTJSNI_Font::GetEscWidthY(const ttstr & text)
 {
 	if( Layer ) return Layer->GetEscWidthY(text);
-	else return sin(Font.Angle * (M_PI/1800)) * (-GetTextWidthDirect(text));
+	else return std::sin(Font.Angle * (M_PI/1800)) * (-GetTextWidthDirect(text));
 }
 //---------------------------------------------------------------------------
 double tTJSNI_Font::GetEscHeightX(const ttstr & text)
 {
 	if( Layer ) return Layer->GetEscHeightX(text);
-	else return sin(Font.Angle * (M_PI/1800)) * std::abs(Font.Height);
+	else return std::sin(Font.Angle * (M_PI/1800)) * std::abs(Font.Height);
 }
 //---------------------------------------------------------------------------
 double tTJSNI_Font::GetEscHeightY(const ttstr & text)
 {
 	if( Layer ) return Layer->GetEscHeightY(text);
-	else return cos(Font.Angle * (M_PI/1800)) * std::abs(Font.Height);
+	else return std::cos(Font.Angle * (M_PI/1800)) * std::abs(Font.Height);
 }
 //---------------------------------------------------------------------------
 void tTJSNI_Font::GetFontGlyphDrawRect( const ttstr & text, tTVPRect& area )

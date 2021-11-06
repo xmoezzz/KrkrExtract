@@ -593,9 +593,9 @@ DWORD& ret_length
 		{
 			for (p = 0; p < colors; p++)
 			{
-				pal[p * 4 + 0] = p;
-				pal[p * 4 + 1] = p;
-				pal[p * 4 + 2] = p;
+				pal[p * 4 + 0] = static_cast<BYTE>(p);
+				pal[p * 4 + 1] = static_cast<BYTE>(p);
+				pal[p * 4 + 2] = static_cast<BYTE>(p);
 				pal[p * 4 + 3] = 0;
 			}
 		}

@@ -7,6 +7,7 @@ AsyncCommandExecutor::AsyncCommandExecutor(KrkrClientProxyer* Proxyer, ULONG Tas
 {
 	NTSTATUS Status;
 
+	RtlInitializeCriticalSection(&m_CriticalSection);
 	InitializeThreadpoolEnvironment(&m_Environment);
 	m_TaskThreshold = m_TaskThreshold > 32 ? 32 : m_TaskThreshold;
 	m_TaskThreshold = m_TaskThreshold < 4  ? 4 : m_TaskThreshold;
@@ -30,6 +31,7 @@ AsyncCommandExecutor::AsyncCommandExecutor(KrkrClientProxyer* Proxyer, ULONG Tas
 AsyncCommandExecutor::~AsyncCommandExecutor()
 {
 	Shutdown();
+	RtlDeleteCriticalSection(&m_CriticalSection);
 }
 
 BOOL AsyncCommandExecutor::IsInitialized()
@@ -116,6 +118,8 @@ BOOL AsyncCommandExecutor::Shutdown()
 	TpReleasePool(m_Pool);
 	m_Pool = nullptr;
 	m_Initialization = FALSE;
+
+	return TRUE;
 }
 
 

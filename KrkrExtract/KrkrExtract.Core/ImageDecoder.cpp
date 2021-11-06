@@ -584,6 +584,7 @@ NTSTATUS Bmp2JPG(PBYTE Buffer, ULONG Size, PCWSTR Path)
 
 	Gdiplus::Image* Img = new Gdiplus::Image(Stream);
 	Gdiplus::Status GStatus = Img->Save(Path, &g_EncoderClsidJPG, &JPGEncoderParameters);
+	(void) GStatus;
 	delete Img;
 	delete Stream;
 

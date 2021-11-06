@@ -264,6 +264,7 @@ NTSTATUS NTAPI KrkrExtractCore::GetEmotePrivateKey(PULONG EmoteKey)
 		NTSTATUS Status;
 		PVOID    Module;
 		
+		Module = nullptr;
 		switch (EmoteKind)
 		{
 		case EMOTEKEY::EMOTE_EMOTEDRIVER:
@@ -292,6 +293,7 @@ NTSTATUS NTAPI KrkrExtractCore::GetEmotePrivateKey(PULONG EmoteKey)
 			return STATUS_NOT_FOUND;
 		}
 
+		Status = STATUS_UNSUCCESSFUL;
 		switch (EmoteKind)
 		{
 		case EMOTEKEY::EMOTE_EMOTEDRIVER:

@@ -29,7 +29,7 @@ PCWSTR
 NTAPI
 GetKrkrExtractVersion()
 {
-	return L"5.0.0.0";
+	return L"5.0.0.1";
 }
 
 
@@ -60,7 +60,7 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		
 		LdrDisableThreadCalloutsForDll(hModule);
-
+		MessageBoxA(0, 0, 0, 0);
 		g_Engine = new (std::nothrow) KrkrExtractCore();
 		if (!g_Engine) 
 		{

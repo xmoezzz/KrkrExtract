@@ -1,6 +1,16 @@
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 26812 26495)
+#endif
+
 #include "tp_stub.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 #include <RpcDefine.h>
 #include <RpcUIDefine.h>
 #include "my.h"
@@ -22,8 +32,25 @@
 #include "AsyncCommandExecutor.h"
 #include "KrkrHook.h"
 #include "trie.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+// warning C4100: unreferenced formal parameter
+//
+// warning C4127: conditional expression is constant
+//
+// warning C4702: unreachable code
+//
+// warning C4800: 'int': forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning (disable: 4100 4127 4702 4800 26495)
+#endif
+
 #include "GrpcConnectionApi.h"
 #include "GrpcCoreApi.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 enum class KrkrMode
 {

@@ -4696,7 +4696,7 @@ dll api
 
 PVOID
 Nt_LoadLibrary(
-	PWSTR ModuleFileName
+	PCWSTR ModuleFileName
 );
 
 PVOID

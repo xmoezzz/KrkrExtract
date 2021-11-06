@@ -1,0 +1,7 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+message ClientUniversalPatchMakeChecked {
+    uint64 SequenceId = 1;
+    uint32 Protect = 2;
+    uint32 Icon    = 3;
+}

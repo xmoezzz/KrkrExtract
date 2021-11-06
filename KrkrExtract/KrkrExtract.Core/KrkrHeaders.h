@@ -183,9 +183,9 @@ public:
 		InternalReset();
 		
 		info.FileNameLength = (USHORT)StrLengthW(Other->GetFileName());
-		lstrcpynW(info.FileName, Other->GetFileName(), min(info.FileNameLength + 1, countof(info.FileName)));
+		(void) lstrcpynW(info.FileName, Other->GetFileName(), min(info.FileNameLength + 1, countof(info.FileName)));
 		yuzu.FileNameLength = (USHORT)StrLengthW(Other->GetM2FileName());
-		lstrcpynW(yuzu.FileName, Other->GetM2FileName(), min(yuzu.FileNameLength + 1, countof(yuzu.FileName)));
+		(void) lstrcpynW(yuzu.FileName, Other->GetM2FileName(), min(yuzu.FileNameLength + 1, countof(yuzu.FileName)));
 
 		m_IsInfoNullTerminated   = Other->GetFileNameNullTerminated();
 		m_IsM2InfoNullTerminated = Other->GetM2GFileNameNullTerminated();

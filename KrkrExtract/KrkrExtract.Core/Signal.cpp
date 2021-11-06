@@ -107,7 +107,7 @@ NTSTATUS NTAPI SignalRemovePrivateProcHandler(KrkrExtractCore* Handle, PVOID Use
 	// TODO
 	//
 
-	RtlRemoveVectoredExceptionHandler(UserData) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
+	return RtlRemoveVectoredExceptionHandler(UserData) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
 

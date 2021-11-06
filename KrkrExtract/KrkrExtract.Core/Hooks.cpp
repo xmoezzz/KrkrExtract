@@ -70,6 +70,7 @@ NTSTATUS KrkrHook::HookGetProcAddress()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -90,6 +91,7 @@ NTSTATUS KrkrHook::UnHookGetProcAddress()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -110,6 +112,7 @@ NTSTATUS KrkrHook::HookCreateProcessInternalW()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -129,6 +132,7 @@ NTSTATUS KrkrHook::UnHookCreateProcessInternalW()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -149,6 +153,7 @@ NTSTATUS KrkrHook::HookMultiByteToWideChar()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -169,6 +174,7 @@ NTSTATUS KrkrHook::UnHookMultiByteToWideChar()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -189,6 +195,7 @@ NTSTATUS KrkrHook::HookCreateFileW()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -209,6 +216,7 @@ NTSTATUS KrkrHook::UnHookCreateFileW()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -228,6 +236,7 @@ NTSTATUS KrkrHook::HookReadFile()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -248,6 +257,7 @@ NTSTATUS KrkrHook::UnHookReadFile()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -268,6 +278,7 @@ NTSTATUS KrkrHook::HookIsDebuggerPresent()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -288,6 +299,7 @@ NTSTATUS KrkrHook::UnHookIsDebuggerPresent()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -305,9 +317,10 @@ NTSTATUS KrkrHook::UnHookIsDebuggerPresent()
 
 NTSTATUS KrkrHook::HookLoadLibraryA()
 {
-	NTSTATUS Status = STATUS_SUCCESS;
+	NTSTATUS Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -328,6 +341,7 @@ NTSTATUS KrkrHook::UnHookLoadLibraryA()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -348,6 +362,7 @@ NTSTATUS KrkrHook::HookLoadLibraryW()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -368,6 +383,7 @@ NTSTATUS KrkrHook::UnHookLoadLibraryW()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -388,6 +404,7 @@ NTSTATUS KrkrHook::HookTVPGetFunctionExporter()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -408,6 +425,7 @@ NTSTATUS KrkrHook::UnHookTVPGetFunctionExporter()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -427,6 +445,7 @@ NTSTATUS KrkrHook::HookTVPSetXP3ArchiveExtractionFilter()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -447,6 +466,7 @@ NTSTATUS KrkrHook::UnHookTVPSetXP3ArchiveExtractionFilter()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -467,6 +487,7 @@ NTSTATUS KrkrHook::HookV2Link(PVOID Module)
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -487,6 +508,7 @@ NTSTATUS KrkrHook::UnHookV2Link()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -507,6 +529,7 @@ NTSTATUS KrkrHook::HookIsDBCSLeadByte()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -527,6 +550,7 @@ NTSTATUS KrkrHook::UnHookIsDBCSLeadByte()
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -549,7 +573,7 @@ NTSTATUS KrkrHook::SetHwBreakPointAt(PVOID Address, SIZE_T Size, HardwareBreakpo
 	SectionProtector Section(m_Lock.Get());
 
 	Index = (ULONG)-1;
-
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -570,6 +594,7 @@ NTSTATUS KrkrHook::RemoveHwBreakPointAt(INT Index)
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -589,6 +614,7 @@ NTSTATUS KrkrHook::RemoveAllHwBreakPointAt(PCONTEXT Context)
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:
@@ -609,6 +635,8 @@ NTSTATUS KrkrHook::GetBusyHwBreakPoint(_Out_ HwBreakPointStatus& BpStatus)
 	NTSTATUS         Status;
 	SectionProtector Section(m_Lock.Get());
 
+	Status = STATUS_UNSUCCESSFUL;
+	BpStatus = HwBreakPointStatus::SlotEmpty;
 	switch (m_Mode)
 	{
 	case HookMode::HOOK_EPT:

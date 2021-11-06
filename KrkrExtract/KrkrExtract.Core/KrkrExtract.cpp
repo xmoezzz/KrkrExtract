@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <json/json.h>
 #include <zlib.h>
-#include "GrpcConnectionApi.h"
 
 import Xp3Parser;
 
@@ -650,7 +649,7 @@ NTSTATUS KrkrExtractCore::InitializeWithRpcMode()
 	return STATUS_SUCCESS;
 }
 
-using KrCreateWindowFunc = NTSTATUS (*NTAPI) (
+using KrCreateWindowFunc = NTSTATUS (NTAPI*) (
 	_In_  PVOID DllModule,
 	_In_  ClientStub* Client,
 	_Out_ ServerStub** Server
@@ -658,14 +657,15 @@ using KrCreateWindowFunc = NTSTATUS (*NTAPI) (
 
 NTSTATUS KrkrExtractCore::InitializeWithLocalMode()
 {
-	WCHAR              UIModulePath[MAX_NTPATH];
+	std::wstring       UIModulePath;
 	KrCreateWindowFunc KrCreateWindow;
 
 	if (m_UIModule)
 		return STATUS_SUCCESS;
 
-	wnsprintfW(UIModulePath, countof(UIModulePath), L"%sKrkrExtract.UI.Lite.dll", m_WorkerDir.c_str());
-	m_UIModule = (HMODULE)Nt_LoadLibrary(UIModulePath);
+	UIModulePath = m_WorkerDir;
+	UIModulePath += L"KrkrExtract.UI.Lite.dll";
+	m_UIModule = (HMODULE)Nt_LoadLibrary(UIModulePath.c_str());
 
 	if (!m_UIModule)
 		return STATUS_DLL_NOT_FOUND;
@@ -715,14 +715,15 @@ NTSTATUS KrkrExtractCore::InitializePrivatePointersFromFile()
 
 	static BYTE JsonMagic[4] = { 0x44, 0x33, 0x22, 0x11 };
 
-	Nt_GetModuleFileName(m_HostModule, ExePath, countof(ExePath));
+	RtlZeroMemory(ExePath, sizeof(ExePath));
+	Nt_GetModuleFileName(m_HostModule, ExePath, countof(ExePath) - 1);
 	wnsprintfW(FullPath, countof(FullPath), L"%s.krconfig", ExePath);
 	Status = File.Open(FullPath);
 	if (NT_FAILED(Status))
 		return Status;
 
 	Size = File.GetSize32();
-	if (Size <= 4)
+	if (Size <= sizeof(Magic))
 		return STATUS_BUFFER_TOO_SMALL;
 
 	Status = File.Read(Magic, sizeof(Magic));
@@ -750,27 +751,27 @@ NTSTATUS KrkrExtractCore::InitializePrivatePointersFromFile()
 
 	for (auto Ptr = Root.begin(); Ptr != Root.end(); Ptr++)
 	{
-		if (Ptr.key().isString() && StrCompareA(Ptr.key().asString().c_str(), "Allocator") == 0 && Ptr->isIntegral()) {
+		if (Ptr.key().isString() && Ptr.key().asString() == "Allocator" && Ptr->isIntegral()) {
 			m_Allocator = Ptr->asUInt64() ? (PBYTE)m_HostModule + Ptr->asUInt64() : 0;
 		}
 		
-		if (Ptr.key().isString() && StrCompareA(Ptr.key().asString().c_str(), "IStreamAdapterVtable") == 0 && Ptr->isIntegral()) {
+		if (Ptr.key().isString() && Ptr.key().asString() == "IStreamAdapterVtable" && Ptr->isIntegral()) {
 			m_IStreamAdapterVtable = Ptr->asUInt64() ? (PBYTE)m_HostModule + Ptr->asUInt64() : 0;
 		}
 
-		if (Ptr.key().isString() && StrCompareA(Ptr.key().asString().c_str(), "TVPCreateBStream") == 0 && Ptr->isIntegral()) {
+		if (Ptr.key().isString() && Ptr.key().asString() == "TVPCreateBStream" && Ptr->isIntegral()) {
 			m_TVPCreateBStream = Ptr->asUInt64() ? (PBYTE)m_HostModule + Ptr->asUInt64() : 0;
 		}
 
-		if (Ptr.key().isString() && StrCompareA(Ptr.key().asString().c_str(), "TVPCreateIStreamP") == 0 && Ptr->isIntegral()) {
+		if (Ptr.key().isString() && Ptr.key().asString() == "TVPCreateIStreamP" && Ptr->isIntegral()) {
 			m_TVPCreateIStreamP = Ptr->asUInt64() ? (PBYTE)m_HostModule + Ptr->asUInt64() : 0;
 		}
 
-		if (Ptr.key().isString() && StrCompareA(Ptr.key().asString().c_str(), "TVPCreateIStreamStub") == 0 && Ptr->isIntegral()) {
+		if (Ptr.key().isString() && Ptr.key().asString() == "TVPCreateIStreamStub" && Ptr->isIntegral()) {
 			m_TVPCreateIStreamStub = Ptr->asUInt64() ? (PBYTE)m_HostModule + Ptr->asUInt64() : 0;
 		}
 
-		if (Ptr.key().isString() && StrCompareA(Ptr.key().asString().c_str(), "exporter") == 0 && Ptr->isIntegral())
+		if (Ptr.key().isString() && Ptr.key().asString() == "exporter" && Ptr->isIntegral())
 		{
 			m_TVPGetFunctionExporter = Ptr->asUInt64() ?
 				(Prototype::TVPGetFunctionExporterFunc)((PBYTE)m_HostModule + Ptr->asUInt64()) :
@@ -1306,6 +1307,8 @@ NTSTATUS KrkrExtractCore::InitializeGlobalFlags()
 	catch (...) {
 		return STATUS_UNSUCCESSFUL;
 	}
+
+	return STATUS_SUCCESS;
 }
 
 
@@ -1422,7 +1425,7 @@ DWORD NTAPI CoreApiServerThread(PVOID Param)
 	KrkrExtractCore* Instance = (KrkrExtractCore*)Param;
 
 	if (!Instance) {
-		return STATUS_INVALID_PARAMETER;
+		return static_cast<DWORD>(STATUS_INVALID_PARAMETER);
 	}
 
 	CoreApiService   Service(Instance);
