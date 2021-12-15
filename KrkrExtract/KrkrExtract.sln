@@ -50,8 +50,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tvpwin32", "krkrz\vcproj\tv
 		{E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA} = {E8A3F6FA-AE1C-4C8E-A0B6-9C8480324EAA}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tbb", "oneTBB\build\vs2013\tbb.vcxproj", "{F62787DD-1327-448B-9818-030062BCFAA5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|KrkrUniversalPlatform = Debug|KrkrUniversalPlatform
@@ -206,16 +204,6 @@ Global
 		{0DA37E3E-48F9-4853-AB2A-76D79042203C}.Release|x64.Build.0 = Release|x64
 		{0DA37E3E-48F9-4853-AB2A-76D79042203C}.Release|x86.ActiveCfg = Release|Win32
 		{0DA37E3E-48F9-4853-AB2A-76D79042203C}.Release|x86.Build.0 = Release|Win32
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Debug|KrkrUniversalPlatform.ActiveCfg = Debug|Win32
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Debug|x64.ActiveCfg = Debug|x64
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Debug|x64.Build.0 = Debug|x64
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Debug|x86.ActiveCfg = Debug|Win32
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Debug|x86.Build.0 = Debug|Win32
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Release|KrkrUniversalPlatform.ActiveCfg = Release|Win32
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Release|x64.ActiveCfg = Release|x64
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Release|x64.Build.0 = Release|x64
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Release|x86.ActiveCfg = Release|Win32
-		{F62787DD-1327-448B-9818-030062BCFAA5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

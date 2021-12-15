@@ -46,6 +46,14 @@ struct EnumXp3PluginArgs
 };
 
 
+NTSTATUS SaveIndexToDisk(PBYTE Buffer, SIZE_T Size)
+{
+	NtFileDisk File;
+	File.Create(L"a.index");
+	File.Write(Buffer, Size);
+	return File.Close();
+}
+
 void CoDumperTask::ThreadFunction()
 {
 	NTSTATUS                          Status;
@@ -109,6 +117,7 @@ void CoDumperTask::ThreadFunction()
 			if (NT_FAILED(NtStatus)) {
 				PrintConsoleW(L"WalkNormalIndexBuffer failed, %08x\n", NtStatus);
 			}
+			// SaveIndexToDisk(Buffer, Size);
 			return NtStatus;
 		},
 		WalkXp3IndexCallbackM(KrkrProxyer, Buffer, Size, File, Magic, Proxyer)
@@ -118,6 +127,7 @@ void CoDumperTask::ThreadFunction()
 			if (NT_FAILED(NtStatus)) {
 				PrintConsoleW(L"WalkSenrenBankaIndexBuffer failed, %08x\n", NtStatus);
 			}
+			// SaveIndexToDisk(Buffer, Size);
 			return NtStatus;
 		},
 		WalkXp3IndexCallbackM(KrkrProxyer, Buffer, Size, File, Magic, Proxyer)
@@ -127,6 +137,7 @@ void CoDumperTask::ThreadFunction()
 			if (NT_FAILED(NtStatus)) {
 				PrintConsoleW(L"WalkSenrenBankaIndexV2Buffer failed, %08x\n", NtStatus);
 			}
+			// SaveIndexToDisk(Buffer, Size);
 			return NtStatus;
 		},
 		WalkXp3IndexCallbackM(KrkrProxyer, Buffer, Size, File, Magic, Proxyer)
@@ -136,6 +147,7 @@ void CoDumperTask::ThreadFunction()
 			if (NT_FAILED(NtStatus)) {
 				PrintConsoleW(L"WalkNekoVol0IndexBuffer failed, %08x\n", NtStatus);
 			}
+			// SaveIndexToDisk(Buffer, Size);
 			return NtStatus;
 		},
 		WalkXp3IndexCallbackM(KrkrProxyer, Buffer, Size, File, Magic, Proxyer)
@@ -145,6 +157,7 @@ void CoDumperTask::ThreadFunction()
 			if (NT_FAILED(NtStatus)) {
 				PrintConsoleW(L"WalkKrkrZIndexBuffer failed, %08x\n", NtStatus);
 			}
+			// SaveIndexToDisk(Buffer, Size);
 			return NtStatus;
 		}
 	);
@@ -255,8 +268,8 @@ INT NTAPI DumperEpFilter(ULONG Code, EXCEPTION_POINTERS* Ep)
 
 HRESULT CoDumperTask::DumpStreamSafe(IStream* Stream, PCWSTR ExtName, PCWSTR OutputFileName)
 {
-	HRESULT    Success;
-	IPlugin*   Plugin;
+	HRESULT    Success = E_FAIL;
+	IPlugin*   Plugin = nullptr;
 
 	SEH_TRY
 	{

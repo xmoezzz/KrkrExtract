@@ -708,9 +708,10 @@ ReadXp3InfoChunk(
 
 	}
 
-	StrCopyW(
+	wcsncpy(
 		InfoChunk.FileName, 
-		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName))
+		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKR2_XP3_INDEX_CHUNK_INFO, FileName)),
+		InfoChunk.FileNameLength
 	);
 
 	ByteTransferred = sizeof(KRKR2_INDEX_CHUNK_GENERAL) + InfoChunk.ChunkSize.LowPart;
@@ -782,9 +783,10 @@ ReadXp3M2InfoChunk(
 		return STATUS_BUFFER_OVERFLOW;
 	}
 
-	StrCopyW(
+	wcsncpy(
 		M2InfoChunk.FileName, 
-		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName))
+		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_YUZU, FileName)),
+		M2InfoChunk.FileNameLength
 	);
 
 	ByteTransferred = sizeof(KRKR2_INDEX_CHUNK_GENERAL) + M2InfoChunk.ChunkSize.LowPart;
@@ -850,9 +852,10 @@ ReadXp3M2CompressedChunk(
 		return STATUS_BUFFER_OVERFLOW;
 	}
 
-	StrCopyW(
+	wcsncpy(
 		CompressedChunk.ProductName, 
-		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName))
+		(PCWSTR)(Buffer + Offset + FIELD_OFFSET(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED, ProductName)),
+		CompressedChunk.LengthOfProduct
 	);
 
 	ByteTransferred = sizeof(KRKR2_INDEX_CHUNK_GENERAL) + CompressedChunk.ChunkSize.LowPart;
