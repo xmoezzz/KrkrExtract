@@ -1,10 +1,11 @@
 # KrkrExtract
 A tool can extract and pack krkr2 and krkrz's xp3 files (32Bit & 64Bit)  
 
-### Beta Version Warning!!
+### Try this
+* [Pandora's box - KrkrzExtract](https://github.com/xmoeproject/KrkrzExtract/releases/tag/1.0.0.0)
 
-* download pre-release binaries from release page
-* DO NOT USE v5 now
+### ⚠️ Not Under Maintain
+* [why](https://github.com/xmoeproject/KrkrExtract/issues/129)
 
 ## 中文说明
 * 我平时很忙，本工程开源并且可以编译，遇到问题应该先自己解决，然后提交PR。
@@ -134,9 +135,6 @@ I don't think any company will use 64bit version.
 
 ## Website
 [KrkrExtract Website](https://xmoeproject.github.io/KrkrExtract/)
-
-## Special Thanks
-感谢amemiya帮我纠正英文错误，丢人现眼了。  
 
 
 
