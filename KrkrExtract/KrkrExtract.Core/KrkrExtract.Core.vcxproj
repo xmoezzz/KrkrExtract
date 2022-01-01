@@ -141,15 +141,13 @@
     <ClCompile Include="DumpFile.cpp" />
     <ClCompile Include="DumpIndex.cpp" />
     <ClCompile Include="EmoteKey.cpp" />
-    <ClCompile Include="EptHook.cpp" />
     <ClCompile Include="FileUnpacker.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="HookBypass.cpp" />
-    <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="ClientImpl.cpp" />
     <ClCompile Include="KrkrHookBypass.cpp" />
     <ClCompile Include="md5.cpp" />
-    <ClCompile Include="NativeHook.cpp" />
+    <ClCompile Include="Hook.cpp" />
     <ClCompile Include="NativeThread.cpp" />
     <ClCompile Include="PbdDecode.cpp" />
     <ClCompile Include="PbdUnpacker.cpp" />
@@ -166,7 +164,6 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4127 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="ImageWorkerNcb.cpp" />
-    <ClCompile Include="Signal.cpp" />
     <ClCompile Include="sqlite3.c" />
     <ClCompile Include="TaskAutoUnlocker.cpp" />
     <ClCompile Include="TaskUniversalDumper.cpp" />
@@ -198,6 +195,7 @@
     <ClCompile Include="Xp3M2ChunkNodeValidator.cpp" />
     <ClCompile Include="Xp3M2CompressedChunkNodeValidator.cpp" />
     <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV2.cpp" />
+    <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV3.cpp" />
     <ClCompile Include="XP3Parser.cpp" />
     <ClCompile Include="Xp3Parser.ixx" />
     <ClCompile Include="Xp3PluginEnum.cpp" />
@@ -231,8 +229,6 @@
     <ClInclude Include="GrpcConnectionApi.h" />
     <ClInclude Include="GrpcCoreApi.h" />
     <ClInclude Include="HardwareBreakpoint.h" />
-    <ClInclude Include="KrkrHook.h" />
-    <ClInclude Include="KrkrHookExporter.h" />
     <ClInclude Include="magic_enum.hpp" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="MemoryEntry.h" />
@@ -271,6 +267,7 @@
     <ClInclude Include="sqlite3ext.h" />
     <ClInclude Include="StatusMatcher.h" />
     <ClInclude Include="TaskAutoUnlocker.h" />
+    <ClInclude Include="tjsObject.h" />
     <ClInclude Include="tp_stub.h" />
     <ClInclude Include="trie.h" />
     <ClInclude Include="unzip.h" />

@@ -30,17 +30,14 @@
 #include "KrkrClientProxyer.h"
 #include "MemoryEntry.h"
 #include "AsyncCommandExecutor.h"
-#include "KrkrHook.h"
+#include "HardwareBreakpoint.h"
 #include "trie.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
 // warning C4100: unreferenced formal parameter
-//
 // warning C4127: conditional expression is constant
-//
 // warning C4702: unreachable code
-//
 // warning C4800: 'int': forcing value to bool 'true' or 'false' (performance warning)
 #pragma warning (disable: 4100 4127 4702 4800 26495)
 #endif
@@ -52,14 +49,6 @@
 #pragma warning (pop)
 #endif
 
-enum class KrkrMode
-{
-	NORMAL     = 0,
-	BASIC_LOCK = 1,
-	ADV_LOCK   = 2,
-	HYPERVISOR = 3
-};
-
 enum class KrkrRunMode
 {
 	LOCAL_MODE   = 0,
@@ -70,14 +59,13 @@ enum class KrkrRunMode
 
 class KrkrExtractCore final : 
 	public ClientStub,
-	public KrkrClientProxyer,
-	public KrkrHookExporter
+	public KrkrClientProxyer
 {
 public:
 	KrkrExtractCore();
 	~KrkrExtractCore();
 
-	KrkrExtractCore* GetInstanceForHook() { return this; };
+	static KrkrExtractCore* GetInstance();
 
 	NTSTATUS Initialize(HMODULE DllModule);
 	NTSTATUS InitializePrivatePointers();
@@ -111,11 +99,7 @@ public:
 	std::vector<std::wstring>              FileNameList;
 
 private:
-
-	//
 	// Flags (Wellknown)
-	//
-
 	KrkrPngMode            m_PngFlag  = KrkrPngMode::PNG_RAW;
 	KrkrTlgMode            m_TlgFlag  = KrkrTlgMode::TLG_RAW;
 	KrkrTextMode           m_TextFlag = KrkrTextMode::TEXT_RAW;
@@ -124,45 +108,28 @@ private:
 	KrkrAmvMode            m_AmvFlag  = KrkrAmvMode::AMV_RAW;
 	KrkrPbdMode            m_PbdFlag  = KrkrPbdMode::PBD_RAW;
 
-	//
 	// Paths
-	//
-
 	std::wstring           m_BaseDir;
 	std::wstring           m_OriginalArchivePath;
 	std::wstring           m_OutputArchivePath;
 
-	//
 	// Packer info
-	//
-
 	std::wstring           m_CurrentTempFileName;
 	std::atomic<HANDLE>    m_CurrentTempHandle = INVALID_HANDLE_VALUE;
 
-	//
 	// Universal patch
-	//
-
 	BOOL                   m_InheritIcon    = FALSE;
 	BOOL                   m_IsProtection   = FALSE;
 
-	//
 	// Tasks
-	//
 	std::atomic<CoTaskBase*> m_CurrentTask     = nullptr;
 	AsyncCommandExecutor*    m_CommandExecutor = nullptr;
 
-	//
 	// Debug
-	//
-
 	std::atomic<BOOL>      m_ConsoleIsAttached     = FALSE;
 	BOOL                   m_DebugOn               = FALSE;
 
-	//
 	// Module Info
-	//
-
 	ULONG_PTR              m_FirstSectionAddress   = 0;
 	ULONG                  m_SizeOfImage           = 0;
 	HMODULE                m_SelfModule            = nullptr;
@@ -170,10 +137,7 @@ private:
 	HMODULE                m_UIModule              = nullptr;
 	ServerStub*            m_LocalServer           = nullptr;
 
-	//
 	// Decoder, Pointers
-	//
-
 	BOOL                                  m_IsSpcialChunkEncrypted = FALSE;
 	Prototype::SpecialChunkDecoderFunc    m_SpecialChunkDecoder    = nullptr;
 	PVOID                                 m_TVPCreateIStreamStub   = nullptr;
@@ -182,17 +146,18 @@ private:
 	PVOID                                 m_Allocator              = nullptr;
 	PVOID                                 m_IStreamAdapterVtable   = nullptr;
 	iTVPFunctionExporter*                 m_TVPFunctionExporter    = nullptr;
-	Prototype::TVPGetFunctionExporterFunc m_TVPGetFunctionExporter = nullptr;
 	std::atomic<tTVPXP3ArchiveExtractionFilter>     m_XP3Filter = nullptr;
 
-	//
-	// utils
-	//
+	public:
+	BOOL m_ShouldHookZlib = FALSE;
+	std::wstring InitModulePath;
+	PBYTE  InitModuleBase = 0;
 
+	private:
+	// utils
 	std::atomic<BOOL>                     m_WindowIsActived = FALSE;
 	std::atomic<KrkrVersion>              m_ModuleType      = KrkrVersion::Unknown;
 	BOOL                                  m_IsAllPackReaded = FALSE;
-	std::atomic<KrkrMode>                 m_Mode            = KrkrMode::NORMAL;
 	std::atomic<KrkrRunMode>              m_RunMode         = KrkrRunMode::LOCAL_MODE;
 	std::atomic<ModuleInitializationType> m_InitializationType    = ModuleInitializationType::NotInited;
 	std::atomic<TVPExporterInitializationType> m_TVPExporterInitializationType = TVPExporterInitializationType::NotInited;
@@ -203,10 +168,7 @@ private:
 	HANDLE                                     m_CoreApiHeartbeatThread     = nullptr;
 	ULONG                                      m_HeartbeatInterval          = 5000;
 	
-	//
 	// Stubs (local or remote)
-	//
-
 	ClientStub*  m_Client = nullptr;
 	ServerStub*  m_Server = nullptr;
 
@@ -214,27 +176,18 @@ public:
 
 	PVOID NTAPI GetPrivatePointer() { return this; }
 
-	//
 	// init
-	//
-
 	NTSTATUS InitExporterWithDll(iTVPFunctionExporter *Exporter);
 	NTSTATUS InitExporterWithExe(iTVPFunctionExporter *Exporter);
 
-	//
 	// Status
-	
 	inline ModuleInitializationType GetInitializationType() { return m_InitializationType.load(); };
 	inline TVPExporterInitializationType GetTVPExporterInitializationType() { return m_TVPExporterInitializationType.load();  };
 	inline KrkrVersion GetModuleType() { return m_ModuleType.load();  };
 	inline void SetInitializationType(ModuleInitializationType Type) { m_InitializationType = Type; };
 	inline void SetTVPExporterInitializationType(TVPExporterInitializationType Type) { m_TVPExporterInitializationType = Type; };
 
-	//
 	// Rpc UI server
-	//
-
-
 	BOOL NTAPI TellServerProgressBar(PCWSTR TaskName, ULONGLONG Current, ULONGLONG Total);
 	BOOL NTAPI TellServerLogOutput(LogLevel Level, PCWSTR FormatString, ...);
 	BOOL NTAPI TellServerCommandResultOutput(CommandStatus Status, PCWSTR FormatString, ...);
@@ -246,7 +199,6 @@ public:
 	BOOL NTAPI TellServerExitFromRemoteProcess();
 
 public:
-
 	VOID   SetCoreApiInitialized()   { m_CoreApiInitialized = TRUE; };
 	VOID   SetCoreApiUninitialized() { m_CoreApiInitialized = FALSE; };
 	BOOL   IsCoreApiInitialized()  { return m_CoreApiInitialized; };
@@ -299,16 +251,10 @@ public:
 	BOOL NotifyClientTaskCloseWindow();
 
 
-	//
 	// Command
-	//
-
 	NTSTATUS NTAPI ParseUtilCommand(PWSTR Command);
 
-	//
 	// Hooks bypass
-	//
-
 	PVOID NTAPI GetProcAddressBypass(
 		PVOID Module,
 		PCSTR RoutineName
@@ -381,21 +327,14 @@ public:
 	VOID NTAPI UndocApiBypass7() {}
 	VOID NTAPI UndocApiBypass8() {}
 	
-
-	//
 	// getters (Packer)
-	//
-
 	PCWSTR NTAPI GetPackerBaseDir()             { return m_BaseDir.c_str(); };
 	PCWSTR NTAPI GetPackerOriginalArchiveName() { return m_OriginalArchivePath.c_str(); };
 	PCWSTR NTAPI GetPackerOutputArchiveName()   { return m_OutputArchivePath.c_str(); };
 	PCWSTR NTAPI GetCurrentTempFileName()       { return m_CurrentTempFileName.c_str(); };
 	HANDLE NTAPI GetCurrentTempHandle()         { return m_CurrentTempHandle.load(); };
 
-	//
 	// setters (Packer)
-	//
-
 	inline void SetPackerBaseDir(PCWSTR Dir)               { m_BaseDir = Dir; };
 	inline void SetPackerOriginalArchiveName(PCWSTR Name)  { m_OriginalArchivePath = Name; };
 	inline void SetPackerOutputArchiveName(PCWSTR Name)    { m_OutputArchivePath = Name; };
@@ -403,11 +342,10 @@ public:
 	void NTAPI SetCurrentTempFileName(PCWSTR Name)        { m_CurrentTempFileName = Name; };
 	void NTAPI SetCurrentTempHandle(HANDLE Handle)        { m_CurrentTempHandle = Handle; };
 
-	//
 	// getters (Pointers, Decoders)
 	BOOL                               NTAPI GetIsSpcialChunkEncrypted() { return m_IsSpcialChunkEncrypted; };
 	Prototype::SpecialChunkDecoderFunc NTAPI GetSpecialChunkDecoder()    { return m_SpecialChunkDecoder; }
-	Prototype::V2LinkFunc              NTAPI GetV2Link()                 { return m_HookEngine ? m_HookEngine->m_V2Link : nullptr; }
+	Prototype::V2LinkFunc              NTAPI GetV2Link()                 { return m_V2Link; }
 	PVOID                   NTAPI GetTVPCreateIStreamStub()   { return m_TVPCreateIStreamStub; };
 	PVOID                   NTAPI GetTVPCreateIStreamP()      { return m_TVPCreateIStreamP; };
 	PVOID                   NTAPI GetTVPCreateBStream()       { return m_TVPCreateBStream; };
@@ -417,10 +355,7 @@ public:
 	PVOID                   NTAPI GetXP3Filter()              { return m_XP3Filter; };
 	PVOID                   NTAPI GetTVPGetFunctionExporter() { return m_TVPGetFunctionExporter; };
 
-	//
 	// setters (Pointers, Decoders)
-	//
-
 	inline void SetIsSpcialChunkEncrypted(BOOL Value)                 { m_IsSpcialChunkEncrypted = Value; };
 	inline void SetSpecialChunkDecoder(Prototype::SpecialChunkDecoderFunc Value) { m_SpecialChunkDecoder = Value; }
 	inline void SetTVPCreateIStreamStub(PVOID Value)                  { m_TVPCreateIStreamStub = Value; };
@@ -431,27 +366,18 @@ public:
 	inline void SetTVPFunctionExporter(iTVPFunctionExporter* Value)   { m_TVPFunctionExporter = Value; };
 	inline void SetXP3Filter(tTVPXP3ArchiveExtractionFilter Value)    { m_XP3Filter = Value; };
 	inline void SetTVPGetFunctionExporter(Prototype::TVPGetFunctionExporterFunc Value) { m_TVPGetFunctionExporter = Value; };
-	//
+	
 	// getters (Module)
-	//
-
 	inline ULONG_PTR NTAPI GetFirstSectionAddress()   { return m_FirstSectionAddress; };
 	inline ULONG_PTR NTAPI GetSizeOfImage()           { return m_SizeOfImage; };
 	inline HMODULE   NTAPI GetSelfModule()            { return m_SelfModule; };
 	inline HMODULE   NTAPI GetHostModule()            { return m_HostModule; };
 
-
-	//
 	// setters (Module)
-	//
-
 	inline void SetFirstSectionAddress(ULONG_PTR Value) { m_FirstSectionAddress = Value; };
 	inline void SetSizeOfImage(ULONG_PTR Value)         { m_SizeOfImage = Value; };
-	
-	//
+
 	// Flags
-	//
-	
 	inline KrkrPngMode  NTAPI GetPngFlag()  { return m_PngFlag; };
 	inline KrkrTlgMode  NTAPI GetTlgFlag()  { return m_TlgFlag; };
 	inline KrkrTextMode NTAPI GetTextFlag() { return m_TextFlag; };
@@ -459,18 +385,9 @@ public:
 	inline KrkrPbdMode  NTAPI GetPbdFlag()  { return m_PbdFlag; };
 	inline KrkrTjs2Mode NTAPI GetTjsFlag()  { return m_TjsFlag; };
 	inline KrkrPsbMode  NTAPI GetPsbFlag()  { return m_PsbFlag; };
-	
-	//
-	// Mode
-	//
-
-	inline KrkrMode GetKrkrMode() { return m_Mode; };
 
 
-	//
 	// Paths
-	//
-
 	std::wstring           m_DllPath;
 	std::wstring           m_ModulePath;
 	std::wstring           m_DllDir;
@@ -481,10 +398,12 @@ public:
 	PCWSTR NTAPI GetDllDir()     { return m_DllDir.c_str(); };
 	PCWSTR NTAPI GetWorkerDir()  { return m_WorkerDir.c_str(); };
 
-	//
-	// Special
-	//
+	NTSTATUS SetHwBreakPoint(PVOID Address, SIZE_T Size, HardwareBreakpoint::Condition AccessStatus, INT& Index);
+	NTSTATUS RemoveHwBreakPoint(INT Index);
+	NTSTATUS RemoveAllHwBreakPoint(PCONTEXT Context);
+	NTSTATUS GetBusyHwBreakPoint(_Out_ HwBreakPointStatus& Status);
 
+	// Special
 	std::unordered_map<ULONG64, MemEntry> m_SpecialChunkMap;
 	std::unordered_map<ULONG, MemEntry>   m_SpecialChunkMapBySize;
 	SectionLock                           m_SpecialLock;
@@ -504,6 +423,7 @@ private:
 	NTSTATUS GetRiddleJokerSpecialEntry(PCWSTR lpFileName);
 	NTSTATUS IsEncryptedSenrenBanka(PBYTE Decompress, ULONG Size, NtFileDisk& File, BOOL& IsEncrypted, DWORD M2Magic);
 	NTSTATUS IsEncryptedSenrenBankaV2(PBYTE Decompress, ULONG Size, NtFileDisk& File, BOOL& IsEncrypted, DWORD M2Magic);
+	NTSTATUS IsEncryptedSenrenBankaV3(PBYTE Decompress, ULONG Size, NtFileDisk& File, BOOL& IsEncrypted, DWORD M2Magic);
 	BOOL     AddFileEntry(PCWSTR FileName, ULONG Length);
 
 public:
@@ -544,7 +464,64 @@ public:
 	tTJSBinaryStream* NTAPI HostTVPCreateStream(PCWSTR FilePath);
 	IStream*          NTAPI HostConvertBStreamToIStream(tTJSBinaryStream* BStream);
 
-	KrkrHook* NTAPI GetHookEngine() { return m_HookEngine; };
+
+	NTSTATUS HookGetProcAddress();
+	NTSTATUS UnHookGetProcAddress();
+	NTSTATUS HookCreateProcessInternalW();
+	NTSTATUS UnHookCreateProcessInternalW();
+	NTSTATUS HookMultiByteToWideChar();
+	NTSTATUS UnHookMultiByteToWideChar();
+	NTSTATUS HookCreateFileW();
+	NTSTATUS UnHookCreateFileW();
+	NTSTATUS HookZLIBUncompress();
+	NTSTATUS HookReadFile();
+	NTSTATUS UnHookReadFile();
+	NTSTATUS HookIsDebuggerPresent();
+	NTSTATUS UnHookIsDebuggerPresent();
+	NTSTATUS HookLoadLibraryA();
+	NTSTATUS UnHookLoadLibraryA();
+	NTSTATUS HookLoadLibraryW();
+	NTSTATUS UnHookLoadLibraryW();
+	NTSTATUS HookTVPGetFunctionExporter();
+	NTSTATUS UnHookTVPGetFunctionExporter();
+	NTSTATUS HookTVPSetXP3ArchiveExtractionFilter();
+	NTSTATUS UnHookTVPSetXP3ArchiveExtractionFilter();
+	NTSTATUS HookV2Link(PVOID Module);
+	NTSTATUS UnHookV2Link();
+	NTSTATUS HookIsDBCSLeadByte();
+	NTSTATUS UnHookIsDBCSLeadByte();
+
+	// Status
+	ForceInline BOOL IsMultiByteToWideCharHooked() { return m_IsMultiByteToWideCharHooked.load(); }
+	ForceInline BOOL IsGetProcAddressHooked() { return m_IsGetProcAddressHooked.load(); }
+	ForceInline BOOL IsCreateProcessInternalWHooked() { return m_IsCreateProcessInternalWHooked.load(); }
+	ForceInline BOOL IsCreateFileWHooked() { return m_IsCreateFileWHooked.load(); }
+	ForceInline BOOL IsReadFileHooked() { return m_IsReadFileHooked.load(); }
+	ForceInline BOOL IsIsDebuggerPresentHooked() { return m_IsIsDebuggerPresentHooked.load(); }
+	ForceInline BOOL IsTVPGetFunctionExporterHooked() { return m_IsTVPGetFunctionExporterHooked.load(); }
+	ForceInline BOOL IsLoadLibraryAHooked() { return m_IsLoadLibraryAHooked.load(); }
+	ForceInline BOOL IsLoadLibraryWHooked() { return m_IsLoadLibraryWHooked.load(); }
+	ForceInline BOOL IsV2LinkHooked() { return m_IsV2LinkHooked.load(); }
+	ForceInline BOOL IsTVPSetXP3ArchiveExtractionFilterHooked() { return m_IsTVPSetXP3ArchiveExtractionFilterHooked.load(); }
+	ForceInline BOOL IsDBCSLeadByteHooked() { return m_IsDBCSLeadByteHooked.load(); }
+
+
+	PVOID                                 m_ExceptionHandler = NULL;
+	SectionLock                           m_ReadFileLocker;
+	ULONG                                 m_RetAddr = 0;
+	BOOL                                  m_SetBpOnce = FALSE;
+	std::atomic<BOOL>              m_BreakOnce = FALSE;
+
+	API_POINTER(GetProcAddress)            m_GetProcAddress = nullptr;
+	API_POINTER(CreateProcessInternalW)    m_CreateProcessInternalW = nullptr;
+	API_POINTER(MultiByteToWideChar)       m_MultiByteToWideChar = nullptr;
+	API_POINTER(CreateFileW)               m_CreateFileW = nullptr;
+	API_POINTER(ReadFile)                  m_ReadFile = nullptr;
+	API_POINTER(IsDebuggerPresent)         m_IsDebuggerPresent = nullptr;
+	Prototype::SetXP3FilterFunc            m_TVPSetXP3ArchiveExtractionFilter = nullptr;
+	Prototype::V2LinkFunc                  m_V2Link = nullptr;
+	Prototype::TVPGetFunctionExporterFunc m_TVPGetFunctionExporter = nullptr;
+	API_POINTER(IsDBCSLeadByte)            m_IsDBCSLeadByte = nullptr;
 	
 private:
 	NTSTATUS InitializeRand();
@@ -567,7 +544,23 @@ private:
 	std::string          m_SessionKey;
 	std::atomic<ULONG>   m_ClientPort = 0;
 
-	KrkrHook* m_HookEngine = nullptr;
+	// Hook Status
+	std::atomic<BOOL> m_IsMultiByteToWideCharHooked = FALSE;
+	std::atomic<BOOL> m_IsGetProcAddressHooked = FALSE;
+	std::atomic<BOOL> m_IsCreateProcessInternalWHooked = FALSE;
+	std::atomic<BOOL> m_IsCreateFileWHooked = FALSE;
+	std::atomic<BOOL> m_IsReadFileHooked = FALSE;
+	std::atomic<BOOL> m_IsIsDebuggerPresentHooked = FALSE;
+	std::atomic<BOOL> m_IsTVPGetFunctionExporterHooked = FALSE;
+	std::atomic<BOOL> m_IsLoadLibraryAHooked = FALSE;
+	std::atomic<BOOL> m_IsLoadLibraryWHooked = FALSE;
+	std::atomic<BOOL> m_IsV2LinkHooked = FALSE;
+	std::atomic<BOOL> m_IsTVPSetXP3ArchiveExtractionFilterHooked = FALSE;
+	std::atomic<BOOL> m_IsDBCSLeadByteHooked = FALSE;
+
+	HardwareBreakpoint                    m_BreakPoint[4];
+	HwBreakPointStatus                    m_BreakPointIndexSet;
+	ULONG_PTR                             m_BreakPointAddresses[4];
 
 
 	//

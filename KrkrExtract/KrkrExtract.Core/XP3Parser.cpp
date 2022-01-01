@@ -168,18 +168,24 @@ PackInfo MatchXp3ArchiveKind(std::vector<Xp3ItemGeneral>& Chunks)
 		ChunkNodeKind::M2_COMPRESSED_NODE_V2
 	};
 
+	auto KrkrZWithCompressPatternV3 =
+	{
+		ChunkNodeKind::M2_COMPRESSED_NODE_V3
+	};
+
 	ArchiveChunkBuilder.add(Krkr2Pattern1,              PackInfo::NormalPack);
 	ArchiveChunkBuilder.add(KrkrZCompatiblePattern1,    PackInfo::KrkrZ);
 	ArchiveChunkBuilder.add(KrkrZCompatiblePattern2,    PackInfo::KrkrZ);
 	ArchiveChunkBuilder.add(KrkrZNekoPattern,           PackInfo::KrkrZ_V2);
 	ArchiveChunkBuilder.add(KrkrZWithCompressPattern,   PackInfo::KrkrZ_SenrenBanka);
 	ArchiveChunkBuilder.add(KrkrZWithCompressPatternV2, PackInfo::KrkrZ_SenrenBanka_V2);
+	ArchiveChunkBuilder.add(KrkrZWithCompressPatternV3, PackInfo::KrkrZ_SenrenBanka_V3);
 
 	Xp3Validators[ChunkNodeKind::FILE_CHUNK_NODE]       = std::shared_ptr<Xp3StatusValidator>(new Xp3FileNodeValidator());
 	Xp3Validators[ChunkNodeKind::M2_CHUNK_NODE]         = std::shared_ptr<Xp3StatusValidator>(new Xp3M2ChunkNodeValidator());
 	Xp3Validators[ChunkNodeKind::M2_COMPRESSED_NODE]    = std::shared_ptr<Xp3StatusValidator>(new Xp3M2CompressedChunkNodeValidator());
 	Xp3Validators[ChunkNodeKind::M2_COMPRESSED_NODE_V2] = std::shared_ptr<Xp3StatusValidator>(new Xp3M2CompressedChunkNodeValidatorV2());
-
+	Xp3Validators[ChunkNodeKind::M2_COMPRESSED_NODE_V3] = std::shared_ptr<Xp3StatusValidator>(new Xp3M2CompressedChunkNodeValidatorV3());
 
 #define CHUNK_RETRY_THRESHOLD 3
 
@@ -254,7 +260,6 @@ PackInfo MatchXp3ArchiveKind(std::vector<Xp3ItemGeneral>& Chunks)
 			);
 
 			PrintConsoleW(L"Unrecognized chunk : %s\n", HashName.c_str());
-			Chunks[i].Dump();
 		}
 	}
 
@@ -898,6 +903,40 @@ ReadXp3M2CompressedChunk(
 
 
 NTSTATUS
+ReadXp3M2CompressedChunk(
+	PBYTE Buffer,
+	ULONG Size,
+	ULONG Offset,
+	KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3& CompressedChunk,
+	ULONG& ByteTransferred,
+	BOOL& NullTerminated
+)
+{
+	ByteTransferred = 0;
+	NullTerminated = TRUE;
+	RtlZeroMemory(&CompressedChunk, sizeof(CompressedChunk));
+
+	if (ByteTransferred + sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3) + Offset > Size) {
+
+		PrintConsoleW(
+			L"ReadXp3M2CompressedChunk(v3) : Buffer overflow in pre-check, Field = %08x, Offset, Size = %08x\n",
+			sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3),
+			Offset,
+			Size
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+	}
+
+	RtlCopyMemory(&CompressedChunk, Buffer + Offset, sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3));
+	ByteTransferred += sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3);
+
+	return STATUS_SUCCESS;
+}
+
+
+
+NTSTATUS
 ReadXp3UnknownChunk(
 	PBYTE Buffer,
 	ULONG Size,
@@ -1011,7 +1050,7 @@ WalkKrkrZIndexBuffer(
 
 				default:
 					Proxyer->TellServerLogOutput(
-						LogLevel::LOG_WARN, L"Unknown chunk in file chunk : %08x",
+						LogLevel::LOG_WARN, L"WalkKrkrZIndexBuffer: Unknown chunk in file chunk : %08x",
 						*(PDWORD)(Decompress + PtrOffset + InChunkPtrOffset)
 					);
 
@@ -1049,7 +1088,7 @@ WalkKrkrZIndexBuffer(
 			else
 			{
 				Proxyer->TellServerLogOutput(
-					LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x at %08x",
+					LogLevel::LOG_WARN, L"WalkKrkrZIndexBuffer: Unknown chunk in root chunk : %08x at %08x",
 					*(PDWORD)(Decompress + PtrOffset),
 					PtrOffset
 				);
@@ -1171,7 +1210,7 @@ Return Value:
 
 				default:
 					Proxyer->TellServerLogOutput(
-						LogLevel::LOG_WARN, L"Unknown chunk in file chunk : %08x",
+						LogLevel::LOG_WARN, L"WalkNormalIndexBuffer: Unknown chunk in file chunk : %08x",
 						*(PDWORD)(Decompress + PtrOffset + InChunkPtrOffset)
 					);
 
@@ -1194,7 +1233,7 @@ Return Value:
 
 		default:
 			Proxyer->TellServerLogOutput(
-				LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x, at address : %08x",
+				LogLevel::LOG_WARN, L"WalkNormalIndexBuffer: Unknown chunk in root chunk : %08x, at address : %08x",
 				*(PDWORD)(Decompress + PtrOffset),
 				PtrOffset
 			);
@@ -1362,7 +1401,7 @@ WalkSenrenBankaIndexBuffer(
 		else
 		{
 			Proxyer->TellServerLogOutput(
-				LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x",
+				LogLevel::LOG_WARN, L"WalkSenrenBankaIndexBuffer: Unknown chunk in root chunk : %08x",
 				*(PDWORD)(IndexBuffer.get() + PtrOffset)
 			);
 
@@ -1386,6 +1425,222 @@ WalkSenrenBankaIndexBuffer(
 	return STATUS_SUCCESS;
 }
 
+
+NTSTATUS SaveIndexToDisk(PBYTE Buffer, SIZE_T Size)
+{
+	NtFileDisk File;
+	File.Create(L"decrypt.index");
+	File.Write(Buffer, Size);
+	return File.Close();
+}
+
+
+NTSTATUS
+WalkSenrenBankaIndexV3Buffer(
+	_In_ KrkrClientProxyer* Proxyer,
+	_In_ PBYTE Decompress,
+	_In_ ULONG Size,
+	_In_ NtFileDisk& File,
+	_In_ DWORD M2ChunkMagic,
+	_In_ Xp3WalkerProxy& Proxy,
+	_In_ SENRENBANKACALLBACK Callback,
+	_In_ PVOID CallbackPrivateContext
+)
+{
+	NTSTATUS                             Status;
+	KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3  CompressedChunk;
+	ULONG                                PtrOffset, DecodeSize, DecompSize;
+	ULONG                                ByteTransferred, FileChunkSize;
+	BOOL                                 NullTerminated, DecryptionFailed;
+	DWORD                                ChunkMagic;
+	XP3Index                             Item;
+	Prototype::SpecialChunkDecoderFunc   Decoder;
+	WalkerCallbackStatus                 CallbackStatus;
+
+	Decoder = Proxyer->GetSpecialChunkDecoder();
+	PrintConsoleW(L"%08x\n", Decoder);
+	MessageBox(0, 0, 0, 0);
+
+	if (sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3) > Size)
+	{
+		PrintConsoleW(
+			L"WalkSenrenBankaIndexV3Buffer failed : Size = %08x, header : %08x\n",
+			Size,
+			sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3)
+		);
+
+		return STATUS_BUFFER_OVERFLOW;
+	}
+
+	NullTerminated = TRUE;
+	Status = ReadXp3M2CompressedChunk(Decompress, Size, 0, CompressedChunk, ByteTransferred, NullTerminated);
+	if (NT_FAILED(Status)) {
+		PrintConsoleW(L"WalkSenrenBankaIndexV3Buffer failed : ReadXp3M2CompressedChunk, %08x\n", Status);
+		return Status;
+	}
+
+	Status = File.Seek(CompressedChunk.Offset.LowPart, FILE_BEGIN);
+	if (NT_FAILED(Status)) {
+		PrintConsoleW(L"WalkSenrenBankaIndexV3Buffer failed : File.Seek, %08x\n", Status);
+		return Status;
+	}
+
+
+	//auto IndexBuffer = AllocateMemorySafeP<BYTE>();
+	auto CompressedBuffer = AllocateMemorySafeP<BYTE>(CompressedChunk.ArchiveSize);
+
+	if ( !CompressedBuffer)
+		return STATUS_NO_MEMORY;
+
+	Status = File.Read(CompressedBuffer.get(), CompressedChunk.ArchiveSize);
+	if (NT_FAILED(Status))
+		return Status;
+
+	SaveIndexToDisk(CompressedBuffer.get(), CompressedChunk.ArchiveSize);
+	Ps::ExitProcess(0);
+#if 0
+	if (Callback)
+	{
+		CallbackStatus = Callback(
+			Proxyer,
+			CompressedBuffer,
+			CompressedChunk.ArchiveSize,
+			CompressedChunk.OriginalSize,
+			File,
+			CallbackPrivateContext
+		);
+
+		switch (CallbackStatus)
+		{
+		case WalkerCallbackStatus::STATUS_SKIP:
+			return STATUS_SUCCESS;
+
+		case WalkerCallbackStatus::STATUS_CONTINUE:
+			break;
+
+		default:
+		case WalkerCallbackStatus::STATUS_ERROR:
+			return STATUS_UNSUCCESSFUL;
+		}
+	}
+
+	DecompSize = CompressedChunk.OriginalSize;
+	DecryptionFailed = FALSE;
+	switch (Proxyer->GetIsSpcialChunkEncrypted())
+	{
+	case FALSE:
+		if (uncompress(IndexBuffer.get(), (PULONG)&DecompSize, CompressedBuffer.get(), CompressedChunk.ArchiveSize) != Z_OK ||
+			DecompSize != CompressedChunk.ArchiveSize) {
+			DecryptionFailed = TRUE;
+		}
+		break;
+
+	default:
+		if (Decoder)
+		{
+			//
+			// ??_7CxFilterDecrypt@@6B@ (hidden module)
+			// .text:026D6315 loc_26D6315:                            ; CODE XREF: sub_26D62A0+71¡üj
+			// .text:026D6315                 test    al, al
+			// .text : 026D6317               setz    al
+			// .text : 026D631A               mov     byte ptr[ebp + arg_8 + 3], al
+			// .text : 026D631D               test    al, al
+			// .text : 026D631F               jnz     short loc_26D6375
+			// .text : 026D6321               mov     eax, 100h
+			// .text : 026D6326               cmp     esi, 100h
+			// .text : 026D632C               ja      short loc_26D6330
+			// .text : 026D632E               mov     eax, esi
+			//
+
+			DecodeSize = 0x100;
+			if (CompressedChunk.ArchiveSize < 0x100) {
+				DecodeSize = CompressedChunk.ArchiveSize;
+			}
+
+			Decoder(CompressedBuffer.get(), CompressedBuffer.get(), DecodeSize);
+			DecompSize = CompressedChunk.OriginalSize;
+
+			if (uncompress(IndexBuffer.get(), (PULONG)&DecompSize, CompressedBuffer.get(), CompressedChunk.ArchiveSize) != Z_OK ||
+				DecompSize != CompressedChunk.OriginalSize) {
+				DecryptionFailed = TRUE;
+			}
+		}
+		break;
+	}
+
+	if (DecryptionFailed) {
+		Proxyer->TellServerLogOutput(LogLevel::LOG_ERROR, L"Failed to decompress special chunk");
+		return STATUS_DECRYPTION_FAILED;
+	}
+
+	if (CompressedChunk.OriginalSize < sizeof(M2ChunkMagic)) {
+		Proxyer->TellServerLogOutput(LogLevel::LOG_ERROR, L"Size of spcial chunk is too small");
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+
+	Proxy.SetM2Krkr();
+
+	ChunkMagic = *(PDWORD)IndexBuffer.get();
+	if (ChunkMagic != M2ChunkMagic) {
+		Proxy.SetSpecialChunkM2(ChunkMagic);
+	}
+	else {
+		ChunkMagic = M2ChunkMagic;
+	}
+
+	SaveIndexToDisk(IndexBuffer.get(), CompressedChunk.OriginalSize);
+
+	PtrOffset = 0;
+	while (PtrOffset < CompressedChunk.OriginalSize)
+	{
+		if (PtrOffset + sizeof(CHUNK_MAGIC_YUZU) > CompressedChunk.OriginalSize)
+			return STATUS_BUFFER_TOO_SMALL;
+
+		if (*(PDWORD)(IndexBuffer.get() + PtrOffset) == ChunkMagic)
+		{
+			ByteTransferred = 0;
+			Item.m_IsM2Format = TRUE;
+
+			Status = ReadXp3M2InfoChunk(
+				IndexBuffer.get(),
+				CompressedChunk.OriginalSize,
+				PtrOffset,
+				Item.yuzu,
+				ByteTransferred,
+				Item.m_IsM2InfoNullTerminated
+			);
+
+			if (NT_FAILED(Status))
+				return Status;
+
+			PtrOffset += ByteTransferred;
+		}
+		else
+		{
+			Proxyer->TellServerLogOutput(
+				LogLevel::LOG_WARN, L"WalkSenrenBankaIndexV2Buffer: Unknown chunk in root chunk : %08x",
+				*(PDWORD)(IndexBuffer.get() + PtrOffset)
+			);
+
+			ByteTransferred = 0;
+			Status = ReadXp3UnknownChunk(IndexBuffer.get(), CompressedChunk.OriginalSize, PtrOffset, ByteTransferred);
+			if (NT_FAILED(Status))
+				return Status;
+
+			PtrOffset += ByteTransferred;
+			break;
+		}
+
+		Item.m_IsM2Format = TRUE;
+
+		if (CheckItem(Item)) {
+			Proxy.AppendItem(Item);
+		}
+	}
+#endif
+	Proxy.SetM2Krkr();
+	return STATUS_SUCCESS;
+}
 
 
 NTSTATUS
@@ -1411,6 +1666,21 @@ WalkSenrenBankaIndexV2Buffer(
 	WalkerCallbackStatus                 CallbackStatus;
 
 	Decoder = Proxyer->GetSpecialChunkDecoder();
+
+	switch (Proxy.GetPackInfo())
+	{
+	case PackInfo::KrkrZ_SenrenBanka_V3:
+		return WalkSenrenBankaIndexV3Buffer(
+			Proxyer,
+			Decompress,
+			Size,
+			File,
+			M2ChunkMagic,
+			Proxy,
+			Callback,
+			CallbackPrivateContext
+		);
+	}
 
 	if (sizeof(KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2) > Size)
 	{
@@ -1563,7 +1833,7 @@ WalkSenrenBankaIndexV2Buffer(
 		else
 		{
 			Proxyer->TellServerLogOutput(
-				LogLevel::LOG_WARN, L"Unknown chunk in root chunk : %08x",
+				LogLevel::LOG_WARN, L"WalkSenrenBankaIndexV2Buffer: Unknown chunk in root chunk : %08x",
 				*(PDWORD)(IndexBuffer.get() + PtrOffset)
 			);
 

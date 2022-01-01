@@ -33,21 +33,6 @@ GetKrkrExtractVersion()
 }
 
 
-static KrkrExtractCore* g_Engine = nullptr;
-
-VOID SwitchToEmoji()
-{
-	CONSOLE_FONT_INFOEX ConsoleFont;
-
-	RtlZeroMemory(&ConsoleFont, sizeof(ConsoleFont));
-	ConsoleFont.cbSize = sizeof(ConsoleFont);
-
-	GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &ConsoleFont);
-
-	RtlZeroMemory(ConsoleFont.FaceName, sizeof(ConsoleFont.FaceName));
-	lstrcpyW(ConsoleFont.FaceName, L"Segoe UI");
-	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &ConsoleFont);
-}
 
 BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 {
@@ -60,14 +45,7 @@ BOOL NTAPI DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		
 		LdrDisableThreadCalloutsForDll(hModule);
-		g_Engine = new (std::nothrow) KrkrExtractCore();
-		if (!g_Engine) 
-		{
-			PrintConsoleW(L"no memory for KrkrExtract");
-			Ps::ExitProcess(-1);
-		}
-
-		Status = g_Engine->Initialize(hModule);
+		Status = KrkrExtractCore::GetInstance()->Initialize(hModule);
 		if (NT_FAILED(Status))
 		{
 			ExceptionBox(L"Initialization failed!");

@@ -32,6 +32,7 @@ public:
 	void SetM2Krkr()      { m_IsM2Krkr = TRUE; };
 	void SetNormalKrkr()  { m_IsM2Krkr = FALSE; };
 	void SetExtractFile() { m_ExtractFile = TRUE; };
+	void SetPackInfo(PackInfo Info) { m_PackInfo = Info; };
 	bool IsM2Krkr() const { return m_IsM2Krkr; };
 	bool IsExtractFile() const        { return m_ExtractFile; };
 	std::vector<XP3Index>& GetItems() { return m_Items; };
@@ -39,6 +40,7 @@ public:
 	void  NTAPI SetSpecialChunkM2(ULONG M2SecondaryMagic) { m_M2SpecialChunkMagic = M2SecondaryMagic; };
 	ULONG NTAPI GetSpecialChunkM2() { return m_M2SpecialChunkMagic; };
 	ULONG NTAPI GetCount() { return m_Items.size(); };
+	PackInfo NTAPI GetPackInfo() { return m_PackInfo; };
 	void  NTAPI Push(Xp3ItemAccess* Item) 
 	{
 		XP3Index Xp3Item(Item);
@@ -52,6 +54,7 @@ private:
 	BOOL                  m_IsM2Krkr            = FALSE;
 	BOOL                  m_ExtractFile         = FALSE;
 	BOOL                  m_M2SpecialChunkMagic = 0;
+	PackInfo              m_PackInfo = PackInfo::NormalPack;
 };
 
 NTSTATUS

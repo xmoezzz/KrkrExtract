@@ -13,6 +13,7 @@ enum class PackInfo : ULONG
 	NormalPack_NoExporter = 3,
 	KrkrZ_SenrenBanka     = 4,
 	KrkrZ_SenrenBanka_V2  = 5,
+	KrkrZ_SenrenBanka_V3 = 6,
 	Krkr_Custom           = 100,
 	UnknownPack           = 0xFFFFFFFF
 };
@@ -25,6 +26,7 @@ enum class ChunkNodeKind : ULONG
 	M2_COMPRESSED_NODE        = 2,
 	M2_COMPRESSED_NODE_V2     = 3,
 	FILE_CHUNK_NODE_PROTECTED = 4,
+	M2_COMPRESSED_NODE_V3 = 5,
 	OTHER_NODE                = 80,
 	USER_CHUNK_NODE           = 100
 };
@@ -75,6 +77,7 @@ public:
 	virtual void  NTAPI SetM2(BOOL IsM2) = 0;
 	virtual void  NTAPI SetSpecialChunkM2(ULONG M2SecondaryMagic) = 0;
 	virtual ULONG NTAPI GetSpecialChunkM2() = 0;
+	virtual PackInfo NTAPI GetPackInfo() = 0;
 };
 
 

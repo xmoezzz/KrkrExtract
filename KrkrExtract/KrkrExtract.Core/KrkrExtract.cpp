@@ -12,42 +12,144 @@
 #include "mt64.h"
 #include "xxhash.h"
 #include "WellknownPlugin.h"
-#include "KrkrHookExporter.h"
 #include "WinReg.h"
 #include <stdint.h>
 #include <json/json.h>
 #include <zlib.h>
+#include "tjsObject.h"
 
 import Xp3Parser;
 
 
-struct KrkrExportedData
+static KrkrExtractCore* g_Engine = nullptr;
+
+KrkrExtractCore* KrkrExtractCore::GetInstance()
 {
-	ULONG64 Hash;
-	ULONG64 TVPCreateIStreamStub;
-	ULONG64 TVPCreateIStreamP;
-	ULONG64 TVPCreateBStream;
-	ULONG64 Allocator;
-	ULONG64 IStreamAdapterVtable;
-	ULONG64 Exporter;
-};
+	if (g_Engine == nullptr) {
+		g_Engine = new (std::nothrow) KrkrExtractCore();
+	}
+
+	return g_Engine;
+}
+
+void hexdump(void* ptr, int buflen) {
+	unsigned char* buf = (unsigned char*)ptr;
+	int i, j;
+	for (i = 0; i < buflen; i += 16) {
+		PrintConsoleA("%06x: ", i);
+		for (j = 0; j < 16; j++)
+			if (i + j < buflen)
+				PrintConsoleA("%02x ", buf[i + j]);
+			else
+				PrintConsoleA("   ");
+		PrintConsoleA(" ");
+		for (j = 0; j < 16; j++)
+			if (i + j < buflen)
+				PrintConsoleA("%c", isprint(buf[i + j]) ? buf[i + j] : '.');
+		PrintConsoleA("\n");
+	}
+}
+
+void SaveVar(tTJSVariant& PbdObjectWrapper)
+{
+	NtFileDisk  File;
+	std::string JsonString;
+
+	PrintConsoleW(L"========== %d\n", PbdObjectWrapper.Type());
+
+
+	if (PbdObjectWrapper.Type() == tvtOctet) {
+		auto ptr = PbdObjectWrapper.AsOctet()->GetData();
+		auto size = PbdObjectWrapper.AsOctet()->GetLength();
+		hexdump((BYTE*)ptr, size);
+	}
+	else if(PbdObjectWrapper.Type() == tvtObject) {
+		tTJSVariant Array;
+		auto Object = PbdObjectWrapper.AsObject();
+		tjs_error err = Object->PropGet(TJS_MEMBERMUSTEXIST, L"Array", 0, &Array, Object);
+		if (TJS_FAILED(err)) {
+			return;
+		}
+
+		tTJSVariant val;
+		tjs_uint num = 0;
+			auto caller = std::shared_ptr<DictIterateCaller>(new DictIterateCaller());
+
+			tTJSVariantClosure closure(caller.get());
+			err = Array.AsObject()->EnumMembers(TJS_MEMBERMUSTEXIST, &closure, NULL);
+			PrintConsoleA("------------  %s\n", caller->Item.toStyledString().c_str());
+		//PrintConsoleA("%s\n", caller->Item.toStyledString().c_str());
+	}
+	else if (PbdObjectWrapper.Type() == tvtInteger) {
+		PrintConsoleA("int -> %08x\n", PbdObjectWrapper.AsInteger());
+	}
+
+	PrintConsoleW(L"...........ok \n");
+	return;
+#if 0
+	tTJSVariant PbdObjectCountWrapper;
+	PbdObject->PropGet(TJS_MEMBERMUSTEXIST, L"count", 0, &PbdObjectCountWrapper, PbdObject);
+	auto PbdObjectCount = PbdObjectCountWrapper.AsInteger();
+	
+	if (PbdObjectCount == 0) {
+		__asm int 3;
+		PrintConsoleW(L"========== count\n");
+		return;
+	}
+
+	PrintConsoleW(L"========== count %d\n", PbdObjectCount);
+
+	Json::Value Root;
+
+	for (tTVInteger i = 0; i < PbdObjectCount; i++)
+	{
+		tTJSVariant ItemWrapper;
+		PbdObject->PropGetByNum(TJS_MEMBERMUSTEXIST, (tjs_int)i, &ItemWrapper, PbdObject);
+		auto Item = ItemWrapper.AsObject();
+		if (Item == NULL)
+			continue;
+
+		//
+		// TODO
+		//
+		if (Item->IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL) != TJS_S_TRUE)
+			continue;
+
+		auto caller = std::shared_ptr<DictIterateCaller>(new DictIterateCaller());
+		if (!caller)
+			continue;
+
+		tTJSVariantClosure closure(caller.get());
+		Item->EnumMembers(TJS_IGNOREPROP, &closure, NULL);
+		Root.append(caller->Item);
+	}
+
+	JsonString = Root.toStyledString();
+	PrintConsoleA("%s\n", JsonString.c_str());
+
+	return;
+#endif
+}
+
+void dump(tTJSVariant& v)
+{
+	SaveVar(v);
+}
+
+using ExtractFunc = BOOL (__cdecl*)(PVOID* , tTJSVariant* );
+ExtractFunc m_extract_func = 0;
+BOOL __cdecl extract(PVOID* Buffer, tTJSVariant* v)
+{
+	bool b = m_extract_func(Buffer, v);
+	//tTJSVariant value = *v;
+	dump(*v);
+	return b;
+}
 
 NTSTATUS KrkrExtractCore::InitExporterPrivate(iTVPFunctionExporter *Exporter)
 {
 	BOOL                  Success;
-	ULONG64               Crc;
-	PVOID                 EncodedExporter;
-	PVOID                 CreateStreamAddress;
-	PBYTE                 PointRva;
-	PBYTE                 ExecuteHandle;
-	NtFileDisk            File;
 	NTSTATUS              Status;
-	Json::Value           Json;
-	KrkrExportedData      ExportedData;
-	WCHAR                 FullPath[MAX_NTPATH];
-	WCHAR                 ExePath[MAX_NTPATH];
-
-	static BYTE JsonMagic[4] = { 0x44, 0x33, 0x22, 0x11 };
 
 	LOOP_ONCE
 	{
@@ -55,6 +157,20 @@ NTSTATUS KrkrExtractCore::InitExporterPrivate(iTVPFunctionExporter *Exporter)
 		if (!Success) {
 			PrintConsoleW(L"KrkrExtractCore::InitExporterPrivate : TVPInitImportStub failed\n");
 			break;
+		}
+
+		if (m_ShouldHookZlib) {
+			HookZLIBUncompress();
+		}
+
+		Mp::PATCH_MEMORY_DATA f[] =
+		{
+			Mp::FunctionJumpVa(InitModuleBase + 0x10C70, extract, &m_extract_func)
+		};
+
+		if (InitModuleBase) {
+			PrintConsoleW(L"%08x: %s\n", InitModuleBase, InitModulePath.c_str());
+			Mp::PatchMemory(f, countof(f));
 		}
 
 		if (m_Allocator            == nullptr ||
@@ -71,52 +187,6 @@ NTSTATUS KrkrExtractCore::InitExporterPrivate(iTVPFunctionExporter *Exporter)
 				break;
 			}
 		}
-
-
-		//
-		// TODO:
-		// dynamic generated code?
-		//
-
-		RtlZeroMemory(&ExportedData, sizeof(ExportedData));
-		ExportedData.Allocator            = m_Allocator ?              (ULONG_PTR)m_Allocator            - (ULONG_PTR)m_SelfModule : 0;
-		ExportedData.IStreamAdapterVtable = m_IStreamAdapterVtable ?   (ULONG_PTR)m_IStreamAdapterVtable - (ULONG_PTR)m_SelfModule : 0;
-		ExportedData.TVPCreateBStream     = m_TVPCreateBStream ?       (ULONG_PTR)m_TVPCreateBStream     - (ULONG_PTR)m_SelfModule : 0;
-		ExportedData.TVPCreateIStreamP    = m_TVPCreateIStreamP ?      (ULONG_PTR)m_TVPCreateIStreamP    - (ULONG_PTR)m_SelfModule : 0;
-		ExportedData.TVPCreateIStreamStub = m_TVPCreateIStreamStub ?   (ULONG_PTR)m_TVPCreateIStreamStub - (ULONG_PTR)m_SelfModule : 0;
-		ExportedData.Exporter             = m_TVPGetFunctionExporter ? (ULONG_PTR)m_TVPGetFunctionExporter - (ULONG_PTR)m_SelfModule : 0;
-
-		ExportedData.Hash = XXH64(&ExportedData, sizeof(ExportedData), 0);
-
-		
-		//
-		// save data
-		//
-#if 0
-		Nt_GetModuleFileName(m_HostModule, ExePath, countof(ExePath));
-		wnsprintfW(FullPath, countof(FullPath), L"%s.krconfig", ExePath);
-		Status = File.Create(FullPath);
-		if (NT_SUCCESS(Status))
-		{
-			Json["Hash"]                 = (uint64_t)ExportedData.Hash;
-			Json["Allocator"]            = (uint64_t)ExportedData.Allocator;
-			Json["IStreamAdapterVtable"] = (uint64_t)ExportedData.IStreamAdapterVtable;
-			Json["TVPCreateBStream"]     = (uint64_t)ExportedData.TVPCreateBStream;
-			Json["TVPCreateIStreamP"]    = (uint64_t)ExportedData.TVPCreateIStreamP;
-			Json["TVPCreateIStreamStub"] = (uint64_t)ExportedData.TVPCreateIStreamStub;
-			Json["exporter"]             = (uint64_t)ExportedData.Exporter;
-
-			auto&& JsonData = Json.toStyledString();
-			for (size_t i = 0; i < JsonData.length(); i++) {
-				JsonData[i] ^= 0x6F;
-			}
-
-			File.Write(JsonMagic, sizeof(JsonMagic));
-			File.Write((PVOID)JsonData.c_str(), JsonData.length());
-			File.Close();
-		}
-
-#endif
 	}
 
 	return Success ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
@@ -195,14 +265,13 @@ KrkrExtractCore::~KrkrExtractCore()
 
 NTSTATUS KrkrExtractCore::Initialize(HMODULE DllModule)
 {
-	NTSTATUS           Status;
+	NTSTATUS          Status;
 	DWORD              Size;
-	PBYTE              Buffer;
+	PBYTE                 Buffer;
 	DWORD              FakeHandle;
-	WCHAR              FileName[MAX_PATH];
-	UINT               Length;
-	WCHAR              ModeString[0x200];
-	WCHAR              RunModeString[0x200];
+	WCHAR               FileName[MAX_PATH];
+	UINT                   Length;
+	WCHAR               RunModeString[0x200];
 
 	static WCHAR PatternZ[] = L"TVP(KIRIKIRI) Z core / Scripting Platform for Win32";
 	static WCHAR Pattern2[] = L"TVP(KIRIKIRI) 2 core / Scripting Platform for Win32";
@@ -269,48 +338,8 @@ NTSTATUS KrkrExtractCore::Initialize(HMODULE DllModule)
 	//
 	// Initialize modes
 	//
-
-
-	RtlZeroMemory(ModeString, sizeof(ModeString));
-	Size = GetEnvironmentVariableW(L"KrkrMode", ModeString, countof(ModeString));
 	RtlZeroMemory(RunModeString, sizeof(RunModeString));
 	Size = GetEnvironmentVariableW(L"KrkrRunMode", RunModeString, countof(RunModeString));
-
-	switch ((USHORT)ModeString[0])
-	{
-	case L'B':
-		m_Mode = KrkrMode::BASIC_LOCK;
-		PrintConsoleW(L"mode : basic lockdown mode\n");
-		break;
-
-	case L'A':
-		m_Mode = KrkrMode::ADV_LOCK;
-		PrintConsoleW(L"mode : advance lockdown mode\n");
-		break;
-
-	case L'H':
-		m_Mode = KrkrMode::HYPERVISOR;
-		PrintConsoleW(L"mode : hypervisor mode\n");
-		break;
-
-	default:
-		m_Mode = KrkrMode::NORMAL;
-		PrintConsoleW(L"mode : normal mode\n");
-		break;
-	}
-
-	//
-	// Create Hook instance
-	// bad design...
-	//
-
-	m_HookEngine = new (std::nothrow) KrkrHook(
-		this,
-		m_Mode == KrkrMode::HYPERVISOR ? HookMode::HOOK_EPT : HookMode::HOOK_NATIVE
-	);
-
-	if (m_HookEngine == nullptr)
-		return STATUS_NO_MEMORY;
 
 	if (lstrcmpiW(RunModeString, L"remote") == 0) {
 
@@ -514,7 +543,7 @@ NTSTATUS KrkrExtractCore::InitializeAndDetectBuiltinCxdec2()
 			ArchiveList[RetryTimes].c_str()
 		);
 
-		if (m_HookEngine->IsReadFileHooked())
+		if (IsReadFileHooked())
 			break;
 
 		Status = WalkXp3ArchiveIndex(
@@ -545,7 +574,7 @@ NTSTATUS KrkrExtractCore::InitializeAndDetectBuiltinCxdec2()
 						break;
 
 					m_IsSpcialChunkEncrypted = TRUE;
-					NtStatus = m_HookEngine->HookReadFile();
+					NtStatus = HookReadFile();
 					if (NT_FAILED(NtStatus)) {
 						PrintConsoleW(L"Failed to hook ReadFile\n");
 					}
@@ -557,23 +586,32 @@ NTSTATUS KrkrExtractCore::InitializeAndDetectBuiltinCxdec2()
 				NTSTATUS NtStatus;
 				BOOL     IsEncrypted;
 
-				PrintConsoleW(L"Pre-init : found Special chunk. (v2)\n");
+				PrintConsoleW(L"Pre-init : found Special chunk. (v2 or later)\n");
 				IsEncrypted = FALSE;
 
 				LOOP_ONCE
 				{
-					NtStatus = IsEncryptedSenrenBankaV2(Buffer, (ULONG)Size, File, IsEncrypted, M2Magic);
-					if (NT_FAILED(NtStatus))
+					switch (Proxyer.GetPackInfo())
 					{
-						PrintConsoleW(L"IsEncryptedSenrenBankaV2 failed\n");
+					case PackInfo::KrkrZ_SenrenBanka_V2:
+						NtStatus = IsEncryptedSenrenBankaV2(Buffer, (ULONG)Size, File, IsEncrypted, M2Magic);
+						if (NT_FAILED(NtStatus))
+						{
+							PrintConsoleW(L"IsEncryptedSenrenBankaV2 failed\n");
+							break;
+						}
 						break;
+
+					case PackInfo::KrkrZ_SenrenBanka_V3:
+						m_ShouldHookZlib = TRUE;
+						return STATUS_SUCCESS;
 					}
 
 					if (!IsEncrypted)
 						break;
 
 					m_IsSpcialChunkEncrypted = TRUE;
-					NtStatus = m_HookEngine->HookReadFile();
+					NtStatus = HookReadFile();
 					if (NT_FAILED(NtStatus)) {
 						PrintConsoleW(L"Failed to hook ReadFile\n");
 					}
@@ -804,77 +842,74 @@ NTSTATUS KrkrExtractCore::InitializeHook()
 	{
 		PrintConsoleW(L"TVPGetFunctionExporter : %08x\n", GetTVPGetFunctionExporter());
 
-		Status = m_HookEngine->HookTVPGetFunctionExporter();
+		Status = HookTVPGetFunctionExporter();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook TVPGetFunctionExporter : 0x%08x\n", Status);
 		}
 	}
 	else
 	{
-		Status = m_HookEngine->HookLoadLibraryA();
+		Status = HookLoadLibraryA();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook LoadLibraryA : 0x%08x\n", Status);
 			return Status;
 		}
 
-		Status = m_HookEngine->HookLoadLibraryW();
+		Status = HookLoadLibraryW();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook LoadLibraryW : 0x%08x\n", Status);
 			return Status;
 		}
 
-		Status = m_HookEngine->HookIsDebuggerPresent();
+		Status = HookIsDebuggerPresent();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook IsDebuggerPresent\n");
 			return Status;
 		}
 
-		Status = m_HookEngine->HookCreateFileW();
+		Status = HookCreateFileW();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook CreateFileW\n");
 			return Status;
 		}
 	}
 
-	Status = m_HookEngine->HookCreateProcessInternalW();
+	Status = HookCreateProcessInternalW();
 	if (NT_FAILED(Status)) {
 		PrintConsoleW(L"Failed to hook CreateProcessInternalW\n");
 	}
 
 	if (m_ModuleType == KrkrVersion::KRKRZ)
 	{
-		Status = m_HookEngine->HookMultiByteToWideChar();
+		Status = HookMultiByteToWideChar();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook MultiByteToWideChar\n");
 		}
 	}
 	else if (m_ModuleType == KrkrVersion::KRKR2)
 	{
-		Status = m_HookEngine->HookIsDBCSLeadByte();
+		Status = HookIsDBCSLeadByte();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook IsDBCSLeadByte\n");
 		}
 
-		Status = m_HookEngine->HookMultiByteToWideChar();
+		Status = HookMultiByteToWideChar();
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"Failed to hook MultiByteToWideChar\n");
 		}
 	}
 
-	//
 	// module path check
-	//
-	
 	switch (Nt_CurrentPeb()->OSMajorVersion)
 	{
 	case 6:
 		if (Nt_CurrentPeb()->OSMinorVersion >= 2) {
-			m_HookEngine->HookGetProcAddress();
+			HookGetProcAddress();
 		}
 		break;
 
 	case 10:
-		m_HookEngine->HookGetProcAddress();
+		HookGetProcAddress();
 		break;
 	}
 
@@ -1004,7 +1039,6 @@ NTSTATUS KrkrExtractCore::IsEncryptedSenrenBanka(PBYTE Decompress, ULONG Size, N
 	NTSTATUS                Status;
 	Xp3WalkerProxy          Proxyer;
 
-
 	IsEncrypted = FALSE;
 
 	Status = WalkSenrenBankaIndexBuffer(
@@ -1064,7 +1098,6 @@ NTSTATUS KrkrExtractCore::IsEncryptedSenrenBankaV2(PBYTE Decompress, ULONG Size,
 	NTSTATUS                Status;
 	Xp3WalkerProxy          Proxyer;
 
-
 	IsEncrypted = FALSE;
 
 	Status = WalkSenrenBankaIndexV2Buffer(
@@ -1118,6 +1151,69 @@ NTSTATUS KrkrExtractCore::IsEncryptedSenrenBankaV2(PBYTE Decompress, ULONG Size,
 	return Status;
 }
 
+
+
+
+NTSTATUS KrkrExtractCore::IsEncryptedSenrenBankaV3(PBYTE Decompress, ULONG Size, NtFileDisk& File, BOOL& IsEncrypted, DWORD M2Magic)
+{
+	NTSTATUS                Status;
+	Xp3WalkerProxy          Proxyer;
+
+	IsEncrypted = TRUE;
+#if 0
+	Status = WalkSenrenBankaIndexV2Buffer(
+		this,
+		Decompress,
+		Size,
+		File,
+		M2Magic,
+		Proxyer,
+		[](
+			KrkrClientProxyer* Proxyer,
+			std::shared_ptr<BYTE> CompressedIndexBuffer,
+			ULONG Size,
+			ULONG OriginalSize,
+			NtFileDisk& File,
+			PVOID UserContext
+			)->WalkerCallbackStatus
+		{
+			ULONG DecompressedSize;
+			PBOOL IsEncryptedPtr = (PBOOL)UserContext;
+
+			if (IsEncryptedPtr) {
+				*IsEncryptedPtr = FALSE;
+			}
+
+			auto OriginalBuffer = AllocateMemorySafeP<BYTE>(OriginalSize);
+			if (!OriginalBuffer)
+				return WalkerCallbackStatus::STATUS_ERROR;
+
+			DecompressedSize = OriginalSize;
+			auto Success = uncompress(
+				OriginalBuffer.get(),
+				&OriginalSize,
+				CompressedIndexBuffer.get(),
+				Size
+			);
+
+			if (Success == Z_OK && OriginalSize == DecompressedSize)
+				return WalkerCallbackStatus::STATUS_SKIP;
+
+			IsEncryptedPtr = (PBOOL)UserContext;
+			if (IsEncryptedPtr) {
+				*IsEncryptedPtr = TRUE;
+			}
+
+			return WalkerCallbackStatus::STATUS_SKIP;
+		},
+		&IsEncrypted
+			);
+
+	return Status;
+#endif
+
+	return STATUS_SUCCESS;
+}
 
 
 BOOL ValidateMaybeXp3File(PCWSTR FilePath)
@@ -1601,7 +1697,7 @@ NTSTATUS KrkrExtractCore::InitHookWithDll(LPCWSTR ModuleName, PVOID ImageBase)
 		if (pV2Link == NULL)
 			break;
 
-		Status = m_HookEngine->HookV2Link(ImageBase);
+		Status = HookV2Link(ImageBase);
 		if (NT_FAILED(Status)) {
 			PrintConsoleW(L"KrkrExtractCore::InitHookWithDll : m_HookEngine->HookV2Link failed, %08x\n", Status);
 			return Status;

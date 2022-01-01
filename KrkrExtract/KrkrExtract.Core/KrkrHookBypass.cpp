@@ -6,7 +6,14 @@ PVOID NTAPI KrkrExtractCore::GetProcAddressBypass(
 	PCSTR RoutineName
 )
 {
-	return m_HookEngine->GetProcAddressBypass(
+	if (m_IsGetProcAddressHooked && m_GetProcAddress) {
+		return m_GetProcAddress(
+			static_cast<HMODULE>(Module),
+			RoutineName
+		);
+	}
+
+	return Nt_GetProcAddress(
 		Module,
 		RoutineName
 	);
@@ -27,7 +34,24 @@ BOOL NTAPI KrkrExtractCore::CreateProcessBypass(
 	PHANDLE                 phNewToken
 )
 {
-	return m_HookEngine->CreateProcessInternalWBypass(
+	if (m_IsCreateProcessInternalWHooked && m_CreateProcessInternalW) {
+		return m_CreateProcessInternalW(
+			hToken,
+			lpApplicationName,
+			lpCommandLine,
+			lpProcessAttributes,
+			lpThreadAttributes,
+			bInheritHandles,
+			dwCreationFlags,
+			lpEnvironment,
+			lpCurrentDirectory,
+			lpStartupInfo,
+			lpProcessInformation,
+			phNewToken
+		);
+	}
+
+	return CreateProcessInternalW(
 		hToken,
 		lpApplicationName,
 		lpCommandLine,
@@ -53,7 +77,18 @@ INT NTAPI KrkrExtractCore::MultiByteToWideCharBypass(
 	int     cchWideChar
 )
 {
-	return m_HookEngine->MultiByteToWideCharBypass(
+	if (m_IsMultiByteToWideCharHooked && m_MultiByteToWideChar) {
+		return m_MultiByteToWideChar(
+			CodePage,
+			dwFlags,
+			lpMultiByteStr,
+			cbMultiByte,
+			lpWideCharStr,
+			cchWideChar
+		);
+	}
+
+	return MultiByteToWideCharBypass(
 		CodePage,
 		dwFlags,
 		lpMultiByteStr,
@@ -73,7 +108,19 @@ HANDLE NTAPI KrkrExtractCore::CreateFileWBypass(
 	HANDLE                hTemplateFile
 )
 {
-	return m_HookEngine->CreateFileWBypass(
+	if (m_IsCreateFileWHooked && m_CreateFileW) {
+		return m_CreateFileW(
+			lpFileName,
+			dwDesiredAccess,
+			dwShareMode,
+			lpSecurityAttributes,
+			dwCreationDisposition,
+			dwFlagsAndAttributes,
+			hTemplateFile
+		);
+	}
+
+	return CreateFileW(
 		lpFileName,
 		dwDesiredAccess,
 		dwShareMode,
@@ -92,7 +139,17 @@ BOOL NTAPI KrkrExtractCore::ReadFileBypass(
 	LPOVERLAPPED lpOverlapped
 )
 {
-	return m_HookEngine->ReadFileBypass(
+	if (m_IsReadFileHooked && m_ReadFile) {
+		return m_ReadFile(
+			hFile,
+			lpBuffer,
+			nNumberOfBytesToRead,
+			lpNumberOfBytesRead,
+			lpOverlapped
+		);
+	}
+
+	return ReadFile(
 		hFile,
 		lpBuffer,
 		nNumberOfBytesToRead,
@@ -104,33 +161,44 @@ BOOL NTAPI KrkrExtractCore::ReadFileBypass(
 BOOL NTAPI KrkrExtractCore::IsDebuggerPresentBypass(
 )
 {
-	return m_HookEngine->IsDebuggerPresentBypass();
+	if (m_IsIsDebuggerPresentHooked && m_IsDebuggerPresent) {
+		return m_IsDebuggerPresent();
+	}
+
+	return Nt_CurrentPeb()->BeingDebugged;
 }
 
 PVOID NTAPI KrkrExtractCore::LoadLibraryABypass(
 	PCSTR LibFileName
 )
 {
-	return m_HookEngine->LoadLibraryABypass(
-		LibFileName
-	);
+	PWSTR            UnicodeName;
+	ULONG            Length, OutLength;
+
+	Length = (StrLengthA(LibFileName) + 1) * 2;
+	UnicodeName = (PWSTR)AllocStack(Length);
+
+	RtlZeroMemory(UnicodeName, Length);
+	RtlMultiByteToUnicodeN(UnicodeName, Length, &OutLength, (PSTR)LibFileName, Length / 2 - 1);
+
+	return Nt_LoadLibrary(UnicodeName);
 }
 
 PVOID NTAPI KrkrExtractCore::LoadLibraryWBypass(
 	PCWSTR LibFileName
 )
 {
-	return m_HookEngine->LoadLibraryWBypass(
-		LibFileName
-	);
+	return Nt_LoadLibrary(LibFileName);
 }
 
 BOOL NTAPI KrkrExtractCore::IsDBCSLeadByteBypass(
 	BYTE TestChar
 )
 {
-	return m_HookEngine->IsDBCSLeadByteBypass(
-		TestChar
-	);
+	if (m_IsDBCSLeadByteHooked && m_IsDBCSLeadByte) {
+		return m_IsDBCSLeadByte(TestChar);
+	}
+
+	return IsDBCSLeadByteEx(GetACP(), TestChar);
 }
 

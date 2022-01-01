@@ -46,13 +46,6 @@ struct EnumXp3PluginArgs
 };
 
 
-NTSTATUS SaveIndexToDisk(PBYTE Buffer, SIZE_T Size)
-{
-	NtFileDisk File;
-	File.Create(L"a.index");
-	File.Write(Buffer, Size);
-	return File.Close();
-}
 
 void CoDumperTask::ThreadFunction()
 {

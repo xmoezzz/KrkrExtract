@@ -29,9 +29,6 @@
     <Filter Include="Header Files\Xp3">
       <UniqueIdentifier>{c55e949b-199c-416d-8600-ff3ed9edbf12}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Hook">
-      <UniqueIdentifier>{82333526-4277-4409-b0ec-5bbc5ad6cfb9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\WellKnownFiles">
       <UniqueIdentifier>{c442a171-b5ca-4838-972d-6db2da5a64b4}</UniqueIdentifier>
     </Filter>
@@ -249,17 +246,11 @@
     <ClCompile Include="CommandParser.cpp">
       <Filter>Source Files\Debugger</Filter>
     </ClCompile>
-    <ClCompile Include="Hooks.cpp">
-      <Filter>Source Files\Hook</Filter>
-    </ClCompile>
-    <ClCompile Include="NativeHook.cpp">
+    <ClCompile Include="Hook.cpp">
       <Filter>Source Files\Hook</Filter>
     </ClCompile>
     <ClCompile Include="HookBypass.cpp">
       <Filter>Source Files\Hook</Filter>
-    </ClCompile>
-    <ClCompile Include="KrkrHookBypass.cpp">
-      <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="PsbCompression.cpp">
       <Filter>Source Files\WellknownFiles\Psb</Filter>
@@ -273,14 +264,8 @@
     <ClCompile Include="Xp3PluginEnum.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="EptHook.cpp">
-      <Filter>Source Files\Hook</Filter>
-    </ClCompile>
     <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV2.cpp">
       <Filter>Source Files\Xp3</Filter>
-    </ClCompile>
-    <ClCompile Include="Signal.cpp">
-      <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="sqlite3.c">
       <Filter>Header Files\Lib</Filter>
@@ -311,6 +296,12 @@
     </ClCompile>
     <ClCompile Include="$(SolutionDir)KrkrExtract.Shared\server.pb.cc">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Xp3M2CompressedChunkNodeValidatorV3.cpp">
+      <Filter>Source Files\Xp3</Filter>
+    </ClCompile>
+    <ClCompile Include="KrkrHookBypass.cpp">
+      <Filter>Source Files\Hook</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -461,12 +452,6 @@
     <ClInclude Include="argparse.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
-    <ClInclude Include="KrkrHookExporter.h">
-      <Filter>Header Files\Hook</Filter>
-    </ClInclude>
-    <ClInclude Include="KrkrHook.h">
-      <Filter>Header Files\Hook</Filter>
-    </ClInclude>
     <ClInclude Include="StatusMatcher.h">
       <Filter>Header Files\Xp3</Filter>
     </ClInclude>
@@ -495,6 +480,9 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="GrpcCoreApi.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="tjsObject.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

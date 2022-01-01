@@ -156,6 +156,7 @@ WalkXp3ArchiveIndex(
 		}
 
 		ArchiveKind = MatchXp3ArchiveKind(Xp3Chunks);
+		Xp3Proxy.SetPackInfo(ArchiveKind);
 		switch (ArchiveKind)
 		{
 		case PackInfo::KrkrZ:
@@ -204,6 +205,7 @@ WalkXp3ArchiveIndex(
 			break;
 
 		case PackInfo::KrkrZ_SenrenBanka_V2:
+		case PackInfo::KrkrZ_SenrenBanka_V3:
 			Status = cbSbOrEncryptedV2Index(
 				Proxyer,
 				Decompress.get(),

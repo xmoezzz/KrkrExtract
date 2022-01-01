@@ -86,49 +86,39 @@ BOOL FinalValid(PWCHAR TestName)
 }
 
 
-void IdentifyFileName(PVOID Address, SIZE_T Size, std::unordered_set<wstring>& FileList)
+BOOL IdentifyFileNameWithOffset(PVOID Address, SIZE_T Size, SIZE_T Offset, std::unordered_set<wstring>& FileList)
 {
 	SIZE_T Length;
-	INT    Count;
-	BOOL   Found, Success;
 	PWSTR  Name;
+
+	if (Offset >= Size)
+		return FALSE;
+
+	Name = (PWCH)((PBYTE)Address + Offset);
+	Length = wcsnlen_s(Name, (Size - Offset) / 2);
+	if (Length < 5)
+		return FALSE;
+
+	if (BasicValid(Name, Length) && FinalValid(Name))
+	{
+		wstring FileName(Name, Length);
+		FileList.insert(FileName);
+		return TRUE;
+	}
+}
+
+void IdentifyFileName(PVOID Address, SIZE_T Size, std::unordered_set<wstring>& FileList)
+{
+	BOOL  Success;
 
 	if (Size <= 4)
 		return;
 
-	Success = FALSE;
-
-	LOOP_ONCE
+	for (ULONG Offset = 0; Offset < Size; Offset += 1)
 	{
-		Name   = (PWCH)((PBYTE)Address);
-		Length = wcsnlen_s(Name, Size / 2);
-		if (Length < 5)
+		Success = IdentifyFileNameWithOffset(Address, Size, Offset, FileList);
+		if (Success)
 			break;
-
-		if (BasicValid(Name, Length) && FinalValid(Name))
-		{
-			wstring FileName(Name, Length);
-			FileList.insert(FileName);
-			Success = TRUE;
-		}
-	}
-
-	if (Success == FALSE)
-	{
-		LOOP_ONCE
-		{
-			Name   = (PWCH)((PBYTE)Address + 4);
-			Length = wcsnlen_s(Name, (Size - 4) / 2);
-			if (Length < 5)
-				break;
-
-			if (BasicValid(Name, Length) && FinalValid(Name))
-			{
-				wstring FileName(Name, Length);
-				FileList.insert(FileName);
-				Success = TRUE;
-			}
-		}
 	}
 }
 

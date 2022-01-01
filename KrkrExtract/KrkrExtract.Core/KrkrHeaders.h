@@ -139,6 +139,17 @@ typedef struct KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2
 } KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V2;
 
 
+// »¨çŠ¥«¥Ê¥Ç£ª¥°¥é¥à Chapter£º1 Ð¡—@½Y
+typedef struct KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3
+{
+	DWORD          Magic;
+	LARGE_INTEGER  ChunkSize;
+	LARGE_INTEGER  Offset;
+	DWORD          ArchiveSize;
+	USHORT         Kind;
+} KRKRZ_XP3_INDEX_CHUNK_COMPRESSED_V3;
+
+
 typedef struct
 {
 	KRKR2_XP3_INDEX_CHUNK_FILE  file;

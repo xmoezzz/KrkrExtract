@@ -52,4 +52,10 @@ public:
 	BOOL          NTAPI Validate(PBYTE Buffer, ULONG Size, DWORD& Magic);
 };
 
-
+class Xp3M2CompressedChunkNodeValidatorV3 : public Xp3StatusValidator
+{
+public:
+	ChunkNodeKind NTAPI GetKind();
+	PCWSTR        NTAPI GetName();
+	BOOL          NTAPI Validate(PBYTE Buffer, ULONG Size, DWORD& Magic);
+};

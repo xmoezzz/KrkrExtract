@@ -87,12 +87,6 @@ ForceInline
 BOOL
 CheckKrkrzPtrStatus()
 {
-	if (!g_krkrzTVPCreateIStream)
-		return FALSE;
-
-	if (!g_krkrzTVPCreateIStreamP)
-		return FALSE;
-
 	if (!g_krkrzTVPCreateBStream)
 		return FALSE;
 
@@ -110,6 +104,135 @@ CheckKrkrzPtrStatus()
 // call this routine to initiaize pointers
 // caller must check engine type
 //
+
+PVOID GetTVPCreateStreamCall()
+{
+	PVOID CallIStreamStub, CallIStream, CallTVPCreateStreamCall;
+	ULONG OpSize, OpOffset;
+	WORD  WordOpcode;
+
+	static char funcname[] = "IStream * ::TVPCreateIStream(const ttstr &,tjs_uint32)";
+
+	LOOP_ONCE
+	{
+		CallTVPCreateStreamCall = NULL;
+
+		CallIStreamStub = TVPGetImportFuncPtr(funcname);
+		if (!CallIStreamStub)
+			break;
+
+		CallIStream = NULL;
+		OpOffset = 0;
+
+		LOOP_FOREVER
+		{
+			if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0xCC)
+				break;
+
+			WordOpcode = *(PWORD)((ULONG_PTR)CallIStreamStub + OpOffset);
+			//mov edx,dword ptr [ebp+0xC]
+			if (WordOpcode == 0x558B)
+			{
+				OpOffset += 2;
+				if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0xC)
+				{
+					OpOffset++;
+					WordOpcode = *(PWORD)((ULONG_PTR)CallIStreamStub + OpOffset);
+					//mov edx,dword ptr [ebp+0x8]
+					if (WordOpcode == 0x4D8B)
+					{
+						OpOffset += 2;
+						if (((PBYTE)CallIStreamStub + OpOffset)[0] == 0x8)
+						{
+							OpOffset++;
+							if (((PBYTE)CallIStreamStub + OpOffset)[0] == CALL)
+							{
+								CallIStream = (PVOID)GetCallDestination(((ULONG_PTR)CallIStreamStub + OpOffset));
+								OpOffset += 5;
+								break;
+							}
+						}
+					}
+				}
+			}
+			//the next opcode
+			OpSize = GetOpCodeSize32(((PBYTE)CallIStreamStub + OpOffset));
+			OpOffset += OpSize;
+		}
+
+		if (!CallIStream)
+			break;
+
+		OpOffset = 0;
+		LOOP_FOREVER
+		{
+			if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
+				break;
+
+		//find the first call
+		if (((PBYTE)CallIStream + OpOffset)[0] == CALL)
+		{
+			CallTVPCreateStreamCall = (PVOID)GetCallDestination(((ULONG_PTR)CallIStream + OpOffset));
+			OpOffset += 5;
+			break;
+		}
+
+		//the next opcode
+		OpSize = GetOpCodeSize32(((PBYTE)CallIStream + OpOffset));
+		OpOffset += OpSize;
+	}
+
+	LOOP_FOREVER
+	{
+		if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
+			break;
+
+		if (((PBYTE)CallIStream + OpOffset)[0] == CALL)
+		{
+			//push 0xC
+			//call HostAlloc
+			//add esp, 0x4
+			if (((PBYTE)CallIStream + OpOffset - 2)[0] == 0x6A &&
+				((PBYTE)CallIStream + OpOffset - 2)[1] == 0x0C)
+			{
+				g_krkrzHostAlloc = (HostAlloc)GetCallDestination(((ULONG_PTR)CallIStream + OpOffset));
+				OpOffset += 5;
+			}
+			break;
+		}
+
+		//the next opcode
+		OpSize = GetOpCodeSize32(((PBYTE)CallIStream + OpOffset));
+		OpOffset += OpSize;
+	}
+
+	LOOP_FOREVER
+	{
+		if (((PBYTE)CallIStream + OpOffset)[0] == 0xC3)
+			break;
+
+	//mov eax, mem.offset
+	if (((PBYTE)CallIStream + OpOffset)[0] == 0xC7 &&
+		((PBYTE)CallIStream + OpOffset)[1] == 0x00)
+	{
+		OpOffset += 2;
+		g_krkrzIStreamAdapterVtable = (PVOID) *(PULONG_PTR)((PBYTE)CallIStream + OpOffset);
+		OpOffset += 4;
+		break;
+	}
+
+	//the next opcode
+	OpSize = GetOpCodeSize32(((PBYTE)CallIStream + OpOffset));
+	OpOffset += OpSize;
+}
+	}
+
+		if (g_krkrzHostAlloc && g_krkrzIStreamAdapterVtable)
+		{
+			return CallTVPCreateStreamCall;
+		}
+		return NULL;
+}
 
 NTSTATUS KrkrExtractCore::InitializeTVPCreateStreamCallKrkrZ()
 {
@@ -135,165 +258,17 @@ NTSTATUS KrkrExtractCore::InitializeTVPCreateStreamCallKrkrZ()
 		return TRUE;
 	}
 
-	LOOP_ONCE
-	{
-		g_krkrzTVPCreateIStream = (HostTVPCreateIStream)TVPGetImportFuncPtr(funcname);
-		if (!g_krkrzTVPCreateIStream)
-			break;
-
-		OpOffset = 0;
-
-		LOOP_FOREVER
-		{
-			if (((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[0] == 0xCC)
-				break;
-			
-			if (OpOffset >= 0x50)
-				break;
-
-			WordOpcode = *(PWORD)((ULONG_PTR)g_krkrzTVPCreateIStream + OpOffset);
-
-			//
-			// stdcall to fastcall
-			// mov  edx, dword ptr [ebp+0xC]
-			//
-			
-			if (WordOpcode == 0x558B)
-			{
-				OpOffset += 2;
-				if (((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[0] == 0xC)
-				{
-					OpOffset++;
-					WordOpcode = *(PWORD)((ULONG_PTR)g_krkrzTVPCreateIStream + OpOffset);
-
-					//
-					// stdcall to fastcall
-					// mov edx, dword ptr [ebp+0x8]
-					//
-
-					if (WordOpcode == 0x4D8B)
-					{
-						OpOffset += 2;
-						if (((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[0] == 0x8)
-						{
-							OpOffset++;
-							if (((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[0] == CALL)
-							{
-								g_krkrzTVPCreateIStreamP = (HostTVPCreateIStreamInternal)GetCallDestination(((ULONG_PTR)g_krkrzTVPCreateIStream + OpOffset));
-								OpOffset += 5;
-								break;
-							}
-						}
-					}
-				}
-			}
-			//the next opcode
-			OpSize = GetOpCodeSize32(((PBYTE)g_krkrzTVPCreateIStream + OpOffset));
-			OpOffset += OpSize;
-		}
-
-		if (!g_krkrzTVPCreateIStreamP)
-			break;
-
-		OpOffset = 0;
-		LOOP_FOREVER
-		{
-			if (((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset)[0] == 0xC3)
-				break;
-
-			if (OpOffset >= 0x100)
-				break;
-
-			//
-			// find the first call
-			// TODO : VSA
-			//
-
-			if (((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset)[0] == CALL)
-			{
-				g_krkrzTVPCreateBStream = (HostTVPCreateBStream)GetCallDestination(((ULONG_PTR)g_krkrzTVPCreateIStreamP + OpOffset));
-				OpOffset += 5;
-				break;
-			}
-
-			//the next opcode
-			OpSize = GetOpCodeSize32(((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset));
-			OpOffset += OpSize;
-		}
-
-		LOOP_FOREVER
-		{
-			if (((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset)[0] == 0xC3)
-				break;
-
-			if (OpOffset >= 0x100)
-				break;
-
-			//
-			// the next call
-			//
-
-			if (((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset)[0] == CALL)
-			{
-				//
-				// push 0xC
-				// call HostAlloc
-				// add esp, 0x4
-				//
-
-				if (((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset - 2)[0] == 0x6A &&
-					((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset - 2)[1] == 0x0C)
-				{
-					g_krkrzHostAlloc = (HostAlloc)GetCallDestination(((ULONG_PTR)g_krkrzTVPCreateIStreamP + OpOffset));
-					OpOffset += 5;
-				}
-				break;
-			}
-
-			//the next opcode
-			OpSize = GetOpCodeSize32(((PBYTE)g_krkrzTVPCreateIStreamP + OpOffset));
-			OpOffset += OpSize;
-		}
-
-		LOOP_FOREVER
-		{
-			if (((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[0] == 0xC3)
-				break;
-
-			if (OpOffset >= 0x100)
-				break;
-
-			//
-			// mov [eax], mem.offset
-			//
-
-			if (((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[0] == 0xC7 &&
-				((PBYTE)g_krkrzTVPCreateIStream + OpOffset)[1] == 0x00)
-			{
-				OpOffset += 2;
-				g_krkrzIStreamAdapterVtable = (PVOID)*(PULONG_PTR)((PBYTE)g_krkrzTVPCreateIStream + OpOffset);
-				OpOffset += 4;
-				break;
-			}
-
-			//
-			// the next opcode
-			//
-
-			OpSize = GetOpCodeSize32(((PBYTE)g_krkrzTVPCreateIStream + OpOffset));
-			OpOffset += OpSize;
-		}
-	}
+	g_krkrzTVPCreateBStream = (HostTVPCreateBStream)GetTVPCreateStreamCall();
 
 	if (CheckKrkrzPtrStatus())
 	{
 		AttachWithPtrValues();
 		g_krkrzIsInitialized  = TRUE;
 		m_PointersInitialized = TRUE;
-		return TRUE;
+		return STATUS_SUCCESS;
 	}
 
-	return FALSE;
+	return STATUS_UNSUCCESSFUL;
 }
 
 
